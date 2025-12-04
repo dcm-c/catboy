@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galéria | MFSZ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
+
+    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="style.css">
+    </noscript>
+</head>
+
+<body>
+
+    <div id="navbar-placeholder"></div>
+    <header class="py-5 mt-5 text-center page-header">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Közösségi Galéria 📸</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 600px;">
+                A legjobb pillanatok, legcukibb outfitek és legmenőbb setupok tőletek, nektek!
+                <br><span class="badge bg-pink text-white mt-2">Kattints a képekre a nagyításhoz!</span>
+            </p>
+        </div>
+    </header>
+
+    <section class="pb-5">
+        <div class="container">
+
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap justify-content-center gap-2 filter-group">
+                        <button class="btn btn-filter active" data-filter="all">Összes ✨</button>
+                        <button class="btn btn-filter" data-filter="outfits">Outfitek 👗</button>
+                        <button class="btn btn-filter" data-filter="events">Találkozók 🎉</button>
+                        <button class="btn btn-filter" data-filter="gaming">Gaming & Tech 🎮</button>
+                        <button class="btn btn-filter" data-filter="art">Art & Kreatív 🎨</button>
+                        <button class="btn btn-filter" id="btn-reddit-filter" data-filter="reddit">Reddit Feed
+                            🧡</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4" id="gallery-grid">
+
+                <div class="col-12 col-sm-6 col-lg-4 gallery-col events">
+                    <div class="photo-wrapper" data-bs-toggle="modal" data-bs-target="#imageModal"
+                        data-img-src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80"
+                        data-title="MondoCon Csapat" data-author="Közös fotózás a 'K' épületnél">
+
+                        <div class="blur-bg"
+                            style="background-image: url('https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80');">
+                        </div>
+
+                        <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80"
+                            class="main-photo" alt="Con Csapat" loading="lazy">
+
+                        <div class="photo-overlay">
+                            <h5>MondoCon Csapat</h5>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div id="reddit-loader-trigger" class="text-center py-5 mt-4">
+                <div class="spinner-border text-pink" role="status" style="display: none;" id="reddit-spinner">
+                    <span class="visually-hidden">Betöltés...</span>
+                </div>
+                <p class="text-muted small mt-2" id="reddit-status-text" style="display: none;">Reddit képek
+                    betöltése...</p>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-auto">
+            <div class="modal-content">
+                <div class="modal-body p-0 position-relative">
+                    <button type="button" class="modal-close-custom" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+
+                    <button class="modal-nav-btn prev-btn" id="prevImageBtn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="modal-nav-btn next-btn" id="nextImageBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <div class="modal-img-container">
+                        <img src="" id="modalImage" alt="Nagyított kép">
+
+                        <div class="modal-caption-box">
+                            <h4 id="modalTitle" class="mb-2">Becenév / Cím</h4>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+
+                                <p id="modalDesc" class="mb-0 text-white-50 small">Rövid leírás szövege...</p>
+
+                                <a href="#" target="_blank" id="modalRedditLink"
+                                    class="btn btn-sm btn-social btn-reddit-link d-none">
+                                    <i class="fab fa-reddit"></i> Megnyitás
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="corner-cat" class="corner-cat">
+        <div class="speech-bubble" id="cat-bubble">Nyau! 😽</div>
+        <i class="fas fa-cat cat-icon"></i>
+    </div>
+
+    <div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="background: #fff0f3; border: 3px solid gold;">
+                <h2 class="fw-bold mb-3">👑 Prémium Tagság</h2>
+                <p class="lead">A tartalom megtekintéséhez életkor-ellenőrzés szükséges.</p>
+                <p class="fw-bold text-danger">Elmúltál már 18 éves?</p>
+
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <button class="btn btn-success btn-lg px-4" id="btn-age-yes">IGEN</button>
+                    <button class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">NEM</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Házirend | MFSZ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="style.css">
+    </noscript>
+</head>
+
+<body>
+    <div id="navbar-placeholder"></div>
+
+    <section class="py-5 mt-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h1 class="fw-bold">Közösségi Házirend 📜</h1>
+                <p class="text-muted">Kérlek, tartsd be ezeket, hogy mindenki jól érezze magát!</p>
+            </div>
+
+            <ul class="nav nav-pills justify-content-center mb-4" id="rulesTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link  active" id="discord-tab" data-bs-toggle="pill" data-bs-target="#discord"
+                        type="button" role="tab">Discord Szabályok 👾</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reddit-tab" data-bs-toggle="pill" data-bs-target="#reddit"
+                        type="button" role="tab">Reddit Szabályok 🤖</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="rulesTabContent">
+
+                <div class="tab-pane fade show active" id="discord" role="tabpanel">
+                    <div class="custom-card p-4 p-md-5 mx-auto" style="max-width: 900px;">
+                        <h3 class="mb-4 text-primary"><i class="fab fa-discord"></i> Hivatalos Discord Szabályzat</h3>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">I. Minimum életkor 👶👴</h4>
+                            <ul class="list-unstyled ps-3">
+                                <li><span class="role-tag">@Tag</span>: Betöltött 15. életév.</li>
+                                <li><span class="role-tag">@Verified 18+</span>: Betöltött 18. életév.</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">II. Tisztelet és Viselkedés 🤝</h4>
+                            <ul class="list-unstyled ps-3">
+                                <li>Ne keresd direkt a veszekedést, kerüld a drámát.</li>
+                                <li>Tilos a sértegetés, fenyegetés, zaklatás, bántalmazás.</li>
+                                <li>Kerülendő a szexizmus és a rasszizmus.</li>
+                                <li>Tilos a toxicitás és a trollkodás.</li>
+                                <li><strong>Szigorúan Tilos:</strong> Raiding, scamelés, doxxolás.</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">III. Csatornahasználat 💬</h4>
+                            <ul class="list-unstyled ps-3">
+                                <li>Shitpost, repost: <span class="channel-tag">#shitpost-repost</span> 🔄, <span
+                                        class="channel-tag">#dobrev-klára-támogatôi-szoba</span> 💩</li>
+                                <li>Negatív gondolatok: <span class="channel-tag">#public-vent</span> 🏭 vagy <span
+                                        class="channel-tag">#komoly-vent</span> ✅</li>
+                                <li>Tematikus: <span class="channel-tag">#politika</span> 🍊, <span
+                                        class="channel-tag">#történelem</span> 🏺, <span
+                                        class="channel-tag">#vallás-spiritualitás-filozófia</span> ✨</li>
+                                <li>Képes csatornák: <span class="channel-tag">#cosplay</span> 👗, <span
+                                        class="channel-tag">#thigh-pics-uwu</span> 🦊, <span
+                                        class="channel-tag">#art</span> 🎨, <span
+                                        class="channel-tag">#képek-videók</span> 📷, <span
+                                        class="channel-tag">#saját-magunk</span> ✅, <span
+                                        class="channel-tag">#nsfw-selfies</span> ✅🔞 (Hosszú beszélgetés kerülendő!)
+                                </li>
+                                <li><strong>Erős NSFW:</strong> <span class="channel-tag">#femboys</span> ✅🔞, <span
+                                        class="channel-tag">#furry</span> ✅🔞 (<span class="role-tag">@Verified
+                                        18+</span> szükséges)</li>
+                                <li><strong>Enyhébb NSFW:</strong> <span class="channel-tag">#18-general</span> 🔞,
+                                    <span class="channel-tag">#18-memes</span> 🔞 (<span class="role-tag">@Light
+                                        NSFW</span> szükséges)
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-danger fw-bold">IV. Tiltott témák 🚫</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled ps-3">
+                                        <li>❌ Pedofília, shota, loli, cub</li>
+                                        <li>❌ Bestalitás, zoofília</li>
+                                        <li>❌ Erőszak, gyűlöletbeszéd</li>
+                                        <li>❌ Szerencsejáték, kaszinó, gambling, slotozás</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled ps-3">
+                                        <li>❌ Illegális kábító- és tudatmódosító szerek</li>
+                                        <li>❌ Önbántalmazás (Kivéve vent szobák, ha segítség kell)</li>
+                                        <li>❌ Promozás, hirdetés (Kivéve engedéllyel)</li>
+                                        <li>❌ Extrém fétisek (Kivéve <span class="channel-tag">#fetish</span> ✅🔞)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-warning fw-bold">V. Tartalom védelme 🔒</h4>
+                            <ul class="list-unstyled ps-3">
+                                <li><strong>Tilos</strong> mások saját képeit lementeni.</li>
+                                <li><strong>Tilos</strong> a szerverről üzeneteket screenshotolni.</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">VI. DM roleok tiszteletben tartása 💌</h4>
+                            <p>Tartsd tiszteletben a következő rangokat:</p>
+                            <span class="badge bg-success me-1">@DM-s Open</span>
+                            <span class="badge bg-warning text-dark me-1">@Ask for DM-s</span>
+                            <span class="badge bg-danger">@DM-s Closed</span>
+                            <p class="mt-2 text-muted small">A viszonzatlan párkeresési szándékok különösen kerülendőek.
+                            </p>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">VII. Profilod tartalma 🖼️</h4>
+                            <ul class="list-unstyled ps-3">
+                                <li>A profilod legyen szigorúan <strong>SFW</strong>.</li>
+                                <li>Nem tartalmazhat sértő, erős politikai, ideológiai és/vagy 18+ tartalmat.</li>
+                            </ul>
+                            <p class="small text-muted"><em>Javaslatokat várunk az <span
+                                        class="channel-tag">#ötletek-javaslatok</span> szobában.</em></p>
+                        </div>
+
+                        <div class="alert alert-light border-warning border border-2 rounded-3 mb-4">
+                            <h5 class="fw-bold text-warning"><i class="fas fa-star"></i> Starboard</h5>
+                            <p class="mb-0">
+                                Amennyiben egy, a <span class="channel-tag">#smink-haj-testápolás</span> 💅, <span
+                                    class="channel-tag">#ruha-divat</span> 👚 vagy <span
+                                    class="channel-tag">#thigh-pics-uwu</span> 🦊 csatornákba küldött kép
+                                <strong>5 db ⭐ reakciót</strong> kap, az automatikusan bekerül az <span
+                                    class="channel-tag">#extra-cukik</span> csatornába!
+                            </p>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">🔰 Rang magyarázat</h4>
+                            <ul class="list-unstyled ps-3">
+                                <li class="mb-2"><span class="role-tag">@Tag</span>: Hozzáférés a szerverhez.</li>
+                                <li class="mb-2"><span class="role-tag">@Verified</span>: Hozzáférés az <span
+                                        class="channel-tag">#elit-lounge</span> ✅, <span
+                                        class="channel-tag">#komoly-vent</span> ✅, <span
+                                        class="channel-tag">#saját-magunk</span> ✅ csatornákhoz. (Követelmény:
+                                    aktivitás).</li>
+                                <li class="mb-2"><span class="role-tag">@Light NSFW</span>: Hozzáférés a <span
+                                        class="channel-tag">#18-general</span> 🔞 és <span
+                                        class="channel-tag">#18-memes</span> 🔞 csatornákhoz. (<span
+                                        class="channel-tag">#autorole</span>-ban felvehető).</li>
+                                <li class="mb-2"><span class="role-tag">@Verified 18+</span>: Hozzáférés a verified NSFW
+                                    csatornákhoz. (Csak 18+ @Verified tagoknak).</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4 border-bottom pb-3">
+                            <h4 class="h5 text-info fw-bold">👑 Személyzet</h4>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <strong>Adminok:</strong>
+                                    <span
+                                        class="badge rounded-pill bg-warning text-dark border border-warning">@Fembargo</span>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Moderátorok:</strong>
+                                    <div class="d-flex flex-wrap gap-2 mt-1">
+                                        <span class="badge rounded-pill border border-info text-info">@Baemin</span>
+                                        <span class="badge rounded-pill border border-info text-info">@Lilli :3</span>
+                                        <span class="badge rounded-pill border border-info text-info">@ᐯ丨匚ㄒ卄卂ㄩ尺</span>
+                                        <span class="badge rounded-pill border border-info text-info">@cride</span>
+                                        <span class="badge rounded-pill border border-info text-info">@metrocska</span>
+                                        <span
+                                            class="badge rounded-pill border border-info text-info">@informacicus</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="h5 text-info fw-bold">🔗 Linkek</h4>
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <a href="https://discord.gg/magyarfemboy" target="_blank"
+                                    class="btn btn-outline-primary"><i class="fab fa-discord"></i> Discord Meghívó</a>
+                                <a href="https://www.reddit.com/r/MagyarFemboyCommunity/" target="_blank"
+                                    class="btn btn-outline-danger"><i class="fab fa-reddit"></i> Reddit</a>
+                                <a href="https://www.facebook.com/groups/magyarfemboy/" target="_blank"
+                                    class="btn btn-outline-primary"><i class="fab fa-facebook"></i> Facebook Csoport</a>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-primary border-0 rounded-3">
+                            <strong>📩 Panasz / Ticket:</strong> Bármilyen fajta problémát tapasztalsz, vagy tipped
+                            lenne szerverrel kapcsolatosan, kérlek jelezd felénk bátran!
+                        </div>
+
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="reddit" role="tabpanel">
+                    <div class="custom-card p-4 p-md-5 mx-auto" style="max-width: 900px;">
+                        <h3 class="mb-4 text-danger"><i class="fab fa-reddit"></i> r/MagyarFemboyCommunity Szabályzat
+                        </h3>
+                        <ol class="list-group list-group-numbered list-group-flush">
+                            <li class="list-group-item border-0"><strong>Nincs NSFW 🔞:</strong> Explicit tartalom és
+                                "hívogató" képek tiltottak.</li>
+                            <li class="list-group-item border-0"><strong>Nincs ismerkedés 💔:</strong> Ne utalj
+                                párkeresésre.</li>
+                            <li class="list-group-item border-0"><strong>Saját képek 📸:</strong> Vagy jelöld meg a
+                                forrást.</li>
+                            <li class="list-group-item border-0"><strong>Hirdetés 📢:</strong> Tilos promózni.</li>
+                            <li class="list-group-item border-0"><strong>Ne legyél freak/gooner 🧟‍♂️:</strong> Képeket
+                                kéregetni tilos.</li>
+                            <li class="list-group-item border-0"><strong>Elfogadás 🏳️‍🌈:</strong>
+                                Homofóbia/Transzfóbia tilos.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="footer-placeholder"></div>
+    <div id="corner-cat" class="corner-cat">
+        <div class="speech-bubble" id="cat-bubble">Nyau! 😽</div>
+        <i class="fas fa-cat cat-icon"></i>
+    </div>
+
+    <div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="background: #fff0f3; border: 3px solid gold;">
+                <h2 class="fw-bold mb-3">👑 Prémium Tagság</h2>
+                <p class="lead">A tartalom megtekintéséhez életkor-ellenőrzés szükséges.</p>
+                <p class="fw-bold text-danger">Elmúltál már 18 éves?</p>
+
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <button class="btn btn-success btn-lg px-4" id="btn-age-yes">IGEN</button>
+                    <button class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">NEM</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
