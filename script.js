@@ -359,12 +359,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalTitle = document.getElementById('modalTitle');
         const modalDesc = document.getElementById('modalDesc');
         const modalRedditLink = document.getElementById('modalRedditLink');
+        const modalInstaLink = document.getElementById('modalInstaLink'); // ÚJ
 
         // Adatok kinyerése
         const imgSrc = wrapper.getAttribute('data-img-src');
         const title = wrapper.getAttribute('data-title');
         const author = wrapper.getAttribute('data-author');
         const postUrl = wrapper.getAttribute('data-post-url'); // Reddit link
+        const instaUrl = wrapper.getAttribute('data-insta-url'); // ÚJ: Instagram link
 
         // Tartalom beállítása
         if (modalImage) modalImage.src = imgSrc;
@@ -378,6 +380,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalRedditLink.classList.remove('d-none'); // Megjelenítjük
             } else {
                 modalRedditLink.classList.add('d-none'); // Elrejtjük
+            }
+        }
+        // Instagram gomb kezelése
+        if (modalInstaLink) {
+            if (instaUrl && instaUrl !== "null" && instaUrl !== "") {
+                modalInstaLink.href = instaUrl;
+                modalInstaLink.classList.remove('d-none');
+            } else {
+                modalInstaLink.classList.add('d-none');
             }
         }
     }
