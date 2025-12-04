@@ -37,12 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.id === 'btn-premium' || e.target.closest('#btn-premium')) {
                 e.preventDefault();
                 const modalEl = document.getElementById('premiumModal');
-                if (modalEl) {
-                    const modal = new bootstrap.Modal(modalEl);
-                    modal.show();
-                } else {
-                    console.error("Hiba: Nem találom a 'premiumModal' ID-jú ablakot a HTML-ben!");
-                }
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
             }
 
             // --- B. "IGEN" Gomb kezelése (Rickroll) ---
