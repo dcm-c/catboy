@@ -1,0 +1,65 @@
+[
+    {
+        "name": "DiscordMod",
+        "stars": 4,
+        "title": "Korrekt",
+        "desc": "A szabályzat betartása megfelelő, de kevés a kitten. Fejlődni kell!",
+        "date": "2023.11.30."
+    },
+    {
+        "name": "MonsterEnergyFan",
+        "stars": 5,
+        "title": "Energia túltengés",
+        "desc": "A voice chat péntek este olyan, mint egy koffein-túladagolás hangformátumban. Imádom.",
+        "date": "2024.03.01."
+    },
+    {
+        "name": "NemVagyokFemboy",
+        "stars": 5,
+        "title": "Csak nézelődni jöttem...",
+        "desc": "...de maradtam az outfitek miatt. Eskü csak havernak kérdezem, hol veszitek a ruhákat?",
+        "date": "2023.09.15."
+    },
+    {
+        "name": "CatEarHeadphones",
+        "stars": 5,
+        "title": "Cicafül",
+        "desc": "Mindenkinek van cicafüles fülese. Ez a mennyország? 🎧",
+        "date": "2023.12.01."
+    },
+    {
+        "name": "GymBro",
+        "stars": 5,
+        "title": "Meglepően kemény",
+        "desc": "Azt hittem puhányok, de láttam olyat guggolni, amit én nem tudok. Respect.",
+        "date": "2024.02.28."
+    },
+    {
+        "name": "KoffeinKirály",
+        "stars": 5,
+        "title": "Vesekő Speedrun Any%",
+        "desc": "A napi 3 Monster után már látom a hangokat. A szerver segített kiválasztani a legjobb ízt.",
+        "date": "2024.03.15."
+    },
+    {
+        "name": "ValoDemon",
+        "stars": 5,
+        "title": "+20% Aim",
+        "desc": "Mióta leborotváltam a lábam, Radiantba jutottam Valorantban. Véletlen? Aligha.",
+        "date": "2024.02.01."
+    },
+    {
+        "name": "SharkTank",
+        "stars": 5,
+        "title": "Cápa Invázió",
+        "desc": "Vettem egy Blåhajt az IKEA-ban, most már ő az adminisztrátor a szobámban.",
+        "date": "2023.09.30."
+    },
+    {
+        "name": "ThighHighLover",
+        "stars": 4,
+        "title": "Szorít",
+        "desc": "A combfix elszorítja a vérkeringést, de a drip megéri a zsibbadást.",
+        "date": "2024.02.19."
+    }
+]

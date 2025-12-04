@@ -85,75 +85,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function initFunnyReviews() {
+    async function initFunnyReviews() {
         const track = document.getElementById('reviews-track');
         if (!track) return;
-        const reviewsPool = [
-            { name: "Cukorfalat99", stars: 5, title: "Végre hazaértem!", desc: "A Monster készlet sosem fogy ki, és mindenki nagyon kedves. A Blåhajom is talált barátokat.", date: "2023.10.12." },
-            { name: "ProgramozoZokni", stars: 5, title: "Best Server EU", desc: "Itt tanultam meg C++-ban kódot írni combfixben. 10/10 élmény, ajánlom mindenkinek.", date: "2024.01.05." },
-            { name: "AnonimUser", stars: 1, title: "Túl sok a rózsaszín", desc: "Beléptem és azonnal femboy lettem. Most nem tudom, hogyan magyarázzam el anyámnak a szoknyát.", date: "2023.12.24." },
-            { name: "UwU_Master", stars: 5, title: "Nyau!", desc: ":3 :3 :3 UwU OwO rawr x3 (Fordítás: Nagyon tetszik a közösség)", date: "2024.02.14." },
-            { name: "DiscordMod", stars: 4, title: "Korrekt", desc: "A szabályzat betartása megfelelő, de kevés a kitten. Fejlődni kell!", date: "2023.11.30." },
-            { name: "MonsterEnergyFan", stars: 5, title: "Energia túltengés", desc: "A voice chat péntek este olyan, mint egy koffein-túladagolás hangformátumban. Imádom.", date: "2024.03.01." },
-            { name: "NemVagyokFemboy", stars: 5, title: "Csak nézelődni jöttem...", desc: "...de maradtam az outfitek miatt. Eskü csak havernak kérdezem, hol veszitek a ruhákat?", date: "2023.09.15." },
-            { name: "LinuxUser", stars: 3, title: "Bloatware", desc: "Túl sok az emoji, terminálból nehéz olvasni a chatet. De legalább kedvesek.", date: "2024.01.20." },
-            { name: "CatEarHeadphones", stars: 5, title: "Cicafül", desc: "Mindenkinek van cicafüles fülese. Ez a mennyország? 🎧", date: "2023.12.01." },
-            { name: "GymBro", stars: 5, title: "Meglepően kemény", desc: "Azt hittem puhányok, de láttam olyat guggolni, amit én nem tudok. Respect.", date: "2024.02.28." },
-            { name: "Grandma64", stars: 2, title: "Ez nem a Facebook?", desc: "Hol van az unokám? Miért vannak itt fiúk lányruhában? De a süti recept jó volt.", date: "2023.08.10." },
-            { name: "ShadowWizard", stars: 5, title: "Money Gang", desc: "We love casting spells. (És a szervert is).", date: "2024.03.10." },
-            { name: "KoffeinKirály", stars: 5, title: "Vesekő Speedrun Any%", desc: "A napi 3 Monster után már látom a hangokat. A szerver segített kiválasztani a legjobb ízt.", date: "2024.03.15." },
-            { name: "CsakHavernakKérdem", stars: 5, title: "Nem vagyok femboy, DE...", desc: "...a szoknya meglepően jól szellőzik nyáron. Csak praktikusságból hordom, eskü.", date: "2023.08.20." },
-            { name: "LinuxFanboy", stars: 5, title: "I use Arch btw", desc: "Azt hittem ez egy Linux support csoport. Nem az, de a combfix segít a kernel fordításban.", date: "2024.01.11." },
-            { name: "ValoDemon", stars: 5, title: "+20% Aim", desc: "Mióta leborotváltam a lábam, Radiantba jutottam Valorantban. Véletlen? Aligha.", date: "2024.02.01." },
-            { name: "Nagyi_Marika", stars: 2, title: "Ez nem a horgoló szakkör?", desc: "Aranyos fiúk, de furcsa ruhákat hordanak. A sütemény receptet viszont köszönöm!", date: "2023.11.05." },
-            { name: "MélyHangúCica", stars: 4, title: "Voice chat élmény", desc: "Mindenki 'UwU'-zott, amíg be nem szóltam a dörmögő bariton hangomon. A csend megfizethetetlen volt.", date: "2024.03.12." },
-            { name: "SharkTank", stars: 5, title: "Cápa Invázió", desc: "Vettem egy Blåhajt az IKEA-ban, most már ő az adminisztrátor a szobámban.", date: "2023.09.30." },
-            { name: "RustDeveloper", stars: 5, title: "Memória biztonság", desc: "A kódom biztonságos, a heteroságom már kevésbé. Kösz MFSZ.", date: "2024.02.28." },
-            { name: "ApaKicsiFia", stars: 3, title: "Apu gyanakszik", desc: "Azt mondtam, hogy a 'programozó zokni' kell a vérkeringés javítására. Szerintem nem hitte el.", date: "2024.01.02." },
-            { name: "StraightDave", stars: 5, title: "Csak ironikusan...", desc: "Csak viccből léptem be 2 éve. Most már szoknyában írom ezt az értékelést. Vigyázzatok, csapda!", date: "2023.07.15." },
-            { name: "AmazonFutár", stars: 5, title: "Ti tartotok el", desc: "Nem tudom mik azok a csomagok, amik zörögnek vagy nagyon puhák, de mindig ide hozom őket.", date: "2023.12.10." },
-            { name: "GymRat_Femboy", stars: 5, title: "Soha ne hagyd ki a lábnapot", desc: "Itt tanultam meg, hogy a guggolás a femboyok titkos fegyvere. Combok > Minden.", date: "2024.03.05." },
-            { name: "SpinnySkirt", stars: 5, title: "Szoknya go brrr", desc: "Vettem egy pörgős szoknyát. Már 3 órája pörgök. Segítség, szédülök.", date: "2023.10.31." },
-            { name: "SusImposter", stars: 1, title: "Téves hívás", desc: "Azt hittem ez a Magyar Fémipari Szakszervezet. Csalódtam, de a mémek jók.", date: "2023.06.20." },
-            { name: "ThighHighLover", stars: 4, title: "Szorít", desc: "A combfix elszorítja a vérkeringést, de a drip megéri a zsibbadást.", date: "2024.02.19." },
-            { name: "E-boy2004", stars: 5, title: "Discord Nitro", desc: "Itt mindenki Nitro-t használ? Azt hittem, ingyen adják a belépéshez.", date: "2023.11.15." },
-            { name: "CatBoy_X", stars: 5, title: ":3", desc: "Mrrrp nyaaa meow mrrp :3 (Fordítás: Kiváló közösség, ajánlom.)", date: "2024.03.14." },
-            { name: "PipelinePunch", stars: 5, title: "Rózsaszín minden", desc: "A Monster, a billentyűzetem, a lelkem. Minden passzol.", date: "2024.01.25." },
-            { name: "HaveromnakKene", stars: 4, title: "Link?", desc: "Egy barátom kérdezi, honnan van a choker. Nem én, a barátom.", date: "2023.09.05." },
-            { name: "AlvasHiany", stars: 5, title: "Hajnali 3", desc: "Miért aktívabb a chat hajnali 3-kor, mint délben? Ti nem alszotok??", date: "2024.02.08." }
-        ];
+        try {
 
-        // 1. Véletlenszerű keverés
-        const shuffled = reviewsPool.sort(() => 0.5 - Math.random());
 
-        // 2. Kilenc elem kiválasztása (3 dia x 3 értékelés)
-        const selectedReviews = shuffled.slice(0, 9);
+            // Sorsolunk egyet a tömbből (0, 1 vagy 2 index)
+            const selectedFile = 'data/reviews' + [Math.floor(Math.random() * 3)] + ".json";
 
-        // 3. Csoportosítás 3-asával
-        const chunkSize = 3;
+            // Debug: Kiírjuk a konzolra, melyiket töltötte be (F12 -> Console)
+            console.log(`Értékelések forrása: ${selectedFile}`);
 
-        for (let i = 0; i < selectedReviews.length; i += chunkSize) {
-            const chunk = selectedReviews.slice(i, i + chunkSize);
+            // 2. A KIVÁLASZTOTT FÁJL LETÖLTÉSE
+            const response = await fetch(selectedFile);
 
-            const slideDiv = document.createElement('div');
-            slideDiv.className = `carousel-item ${i === 0 ? 'active' : ''}`;
+            if (!response.ok) throw new Error(`Hiba a fájl betöltésekor: ${response.statusText}`);
 
-            let rowHtml = '<div class="row g-4 justify-content-center">';
+            // 3. ADATOK ÁTVÉTELE
+            // Most nem fűzünk össze semmit, ez lesz a teljes készlet
+            const reviewsPool = await response.json();
 
-            // --- ITT A VÁLTOZÁS: Figyeljük az indexet ---
-            chunk.forEach((review, index) => {
-                // Csillag generálás
-                let starHtml = '';
-                for (let k = 0; k < 5; k++) {
-                    starHtml += k < review.stars ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-                }
+            // 1. Véletlenszerű keverés
+            const shuffled = reviewsPool.sort(() => 0.5 - Math.random());
 
-                // MOBIL REJTÉS LOGIKA:
-                // Ha ez a 3. elem (index === 2), akkor adjunk hozzá egy osztályt, 
-                // ami mobilon elrejti (d-none), de asztalin megjeleníti (d-lg-block).
-                const hideClass = (index === 2) ? 'd-none d-lg-block' : '';
+            // 2. Kilenc elem kiválasztása (3 dia x 3 értékelés)
+            const selectedReviews = shuffled.slice(0, 9);
 
-                rowHtml += `
+            // 3. Csoportosítás 3-asával
+            const chunkSize = 3;
+
+            for (let i = 0; i < selectedReviews.length; i += chunkSize) {
+                const chunk = selectedReviews.slice(i, i + chunkSize);
+
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `carousel-item ${i === 0 ? 'active' : ''}`;
+
+                let rowHtml = '<div class="row g-4 justify-content-center">';
+
+                // --- ITT A VÁLTOZÁS: Figyeljük az indexet ---
+                chunk.forEach((review, index) => {
+                    // Csillag generálás
+                    let starHtml = '';
+                    for (let k = 0; k < 5; k++) {
+                        starHtml += k < review.stars ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                    }
+
+                    // MOBIL REJTÉS LOGIKA:
+                    // Ha ez a 3. elem (index === 2), akkor adjunk hozzá egy osztályt, 
+                    // ami mobilon elrejti (d-none), de asztalin megjeleníti (d-lg-block).
+                    const hideClass = (index === 2) ? 'd-none d-lg-block' : '';
+
+                    rowHtml += `
                 <div class="col-lg-4 col-md-6 col-12 ${hideClass}">
                     <div class="review-card h-100">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -166,16 +149,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-            });
+                });
 
-            rowHtml += '</div>';
-            slideDiv.innerHTML = rowHtml;
-            track.appendChild(slideDiv);
+                rowHtml += '</div>';
+                slideDiv.innerHTML = rowHtml;
+                track.appendChild(slideDiv);
+            }
+        } catch (error) {
+            console.error("Nem sikerült betölteni az értékeléseket:", error);
+            track.innerHTML = `<div class="text-center p-5 text-muted">Az értékelések épp alszanak... 😴 (Hiba történt)</div>`;
         }
     }
-    // =========================================================
-    // A. GALÉRIA OLDAL FUNKCIÓI
-    // =========================================================
     function initGalleryPage(gridElement) {
         const filterBtns = document.querySelectorAll('.btn-filter');
         const loaderTrigger = document.getElementById('reddit-loader-trigger');
@@ -188,9 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.addEventListener('click', () => {
                     filterBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-
                     const filterValue = btn.getAttribute('data-filter');
-
                     if (filterValue === 'reddit' && !redditLoaded) {
                         loadRedditImages(gridElement, spinner, statusText, () => {
                             redditLoaded = true;

@@ -1,0 +1,65 @@
+[
+    {
+        "name": "ProgramozoZokni",
+        "stars": 5,
+        "title": "Best Server EU",
+        "desc": "Itt tanultam meg C++-ban kódot írni combfixben. 10/10 élmény, ajánlom mindenkinek.",
+        "date": "2024.01.05."
+    },
+    {
+        "name": "LinuxUser",
+        "stars": 3,
+        "title": "Bloatware",
+        "desc": "Túl sok az emoji, terminálból nehéz olvasni a chatet. De legalább kedvesek.",
+        "date": "2024.01.20."
+    },
+    {
+        "name": "RustDeveloper",
+        "stars": 5,
+        "title": "Memória biztonság",
+        "desc": "A kódom biztonságos, a heteroságom már kevésbé. Kösz MFSZ.",
+        "date": "2024.02.28."
+    },
+    {
+        "name": "ApaKicsiFia",
+        "stars": 3,
+        "title": "Apu gyanakszik",
+        "desc": "Azt mondtam, hogy a 'programozó zokni' kell a vérkeringés javítására. Szerintem nem hitte el.",
+        "date": "2024.01.02."
+    },
+    {
+        "name": "E-boy2004",
+        "stars": 5,
+        "title": "Discord Nitro",
+        "desc": "Itt mindenki Nitro-t használ? Azt hittem, ingyen adják a belépéshez.",
+        "date": "2023.11.15."
+    },
+    {
+        "name": "TechTipsLinus",
+        "stars": 5,
+        "title": "RGB mindenhol",
+        "desc": "Még a macskafülek is világítanak. A setupom sosem volt még ilyen cuki.",
+        "date": "2024.01.10."
+    },
+    {
+        "name": "SysAdmin",
+        "stars": 4,
+        "title": "Stabil szerver",
+        "desc": "99.9% uptime, 0% dráma (na jó, néha 1%). Jobb, mint a céges infrastruktúra.",
+        "date": "2023.12.05."
+    },
+    {
+        "name": "PythonSnake",
+        "stars": 5,
+        "title": "import happiness",
+        "desc": "from MFSZ import friends. Végre működik a kód.",
+        "date": "2024.03.02."
+    },
+    {
+        "name": "WebDevUwU",
+        "stars": 5,
+        "title": "CSS varázslat",
+        "desc": "A weboldaluk nagyon modern lett. Értékelem a glassmorphismot!",
+        "date": "2024.03.20."
+    }
+]
