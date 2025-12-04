@@ -1,47 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     // --- GLOBÁLIS VÁLTOZÓK A GALÉRIA LÉPTETÉSHEZ ---
-    let visiblePhotoWrappers = []; // Az éppen látható (nem kiszűrt) képek listája
-    let currentImageIndex = 0;     // Hol tartunk a listában
+    let visiblePhotoWrappers = [];
+    let currentImageIndex = 0;
 
-    // --- 1. KOMPONENSEK BETÖLTÉSE ---
     loadComponents().then(() => {
         document.body.classList.add('loaded');
-        initModal(); // Modal inicializálása a betöltés után
+        initModal();
     });
     initPremiumButton();
 
-    // --- 2. OLDAL SPECIFIKUS LOGIKA ---
     const galleryGrid = document.getElementById('gallery-grid');
     const homeRedditBox = document.getElementById('reddit-content');
-
     if (galleryGrid) {
         initGalleryPage(galleryGrid);
     }
-
     if (homeRedditBox) {
         initHomePage(homeRedditBox);
         initFunnyReviews();
     }
     initCatInteraction();
-    // ==========================================
-    // 1. PREMIUM BUTTON & RICKROLL LOGIKA (GOLYÓÁLLÓ VERZIÓ) 🎵
-    // ==========================================
     function initPremiumButton() {
-
-        // Globális kattintás figyelő (Ez kezeli a Menüt és az IGEN gombot is)
         document.body.addEventListener('click', function (e) {
-
-            // --- A. Menü gomb (Premium) megnyitása ---
-            // Megnézzük, hogy a kattintott elem (vagy a szülője) a prémium gomb-e
             if (e.target.id === 'btn-premium' || e.target.closest('#btn-premium')) {
                 e.preventDefault();
                 const modalEl = document.getElementById('premiumModal');
                 const modal = new bootstrap.Modal(modalEl);
                 modal.show();
             }
-
-            // --- B. "IGEN" Gomb kezelése (Rickroll) ---
             if (e.target.id === 'btn-age-yes') {
                 const modalContent = document.querySelector('#premiumModal .modal-content');
                 if (modalContent) {
@@ -55,37 +40,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Bezárás</button>
                     </div>
                 `;
-
-                    // Stílus igazítás
                     modalContent.style.border = "none";
                     modalContent.style.background = "transparent";
                 }
             }
         });
     }
-    // ==========================================
-    // 2. INTERAKTÍV MACSKA -> CÁPA EVOLÚCIÓ 🐱 -> 🦈
-    // ==========================================
+
     function initCatInteraction() {
         const container = document.getElementById('corner-cat');
         const bubble = document.getElementById('cat-bubble');
-        const icon = container.querySelector('i'); // Az ikon elem
+        const icon = container.querySelector('i');
 
         let clickCount = 0;
         let isShark = false;
 
         if (container && bubble) {
             container.addEventListener('click', () => {
-
-                // Ha már cápa, akkor csak bugyborékol
                 if (isShark) {
                     showBubble("Blub blub... 🫧");
                     return;
                 }
-
                 clickCount++;
-
-                // Logika a kattintások számához
                 if (clickCount === 3) {
                     showBubble("Nyau! 😽");
                 }
@@ -93,35 +69,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     showBubble("Miau! Ne piszkálj! 🙀");
                 }
                 else if (clickCount >= 9) {
-                    // --- ÁTVÁLTOZÁS ---
                     isShark = true;
-
-                    // 1. Ikon csere (halra, vagy ha van cápa ikonod)
                     icon.className = "fas fa-fish cat-icon";
-
-                    // 2. Stílus hozzáadása (kék szín, dőlés)
                     container.classList.add('shark-mode');
-
-                    // 3. Üzenet
                     showBubble("BLÅHAJ MÓD AKTIVÁLVA! 🦈🌊");
                 }
             });
         }
-
-        // Segédfüggvény a buborék megjelenítésére
         function showBubble(text) {
             bubble.textContent = text;
             bubble.classList.add('show');
-
-            // 2.5 másodperc múlva eltűnik
             setTimeout(() => {
                 bubble.classList.remove('show');
-            }, 2500);
+            }, 3500);
         }
     }
-    // ==========================================
-    // 3. KAMU ÉRTÉKELÉSEK GENERÁTOR (CAROUSEL) 💬
-    // ==========================================
+
     function initFunnyReviews() {
         const track = document.getElementById('reviews-track');
         if (!track) return;
