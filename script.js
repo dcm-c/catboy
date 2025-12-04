@@ -47,12 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // --- B. "IGEN" Gomb kezelése (Rickroll) ---
             if (e.target.id === 'btn-age-yes') {
-                console.log("IGEN gomb megnyomva -> Indul a Rickroll...");
-
                 const modalContent = document.querySelector('#premiumModal .modal-content');
-
                 if (modalContent) {
-                    // Videó beágyazása
                     modalContent.innerHTML = `
                     <div class="ratio ratio-16x9">
                         <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" title="Rick Roll" allow="autoplay; encrypted-media" allowfullscreen></iframe>
@@ -60,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="text-center p-3" style="background: #fff;">
                         <h3 class="fw-bold text-danger">NA NEE! 🕺</h3>
                         <p class="mb-0">Sose add fel...</p>
-                        <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Bezárás (Ha tudod)</button>
+                        <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Bezárás</button>
                     </div>
                 `;
 
