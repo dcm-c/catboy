@@ -854,12 +854,12 @@ footer {
 
 /* --- ÉRTÉKELÉS CAROUSEL NYILAK --- */
 .carousel-control-prev {
-    left: -50px;
+    left: -100px;
     /* Kijjebb toljuk balra */
 }
 
 .carousel-control-next {
-    right: -50px;
+    right: -100px;
     /* Kijjebb toljuk jobbra */
 }
 
