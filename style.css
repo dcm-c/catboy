@@ -54,25 +54,24 @@ body {
     box-shadow: 0 4px 20px rgba(245, 169, 184, 0.15);
 }
 
+.navbar-toggler {
+    color: var(--pink);
+}
+
 /* Alapvető távolság és stílus a füleknek */
 .nav-pills .nav-item {
     margin: 5px;
     /* Kicsi térköz minden irányból */
 }
 
-/* Alapállapot (Nem aktív gomb) */
 .nav-pills .nav-link {
     background-color: #e9ecef;
     color: var(--dark);
-    /* Rózsaszín szöveg */
     border: 2px solid var(--pink);
-    /* Rózsaszín keret */
     margin: 0 8px;
     padding: 10px 25px;
     border-radius: 50px;
-    /* Kerekebb forma */
     font-weight: 700;
-
     transition: all 0.3s ease;
 }
 
@@ -84,7 +83,6 @@ body {
 
 .nav-pills .nav-link:hover {
     background-color: #fff0f3;
-    /* Halvány rózsaszín háttér */
     color: var(--pink);
     transform: translateY(-2px);
 }
@@ -99,7 +97,6 @@ body {
     border: 2px solid var(--pink);
 }
 
-/* Hover és Aktív állapot: Kékre vált, hogy feltűnő legyen */
 .btn-nav:hover,
 .btn-nav:active,
 .btn-nav:focus {
@@ -110,9 +107,6 @@ body {
     box-shadow: 0 4px 15px rgba(91, 206, 250, 0.4);
 }
 
-/* --- KÖZÖSSÉGI MÉDIA GOMBOK JAVÍTÁSA --- */
-
-/* Közös alapstílus mindkét gombnak */
 .btn-social-custom {
     display: flex;
     align-items: center;
@@ -121,16 +115,12 @@ body {
     padding: 12px 20px;
     font-size: 1.1rem;
     font-weight: 800;
-    /* Vastag betű */
     border-radius: 15px;
-    /* Lekerekítés */
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* Ruganyos animáció */
     border: none;
     margin-bottom: 1.5rem;
     color: white !important;
-    /* Mindig fehér legyen a szöveg */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -186,7 +176,6 @@ body {
     box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
 }
 
-/* Hero Section */
 .hero-section {
     padding: 4rem 0;
     min-height: 85vh;
@@ -201,7 +190,6 @@ body {
     font-weight: 800;
 }
 
-/* Gombok */
 .btn-primary-custom {
     background-color: var(--pink);
     border: none;
@@ -632,14 +620,13 @@ textarea {
 .reddit-image-wrapper {
     position: relative;
     width: 100%;
-    height: 250px;
+    height: 400px;
     border-radius: 15px;
     overflow: hidden;
     background: #ddd;
     margin-bottom: 1rem;
 }
 
-/* A blur és main classok ugyanazok, mint fent */
 /* --- FOOTER STÍLUSOK --- */
 footer {
     background: rgba(255, 255, 255, 0.8);
