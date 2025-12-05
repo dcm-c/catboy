@@ -894,12 +894,10 @@ footer {
 @media (min-width: 992px) {
     .mobile-group {
         display: contents;
-        /* PC-n "megszűnik" a div, mintha ott se lenne */
     }
 
     .mobile-group .nav-item {
         flex: none;
-        /* Visszaállítjuk az eredeti méretezést */
     }
 }
 
