@@ -1,25 +1,38 @@
 /* ==========================================================================
    2HB FOXCOMM 10.0 - OVERLOAD EDITION
    ========================================================================== */
-
 let audioContext = null;
 
-// --- HANG MOTOR (Változatlan) ---
+// --- 1. HANG MOTOR ---
 function initAudio() {
     if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
     if (audioContext.state === 'suspended') audioContext.resume();
 }
+
 function playFakeXPSound() {
-    initAudio(); const now = audioContext.currentTime;
-    [{ f: 311, t: 0, d: 2 }, { f: 466, t: 0.4, d: 2 }, { f: 622, t: 0.8, d: 2 }, { f: 830, t: 1.2, d: 3 }, { f: 932, t: 1.6, d: 4 }].forEach(n => {
-        const o = audioContext.createOscillator(), g = audioContext.createGain(); o.type = 'triangle'; o.frequency.value = n.f;
+    initAudio();
+    const now = audioContext.currentTime;
+    const notes = [{ f: 311, t: 0, d: 2 }, { f: 466, t: 0.4, d: 2 }, { f: 622, t: 0.8, d: 2 }, { f: 830, t: 1.2, d: 3 }, { f: 932, t: 1.6, d: 4 }];
+    const mg = audioContext.createGain(); mg.gain.setValueAtTime(0.5, now); mg.connect(audioContext.destination);
+    notes.forEach(n => {
+        const o = audioContext.createOscillator(); const g = audioContext.createGain();
+        o.type = 'triangle'; o.frequency.value = n.f;
         g.gain.setValueAtTime(0, now + n.t); g.gain.linearRampToValueAtTime(0.3, now + n.t + 0.1); g.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
-        o.connect(g); g.connect(audioContext.destination); o.start(now + n.t); o.stop(now + n.t + n.d);
+        o.connect(g); g.connect(mg); o.start(now + n.t); o.stop(now + n.t + n.d);
     });
 }
-function playSystemBeep(t) { initAudio(); const o = audioContext.createOscillator(), g = audioContext.createGain(); g.connect(audioContext.destination); if (t === 'error') { o.type = 'sawtooth'; o.frequency.value = 100; g.gain.setValueAtTime(0.3, audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3); } else { o.type = 'square'; o.frequency.value = 1200; g.gain.setValueAtTime(0.1, audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05); } o.start(); o.stop(audioContext.currentTime + 0.3); }
 
-// --- LOADER GENERÁTOR (Változatlan) ---
+function playSystemBeep(type) {
+    initAudio();
+    const o = audioContext.createOscillator(); const g = audioContext.createGain();
+    g.connect(audioContext.destination);
+    if (type === 'error') {
+        o.type = 'sawtooth'; o.frequency.value = 100; g.gain.setValueAtTime(0.3, audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    } else {
+        o.type = 'square'; o.frequency.value = 1200; g.gain.setValueAtTime(0.1, audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+    }
+    o.start(); o.stop(audioContext.currentTime + 0.3);
+}
 function generateRandomLoader() {
     const l = document.getElementById('loader'), t = Math.floor(Math.random() * 2);
     const btn = `<button id="startSystemBtn" style="display:none;margin-top:20px;padding:10px;background:red;color:yellow;font-weight:bold;border:3px outset white;cursor:pointer;z-index:999;">>>> RENDSZER INDÍTÁSA <<<</button>`;
@@ -31,7 +44,6 @@ function generateRandomLoader() {
     }
 }
 function randomizeLoaderAnim() { const s = document.querySelector('.fox-spinner'); if (s) s.className = 'fox-spinner ' + ['spin', 'spin-3d', 'spin-wobble'][Math.floor(Math.random() * 3)]; }
-
 // --- 1. ÚJ FUNKCIÓ: TELJES KÉPERNYŐS OVERLAYEK ---
 function triggerFullOverlay(type) {
     playSystemBeep('click');
@@ -157,12 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const bg = document.getElementById('chiptune-bg'); if (bg) bg.play().catch(() => { });
         }
     });
-
     initListeners();
 });
 
 function startChaosEngine() {
-    // Ghost Switch generátor (5 másodpercenként próbálkozik)
     setInterval(() => {
         if (Math.random() > 0.6) spawnGhostSwitch();
     }, 5000);
@@ -174,30 +184,44 @@ function startChaosEngine() {
 }
 
 function initListeners() {
+    initToggles();
     // OVERLAY GOMBOK BEKÖTÉSE
     const btnDefrag = document.getElementById('btnDefrag');
     if (btnDefrag) btnDefrag.addEventListener('click', () => triggerFullOverlay('DEFRAG'));
 
     const btnHacking = document.getElementById('btnHacking');
     if (btnHacking) btnHacking.addEventListener('click', () => triggerFullOverlay('HACKING'));
-
+    // Formázás
+    const btnFormat = document.getElementById('btnFormat');
+    if (btnFormat) btnFormat.addEventListener('click', () => {
+        const win = createFakeWindow(200, 200, "Format C:", "Törlés...", true);
+        let w = 0; const bar = win.querySelector('.progress-blocks');
+        const int = setInterval(() => {
+            w++; if (bar) bar.style.width = w + '%';
+            if (w >= 100) { clearInterval(int); win.querySelector('.window-content-area').innerHTML = 'FORMAT COMPLETE.<br><button onclick="this.closest(\'.retro-window\').remove()">PÁNIK</button>'; playFakeXPSound(); }
+        }, 30);
+    });
     // Régi gombok
     const btnCascade = document.getElementById('btnCascade');
     if (btnCascade) btnCascade.addEventListener('click', () => {
         let i = 0; const int = setInterval(() => { createFakeWindow(100 + i * 20, 100 + i * 20, "HIBA", "Fatal Error"); playSystemBeep('error'); if (++i > 10) clearInterval(int); }, 100);
     });
-
-    // Pánik gomb
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") { document.querySelectorAll('.retro-window, .fullscreen-overlay, .ghost-switch-container').forEach(w => w.remove()); document.body.style.filter = 'none'; }
+    const cpurs = document.getElementById('cursorSelect').addEventListener('change', function () {
+        document.body
+            .style.cursor = this.value;
     });
-
-    // Globális téma (ha a HTML-ben inline van)
-    window.setGlitchTheme = (t) => {
-        playSystemBeep('click'); document.body.className = '';
-        setTimeout(() => document.body.classList.add('theme-' + t), 100);
-    };
 }
+// Pánik gomb
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") { document.querySelectorAll('.retro-window, .fullscreen-overlay, .ghost-switch-container').forEach(w => w.remove()); document.body.style.filter = 'none'; }
+});
+
+
+// Globális téma (ha a HTML-ben inline van)
+window.setGlitchTheme = (t) => {
+    playSystemBeep('click'); document.body.className = '';
+    setTimeout(() => document.body.classList.add('theme-' + t), 100);
+};
 function createFakeWindow(x, y, title, content, isProgress) {
     const w = document.createElement('div'); w.className = 'retro-window';
     w.style.left = x + 'px'; w.style.top = y + 'px'; w.style.zIndex = 10000 + Math.floor(Math.random() * 100);
@@ -206,4 +230,19 @@ function createFakeWindow(x, y, title, content, isProgress) {
     w.onmousedown = () => w.style.zIndex = parseInt(w.style.zIndex) + 100;
     document.body.appendChild(w);
     return w;
+}
+function initToggles() {
+    const toggles = document.querySelectorAll('.toggle-switch');
+    setInterval(() => {
+        if (toggles.length === 0) return;
+        const idx = Math.floor(Math.random() * toggles.length);
+        const el = toggles[idx];
+        playSystemBeep('click');
+
+        if (el.classList.contains('off')) {
+            el.classList.remove('off'); el.innerHTML = "ON ⏻";
+        } else {
+            el.classList.add('off'); el.innerHTML = "OFF ⭘";
+        }
+    }, 2000);
 }
