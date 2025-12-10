@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCM - FAXOMM 7.5 - ULTIMATE WAREZ EDITION</title>
+    <link rel="stylesheet" href="faxstyle.css">
+</head>
+
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <audio id="chiptune-bg" loop>
+        <source
+            src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAAAP///////wAA////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP///////wAA//////////////////8AAP//////////////////////AAD///////////////////////////8AAP///////////wAA"
+            type="audio/wav">
+    </audio>
+
+    <div id="loader">
+        <div class="fox-spinner">🦊</div>
+        <div class="loader-text">
+            RENDSZER OPTIMALIZÁLÁSA...<br>
+            <span class="fake-gif-new">V 6.6.6</span>
+        </div>
+        <button id="startSystemBtn"
+            style="display:none; margin-top: 20px; padding: 10px 20px; background: red; color: yellow; font-weight: bold; border: 3px outset white; cursor: pointer; font-family: monospace; font-size: 16px; animation: blink-rapid 0.5s infinite;">
+            >>> RENDSZER INDÍTÁSA <<< </button>
+    </div>
+
+    <div class="main-window" id="content" style="display:none;">
+
+        <div style="position:absolute; top:-20px; right:-20px; font-size:40px; transform: rotate(20deg);">💾</div>
+
+        <div class="fake-gif-fire"></div>
+        <h1 style="display:inline;">DCM FAXOMM 7.0</h1>
+        <div class="fake-gif-fire"></div>
+        <div style="font-size: 10px; letter-spacing: 2px;">LUNAVA EDITION <span class="fake-gif-new">HOT!</span></div>
+
+        <div class="construction-bar"></div>
+
+        <div class="marquee-container">
+            <marquee scrollamount="15" bgcolor="black">
+                <span style="color: yellow">⚠</span> !!! FIGYELEM: A SZOFTVER ÖNÁLLÓ TUDATTAL RENDELKEZIK. NE HAGYJA
+                ŐRIZETLENÜL !!! <span style="color: yellow">⚠</span>
+            </marquee>
+        </div>
+
+        <div class="grid-row">
+            <div class="panel">
+                <span class="panel-title">Fax SEB téma</span>
+                <div style="text-align: left; padding: 10px;">
+                    <span class="toggle-switch">ON ⏻</span> <span style="color: #ccc;">Turbo Mód</span>
+                    <br><br>
+                    <span style="font-size: 24px; animation: spin 2s infinite linear;">📧</span> <a href="#"
+                        style="color: cyan;">Írj a fejlesztőnek!</a>
+                </div>
+
+                <button id="btnCascade" class="btn-nt">SAB Telepítése 🍀</button>
+                <button id="btnProgress" class="btn-nt">DCM UX-Theme patch 🦊</button>
+                <button class="btn-nt generic-spam">Témakezelő megnyitása 🦊</button>
+            </div>
+
+            <div class="panel">
+                <span class="panel-title">Rendszer ikontéma (Vigyázz!)</span>
+                <div class="grid-row">
+                    <button class="btn-nt btn-icon-switch" onclick="setGlitchTheme('win11')">Wind0ws 11 ikonoks
+                        🟦</button>
+                    <button class="btn-nt btn-icon-switch" onclick="setGlitchTheme('win98')">Wíndóws 98 ikdonok
+                        💾</button>
+                    <button class="btn-nt btn-icon-switch" onclick="setGlitchTheme('win7')">Widndowds 7 ikonos
+                        🔮</button>
+                    <button class="btn-nt btn-icon-switch" onclick="setGlitchTheme('fox')">
+                        FaXomm 3 ikonok <span class="fake-gif-new">Nagyon új</span>
+                    </button>
+                </div>
+                <div style="margin-top:10px;">
+                    <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVNDQVBFMi4wAwEAAAAh/whXaGF0IGFyZSB5b3UgbG9va2luZyBhdD8BACH5BAVkAAAALAAAAAAQABAAAAM2CLrc/jDKSau9OOvNu/9gCP5g4G1WQZyD6rjC2653JuR84/t55+zSD3gQEhCKw02IyUQ6nysCADs="
+                        width="32" height="32" alt="ugly_spinner">
+                    <small>Loading icons...</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="panel">
+                <span class="panel-title">Egér és Mutató</span>
+                <div style="display: flex; justify-content: space-around; padding-top: 10px;">
+                    <div>
+                        <div style="font-size: 30px; animation: spin 5s infinite;">🖱️</div>
+                        <select id="cursorSelect"
+                            style="background: #000; color: #fff; border: 2px solid #fff; border-radius: 0;">
+                            <option value="default">defaoult</option>
+                            <option value="wait">Waiting</option>
+                            <option value="crosshair">Sniper</option>
+                            <option value="help">?</option>
+                            <option value="none">Hard mode</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <span class="panel-title">Meghajtók Formázása</span>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <select id="driveSelect" style="background: #000; color: #fff; height: 30px; border-radius: 0;">
+                        <option>C: (Rendszer)</option>
+                        <option>D: (Játékok)</option>
+                        <option>E: (Linux)</option>
+                    </select>
+                    <button id="btnFormat" class="btn-nt"
+                        style="width: auto; background: red; color: yellow;">FORMÁZÁS</button>
+                </div>
+                <div style="margin-top: 15px; text-align: left;">
+                    <span class="toggle-switch">ON ⏻</span>
+                    <span style="border: 1px solid lime; padding: 5px; color: #fff;">FaXomm *MIjúY Téma</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <span class="panel-title">Audio és Vizuális Terror</span>
+            <div class="grid-row">
+                <div style="text-align: left;">
+                    <label>Válassz rendszerhangot:</label><br>
+                    <select
+                        style="width: 100%; background: black; color: white; margin-bottom: 10px; border-radius: 0;">
+                        <option>Beállítás módosítása</option>
+                    </select>
+                    <br>
+                    <button id="btnStuck" class="btn-nt" style="width: 30px;">A</button>
+                    <button class="btn-nt generic-spam" style="width: 30px;">B</button>
+                    <button class="btn-nt generic-spam" style="width: 30px;">C</button>
+                </div>
+
+                <div style="text-align: right;">
+                    <div style="display: inline-block; margin: 5px;">
+                        <span class="toggle-switch">ON ⏻</span><br>CMD nyitás *JCM
+                    </div>
+                    <div style="display: inline-block; margin: 5px;">
+                        <span class="toggle-switch">ON ⏻</span><br>Kékhalál *JCM
+                    </div>
+                    <div style="display: inline-block; margin: 5px;">
+                        <span class="toggle-switch">ON ⏻</span><br>Óra másodpercek
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="construction-bar"></div>
+
+        <div class="footer-controls">
+            <div style="font-size: 10px; color: #aaa; margin-bottom: 10px;">
+                *JCM = Jobb click menü | <a href="#" style="color: magenta">Vendégkönyv</a>
+            </div>
+            <div class="update-icon" onclick="alert('HIBA: A rendszer túl optimalizált a frissítéshez!')">
+                🔄
+            </div>
+            <span>Mentés és összeomlás</span>
+        </div>
+
+    </div>
+    <script src="faxy.js"></script>
+</body>
+
+</html>
