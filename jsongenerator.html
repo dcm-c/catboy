@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vita RPG Szerkesztő V16 (Smart Tools)</title>
+    <title>Vita RPG Szerkesztő V21.1 (Fix)</title>
+    <!-- ... styles same as before ... -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -37,15 +38,7 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        /* Szimulációs inputok */
-        .sim-input {
-            border-color: #6366f1;
-            color: #a5b4fc;
-            text-align: center;
-            font-family: monospace;
-            font-weight: bold;
-        }
-
+        /* Kiemelések */
         .id-input {
             background-color: #1e1b4b !important;
             border-color: #4338ca !important;
@@ -64,6 +57,29 @@
             border-color: #059669;
             color: #34d399;
             font-family: monospace;
+        }
+
+        .media-input {
+            border-color: #ec4899;
+            color: #fbcfe8;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .priority-input {
+            border-color: #f43f5e;
+            color: #fda4af;
+            font-family: monospace;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .sim-input {
+            border-color: #6366f1;
+            color: #a5b4fc;
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
         }
 
         .outcome-box {
@@ -106,13 +122,12 @@
             class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700 bg-slate-900/50 p-4 rounded-xl sticky top-0 z-50 backdrop-blur-sm shadow-lg">
             <div>
                 <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-magic text-purple-500"></i> Vita RPG Szerkesztő <span
-                        class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded font-mono font-bold">V16</span>
+                    <i class="fas fa-check-circle text-green-500"></i> Vita RPG Szerkesztő <span
+                        class="text-xs bg-green-600 text-white px-2 py-0.5 rounded font-mono font-bold">V21.1</span>
                 </h1>
                 <p class="text-slate-400 text-xs mt-1 font-mono">
-                    <span class="text-indigo-400">Smart Balance</span> |
-                    <span class="text-cyan-400">Helper Menük</span> |
-                    <span class="text-emerald-400">Full Logic</span>
+                    <span class="text-rose-400">Javított String Parser</span> |
+                    <span class="text-indigo-400">Stabil Render</span>
                 </p>
             </div>
             <div class="flex gap-2">
@@ -130,53 +145,57 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-            <!-- BAL OLDAL: SZERKESZTŐ -->
+            <!-- Bal oldali panel (Szerkesztő) -->
             <div class="lg:col-span-7 space-y-6 overflow-y-auto max-h-[88vh] pr-2 pb-20">
 
-                <!-- 0. OKOS MÉRLEG (VISSZAÁLLÍTVA) -->
+                <!-- 0. OKOS MÉRLEG -->
                 <section class="card p-4 border-t-4 border-indigo-500 bg-slate-900/40">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-sm font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                            <i class="fas fa-calculator"></i> Játékegyensúly & Szimuláció
+                            <i class="fas fa-calculator"></i> Játékos Szimuláció
                         </h2>
                         <div id="diff-badge"
                             class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-600">
-                            Számítás...
-                        </div>
+                            Számítás...</div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="section-label text-center mb-1 text-indigo-300">Játékos Teszt Statok</span>
+                            <span class="section-label text-center mb-1 text-indigo-300">Játékos Statisztikák</span>
                             <div class="grid grid-cols-3 gap-2">
-                                <div><input type="number" id="sim-log" oninput="calcDiff()"
-                                        class="input-dark sim-input text-xs" value="12" title="LOG"></div>
-                                <div><input type="number" id="sim-rhe" oninput="calcDiff()"
-                                        class="input-dark sim-input text-xs" value="12" title="RHE"></div>
-                                <div><input type="number" id="sim-cal" oninput="calcDiff()"
-                                        class="input-dark sim-input text-xs" value="12" title="CAL"></div>
-                                <div><input type="number" id="sim-cre" oninput="calcDiff()"
-                                        class="input-dark sim-input text-xs" value="12" title="CRE"></div>
-                                <div><input type="number" id="sim-cor" oninput="calcDiff()"
-                                        class="input-dark sim-input text-xs" value="12" title="COR"></div>
-                                <div><input type="number" id="sim-pre" oninput="calcDiff()"
-                                        class="input-dark sim-input text-xs" value="12" title="PRE"></div>
+                                <div><label class="section-label text-center">LOG</label><input type="number"
+                                        id="sim-log" oninput="calcDiff()" class="input-dark sim-input text-xs"
+                                        value="12"></div>
+                                <div><label class="section-label text-center">RHE</label><input type="number"
+                                        id="sim-rhe" oninput="calcDiff()" class="input-dark sim-input text-xs"
+                                        value="12"></div>
+                                <div><label class="section-label text-center">CAL</label><input type="number"
+                                        id="sim-cal" oninput="calcDiff()" class="input-dark sim-input text-xs"
+                                        value="12"></div>
+                                <div><label class="section-label text-center">CRE</label><input type="number"
+                                        id="sim-cre" oninput="calcDiff()" class="input-dark sim-input text-xs"
+                                        value="12"></div>
+                                <div><label class="section-label text-center">COR</label><input type="number"
+                                        id="sim-cor" oninput="calcDiff()" class="input-dark sim-input text-xs"
+                                        value="12"></div>
+                                <div><label class="section-label text-center">PRE</label><input type="number"
+                                        id="sim-pre" oninput="calcDiff()" class="input-dark sim-input text-xs"
+                                        value="12"></div>
                             </div>
                         </div>
                         <div class="bg-slate-800 p-2 rounded border border-indigo-900">
-                            <span class="section-label mb-1 text-yellow-500">Teszt Tárgyak (Pipáld be)</span>
+                            <span class="section-label mb-1 text-yellow-500">Tárgyak és Változók</span>
                             <div id="sim-items-list" class="flex flex-wrap gap-2 mb-2 min-h-[20px]"></div>
+                            <input type="text" id="sim-vars" oninput="calcDiff()" class="input-dark text-xs font-mono"
+                                placeholder="popularity:60">
                         </div>
                     </div>
-                    <div id="diff-details"
-                        class="text-[10px] text-slate-400 font-mono mt-2 border-t border-slate-700 pt-2"></div>
                 </section>
 
-                <!-- TÁRGYAK -->
+                <!-- 1. TÁRGYAK -->
                 <section class="card p-4 border-l-4 border-blue-400 bg-slate-800/30">
                     <div class="flex justify-between items-center mb-2">
-                        <h2 class="text-xs font-bold text-blue-400 uppercase tracking-widest">Tárgy Definíciók</h2>
+                        <h2 class="text-xs font-bold text-blue-400 uppercase tracking-widest">Tárgyak (Definíciók)</h2>
                         <button onclick="addItemDefinition()"
                             class="text-[10px] bg-blue-700 hover:bg-blue-600 px-2 py-1 rounded text-white font-bold transition">+
                             ÚJ TÁRGY</button>
@@ -184,7 +203,7 @@
                     <div id="defined-items-list" class="space-y-2"></div>
                 </section>
 
-                <!-- PROFIL & STATOK -->
+                <!-- 2. PROFIL & STATOK -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <section class="card p-4 border-t-4 border-blue-500 bg-slate-800/50">
                         <h2 class="text-xs font-bold text-blue-400 uppercase mb-2">PROFIL ADATOK</h2>
@@ -207,40 +226,38 @@
                     <section class="card p-4 border-t-4 border-emerald-500 bg-slate-800/50">
                         <h2 class="text-xs font-bold text-emerald-400 uppercase mb-2">ELLENFÉL STATISZTIKÁK</h2>
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="section-label text-slate-300">LOGIKA (LOG)</label><input type="number"
+                            <div><label class="section-label text-slate-400">LOGIKA (LOG)</label><input type="number"
                                     id="s-log" oninput="updateBase('log', this.value)"
                                     class="input-dark text-center font-mono font-bold text-emerald-400" value="12">
                             </div>
-                            <div><label class="section-label text-slate-300">RETORIKA (RHE)</label><input type="number"
+                            <div><label class="section-label text-slate-400">RETORIKA (RHE)</label><input type="number"
                                     id="s-rhe" oninput="updateBase('rhe', this.value)"
                                     class="input-dark text-center font-mono font-bold text-emerald-400" value="12">
                             </div>
-                            <div><label class="section-label text-slate-300">NYUGALOM (CAL)</label><input type="number"
+                            <div><label class="section-label text-slate-400">NYUGALOM (CAL)</label><input type="number"
                                     id="s-cal" oninput="updateBase('cal', this.value)"
                                     class="input-dark text-center font-mono font-bold text-emerald-400" value="12">
                             </div>
-                            <div><label class="section-label text-slate-300">HITELESSÉG (CRE)</label><input
+                            <div><label class="section-label text-slate-400">HITELESSÉG (CRE)</label><input
                                     type="number" id="s-cre" oninput="updateBase('cre', this.value)"
                                     class="input-dark text-center font-mono font-bold text-emerald-400" value="12">
                             </div>
-                            <div><label class="section-label text-slate-300">KORRUPCIÓ (COR)</label><input type="number"
+                            <div><label class="section-label text-slate-400">KORRUPCIÓ (COR)</label><input type="number"
                                     id="s-cor" oninput="updateBase('cor', this.value)"
                                     class="input-dark text-center font-mono font-bold text-emerald-400" value="12">
                             </div>
-                            <div><label class="section-label text-slate-300">TEKINTÉLY (PRE)</label><input type="number"
+                            <div><label class="section-label text-slate-400">TEKINTÉLY (PRE)</label><input type="number"
                                     id="s-pre" oninput="updateBase('pre', this.value)"
                                     class="input-dark text-center font-mono font-bold text-emerald-400" value="12">
                             </div>
                         </div>
-
                         <div class="mt-3 pt-3 border-t border-slate-700">
                             <div class="flex justify-between items-center mb-1"><span
                                     class="section-label text-cyan-400">Globális Tárgy Reakciók</span></div>
                             <div class="flex gap-1 mb-2">
-                                <!-- ÚJ: Dropdown a definiált tárgyakhoz -->
                                 <select id="gir-id-select"
-                                    class="input-dark w-28 text-[10px] bg-slate-900 border-cyan-800">
-                                    <option value="">-- Válassz --</option>
+                                    class="input-dark w-24 text-[10px] bg-slate-900 border-cyan-800">
+                                    <option value="">-Válassz-</option>
                                 </select>
                                 <input type="number" id="gir-val" class="input-dark w-12 text-[10px]" placeholder="+/-">
                                 <button onclick="addGlobalItemReaction()"
@@ -251,7 +268,7 @@
                     </section>
                 </div>
 
-                <!-- FÁZISOK -->
+                <!-- 3. FÁZISOK -->
                 <section class="card p-4 border-l-4 border-amber-500">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xs font-bold text-amber-500 uppercase tracking-widest">KÖTÖTT FÁZISOK</h2>
@@ -262,11 +279,10 @@
                     <div id="phases-list" class="space-y-2"></div>
                 </section>
 
-                <!-- SAJÁT ÉRVEK -->
+                <!-- 4. SAJÁT ÉRVEK -->
                 <section class="card p-4 border-l-4 border-purple-500 bg-slate-800/30">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xs font-bold text-purple-400 uppercase tracking-widest">SAJÁT ÉRVEK (PLAYER
-                            MOVES)</h2>
+                        <h2 class="text-xs font-bold text-purple-400 uppercase tracking-widest">SAJÁT ÉRVEK</h2>
                         <button onclick="addMove()"
                             class="text-[10px] bg-purple-700 hover:bg-purple-600 px-3 py-1 rounded text-white font-bold transition">ÚJ
                             ÉRV</button>
@@ -274,11 +290,10 @@
                     <div id="moves-list" class="space-y-6"></div>
                 </section>
 
-                <!-- ELLENFÉL TÁMADÁSAI -->
+                <!-- 5. ELLENFÉL TÁMADÁSAI -->
                 <section class="card p-4 border-l-4 border-red-500 bg-slate-800/30">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xs font-bold text-red-400 uppercase tracking-widest">ELLENFÉL TÁMADÁSAI
-                            (ATTACKS)</h2>
+                        <h2 class="text-xs font-bold text-red-400 uppercase tracking-widest">ELLENFÉL TÁMADÁSAI</h2>
                         <button onclick="addAttack()"
                             class="text-[10px] bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white font-bold transition flex items-center gap-1"><i
                                 class="fas fa-plus"></i> ÚJ TÁMADÁS</button>
@@ -286,7 +301,7 @@
                     <div id="attacks-list" class="space-y-8"></div>
                 </section>
 
-                <!-- LEZÁRÁSOK -->
+                <!-- 6. LEZÁRÁSOK -->
                 <section class="card p-4 border-t-4 border-yellow-500">
                     <div class="mb-4 bg-slate-900/50 p-3 rounded border border-red-900/30">
                         <label class="section-label text-red-400 text-xs mb-1">VERESÉG (FINAL STRIKE)</label>
@@ -310,6 +325,7 @@
                 </section>
             </div>
 
+            <!-- JOBB OLDAL: ELŐNÉZET -->
             <div class="lg:col-span-5">
                 <div class="sticky top-20">
                     <div
@@ -340,96 +356,25 @@
 
         function init() { renderLists(); syncInputs(); calcDiff(); updatePreview(); updateGlobalItemSelect(); }
 
-        // --- OKOS MÉRLEG ---
-        function calcDiff() {
-            try {
-                let playerStats = {};
-                STAT_IDS.forEach(s => {
-                    const el = document.getElementById('sim-' + s);
-                    playerStats[s] = el ? (parseInt(el.value) || 10) : 10;
-                });
-
-                // Szimulált Tárgyak
-                const simItemsContainer = document.getElementById('sim-items-list');
-                if (simItemsContainer) {
-                    const activeItems = Array.from(simItemsContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-                    activeItems.forEach(itemId => {
-                        const item = data.definedItems.find(i => i.id === itemId);
-                        if (item && item.bonuses) {
-                            for (let s in item.bonuses) playerStats[s] = (playerStats[s] || 0) + item.bonuses[s];
-                        }
-                    });
-                }
-
-                // Szimulált változók
-                let simVars = {};
-                const varsInput = document.getElementById('sim-vars');
-                if (varsInput && varsInput.value) {
-                    varsInput.value.split(',').forEach(p => {
-                        let [k, v] = p.split(':');
-                        if (k && v) simVars[k.trim()] = parseInt(v.trim());
-                    });
-                }
-
-                // Mérlegelés
-                let validMovesCount = 0;
-                let advantageSum = 0;
-
-                Object.keys(data.playerMoves).forEach(mk => {
-                    const m = data.playerMoves[mk];
-                    let reqMet = true;
-                    if (m.requirements) {
-                        for (let reqKey in m.requirements) {
-                            let reqVal = m.requirements[reqKey];
-                            if (reqKey.startsWith('item:')) { /* Sim item check */ }
-                            else if (reqKey.startsWith('var:') || simVars[reqKey] !== undefined) {
-                                let checkVal = simVars[reqKey] !== undefined ? simVars[reqKey] : (playerStats[reqKey] || 0);
-                                if (checkVal < reqVal) reqMet = false;
-                            }
-                            else if (STAT_IDS.includes(reqKey)) {
-                                if (playerStats[reqKey] < reqVal) reqMet = false;
-                            }
-                        }
-                    }
-
-                    if (reqMet) {
-                        validMovesCount++;
-                        let pVal = playerStats[m.stat] || 0;
-                        let eDC = data[m.dcStat] || 10;
-                        advantageSum += (pVal - eDC);
-                    }
-                });
-
-                let diffScore = validMovesCount > 0 ? (advantageSum / validMovesCount) : -10;
-                let label = "Normál", color = "text-yellow-400";
-                if (diffScore > 4) { label = "Könnyű"; color = "text-emerald-400"; }
-                else if (diffScore > -2) { label = "Közepes"; color = "text-blue-400"; }
-                else if (diffScore > -5) { label = "Nehéz"; color = "text-orange-400"; }
-                else { label = "Halálos"; color = "text-red-500"; }
-
-                const badge = document.getElementById('diff-badge');
-                if (badge) {
-                    badge.className = `px-3 py-1 rounded-full text-xs font-bold border bg-slate-800 ${color} border-slate-600`;
-                    badge.innerText = `${label} (${diffScore.toFixed(1)})`;
-                }
-            } catch (e) { console.error("Sim error:", e); }
-        }
-
-        // --- ALAP ROBOTOK ---
+        // --- SEGÉDEK ---
         function randID(p) { return p + "_" + Math.random().toString(36).substr(2, 4); }
-        function parseDict(str) {
-            let r = {};
-            if (str) str.split(',').forEach(p => {
-                let parts = p.split(':'); if (parts.length >= 2) { let val = parts.pop().trim(); let key = parts.join(':').trim(); if (key && val) r[key] = isNaN(val) ? val : parseInt(val); }
-            }); return r;
+
+        // JAVÍTVA: dictToStr biztonságosabb kezelése
+        function parseDict(str) { let r = {}; if (str) str.split(',').forEach(p => { let parts = p.split(':'); if (parts.length >= 2) { let val = parts.pop().trim(); let key = parts.join(':').trim(); if (key && val) r[key] = isNaN(val) ? val : parseInt(val); } }); return r; }
+        function dictToStr(obj) {
+            if (!obj) return "";
+            if (typeof obj === 'string') return obj;
+            return Object.keys(obj).map(k => `${k}:${obj[k]}`).join(', ');
         }
-        function dictToStr(obj) { return !obj ? "" : Object.keys(obj).map(k => `${k}:${obj[k]}`).join(', '); }
         function setDeepValue(obj, path, val) { let k = path.split('.'); let c = obj; for (let i = 0; i < k.length - 1; i++) { if (!c[k[i]]) c[k[i]] = {}; c = c[k[i]]; } c[k[k.length - 1]] = val; }
 
         function uD(el) { let path = el.getAttribute('data-path'); let val = el.type === 'number' ? parseInt(el.value) || 0 : (el.type === 'checkbox' ? el.checked : el.value); setDeepValue(data, path, val); updatePreview(); }
         function updateLogic(path, val) { setDeepValue(data, path, parseDict(val)); calcDiff(); updatePreview(); }
         function updateBase(k, v) { data[k] = STAT_IDS.includes(k) ? parseInt(v) || 0 : v; calcDiff(); updatePreview(); }
         function updateFS(k, v) { if (k === 'text') data.enemyFinalStrike.text = v; else if (k.includes('dialogue')) data.enemyFinalStrike.dialogues[k === 'dialogue1' ? 0 : 1] = v; updatePreview(); }
+
+        function renKey(cat, oldK, newK) { if (!newK || oldK === newK) return; if (data[cat][newK]) { alert("Létező ID"); return } data[cat][newK] = data[cat][oldK]; delete data[cat][oldK]; renderLists(); updatePreview(); }
+        function renRes(aid, oldK, newK) { if (!newK || oldK === newK) return; if (data.enemyAttacks[aid].responses[newK]) { alert("Létező ID"); return } data.enemyAttacks[aid].responses[newK] = data.enemyAttacks[aid].responses[oldK]; delete data.enemyAttacks[aid].responses[oldK]; renderLists(); updatePreview(); }
 
         function syncInputs() {
             try {
@@ -441,67 +386,57 @@
             } catch (e) { }
         }
         function updatePreview() { document.getElementById('json-preview').textContent = JSON.stringify(data, null, 2); }
+
         function importJSON(event) {
-            const file = event.target.files[0]; if (!file) return;
+            const file = event.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = function (e) { try { data = { ...data, ...JSON.parse(e.target.result) }; renderLists(); syncInputs(); updatePreview(); updateGlobalItemSelect(); } catch (err) { alert("Hiba!"); } };
+            reader.onload = function (e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    data = { ...data, ...importedData };
+                    renderLists(); syncInputs(); updatePreview(); updateGlobalItemSelect();
+                    alert("JSON sikeresen importálva!");
+                } catch (error) { alert("Hiba a JSON importálásakor: " + error.message); }
+            };
             reader.readAsText(file); event.target.value = '';
         }
 
-        // --- HELPER FUNKCIÓK (ÚJ) ---
-        function getHelperSelectHTML(idSuffix, type) {
-            let opts = `<option value="">- Stat/Var -</option>`;
-            HELPER_OPTS.forEach(o => opts += `<option value="${o.v}">${o.t}</option>`);
-
-            // Tárgyak hozzáadása a listához, ha vannak
-            if (data.definedItems && data.definedItems.length > 0) {
-                opts += `<option disabled>-- Tárgyak --</option>`;
-                data.definedItems.forEach(i => opts += `<option value="item:${i.id}">${i.name}</option>`);
-            }
-
-            return `<div class="flex gap-1 mt-1 items-center bg-slate-900/50 p-1 rounded border border-slate-700/50">
-                <select id="${idSuffix}_sel" class="input-dark text-[10px] w-24 p-1 h-6">${opts}</select>
-                <input id="${idSuffix}_val" type="number" class="input-dark text-[10px] w-12 h-6" placeholder="Val" value="${type === 'eff' ? 5 : 15}">
-                <button onclick="insertHelper('${idSuffix}')" class="bg-slate-600 hover:bg-slate-500 text-white w-6 h-6 rounded flex items-center justify-center text-[10px]"><i class="fas fa-plus"></i></button>
-            </div>`;
+        // --- HELPER FUNKCIÓK ---
+        function getLogicBuilderHTML(id) {
+            let options = `<option value="">Stat/Var/Item</option>`;
+            HELPER_OPTS.forEach(o => options += `<option value="${o.v}">${o.t}</option>`);
+            if (data.definedItems) data.definedItems.forEach(i => options += `<option value="item:${i.id}">${i.name}</option>`);
+            return `<div class="flex gap-1 mt-1 items-center bg-amber-900/20 p-1 rounded border border-amber-500/30"><select id="lb_src_${id}" class="input-dark text-[10px] w-24 p-0 h-6">${options}</select><select id="lb_rel_${id}" class="input-dark text-[10px] w-12 p-0 h-6 text-center font-bold text-amber-400 bg-slate-800"><option value=">">></option><option value="<"><</option><option value="==">==</option></select><input id="lb_val_${id}" type="text" class="input-dark text-[10px] w-12 h-6" placeholder="Érték"><select id="lb_gate_${id}" class="input-dark text-[10px] w-12 p-0 h-6 text-indigo-300 font-bold bg-slate-800"><option value="">-</option><option value="&&">ÉS</option><option value="||">VAGY</option></select><button onclick="addLogicSnippet('${id}')" class="bg-amber-600 hover:bg-amber-500 text-white w-6 h-6 rounded flex items-center justify-center text-[10px]">+</button></div>`;
         }
-
-        window.insertHelper = (inputId) => {
-            const input = document.getElementById(inputId);
-            const select = document.getElementById(inputId + '_sel');
-            const valInput = document.getElementById(inputId + '_val');
-            const key = select.value;
-            const val = valInput.value;
-
-            if (!key || !val) return;
-
-            let currentVal = input.value.trim();
-            // Ha itemről van szó, a formátum item:id:val, egyébként key:val
-            let newVal = key.startsWith("item:") ? `${key}:${val}` : `${key}:${val}`;
-
-            input.value = currentVal ? `${currentVal}, ${newVal}` : newVal;
-
-            // Trigger update
-            let path = input.getAttribute('oninput').match(/'([^']+)'/)[1];
-            updateLogic(path, input.value);
-        };
-
-        function getAttackOptionsHTML(selected) {
-            let opts = `<option value="">-- Véletlenszerű --</option>`;
-            Object.keys(data.enemyAttacks).forEach(id => { opts += `<option value="${id}" ${selected === id ? 'selected' : ''}>${id}</option>`; });
-            return opts;
+        window.addLogicSnippet = (inputId) => {
+            const src = document.getElementById(`lb_src_${inputId}`).value; const rel = document.getElementById(`lb_rel_${inputId}`).value; const val = document.getElementById(`lb_val_${inputId}`).value; const gate = document.getElementById(`lb_gate_${inputId}`).value; const input = document.getElementById(inputId);
+            if (!src || !val) return;
+            let snippet = `${src} ${rel} ${val}`; input.value = input.value ? `${input.value} ${gate || '&&'} ${snippet}` : snippet;
+            let path = input.getAttribute('oninput').match(/'([^']+)'/)[1]; updateLogic(path, input.value);
         }
-
-        function getItemSelectHTML(idSuffix) {
-            // Ez a specifikus item selector a Tárgy Bónuszokhoz (nem a feltételekhez)
-            // De most már integráltuk a fenti helperbe is
-            return "";
-        }
-
+        function getAttackOptionsHTML(selected) { let opts = `<option value="">-- Véletlenszerű --</option>`; Object.keys(data.enemyAttacks).forEach(id => { opts += `<option value="${id}" ${selected === id ? 'selected' : ''}>${id}</option>`; }); return opts; }
         function updateGlobalItemSelect() {
-            const sel = document.getElementById('gir-id-select');
-            if (!sel) return;
+            const sel = document.getElementById('gir-id-select'); if (!sel) return;
             sel.innerHTML = `<option value="">-- Válassz --</option>` + data.definedItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+            document.getElementById('sim-items-list').innerHTML = data.definedItems.map(item => `<label class="inline-flex items-center gap-1 bg-slate-700 px-2 py-1 rounded cursor-pointer select-none border border-slate-600"><input type="checkbox" value="${item.id}" onchange="calcDiff()" class="accent-indigo-500"><span class="text-[10px] text-indigo-200 font-mono">${item.name}</span></label>`).join('');
+        }
+
+        // --- OKOS MÉRLEG ---
+        function calcDiff() {
+            try {
+                let playerStats = {}; STAT_IDS.forEach(s => { const el = document.getElementById('sim-' + s); playerStats[s] = el ? (parseInt(el.value) || 10) : 10; });
+                const simItemsContainer = document.getElementById('sim-items-list'); const activeItems = simItemsContainer ? Array.from(simItemsContainer.querySelectorAll('input:checked')).map(cb => cb.value) : [];
+                activeItems.forEach(itemId => { const item = data.definedItems.find(i => i.id === itemId); if (item && item.bonuses) { for (let s in item.bonuses) playerStats[s] = (playerStats[s] || 0) + item.bonuses[s]; } });
+                let validMovesCount = 0; let advantageSum = 0;
+                Object.keys(data.playerMoves).forEach(mk => {
+                    const m = data.playerMoves[mk]; let pVal = playerStats[m.stat] || 0; let eDC = data[m.dcStat] || 10; advantageSum += (pVal - eDC); validMovesCount++;
+                });
+                let diffScore = validMovesCount > 0 ? (advantageSum / validMovesCount) : -5;
+                let label = "Normál", color = "text-yellow-400";
+                if (diffScore > 3) { label = "Könnyű"; color = "text-green-400"; } else if (diffScore < -2) { label = "Nehéz"; color = "text-orange-400"; }
+                const badge = document.getElementById('diff-badge'); if (badge) { badge.innerHTML = `<span class="${color}">${label} (${diffScore.toFixed(1)})</span>`; }
+            } catch (e) { }
         }
 
         // --- ADDERS ---
@@ -511,62 +446,45 @@
             if (key === 'finishers') data.finishers.push({ id: randID("win"), label: "Győzelem", text: "", path: "path_1", requirements: {}, effects: {} });
             renderLists(); updatePreview();
         }
-        function addMove() { let id = randID("move"); data.playerMoves[id] = { label: "Érv", stat: "log", dcStat: "log", power: 15, cost: 10, mediaMod: 0, singleUse: false, nextAttack: "", requirements: {}, effects: {}, dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] } }; renderLists(); updatePreview(); }
-        function addAttack() { let id = randID("att"); data.enemyAttacks[id] = { text: "Kérdés?", attackStat: "pre", mediaMod: 50, itemReactions: {}, requirements: {}, effects: {}, responses: { "r1": { label: "Válasz", stat: "log", requirements: {}, dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] }, followUps: { critSuccess: "", success: "", fail: "", critFail: "" }, effects: { critSuccess: {}, success: {}, fail: {}, critFail: {} } } } }; renderLists(); updatePreview(); }
-        function addResponse(aid) { let id = randID("res"); data.enemyAttacks[aid].responses[id] = { label: "Válasz", stat: "log", requirements: {}, dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] }, followUps: { critSuccess: "", success: "", fail: "", critFail: "" }, effects: { critSuccess: {}, success: {}, fail: {}, critFail: {} } }; renderLists(); updatePreview(); }
-
-        function addGlobalItemReaction() {
-            let id = document.getElementById('gir-id-select').value;
-            let val = parseInt(document.getElementById('gir-val').value);
-            if (!id) return; data.itemReactions[id] = val; document.getElementById('gir-val').value = ""; renderLists(); updatePreview();
-        }
+        function addMove() { let id = randID("move"); data.playerMoves[id] = { label: "Érv", stat: "log", dcStat: "log", power: 15, cost: 10, mediaMod: 0, singleUse: false, nextAttack: "", requirements: "", effects: {}, dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] } }; renderLists(); updatePreview(); }
+        // ÚJ: Prioritás mező inicializálása
+        function addAttack() { let id = randID("att"); data.enemyAttacks[id] = { text: "Kérdés?", attackStat: "pre", priority: 1, mediaMod: 50, itemReactions: {}, requirements: "", effects: {}, responses: { "r1": { label: "Válasz", stat: "log", requirements: "", dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] }, followUps: { critSuccess: "", success: "", fail: "", critFail: "" }, effects: { critSuccess: {}, success: {}, fail: {}, critFail: {} } } } }; renderLists(); updatePreview(); }
+        function addResponse(aid) { let id = randID("res"); data.enemyAttacks[aid].responses[id] = { label: "Válasz", stat: "log", requirements: "", dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] }, followUps: { critSuccess: "", success: "", fail: "", critFail: "" }, effects: { critSuccess: {}, success: {}, fail: {}, critFail: {} } }; renderLists(); updatePreview(); }
+        function addGlobalItemReaction() { let id = document.getElementById('gir-id-select').value; let val = parseInt(document.getElementById('gir-val').value); if (!id) return; data.itemReactions[id] = val; document.getElementById('gir-val').value = ""; renderLists(); updatePreview(); }
         function addAttackItemReaction(aid) { let el = document.getElementById('it_' + aid); let valEl = document.getElementById('itv_' + aid); if (!el.value || !valEl.value) return; if (!data.enemyAttacks[aid].itemReactions) data.enemyAttacks[aid].itemReactions = {}; data.enemyAttacks[aid].itemReactions[el.value] = parseInt(valEl.value); el.value = ""; valEl.value = ""; renderLists(); updatePreview(); }
 
         // --- RENDER ---
         function renderLists() {
-            // Tárgyak
-            document.getElementById('defined-items-list').innerHTML = data.definedItems.map((it, i) => `
-                <div class="bg-slate-900 p-2 rounded flex gap-2 mb-2 border border-blue-500/30">
-                    <input value="${it.id}" oninput="data.definedItems[${i}].id=this.value; updatePreview(); updateGlobalItemSelect()" class="input-dark w-1/4 text-[10px]" placeholder="ID">
-                    <input value="${it.name}" oninput="data.definedItems[${i}].name=this.value; updatePreview()" class="input-dark flex-grow text-[10px]" placeholder="Név">
-                    <input value="${dictToStr(it.bonuses)}" oninput="updateLogic('definedItems.${i}.bonuses', this.value)" class="input-dark w-1/3 text-[10px] font-mono text-emerald-300" placeholder="stat:val">
-                    <button onclick="data.definedItems.splice(${i},1);renderLists();updatePreview();calcDiff()" class="text-red-500">X</button>
-                </div>`).join('');
-
-            // Sim Items Checkbox
-            document.getElementById('sim-items-list').innerHTML = data.definedItems.map(item => `
-                <label class="inline-flex items-center gap-1 bg-slate-700 px-2 py-1 rounded cursor-pointer select-none border border-slate-600">
-                    <input type="checkbox" value="${item.id}" onchange="calcDiff()" class="accent-indigo-500">
-                    <span class="text-[10px] text-indigo-200 font-mono">${item.name}</span>
-                </label>`).join('');
-
-            // Globális Itemek
+            document.getElementById('defined-items-list').innerHTML = data.definedItems.map((it, i) => `<div class="bg-slate-900 p-2 rounded flex gap-2 mb-2 border border-blue-500/30"><input value="${it.id}" oninput="data.definedItems[${i}].id=this.value; updatePreview(); updateGlobalItemSelect()" class="input-dark w-1/4 text-[10px]" placeholder="ID"><input value="${it.name}" oninput="data.definedItems[${i}].name=this.value; updatePreview()" class="input-dark flex-grow text-[10px]" placeholder="Név"><input value="${dictToStr(it.bonuses)}" oninput="updateEffects('definedItems.${i}.bonuses', this.value)" class="input-dark w-1/3 text-[10px] font-mono text-emerald-300" placeholder="stat:val"><button onclick="data.definedItems.splice(${i},1);renderLists();updatePreview();calcDiff()" class="text-red-500">X</button></div>`).join('');
             document.getElementById('global-item-list').innerHTML = Object.keys(data.itemReactions).map(k => `<span class="bg-cyan-900/50 text-cyan-300 text-[10px] px-2 py-1 rounded border border-cyan-500/30 flex items-center gap-1">${k}: ${data.itemReactions[k]} <i class="fas fa-times cursor-pointer hover:text-red-500" onclick="delete data.itemReactions['${k}']; renderLists(); updatePreview();"></i></span>`).join('');
-
-            // Fázisok
             document.getElementById('phases-list').innerHTML = data.startingPhases.map((p, i) => `<div class="bg-slate-900 p-2 mb-2 rounded border border-slate-700 flex gap-2"><input value="${p.phaseName}" oninput="data.startingPhases[${i}].phaseName=this.value;updatePreview()" class="input-dark w-1/3 text-[10px]" placeholder="Név"><input value="${p.playerMoveKeys}" oninput="data.startingPhases[${i}].playerMoveKeys=this.value.split(',');updatePreview()" class="input-dark flex-grow text-[10px]" placeholder="Move ID-k"><input value="${p.enemyAttackKey}" oninput="data.startingPhases[${i}].enemyAttackKey=this.value;updatePreview()" class="input-dark w-1/4 text-[10px]" placeholder="Attack ID"><button onclick="data.startingPhases.splice(${i},1);renderLists();updatePreview()" class="text-red-500">X</button></div>`).join('');
 
             // MOVES
             document.getElementById('moves-list').innerHTML = Object.keys(data.playerMoves).map(id => {
                 let m = data.playerMoves[id];
                 return `<div class="card p-4 border-l-4 border-purple-500 mb-4 bg-slate-900/40">
-                    <div class="flex justify-between mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-purple-400 font-mono">ID: ${id}</span></div><div class="flex items-center gap-2"><label class="flex items-center gap-1 text-[10px] text-slate-300 bg-slate-800 px-2 py-1 rounded border border-slate-600"><input type="checkbox" ${m.singleUse ? 'checked' : ''} data-path="playerMoves.${id}.singleUse" onchange="uD(this)" class="accent-purple-500"> 1x</label><button onclick="delete data.playerMoves['${id}'];renderLists();updatePreview()" class="text-red-500 text-xs">X</button></div></div>
+                    <div class="flex justify-between mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-purple-400 font-mono">ID: ${id}</span><input value="${id}" onchange="renKey('playerMoves','${id}',this.value)" class="id-input p-1 rounded text-xs w-24"></div><div class="flex items-center gap-2"><label class="flex items-center gap-1 text-[10px] text-slate-300 bg-slate-800 px-2 py-1 rounded border border-slate-600"><input type="checkbox" ${m.singleUse ? 'checked' : ''} data-path="playerMoves.${id}.singleUse" onchange="uD(this)" class="accent-purple-500"> 1x</label><button onclick="delete data.playerMoves['${id}'];renderLists();updatePreview()" class="text-red-500 text-xs">X</button></div></div>
                     <div class="grid grid-cols-4 gap-2 mb-2"><div class="col-span-2"><label class="section-label">Címke</label><input value="${m.label}" oninput="uD(this)" data-path="playerMoves.${id}.label" class="input-dark"></div><div><label class="section-label">Stat</label><select onchange="uD(this)" data-path="playerMoves.${id}.stat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${m.stat == s ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div><label class="section-label">DC Stat</label><select onchange="uD(this)" data-path="playerMoves.${id}.dcStat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${m.dcStat == s ? 'selected' : ''}>vs ${s}</option>`).join('')}</select></div></div>
                     <div class="grid grid-cols-3 gap-2 mb-2"><div><label class="section-label">Sebzés</label><input type="number" value="${m.power}" oninput="uD(this)" data-path="playerMoves.${id}.power" class="input-dark text-xs"></div><div><label class="section-label">Stamina</label><input type="number" value="${m.cost}" oninput="uD(this)" data-path="playerMoves.${id}.cost" class="input-dark text-xs"></div><div><label class="section-label text-pink-400">Media Mod</label><input type="number" value="${m.mediaMod || 0}" oninput="uD(this)" data-path="playerMoves.${id}.mediaMod" class="input-dark media-input text-xs"></div></div>
-                    <div class="bg-black/20 p-2 rounded mb-2 border border-slate-700/50"><div class="flex gap-2 mb-2"><div class="w-1/2"><label class="section-label text-pink-400">Láncolás</label><select class="input-dark text-[10px] border border-pink-500/30 bg-slate-900 text-pink-200" onchange="uD(this)" data-path="playerMoves.${id}.nextAttack">${getAttackOptionsHTML(m.nextAttack)}</select></div></div>
-                    <label class="section-label text-amber-500">Feltételek</label><input id="req_${id}" value="${dictToStr(m.requirements)}" oninput="updateLogic('playerMoves.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]" placeholder="pl: log:15">${getHelperSelectHTML('req_' + id, 'req')}</div>
-                    <div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(k => `<div class="outcome-box border-${k.includes('Success') ? 'emerald' : 'red'}-500"><span class="section-label">${k}</span><textarea oninput="uD(this)" data-path="playerMoves.${id}.dialogues.${k}.0" class="input-dark mb-1 h-10 text-[10px]" rows="1">${m.dialogues[k][0]}</textarea><input id="eff_${id}_${k}" value="${dictToStr(m.effects ? m.effects[k] : {})}" oninput="updateLogic('playerMoves.${id}.effects.${k}',this.value)" class="input-dark effect-input text-[10px]" placeholder="Hatás: pop:5">${getHelperSelectHTML('eff_' + id + '_' + k, 'eff')}</div>`).join('')}</div>
-                </div>`;
+                    <div class="bg-black/20 p-2 rounded mb-2 border border-slate-700/50"><div class="mb-1"><label class="section-label text-pink-400">Flow</label><select class="input-dark text-[10px] bg-slate-900" onchange="uD(this)" data-path="playerMoves.${id}.nextAttack">${getAttackOptionsHTML(m.nextAttack)}</select></div><label class="section-label text-amber-500">Feltételek</label><input id="req_${id}" value="${dictToStr(m.requirements)}" oninput="updateLogic('playerMoves.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]" placeholder="pl: log:15">${getLogicBuilderHTML('req_' + id)}</div>
+                    <div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(k => `<div class="outcome-box border-${k.includes('Success') ? 'emerald' : 'red'}-500"><span class="section-label">${k}</span><textarea oninput="uD(this)" data-path="playerMoves.${id}.dialogues.${k}.0" class="input-dark mb-1 h-10 text-[10px]" rows="1">${m.dialogues[k][0]}</textarea><input value="${dictToStr(m.effects ? m.effects[k] : {})}" oninput="updateLogic('playerMoves.${id}.effects.${k}',this.value)" class="input-dark effect-input text-[10px]" placeholder="Hatás: pop:5"></div>`).join('')}</div></div>`;
             }).join('');
 
             // Attacks
             document.getElementById('attacks-list').innerHTML = Object.keys(data.enemyAttacks).map(id => {
                 let a = data.enemyAttacks[id];
-                return `<div class="card p-4 border-l-4 border-red-500 mb-4 bg-slate-900/40"><div class="flex justify-between items-center mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-red-400 font-bold">ID: ${id}</span></div><button onclick="delete data.enemyAttacks['${id}']; renderLists(); updatePreview();" class="text-red-500 text-xs">TÖRLÉS</button></div><div class="grid grid-cols-4 gap-2 mb-2"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.text" class="col-span-3 input-dark h-12 text-xs" placeholder="Kérdés szövege">${a.text}</textarea><div class="space-y-1"><select onchange="uD(this)" data-path="enemyAttacks.${id}.attackStat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${a.attackStat == s ? 'selected' : ''}>${s}</option>`).join('')}</select><input type="number" value="${a.mediaMod || 0}" oninput="uD(this)" data-path="enemyAttacks.${id}.mediaMod" class="input-dark media-input text-[10px]" placeholder="Media Mod"></div></div><div class="bg-blue-900/10 p-2 rounded mb-3 border border-blue-900/30 flex gap-2 items-center"><span class="section-label text-blue-400 mb-0">Tárgy bónusz:</span><input type="text" id="it_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-20" placeholder="ID"><input type="number" id="itv_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-12" placeholder="+/-"><button onclick="addAttackItemReaction('${id}')" class="bg-blue-600 px-2 text-[10px] rounded font-bold">ADD</button><div class="flex flex-wrap gap-1">${Object.keys(a.itemReactions || {}).map(k => `<span class="bg-blue-500/20 text-[9px] px-2 rounded border border-blue-500/30">${k}:${a.itemReactions[k]} <i class="fas fa-times cursor-pointer ml-1" onclick="delete data.enemyAttacks['${id}'].itemReactions['${k}']; renderLists(); updatePreview();"></i></span>`).join('')}</div></div><div class="mb-2 grid grid-cols-2 gap-2"><div><label class="section-label text-amber-500">Feltételek</label><input id="att_req_${id}" value="${dictToStr(a.requirements)}" oninput="updateLogic('enemyAttacks.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]">${getHelperSelectHTML('att_req_' + id, 'req')}</div><div><label class="section-label text-emerald-500">Azonnali Hatások</label><input id="att_eff_${id}" value="${dictToStr(a.effects)}" oninput="updateLogic('enemyAttacks.${id}.effects',this.value)" class="input-dark effect-input text-[10px]">${getHelperSelectHTML('att_eff_' + id, 'eff')}</div></div>${Object.keys(a.responses).map(rid => { let r = a.responses[rid]; return `<div class="bg-black/30 p-2 rounded mb-2 border border-slate-700"><div class="flex gap-2 mb-1"><input value="${r.label}" oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.label" class="input-dark flex-grow text-xs" placeholder="Gomb"><select onchange="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.stat" class="input-dark w-16 text-[10px] uppercase">${STAT_IDS.map(s => `<option value="${s}" ${r.stat == s ? 'selected' : ''}>Véd: ${s}</option>`).join('')}</select><button onclick="delete data.enemyAttacks['${id}'].responses['${rid}'];renderLists();updatePreview()" class="text-red-400">X</button></div><div class="mb-2"><input id="res_req_${rid}" value="${dictToStr(r.requirements)}" oninput="updateLogic('enemyAttacks.${id}.responses.${rid}.requirements',this.value)" class="input-dark logic-input mb-1 text-[10px]" placeholder="Feltétel">${getHelperSelectHTML('res_req_' + rid, 'req')}</div><div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(t => `<div class="outcome-box border-${t.includes('Success') ? 'emerald' : 'red'}-500"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.dialogues.${t}.0" class="input-dark text-[9px] h-8 mb-1" placeholder="Válasz ${t}">${r.dialogues[t][0]}</textarea><input id="res_eff_${rid}_${t}" value="${dictToStr(r.effects ? r.effects[t] : {})}" oninput="updateLogic('enemyAttacks.${id}.responses.${rid}.effects.${t}',this.value)" class="input-dark effect-input text-[9px] mb-1" placeholder="Hatás">${getHelperSelectHTML('res_eff_' + rid + '_' + t, 'eff')}<textarea oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.followUps.${t}" class="w-full p-1 rounded bg-red-950/20 text-[9px] text-red-200 italic mt-1" rows="1" placeholder="Viszontválasz">${r.followUps ? r.followUps[t] : ''}</textarea></div>`).join('')}</div></div>` }).join('')}<button onclick="addResponse('${id}')" class="text-[10px] bg-red-800/50 w-full rounded py-1">+ VÁLASZ</button></div>`;
+                return `<div class="card p-4 border-l-4 border-red-500 mb-4 bg-slate-900/40">
+                    <div class="flex justify-between items-center mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-red-400 font-bold">ID: ${id}</span><input value="${id}" onchange="renKey('enemyAttacks','${id}',this.value)" class="id-input p-1 rounded text-xs w-24"></div><button onclick="delete data.enemyAttacks['${id}']; renderLists(); updatePreview();" class="text-red-500 text-xs">TÖRLÉS</button></div>
+                    <div class="grid grid-cols-4 gap-2 mb-2"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.text" class="col-span-3 input-dark h-12 text-xs" placeholder="Kérdés szövege">${a.text}</textarea><div class="space-y-1"><select onchange="uD(this)" data-path="enemyAttacks.${id}.attackStat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${a.attackStat == s ? 'selected' : ''}>${s}</option>`).join('')}</select><input type="number" value="${a.mediaMod || 0}" oninput="uD(this)" data-path="enemyAttacks.${id}.mediaMod" class="input-dark media-input text-[10px]" placeholder="Media Mod"><input type="number" value="${a.priority || 1}" oninput="uD(this)" data-path="enemyAttacks.${id}.priority" class="input-dark priority-input text-[10px]" placeholder="Priority"></div></div>
+                    <div class="bg-blue-900/10 p-2 rounded mb-3 border border-blue-900/30 flex gap-2 items-center"><span class="section-label text-blue-400 mb-0">Tárgy bónusz:</span><input type="text" id="it_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-20" placeholder="ID"><input type="number" id="itv_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-12" placeholder="+/-"><button onclick="addAttackItemReaction('${id}')" class="bg-blue-600 px-2 text-[10px] rounded font-bold">ADD</button><div class="flex flex-wrap gap-1">${Object.keys(a.itemReactions || {}).map(k => `<span class="bg-blue-500/20 text-[9px] px-2 rounded border border-blue-500/30">${k}:${a.itemReactions[k]} <i class="fas fa-times cursor-pointer ml-1" onclick="delete data.enemyAttacks['${id}'].itemReactions['${k}']; renderLists(); updatePreview();"></i></span>`).join('')}</div></div><div class="mb-2 bg-black/20 p-2 rounded border border-slate-700/50"><label class="section-label text-amber-500">Feltételek (Támadás)</label><input id="att_req_${id}" value="${dictToStr(a.requirements)}" oninput="updateLogic('enemyAttacks.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]">${getLogicBuilderHTML('att_req_' + id)}</div>
+                    ${Object.keys(a.responses).map(rid => {
+                    let r = a.responses[rid];
+                    return `<div class="bg-black/30 p-2 rounded mb-2 border border-slate-700"><div class="flex gap-2 mb-1"><input value="${rid}" onchange="renRes('${id}','${rid}',this.value)" class="id-input p-1 rounded text-[10px] w-16"><input value="${r.label}" oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.label" class="input-dark flex-grow text-xs"><select onchange="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.stat" class="input-dark w-16 text-[10px] uppercase">${STAT_IDS.map(s => `<option value="${s}" ${r.stat == s ? 'selected' : ''}>Véd: ${s}</option>`).join('')}</select><button onclick="delete data.enemyAttacks['${id}'].responses['${rid}'];renderLists();updatePreview()" class="text-red-400">X</button></div><div class="mb-2"><input id="res_req_${rid}" value="${dictToStr(r.requirements)}" oninput="updateLogic('enemyAttacks.${id}.responses.${rid}.requirements',this.value)" class="input-dark logic-input mb-1 text-[10px]" placeholder="Feltétel">${getLogicBuilderHTML('res_req_' + rid)}</div><div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(t => `<div class="outcome-box border-${t.includes('Success') ? 'emerald' : 'red'}-500"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.dialogues.${t}.0" class="input-dark text-[9px] h-8 mb-1" placeholder="Válasz ${t}">${r.dialogues[t][0]}</textarea><input value="${dictToStr(r.effects ? r.effects[t] : {})}" oninput="updateLogic('enemyAttacks.${id}.responses.${rid}.effects.${t}',this.value)" class="input-dark effect-input text-[9px] mb-1" placeholder="Hatás"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.followUps.${t}" class="w-full p-1 rounded bg-red-950/20 text-[9px] text-red-200 italic mt-1" rows="1" placeholder="Viszontválasz">${r.followUps ? r.followUps[t] : ''}</textarea></div>`).join('')}</div></div>`;
+                }).join('')}<button onclick="addResponse('${id}')" class="text-[10px] bg-red-800/50 w-full rounded py-1">+ VÁLASZ LEHETŐSÉG</button></div>`;
             }).join('');
 
             // Finishers
-            document.getElementById('finishers-list').innerHTML = data.finishers.map((f, i) => `<div class="p-2 bg-slate-900 rounded border border-yellow-700 mb-2 relative group"><button onclick="data.finishers.splice(${i},1);renderLists();updatePreview()" class="absolute top-1 right-1 text-red-500 text-xs">X</button><div class="grid grid-cols-2 gap-2 mb-1"><input value="${f.label}" oninput="data.finishers[${i}].label=this.value;updatePreview()" class="input-dark text-xs"><input value="${f.path}" oninput="data.finishers[${i}].path=this.value;renderLists();updatePreview()" class="input-dark text-xs text-yellow-300"></div><input id="fin_req_${i}" value="${dictToStr(f.requirements)}" oninput="updateLogic('finishers.${i}.requirements',this.value)" class="input-dark logic-input mb-1 text-xs" placeholder="Feltétel">${getHelperSelectHTML('fin_req_' + i, 'req')}<input id="fin_eff_${i}" value="${dictToStr(f.effects)}" oninput="updateLogic('finishers.${i}.effects',this.value)" class="input-dark effect-input mb-1 text-xs" placeholder="Hatás">${getHelperSelectHTML('fin_eff_' + i, 'eff')}<textarea oninput="data.finishers[${i}].text=this.value;updatePreview()" class="input-dark text-xs h-8">${f.text}</textarea></div>`).join('');
+            document.getElementById('finishers-list').innerHTML = data.finishers.map((f, i) => `<div class="p-2 bg-slate-900 rounded border border-yellow-700 mb-2 relative group"><button onclick="data.finishers.splice(${i},1);renderLists();updatePreview()" class="absolute top-1 right-1 text-red-500 text-xs">X</button><div class="grid grid-cols-2 gap-2 mb-1"><input value="${f.label}" oninput="data.finishers[${i}].label=this.value;updatePreview()" class="input-dark text-xs"><input value="${f.path}" oninput="data.finishers[${i}].path=this.value;renderLists();updatePreview()" class="input-dark text-xs text-yellow-300"></div><input value="${dictToStr(f.requirements)}" oninput="updateLogic('finishers.${i}.requirements',this.value)" class="input-dark logic-input mb-1 text-xs" placeholder="Feltétel"><input value="${dictToStr(f.effects)}" oninput="updateLogic('finishers.${i}.effects',this.value)" class="input-dark effect-input mb-1 text-xs" placeholder="Hatás"><textarea oninput="data.finishers[${i}].text=this.value;updatePreview()" class="input-dark text-xs h-8">${f.text}</textarea></div>`).join('');
             document.getElementById('fin-reac-list').innerHTML = data.finishers.map(f => `<div class="flex gap-2 items-center bg-black/20 p-1 rounded"><span class="text-[9px] font-mono text-yellow-500 w-16 truncate">${f.path || '?'}</span><input value="${data.finisherReactions[f.path] || ''}" oninput="data.finisherReactions['${f.path}']=this.value;updatePreview()" class="input-dark text-xs flex-grow" placeholder="Ellenfél reakciója..."></div>`).join('');
 
             updateGlobalItemSelect();
