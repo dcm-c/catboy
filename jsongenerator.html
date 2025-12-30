@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vita RPG Szerkesztő V21.1 (Fix)</title>
-    <!-- ... styles same as before ... -->
+    <title>Vita RPG Szerkesztő V22 (Fix & Features)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -74,6 +73,13 @@
             text-align: center;
         }
 
+        .temp-mod-box {
+            border: 1px dashed #a855f7;
+            background: rgba(168, 85, 247, 0.1);
+            padding: 4px;
+            border-radius: 4px;
+        }
+
         .sim-input {
             border-color: #6366f1;
             color: #a5b4fc;
@@ -116,18 +122,19 @@
     </style>
 </head>
 
-<body class="p-4" onload="init()">
+<body class="p-4">
     <div class="max-w-[1900px] mx-auto">
         <header
             class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700 bg-slate-900/50 p-4 rounded-xl sticky top-0 z-50 backdrop-blur-sm shadow-lg">
             <div>
                 <h1 class="text-2xl font-bold text-white flex items-center gap-2">
                     <i class="fas fa-check-circle text-green-500"></i> Vita RPG Szerkesztő <span
-                        class="text-xs bg-green-600 text-white px-2 py-0.5 rounded font-mono font-bold">V21.1</span>
+                        class="text-xs bg-green-600 text-white px-2 py-0.5 rounded font-mono font-bold">V22</span>
                 </h1>
                 <p class="text-slate-400 text-xs mt-1 font-mono">
                     <span class="text-rose-400">Javított String Parser</span> |
-                    <span class="text-indigo-400">Stabil Render</span>
+                    <span class="text-indigo-400">Temp Mods</span> |
+                    <span class="text-amber-400">Fázis Dropdown</span>
                 </p>
             </div>
             <div class="flex gap-2">
@@ -156,7 +163,8 @@
                         </h2>
                         <div id="diff-badge"
                             class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-600">
-                            Számítás...</div>
+                            Számítás...
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -268,7 +276,7 @@
                     </section>
                 </div>
 
-                <!-- 3. FÁZISOK -->
+                <!-- 3. FÁZISOK (DROPDOWN-NAL) -->
                 <section class="card p-4 border-l-4 border-amber-500">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xs font-bold text-amber-500 uppercase tracking-widest">KÖTÖTT FÁZISOK</h2>
@@ -279,7 +287,7 @@
                     <div id="phases-list" class="space-y-2"></div>
                 </section>
 
-                <!-- 4. SAJÁT ÉRVEK -->
+                <!-- 4. SAJÁT ÉRVEK (TEMP MODDAL) -->
                 <section class="card p-4 border-l-4 border-purple-500 bg-slate-800/30">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xs font-bold text-purple-400 uppercase tracking-widest">SAJÁT ÉRVEK</h2>
@@ -354,17 +362,21 @@
             { v: 'pop', t: 'Népszerűség' }, { v: 'fol', t: 'Követők' }, { v: 'hp', t: 'Életerő' }, { v: 'stamina', t: 'Stamina' }
         ];
 
-        function init() { renderLists(); syncInputs(); calcDiff(); updatePreview(); updateGlobalItemSelect(); }
+        // FONTOS: A definíciót előre hoztuk, hogy az init lássa
+        function updatePreview() {
+            const preview = document.getElementById('json-preview');
+            if (preview) preview.textContent = JSON.stringify(data, null, 2);
+        }
 
         // --- SEGÉDEK ---
         function randID(p) { return p + "_" + Math.random().toString(36).substr(2, 4); }
-
-        // JAVÍTVA: dictToStr biztonságosabb kezelése
         function parseDict(str) { let r = {}; if (str) str.split(',').forEach(p => { let parts = p.split(':'); if (parts.length >= 2) { let val = parts.pop().trim(); let key = parts.join(':').trim(); if (key && val) r[key] = isNaN(val) ? val : parseInt(val); } }); return r; }
+
+        // JAVÍTÁS: dictToStr hibatűrő
         function dictToStr(obj) {
-            if (!obj) return "";
+            if (obj === undefined || obj === null) return "";
             if (typeof obj === 'string') return obj;
-            return Object.keys(obj).map(k => `${k}:${obj[k]}`).join(', ');
+            try { return Object.keys(obj).map(k => `${k}:${obj[k]}`).join(', '); } catch (e) { return ""; }
         }
         function setDeepValue(obj, path, val) { let k = path.split('.'); let c = obj; for (let i = 0; i < k.length - 1; i++) { if (!c[k[i]]) c[k[i]] = {}; c = c[k[i]]; } c[k[k.length - 1]] = val; }
 
@@ -376,16 +388,34 @@
         function renKey(cat, oldK, newK) { if (!newK || oldK === newK) return; if (data[cat][newK]) { alert("Létező ID"); return } data[cat][newK] = data[cat][oldK]; delete data[cat][oldK]; renderLists(); updatePreview(); }
         function renRes(aid, oldK, newK) { if (!newK || oldK === newK) return; if (data.enemyAttacks[aid].responses[newK]) { alert("Létező ID"); return } data.enemyAttacks[aid].responses[newK] = data.enemyAttacks[aid].responses[oldK]; delete data.enemyAttacks[aid].responses[oldK]; renderLists(); updatePreview(); }
 
+        // --- HELPEREK A FÁZISOKHOZ ---
+        function getMoveOptions() { return Object.keys(data.playerMoves).map(k => `<option value="${k}">${data.playerMoves[k].label} (${k})</option>`).join(''); }
+        function getAttackOptions() { return Object.keys(data.enemyAttacks).map(k => `<option value="${k}">${k}</option>`).join(''); }
+        function getAttackOptionsHTML(selected) { let opts = `<option value="">-- Véletlenszerű --</option>`; Object.keys(data.enemyAttacks).forEach(id => { opts += `<option value="${id}" ${selected === id ? 'selected' : ''}>${id}</option>`; }); return opts; }
+
+        function addMoveToPhase(idx) {
+            const select = document.getElementById(`phase-select-${idx}`);
+            if (!select || !select.value) return;
+            if (!data.startingPhases[idx].playerMoveKeys.includes(select.value)) {
+                data.startingPhases[idx].playerMoveKeys.push(select.value);
+                renderLists(); updatePreview();
+            }
+        }
+        function removeMoveFromPhase(pIdx, mKey) {
+            data.startingPhases[pIdx].playerMoveKeys = data.startingPhases[pIdx].playerMoveKeys.filter(k => k !== mKey);
+            renderLists(); updatePreview();
+        }
+
+        // --- UI SZINKRON ---
         function syncInputs() {
             try {
-                ['p-name', 'p-party', 'p-portrait', 'p-color'].forEach((id, i) => { let k = ['name', 'party', 'portrait', 'hpColor'][i]; document.getElementById(id).value = data[k] || ""; });
+                ['p-name', 'p-party', 'p-portrait', 'p-color'].forEach((id, i) => { let k = ['name', 'party', 'portrait', 'hpColor'][i]; let el = document.getElementById(id); if (el) el.value = data[k] || ""; });
                 STAT_IDS.forEach(s => { let el = document.getElementById('s-' + s); if (el) el.value = data[s]; });
                 document.getElementById('fs-text').value = data.enemyFinalStrike.text;
                 document.getElementById('fs-d1').value = data.enemyFinalStrike.dialogues[0] || "";
                 document.getElementById('fs-d2').value = data.enemyFinalStrike.dialogues[1] || "";
             } catch (e) { }
         }
-        function updatePreview() { document.getElementById('json-preview').textContent = JSON.stringify(data, null, 2); }
 
         function importJSON(event) {
             const file = event.target.files[0];
@@ -402,7 +432,6 @@
             reader.readAsText(file); event.target.value = '';
         }
 
-        // --- HELPER FUNKCIÓK ---
         function getLogicBuilderHTML(id) {
             let options = `<option value="">Stat/Var/Item</option>`;
             HELPER_OPTS.forEach(o => options += `<option value="${o.v}">${o.t}</option>`);
@@ -415,7 +444,7 @@
             let snippet = `${src} ${rel} ${val}`; input.value = input.value ? `${input.value} ${gate || '&&'} ${snippet}` : snippet;
             let path = input.getAttribute('oninput').match(/'([^']+)'/)[1]; updateLogic(path, input.value);
         }
-        function getAttackOptionsHTML(selected) { let opts = `<option value="">-- Véletlenszerű --</option>`; Object.keys(data.enemyAttacks).forEach(id => { opts += `<option value="${id}" ${selected === id ? 'selected' : ''}>${id}</option>`; }); return opts; }
+
         function updateGlobalItemSelect() {
             const sel = document.getElementById('gir-id-select'); if (!sel) return;
             sel.innerHTML = `<option value="">-- Válassz --</option>` + data.definedItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
@@ -446,8 +475,7 @@
             if (key === 'finishers') data.finishers.push({ id: randID("win"), label: "Győzelem", text: "", path: "path_1", requirements: {}, effects: {} });
             renderLists(); updatePreview();
         }
-        function addMove() { let id = randID("move"); data.playerMoves[id] = { label: "Érv", stat: "log", dcStat: "log", power: 15, cost: 10, mediaMod: 0, singleUse: false, nextAttack: "", requirements: "", effects: {}, dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] } }; renderLists(); updatePreview(); }
-        // ÚJ: Prioritás mező inicializálása
+        function addMove() { let id = randID("move"); data.playerMoves[id] = { label: "Érv", stat: "log", dcStat: "log", power: 15, cost: 10, mediaMod: 0, singleUse: false, nextAttack: "", tempMod: { stat: 'rhe', val: 0, dur: 1 }, requirements: {}, effects: {}, dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] } }; renderLists(); updatePreview(); }
         function addAttack() { let id = randID("att"); data.enemyAttacks[id] = { text: "Kérdés?", attackStat: "pre", priority: 1, mediaMod: 50, itemReactions: {}, requirements: "", effects: {}, responses: { "r1": { label: "Válasz", stat: "log", requirements: "", dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] }, followUps: { critSuccess: "", success: "", fail: "", critFail: "" }, effects: { critSuccess: {}, success: {}, fail: {}, critFail: {} } } } }; renderLists(); updatePreview(); }
         function addResponse(aid) { let id = randID("res"); data.enemyAttacks[aid].responses[id] = { label: "Válasz", stat: "log", requirements: "", dialogues: { critSuccess: [""], success: [""], fail: [""], critFail: [""] }, followUps: { critSuccess: "", success: "", fail: "", critFail: "" }, effects: { critSuccess: {}, success: {}, fail: {}, critFail: {} } }; renderLists(); updatePreview(); }
         function addGlobalItemReaction() { let id = document.getElementById('gir-id-select').value; let val = parseInt(document.getElementById('gir-val').value); if (!id) return; data.itemReactions[id] = val; document.getElementById('gir-val').value = ""; renderLists(); updatePreview(); }
@@ -455,28 +483,77 @@
 
         // --- RENDER ---
         function renderLists() {
+            // ... (Defined Items és Global Item Reactions ugyanaz) ...
             document.getElementById('defined-items-list').innerHTML = data.definedItems.map((it, i) => `<div class="bg-slate-900 p-2 rounded flex gap-2 mb-2 border border-blue-500/30"><input value="${it.id}" oninput="data.definedItems[${i}].id=this.value; updatePreview(); updateGlobalItemSelect()" class="input-dark w-1/4 text-[10px]" placeholder="ID"><input value="${it.name}" oninput="data.definedItems[${i}].name=this.value; updatePreview()" class="input-dark flex-grow text-[10px]" placeholder="Név"><input value="${dictToStr(it.bonuses)}" oninput="updateEffects('definedItems.${i}.bonuses', this.value)" class="input-dark w-1/3 text-[10px] font-mono text-emerald-300" placeholder="stat:val"><button onclick="data.definedItems.splice(${i},1);renderLists();updatePreview();calcDiff()" class="text-red-500">X</button></div>`).join('');
             document.getElementById('global-item-list').innerHTML = Object.keys(data.itemReactions).map(k => `<span class="bg-cyan-900/50 text-cyan-300 text-[10px] px-2 py-1 rounded border border-cyan-500/30 flex items-center gap-1">${k}: ${data.itemReactions[k]} <i class="fas fa-times cursor-pointer hover:text-red-500" onclick="delete data.itemReactions['${k}']; renderLists(); updatePreview();"></i></span>`).join('');
-            document.getElementById('phases-list').innerHTML = data.startingPhases.map((p, i) => `<div class="bg-slate-900 p-2 mb-2 rounded border border-slate-700 flex gap-2"><input value="${p.phaseName}" oninput="data.startingPhases[${i}].phaseName=this.value;updatePreview()" class="input-dark w-1/3 text-[10px]" placeholder="Név"><input value="${p.playerMoveKeys}" oninput="data.startingPhases[${i}].playerMoveKeys=this.value.split(',');updatePreview()" class="input-dark flex-grow text-[10px]" placeholder="Move ID-k"><input value="${p.enemyAttackKey}" oninput="data.startingPhases[${i}].enemyAttackKey=this.value;updatePreview()" class="input-dark w-1/4 text-[10px]" placeholder="Attack ID"><button onclick="data.startingPhases.splice(${i},1);renderLists();updatePreview()" class="text-red-500">X</button></div>`).join('');
 
-            // MOVES
+            // Phases (DROPDOWN-NAL)
+            document.getElementById('phases-list').innerHTML = data.startingPhases.map((p, i) => `
+                <div class="bg-slate-900 p-3 mb-2 rounded border border-slate-700">
+                    <div class="flex gap-2 mb-2">
+                        <input value="${p.phaseName}" oninput="data.startingPhases[${i}].phaseName=this.value;updatePreview()" class="input-dark w-1/3 text-[10px]" placeholder="Név">
+                        <select onchange="data.startingPhases[${i}].enemyAttackKey=this.value;updatePreview()" class="input-dark flex-grow text-[10px] text-red-300">
+                            <option value="">-- Ellenfél Támadása --</option>
+                            ${getAttackOptions()}
+                            <option value="${p.enemyAttackKey}" selected>${p.enemyAttackKey || 'Válassz'}</option>
+                        </select>
+                        <button onclick="data.startingPhases.splice(${i},1);renderLists();updatePreview()" class="text-red-500">X</button>
+                    </div>
+                    <div class="bg-black/20 p-2 rounded">
+                        <div class="text-[9px] text-slate-500 mb-1">Elérhető Érvek:</div>
+                        <div class="flex flex-wrap gap-1 mb-1">
+                            ${(Array.isArray(p.playerMoveKeys) ? p.playerMoveKeys : []).map(k => `<span class="bg-purple-900/50 text-purple-200 text-[9px] px-2 rounded border border-purple-500/30 cursor-pointer hover:bg-red-900/50" onclick="removeMoveFromPhase(${i}, '${k}')">${k} &times;</span>`).join('')}
+                        </div>
+                        <div class="flex gap-1">
+                             <select id="phase-select-${i}" class="input-dark text-[10px] text-purple-300">
+                                <option value="">-- Érv hozzáadása --</option>
+                                ${getMoveOptions()}
+                            </select>
+                            <button onclick="addMoveToPhase(${i})" class="bg-purple-600 px-2 rounded text-[10px] font-bold">+</button>
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            // Moves (Temp Moddal)
             document.getElementById('moves-list').innerHTML = Object.keys(data.playerMoves).map(id => {
                 let m = data.playerMoves[id];
                 return `<div class="card p-4 border-l-4 border-purple-500 mb-4 bg-slate-900/40">
-                    <div class="flex justify-between mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-purple-400 font-mono">ID: ${id}</span><input value="${id}" onchange="renKey('playerMoves','${id}',this.value)" class="id-input p-1 rounded text-xs w-24"></div><div class="flex items-center gap-2"><label class="flex items-center gap-1 text-[10px] text-slate-300 bg-slate-800 px-2 py-1 rounded border border-slate-600"><input type="checkbox" ${m.singleUse ? 'checked' : ''} data-path="playerMoves.${id}.singleUse" onchange="uD(this)" class="accent-purple-500"> 1x</label><button onclick="delete data.playerMoves['${id}'];renderLists();updatePreview()" class="text-red-500 text-xs">X</button></div></div>
-                    <div class="grid grid-cols-4 gap-2 mb-2"><div class="col-span-2"><label class="section-label">Címke</label><input value="${m.label}" oninput="uD(this)" data-path="playerMoves.${id}.label" class="input-dark"></div><div><label class="section-label">Stat</label><select onchange="uD(this)" data-path="playerMoves.${id}.stat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${m.stat == s ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div><label class="section-label">DC Stat</label><select onchange="uD(this)" data-path="playerMoves.${id}.dcStat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${m.dcStat == s ? 'selected' : ''}>vs ${s}</option>`).join('')}</select></div></div>
-                    <div class="grid grid-cols-3 gap-2 mb-2"><div><label class="section-label">Sebzés</label><input type="number" value="${m.power}" oninput="uD(this)" data-path="playerMoves.${id}.power" class="input-dark text-xs"></div><div><label class="section-label">Stamina</label><input type="number" value="${m.cost}" oninput="uD(this)" data-path="playerMoves.${id}.cost" class="input-dark text-xs"></div><div><label class="section-label text-pink-400">Media Mod</label><input type="number" value="${m.mediaMod || 0}" oninput="uD(this)" data-path="playerMoves.${id}.mediaMod" class="input-dark media-input text-xs"></div></div>
-                    <div class="bg-black/20 p-2 rounded mb-2 border border-slate-700/50"><div class="mb-1"><label class="section-label text-pink-400">Flow</label><select class="input-dark text-[10px] bg-slate-900" onchange="uD(this)" data-path="playerMoves.${id}.nextAttack">${getAttackOptionsHTML(m.nextAttack)}</select></div><label class="section-label text-amber-500">Feltételek</label><input id="req_${id}" value="${dictToStr(m.requirements)}" oninput="updateLogic('playerMoves.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]" placeholder="pl: log:15">${getLogicBuilderHTML('req_' + id)}</div>
-                    <div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(k => `<div class="outcome-box border-${k.includes('Success') ? 'emerald' : 'red'}-500"><span class="section-label">${k}</span><textarea oninput="uD(this)" data-path="playerMoves.${id}.dialogues.${k}.0" class="input-dark mb-1 h-10 text-[10px]" rows="1">${m.dialogues[k][0]}</textarea><input value="${dictToStr(m.effects ? m.effects[k] : {})}" oninput="updateLogic('playerMoves.${id}.effects.${k}',this.value)" class="input-dark effect-input text-[10px]" placeholder="Hatás: pop:5"></div>`).join('')}</div></div>`;
+                    <div class="flex justify-between mb-2">
+                        <div class="flex gap-2 items-center"><span class="text-[10px] text-purple-400 font-mono">ID: ${id}</span><input value="${id}" onchange="renKey('playerMoves','${id}',this.value)" class="id-input p-1 rounded text-xs w-24"></div>
+                        <div class="flex items-center gap-2"><label class="flex items-center gap-1 text-[10px] text-slate-300 bg-slate-800 px-2 py-1 rounded border border-slate-600"><input type="checkbox" ${m.singleUse ? 'checked' : ''} data-path="playerMoves.${id}.singleUse" onchange="uD(this)" class="accent-purple-500"> 1x</label><button onclick="delete data.playerMoves['${id}'];renderLists();updatePreview()" class="text-red-500 text-xs">X</button></div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 mb-2">
+                        <div class="col-span-2"><label class="section-label">Címke</label><input value="${m.label}" oninput="uD(this)" data-path="playerMoves.${id}.label" class="input-dark"></div>
+                        <div><label class="section-label">Stat</label><select onchange="uD(this)" data-path="playerMoves.${id}.stat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${m.stat == s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+                        <div><label class="section-label">DC Stat</label><select onchange="uD(this)" data-path="playerMoves.${id}.dcStat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${m.dcStat == s ? 'selected' : ''}>vs ${s}</option>`).join('')}</select></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <div><label class="section-label">Sebzés</label><input type="number" value="${m.power}" oninput="uD(this)" data-path="playerMoves.${id}.power" class="input-dark text-xs"></div>
+                        <div><label class="section-label">Stamina</label><input type="number" value="${m.cost}" oninput="uD(this)" data-path="playerMoves.${id}.cost" class="input-dark text-xs"></div>
+                        <div><label class="section-label text-pink-400">Media Mod</label><input type="number" value="${m.mediaMod || 0}" oninput="uD(this)" data-path="playerMoves.${id}.mediaMod" class="input-dark media-input text-xs"></div>
+                    </div>
+                    <!-- TEMP MOD -->
+                    <div class="temp-mod-box flex gap-2 items-center mb-2">
+                        <span class="text-[9px] font-bold text-pink-400 uppercase">Temp Mod (Köv. Kör):</span>
+                        <input value="${m.tempMod?.stat || 'rhe'}" oninput="data.playerMoves['${id}'].tempMod = data.playerMoves['${id}'].tempMod || {}; data.playerMoves['${id}'].tempMod.stat=this.value; updatePreview();" class="input-dark w-16 text-[10px]" placeholder="stat">
+                        <input type="number" value="${m.tempMod?.val || 0}" oninput="data.playerMoves['${id}'].tempMod = data.playerMoves['${id}'].tempMod || {}; data.playerMoves['${id}'].tempMod.val=parseInt(this.value); updatePreview();" class="input-dark w-12 text-[10px]" placeholder="+/-">
+                    </div>
+                    <div class="bg-black/20 p-2 rounded mb-2 border border-slate-700/50">
+                        <div class="mb-1"><label class="section-label text-pink-400">Flow</label><select class="input-dark text-[10px] bg-slate-900" onchange="uD(this)" data-path="playerMoves.${id}.nextAttack">${getAttackOptionsHTML(m.nextAttack)}</select></div>
+                        <label class="section-label text-amber-500">Feltételek</label><input id="req_${id}" value="${dictToStr(m.requirements)}" oninput="updateLogic('playerMoves.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]" placeholder="pl: log:15">${getLogicBuilderHTML('req_' + id)}
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(k => `<div class="outcome-box border-${k.includes('Success') ? 'emerald' : 'red'}-500"><span class="section-label">${k}</span><textarea oninput="uD(this)" data-path="playerMoves.${id}.dialogues.${k}.0" class="input-dark mb-1 h-8 text-[10px]" rows="1">${m.dialogues[k][0]}</textarea><input value="${dictToStr(m.effects ? m.effects[k] : {})}" oninput="updateLogic('playerMoves.${id}.effects.${k}',this.value)" class="input-dark effect-input text-[10px]" placeholder="Hatás: pop:5"></div>`).join('')}</div>
+                </div>`;
             }).join('');
 
-            // Attacks
+            // Attacks (Támadások)
             document.getElementById('attacks-list').innerHTML = Object.keys(data.enemyAttacks).map(id => {
                 let a = data.enemyAttacks[id];
                 return `<div class="card p-4 border-l-4 border-red-500 mb-4 bg-slate-900/40">
                     <div class="flex justify-between items-center mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-red-400 font-bold">ID: ${id}</span><input value="${id}" onchange="renKey('enemyAttacks','${id}',this.value)" class="id-input p-1 rounded text-xs w-24"></div><button onclick="delete data.enemyAttacks['${id}']; renderLists(); updatePreview();" class="text-red-500 text-xs">TÖRLÉS</button></div>
                     <div class="grid grid-cols-4 gap-2 mb-2"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.text" class="col-span-3 input-dark h-12 text-xs" placeholder="Kérdés szövege">${a.text}</textarea><div class="space-y-1"><select onchange="uD(this)" data-path="enemyAttacks.${id}.attackStat" class="input-dark uppercase text-[10px]">${STAT_IDS.map(s => `<option value="${s}" ${a.attackStat == s ? 'selected' : ''}>${s}</option>`).join('')}</select><input type="number" value="${a.mediaMod || 0}" oninput="uD(this)" data-path="enemyAttacks.${id}.mediaMod" class="input-dark media-input text-[10px]" placeholder="Media Mod"><input type="number" value="${a.priority || 1}" oninput="uD(this)" data-path="enemyAttacks.${id}.priority" class="input-dark priority-input text-[10px]" placeholder="Priority"></div></div>
-                    <div class="bg-blue-900/10 p-2 rounded mb-3 border border-blue-900/30 flex gap-2 items-center"><span class="section-label text-blue-400 mb-0">Tárgy bónusz:</span><input type="text" id="it_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-20" placeholder="ID"><input type="number" id="itv_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-12" placeholder="+/-"><button onclick="addAttackItemReaction('${id}')" class="bg-blue-600 px-2 text-[10px] rounded font-bold">ADD</button><div class="flex flex-wrap gap-1">${Object.keys(a.itemReactions || {}).map(k => `<span class="bg-blue-500/20 text-[9px] px-2 rounded border border-blue-500/30">${k}:${a.itemReactions[k]} <i class="fas fa-times cursor-pointer ml-1" onclick="delete data.enemyAttacks['${id}'].itemReactions['${k}']; renderLists(); updatePreview();"></i></span>`).join('')}</div></div><div class="mb-2 bg-black/20 p-2 rounded border border-slate-700/50"><label class="section-label text-amber-500">Feltételek (Támadás)</label><input id="att_req_${id}" value="${dictToStr(a.requirements)}" oninput="updateLogic('enemyAttacks.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]">${getLogicBuilderHTML('att_req_' + id)}</div>
+                    <div class="bg-blue-900/10 p-2 rounded mb-3 border border-blue-900/30 flex gap-2 items-center"><span class="section-label text-blue-400 mb-0">Tárgy bónusz:</span><input type="text" id="it_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-20" placeholder="ID"><input type="number" id="itv_${id}" class="bg-slate-900 border border-slate-700 rounded p-1 text-[10px] w-12" placeholder="+/-"><button onclick="addAttackItemReaction('${id}')" class="bg-blue-600 px-2 text-[10px] rounded font-bold">ADD</button><div class="flex flex-wrap gap-1">${Object.keys(a.itemReactions || {}).map(k => `<span class="bg-blue-500/20 text-[9px] px-2 rounded border border-blue-500/30">${k}:${a.itemReactions[k]} <i class="fas fa-times cursor-pointer ml-1" onclick="delete data.enemyAttacks['${id}'].itemReactions['${k}']; renderLists(); updatePreview();"></i></span>`).join('')}</div></div>
+                    <div class="mb-2 bg-black/20 p-2 rounded border border-slate-700/50"><label class="section-label text-amber-500">Feltételek</label><input id="att_req_${id}" value="${dictToStr(a.requirements)}" oninput="updateLogic('enemyAttacks.${id}.requirements',this.value)" class="input-dark logic-input text-[10px]">${getLogicBuilderHTML('att_req_' + id)}</div>
                     ${Object.keys(a.responses).map(rid => {
                     let r = a.responses[rid];
                     return `<div class="bg-black/30 p-2 rounded mb-2 border border-slate-700"><div class="flex gap-2 mb-1"><input value="${rid}" onchange="renRes('${id}','${rid}',this.value)" class="id-input p-1 rounded text-[10px] w-16"><input value="${r.label}" oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.label" class="input-dark flex-grow text-xs"><select onchange="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.stat" class="input-dark w-16 text-[10px] uppercase">${STAT_IDS.map(s => `<option value="${s}" ${r.stat == s ? 'selected' : ''}>Véd: ${s}</option>`).join('')}</select><button onclick="delete data.enemyAttacks['${id}'].responses['${rid}'];renderLists();updatePreview()" class="text-red-400">X</button></div><div class="mb-2"><input id="res_req_${rid}" value="${dictToStr(r.requirements)}" oninput="updateLogic('enemyAttacks.${id}.responses.${rid}.requirements',this.value)" class="input-dark logic-input mb-1 text-[10px]" placeholder="Feltétel">${getLogicBuilderHTML('res_req_' + rid)}</div><div class="grid grid-cols-2 gap-2">${['critSuccess', 'success', 'fail', 'critFail'].map(t => `<div class="outcome-box border-${t.includes('Success') ? 'emerald' : 'red'}-500"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.dialogues.${t}.0" class="input-dark text-[9px] h-8 mb-1" placeholder="Válasz ${t}">${r.dialogues[t][0]}</textarea><input value="${dictToStr(r.effects ? r.effects[t] : {})}" oninput="updateLogic('enemyAttacks.${id}.responses.${rid}.effects.${t}',this.value)" class="input-dark effect-input text-[9px] mb-1" placeholder="Hatás"><textarea oninput="uD(this)" data-path="enemyAttacks.${id}.responses.${rid}.followUps.${t}" class="w-full p-1 rounded bg-red-950/20 text-[9px] text-red-200 italic mt-1" rows="1" placeholder="Viszontválasz">${r.followUps ? r.followUps[t] : ''}</textarea></div>`).join('')}</div></div>`;
@@ -489,6 +566,9 @@
 
             updateGlobalItemSelect();
         }
+
+        // Futtatás inicializáláskor
+        window.onload = init;
     </script>
 </body>
 
