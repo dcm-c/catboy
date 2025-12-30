@@ -2,8 +2,6 @@
    2HB FOXCOMM 10.0 - OVERLOAD EDITION
    ========================================================================== */
 let audioContext = null;
-
-// --- 1. HANG MOTOR ---
 function initAudio() {
     if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
     if (audioContext.state === 'suspended') audioContext.resume();
@@ -33,6 +31,20 @@ function playSystemBeep(type) {
     }
     o.start(); o.stop(audioContext.currentTime + 0.3);
 }
+function playSiren() {
+    initAudio();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(600, audioContext.currentTime);
+    osc.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.3);
+    osc.frequency.linearRampToValueAtTime(600, audioContext.currentTime + 0.6);
+    osc.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.9);
+    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1.0);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(); osc.stop(audioContext.currentTime + 1.0);
+}
 function generateRandomLoader() {
     const l = document.getElementById('loader'), t = Math.floor(Math.random() * 2);
     const btn = `<button id="startSystemBtn" style="display:none;margin-top:20px;padding:10px;background:red;color:yellow;font-weight:bold;border:3px outset white;cursor:pointer;z-index:999;">>>> RENDSZER INDÍTÁSA <<<</button>`;
@@ -44,7 +56,7 @@ function generateRandomLoader() {
     }
 }
 function randomizeLoaderAnim() { const s = document.querySelector('.fox-spinner'); if (s) s.className = 'fox-spinner ' + ['spin', 'spin-3d', 'spin-wobble'][Math.floor(Math.random() * 3)]; }
-// --- 1. ÚJ FUNKCIÓ: TELJES KÉPERNYŐS OVERLAYEK ---
+
 function triggerFullOverlay(type) {
     playSystemBeep('click');
     const overlay = document.createElement('div');
@@ -131,11 +143,8 @@ function spawnGhostSwitch() {
         playSystemBeep('error');
         toggle.innerHTML = "ON ⏻";
         toggle.style.background = "lime";
-
-        // Káosz effekt
         document.body.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
         spawnFloatEmoji();
-
         setTimeout(() => swContainer.remove(), 500);
     };
 
@@ -201,6 +210,11 @@ function initListeners() {
             if (w >= 100) { clearInterval(int); win.querySelector('.window-content-area').innerHTML = 'FORMAT COMPLETE.<br><button onclick="this.closest(\'.retro-window\').remove()">PÁNIK</button>'; playFakeXPSound(); }
         }, 30);
     });
+    const btnVirus = document.getElementById('btnVirus');
+    if (btnVirus) btnVirus.addEventListener('click', triggerVirusAlert);
+
+    const btnChat = document.getElementById('btnChat');
+    if (btnChat) btnChat.addEventListener('click', triggerChatWindow);
     // Régi gombok
     const btnCascade = document.getElementById('btnCascade');
     if (btnCascade) btnCascade.addEventListener('click', () => {
@@ -245,4 +259,64 @@ function initToggles() {
             el.classList.add('off'); el.innerHTML = "OFF ⭘";
         }
     }, 2000);
+}
+// 1. VÍRUS RIASZTÁS
+function triggerVirusAlert() {
+    playSiren(); // Indul a sziréna!
+    const win = createFakeWindow(window.innerWidth / 2 - 150, window.innerHeight / 2 - 100, "VÍRUS ÉSZLELVE", "", false);
+    win.querySelector('.retro-header').style.background = 'red';
+    win.querySelector('.retro-body').classList.add('virus-alert');
+    win.querySelector('.retro-body').innerHTML = `
+        <div class="retro-icon">☣️</div>
+        <div class="virus-body">
+            KRITIKUS FENYEGETÉS!<br><br>
+            A géped fertőzött.<br>
+            Törlési idő: <span id="virus-timer">10</span> mp
+        </div>
+    `;
+
+    // Visszaszámlálás
+    let count = 10;
+    const timerSpan = win.querySelector('#virus-timer');
+    const int = setInterval(() => {
+        count--;
+        if (timerSpan) timerSpan.innerText = count;
+        playSystemBeep('error'); // Minden másodpercben pittyeg
+        if (count <= 0) {
+            clearInterval(int);
+            win.remove();
+            alert("A vírus törölte önmagát, mert nem talált értelmes adatot.");
+        }
+    }, 1000);
+}
+
+// 2. CHAT ABLAK (Admin)
+function triggerChatWindow() {
+    playSystemBeep('click');
+    const win = createFakeWindow(100, 100, "Admin Chat", "", false);
+    const body = win.querySelector('.retro-body');
+    body.style.display = 'block';
+    body.innerHTML = `
+        <div class="chat-log" id="chatLog"></div>
+        <input type="text" placeholder="Írj ide..." style="width:90%">
+    `;
+
+    const messages = [
+        "Szia.",
+        "Látom mit csinálsz.",
+        "Miért nyomkodod a gombokat?",
+        "Törlöm a System32 mappát...",
+        "Ne próbálj bezárni."
+    ];
+
+    let i = 0;
+    const log = win.querySelector('#chatLog');
+
+    const chatInt = setInterval(() => {
+        if (i >= messages.length) { clearInterval(chatInt); return; }
+        log.innerHTML += `<div class="chat-msg-admin">Admin: ${messages[i]}</div>`;
+        log.scrollTop = log.scrollHeight;
+        playSystemBeep('click'); // Üzenet hang
+        i++;
+    }, 1500);
 }

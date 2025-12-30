@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budapest Cirkusz: Abszurd Krónikák 2024-2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Chosen Palette: "Political Circus" 
+         Primary: MKKP Yellow (#fbbf24) & Absurd Purple (#8b5cf6)
+         Accents: Karácsony Green, Vitézy Teal, Fidesz Orange
+         Background: Chaotic White/Gray patterns
+    -->
+
+    <!-- Application Structure Plan:
+         1. Hero Section: "The Theatre of the Absurd" - Gonzo journalism style header.
+         2. The "Gift Shop" (Ajándékbolt): Interactive showcase of the legendary Christmas gift exchanges (Lego AT-AT, Trolley Problem).
+         3. Quote Wall (Aranyköpések): "Naked kittens on the tundra" and other gems.
+         4. The "Oops" Budget: Visualizing how the budget passed because the opposition walked out.
+         5. The "Kingmaker" Seesaw: An interactive physics toy/chart showing the Tisza Party balancing act.
+         6. Absurd Proposals Generator: Randomizer for real, strange agenda items.
+    -->
+
+    <!-- Visualization & Content Choices:
+         - Used bright, clashing colors to represent the chaotic nature of the assembly.
+         - Cards are designed to look like tabloid clippings or post-it notes.
+         - The "Budget" section uses a "Disappearing Bar Chart" to mock the Fidesz walkout.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .sticker {
+            box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1);
+            transition: all 0.2s ease;
+        }
+
+        .sticker:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        .rotate-random:nth-child(odd) {
+            transform: rotate(1deg);
+        }
+
+        .rotate-random:nth-child(even) {
+            transform: rotate(-1deg);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .comic-bubble {
+            position: relative;
+            background: #fff;
+            border-radius: .4em;
+            border: 3px solid #000;
+        }
+
+        .comic-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #000;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -10px;
+            margin-bottom: -20px;
+        }
+    </style>
+</head>
+
+<body class="text-gray-900">
+
+    <!-- Navbar -->
+    <nav class="bg-yellow-400 border-b-4 border-black p-4 sticky top-0 z-50 transform -rotate-1 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-3xl font-bold tracking-tighter flex items-center gap-2">
+                <i class="fas fa-dog text-4xl"></i>
+                <span>Budapest<span class="text-purple-700">Cirkusz</span></span>
+            </div>
+            <div class="hidden md:flex gap-6 font-bold text-lg">
+                <a href="#ajandekok" class="hover:text-purple-700 hover:underline decoration-wavy">🎁 A Nagy
+                    Ajándékozás</a>
+                <a href="#aranykopesek" class="hover:text-purple-700 hover:underline decoration-wavy">💬
+                    Aranyköpések</a>
+                <a href="#koltsegvetes" class="hover:text-purple-700 hover:underline decoration-wavy">💸 A "Hoppá"
+                    Költségvetés</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-20 text-center px-4 relative overflow-hidden">
+        <div class="absolute top-10 left-10 text-6xl opacity-20 rotate-12">🤪</div>
+        <div class="absolute bottom-10 right-10 text-6xl opacity-20 -rotate-12">🎪</div>
+
+        <h1
+            class="text-5xl md:text-8xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500 drop-shadow-md">
+            Abszurd Krónikák
+        </h1>
+        <p class="text-xl md:text-2xl font-bold bg-black text-white inline-block px-4 py-2 transform rotate-2">
+            2024 Ősz – 2025 Tél: Amikor a valóság furcsább volt a fikciónál
+        </p>
+
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <div class="bg-white p-4 border-4 border-black rotate-random">
+                <div class="text-4xl mb-2">🐈</div>
+                <h3 class="text-xl font-bold">Meztelen Kismacskák</h3>
+                <p class="text-sm">Reinkarnáció a tundrán (MKKP)</p>
+            </div>
+            <div class="bg-white p-4 border-4 border-black rotate-random">
+                <div class="text-4xl mb-2">🚃</div>
+                <h3 class="text-xl font-bold">Villamos Dilemma</h3>
+                <p class="text-sm">Vitézy ajándéka Karácsonynak</p>
+            </div>
+            <div class="bg-white p-4 border-4 border-black rotate-random">
+                <div class="text-4xl mb-2">🏃‍♂️</div>
+                <h3 class="text-xl font-bold">A Kiosonó Ellenzék</h3>
+                <p class="text-sm">Így lett véletlenül költségvetés</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section 1: The Legendary Gift Exchange -->
+    <section id="ajandekok" class="py-16 bg-purple-100 border-t-4 border-black">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-black text-center mb-12 text-purple-900 transform -rotate-1">
+                🎄 A Nagy Karácsonyi Ajándék-Slam (2025)
+            </h2>
+            <p class="text-center text-lg mb-8 font-bold">
+                Ahol a passzív-agresszív politikai üzengetés találkozik a szeretet ünnepével.
+            </p>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="sticker bg-white p-6 border-2 border-black rounded-lg">
+                    <div class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 inline-block mb-2 rounded">Feladó:
+                        Vitézy Dávid</div>
+                    <div class="text-sm font-bold mb-2">Címzett: Karácsony Gergely</div>
+                    <div class="text-center py-4">
+                        <i class="fas fa-train text-6xl text-teal-600 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">"Villamos Dilemma" Társasjáték</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-t border-gray-200 pt-2">
+                        "Hogy gyakorolja a morális döntéseket, amikor nincs jó választás." (Utalás a Trolley Problem
+                        mémre).
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="sticker bg-white p-6 border-2 border-black rounded-lg">
+                    <div class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 inline-block mb-2 rounded">
+                        Feladó: Karácsony Gergely</div>
+                    <div class="text-sm font-bold mb-2">Címzett: Tüttő Kata</div>
+                    <div class="text-center py-4">
+                        <i class="fas fa-certificate text-6xl text-yellow-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">"Tiszteletbeli Helyettes" Oklevél</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-t border-gray-200 pt-2">
+                        Mivel a közgyűlés 2 éve képtelen helyettest választani, maradt a papír alapú elismerés.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="sticker bg-white p-6 border-2 border-black rounded-lg">
+                    <div class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 inline-block mb-2 rounded">
+                        Feladó: Karácsony Gergely</div>
+                    <div class="text-sm font-bold mb-2">Címzett: Molnár Dániel (Tisza)</div>
+                    <div class="text-center py-4">
+                        <i class="fas fa-book-dead text-6xl text-gray-800 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Krasznahorkai Könyv</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-t border-gray-200 pt-2">
+                        Cím: "Rombolás és bánat az Ég alatt". Finom utalás a Tisza Párt "romboló" politikai
+                        stratégiájára?
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="sticker bg-white p-6 border-2 border-black rounded-lg">
+                    <div class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 inline-block mb-2 rounded">
+                        Előzmény (MKKP)</div>
+                    <div class="text-sm font-bold mb-2">Szereplő: Kovács Gergely</div>
+                    <div class="text-center py-4">
+                        <i class="fas fa-robot text-6xl text-gray-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Lego Birodalmi Lépegető</h3>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-t border-gray-200 pt-2">
+                        Döme Zsuzsa panaszkodott: "Tavaly Gergő egy AT-AT lépegetőt kapott, én csak egy képeslapot a
+                        Fidesztől. Idén jobbat várok!"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Quote Wall -->
+    <section id="aranykopesek" class="py-16 container mx-auto px-4">
+        <h2 class="text-4xl font-black text-center mb-12">💬 Közgyűlési Aranyköpések</h2>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Quote 1 -->
+            <div class="comic-bubble p-6 shadow-xl transform rotate-1">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-2xl border-2 border-black">
+                        🐶</div>
+                    <div class="font-bold">Döme Zsuzsanna (MKKP)</div>
+                </div>
+                <p class="text-xl font-bold text-purple-900">
+                    "Ha esetleg van reinkarnáció, akkor a teremben ülő képviselők közül sokan meztelen kismacskaként
+                    fognak újraszületni a tundrán."
+                </p>
+                <div class="mt-2 text-sm text-gray-500">Kontextus: Az aluljárók lezárásáról szóló, végtelenbe nyúló vita
+                    közben.</div>
+            </div>
+
+            <!-- Quote 2 -->
+            <div class="comic-bubble p-6 shadow-xl transform -rotate-1">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-2xl border-2 border-black">
+                        🎄</div>
+                    <div class="font-bold">Karácsony Gergely (Leaked Audio)</div>
+                </div>
+                <p class="text-xl font-bold text-green-900">
+                    "...mint a templom, amit ökörsütéssel és pénzszórással avattak fel, aztán felrobbantották a
+                    németek."
+                </p>
+                <div class="mt-2 text-sm text-gray-500">Kontextus: Kiszivárgott felvétel arról, hogy mi a terv másnapra.
+                    (Válasz: Nincs.)</div>
+            </div>
+
+            <!-- Quote 3 -->
+            <div class="comic-bubble p-6 shadow-xl transform rotate-1">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-2xl border-2 border-black">
+                        🚆</div>
+                    <div class="font-bold">Vitézy Dávid (Twitter/X)</div>
+                </div>
+                <p class="text-xl font-bold text-teal-900">
+                    "A robbantás nem alapjog, sokkal fontosabb a gyerekek és a háziállatok érdeke."
+                </p>
+                <div class="mt-2 text-sm text-gray-500">Kontextus: A pirotechnikai eszközök betiltásának vitája.</div>
+            </div>
+
+            <!-- Quote 4 -->
+            <div class="comic-bubble p-6 shadow-xl transform -rotate-1">
+                <div class="flex items-center gap-4 mb-4">
+                    <div
+                        class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-2xl border-2 border-black">
+                        🍊</div>
+                    <div class="font-bold">Szentkirályi Alexandra (Fidesz)</div>
+                </div>
+                <p class="text-xl font-bold text-orange-900">
+                    "A főpolgármester úgy tekint a fővárosiak nehéz anyagi helyzetére, mint egy politikai színpadra."
+                </p>
+                <div class="mt-2 text-sm text-gray-500">Kontextus: Mielőtt kivonultak volna a szavazásról, ezzel átadva
+                    a színpadot.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: The "Oops" Budget -->
+    <section id="koltsegvetes" class="py-16 bg-blue-100 border-y-4 border-black overflow-hidden">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-black mb-6">💸 A "Hoppá" Költségvetés (2025)</h2>
+            <p class="text-lg mb-8 max-w-2xl mx-auto font-bold">
+                Senki nem hitte, hogy átmegy. Aztán a Fidesz úgy döntött, hogy "felháborodásból" kivonul. Ezzel
+                véletlenül lecsökkentették a szükséges többségi küszöböt.
+            </p>
+
+            <div
+                class="bg-white p-8 rounded-xl border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] max-w-3xl mx-auto">
+                <h3 class="text-xl font-bold mb-4">A Szavazás Matematikája (Vizuális Rekonstrukció)</h3>
+
+                <div class="chart-container">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+
+                <div class="mt-6 flex justify-center gap-4">
+                    <button onclick="toggleFidesz()"
+                        class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg border-2 border-black shadow-md transition transform active:scale-95">
+                        🚪 Fidesz: Kivonulás / Vissza
+                    </button>
+                </div>
+                <p class="mt-4 text-sm font-bold text-gray-500" id="statusText">
+                    Jelenleg: Mindenki bent van. Nincs többség.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Absurd Proposals Generator -->
+    <section class="py-16 container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-black mb-8">🎲 Abszurd Javaslat Generátor</h2>
+        <p class="mb-6 font-bold">Kattints a gombra, hogy láss egy VALÓDI napirendi pontot!</p>
+
+        <div class="bg-yellow-300 p-12 rounded-full h-64 w-64 mx-auto flex items-center justify-center border-4 border-black cursor-pointer hover:rotate-6 transition shadow-xl"
+            onclick="generateProposal()">
+            <div id="proposalText" class="font-black text-xl">KATTINTS!</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-8 text-center border-t-8 border-yellow-400">
+        <p class="font-bold text-xl">Budapest Cirkusz © 2025</p>
+        <p class="text-sm text-gray-400 mt-2">
+            Ez az oldal szatíra, de sajnos minden adat a valós jegyzőkönyvekből és sajtóbeszámolókból származik.
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- DATA ---
+
+        // Real absurd proposals from the reports
+        const proposals = [
+            "Javaslat a 'Városháza Kertmozi' ingyenes használatba adására (miközben csődben vagyunk).",
+            "MKKP Javaslat: Ha van reinkarnáció, mindenki szülessen újjá meztelen kismacskaként.",
+            "Sziget Fesztivál Ultimátum: 'Vagy aláírjátok most, vagy nem lesz fesztivál 2026-ban!'",
+            "A közösségi költségvetés leállítása (Vitézy javaslata), amit Karácsony támogatott, a Kutyapárt ellenzett.",
+            "Rendszerváltás a parkolásban: Ahol sokat szabálytalankodnak, ott szüntessük meg a parkolást!",
+            "Ajándékozási napirend: Lego birodalmi lépegető átadása jegyzőkönyvön kívül."
+        ];
+
+        // Budget Chart Logic
+        let fideszPresent = true;
+        let budgetChart;
+
+        function initChart() {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            budgetChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Szükséges Többség', 'Karácsony Koalíciója', 'Ellenzék (Fidesz+Egyéb)'],
+                    datasets: [{
+                        label: 'Szavazatok',
+                        data: [17, 16, 17], // Initial stalemate
+                        backgroundColor: ['#e5e7eb', '#059669', '#ea580c'],
+                        borderWidth: 2,
+                        borderColor: 'black'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 35 }
+                    }
+                }
+            });
+        }
+
+        function toggleFidesz() {
+            fideszPresent = !fideszPresent;
+            const statusText = document.getElementById('statusText');
+
+            if (!fideszPresent) {
+                // Fidesz walks out
+                budgetChart.data.datasets[0].data = [11, 16, 3]; // Majority threshold drops because total present drops
+                budgetChart.data.labels[2] = 'Ellenzék (Fidesz KIVONULT)';
+                budgetChart.data.datasets[0].backgroundColor = ['#e5e7eb', '#059669', '#9ca3af'];
+                statusText.innerHTML = "🔴 HOPPÁ! A Fidesz kivonult. A 16 szavazat hirtelen elég lett a többséghez!";
+                statusText.className = "mt-4 text-lg font-bold text-green-600 animate-bounce";
+            } else {
+                // Fidesz returns
+                budgetChart.data.datasets[0].data = [17, 16, 17];
+                budgetChart.data.labels[2] = 'Ellenzék (Fidesz+Egyéb)';
+                budgetChart.data.datasets[0].backgroundColor = ['#e5e7eb', '#059669', '#ea580c'];
+                statusText.innerHTML = "Jelenleg: Mindenki bent van. Nincs többség (Patthelyzet).";
+                statusText.className = "mt-4 text-sm font-bold text-gray-500";
+            }
+            budgetChart.update();
+        }
+
+        function generateProposal() {
+            const container = document.getElementById('proposalText');
+            // Flash effect
+            container.parentElement.classList.add('bg-white');
+            setTimeout(() => container.parentElement.classList.remove('bg-white'), 100);
+
+            const random = proposals[Math.floor(Math.random() * proposals.length)];
+            container.innerText = random;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+        });
+
+    </script>
+</body>
+
+</html>

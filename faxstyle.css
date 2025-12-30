@@ -1,14 +1,145 @@
 /* ALAPOK */
 body {
-    background-color: #000000;
-    /* A háttérkép alapból látszik, de a canvas majd eltakarja ha kell */
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhQwWgwYgKEABYBjACJAAkA2XYcWjD2WcwAAAAASUVORK5CYII='), linear-gradient(135deg, #050505 25%, #1a0033 100%);
-    color: #00ffff;
-    font-family: 'Comic Sans MS', 'Verdana', sans-serif;
+    background-color: #008080;
+    /* Win95 Teal szín alapnak */
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhQwWgwYgKEABYBjACJAAkA2XYcWjD2WcwAAAAASUVORK5CYII='), linear-gradient(135deg, #000 0%, #000080 100%);
+    color: #e0e0e0;
+    font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+    /* A klasszikus font */
     margin: 0;
     overflow-x: hidden;
     text-align: center;
-    transition: filter 0.5s ease;
+}
+
+/* --- WIN95 STÍLUSÚ KERETEK (A SZÖGLETESSÉG CSÚCSA) --- */
+.win95-border {
+    border: 2px solid;
+    border-color: #dfdfdf #404040 #404040 #dfdfdf;
+    /* Fény és árnyék */
+    background: #c0c0c0;
+    /* Klasszikus szürke */
+    color: black;
+    box-shadow: 1px 1px 0px black;
+}
+
+/* GOMBOK FELÜLÍRÁSA */
+.btn-nt {
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #fff #000 #000 #fff;
+    /* Kiemelkedő gomb */
+    color: black;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-weight: bold;
+    padding: 5px 10px;
+    text-shadow: none;
+    border-radius: 0 !important;
+    margin: 5px 0;
+    width: 95%;
+    cursor: pointer;
+}
+
+.btn-nt:active {
+    border-color: #000 #fff #fff #000;
+    /* Benyomódás effekt */
+    transform: translate(1px, 1px);
+}
+
+.btn-nt:hover {
+    background: #000080;
+    color: white;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="font-size:16px"><text y="15">⚠️</text></svg>'), auto;
+}
+
+/* PANELEK */
+.panel {
+    border: 2px solid;
+    border-color: #dfdfdf #404040 #404040 #dfdfdf;
+    background: #c0c0c0;
+    padding: 15px;
+    margin-bottom: 15px;
+    position: relative;
+    color: black;
+}
+
+.panel-title {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: #000080;
+    color: white;
+    padding: 0 5px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* RETRO ABLAKOK */
+.retro-window {
+    position: absolute;
+    width: 320px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #dfdfdf #000 #000 #dfdfdf;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    font-family: 'MS Sans Serif', sans-serif;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+}
+
+.retro-header {
+    background: linear-gradient(to right, #000080, #1084d0);
+    color: white;
+    padding: 2px 4px;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.retro-close-btn {
+    background: #c0c0c0;
+    border: 1px solid;
+    border-color: #fff #000 #000 #fff;
+    color: black;
+    font-weight: bold;
+    width: 16px;
+    height: 14px;
+    line-height: 12px;
+    text-align: center;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.retro-close-btn:active {
+    border-color: #000 #fff #fff #000;
+}
+
+.retro-body {
+    padding: 15px;
+    color: black;
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.retro-icon {
+    font-size: 32px;
+}
+
+/* INPUTOK / SELECTEK */
+select,
+input[type="text"] {
+    background: white;
+    border: 2px solid;
+    border-color: #404040 #dfdfdf #dfdfdf #404040;
+    /* Inset (bemélyedő) */
+    font-family: 'Courier New', monospace;
+    border-radius: 0;
 }
 
 /* MÁTRIX CANVAS */
@@ -665,4 +796,49 @@ h1 {
         transform: translateY(-100px) rotate(360deg);
         opacity: 0;
     }
+}
+
+/* VÍRUS ABLAK STÍLUS */
+.virus-alert {
+    background: red !important;
+    color: yellow !important;
+}
+
+.virus-body {
+    font-weight: bold;
+    font-size: 14px;
+    animation: flash-bg 0.5s infinite;
+}
+
+@keyframes flash-bg {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* CHAT ABLAK STÍLUS */
+.chat-log {
+    background: white;
+    border: 2px inset #888;
+    height: 100px;
+    overflow-y: scroll;
+    padding: 5px;
+    font-family: monospace;
+    margin-bottom: 5px;
+}
+
+.chat-msg-admin {
+    color: red;
+}
+
+.chat-msg-user {
+    color: blue;
 }
