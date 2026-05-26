@@ -857,6 +857,34 @@ footer {
     /* Kijjebb toljuk jobbra */
 }
 
+/* --- Egyedi GYIK Harmonika Stílusok --- */
+.custom-accordion .accordion-button:not(.collapsed) {
+    color: white !important;
+    background-color: var(--pink) !important;
+    box-shadow: 0 4px 15px rgba(245, 169, 184, 0.2);
+}
+
+.custom-accordion .accordion-button:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 0.25rem rgba(245, 169, 184, 0.25);
+}
+
+.custom-accordion .accordion-item {
+    border-radius: 20px !important;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.custom-accordion .accordion-button {
+    border-radius: 20px !important;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.custom-accordion .accordion-button::after {
+    transition: transform 0.3s ease;
+}
+
 /* Mobilon ne lógjon ki a képernyőről */
 @media (max-width: 768px) {
     .carousel-control-prev {
