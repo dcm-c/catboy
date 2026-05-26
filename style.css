@@ -304,6 +304,12 @@ textarea {
     border: 1px solid var(--pink);
 }
 
+.discord-iframe {
+    width: 100%;
+    min-height: 300px;
+    border: 0;
+}
+
 /* Gallery */
 .photo-item {
     position: relative;
@@ -813,6 +819,7 @@ footer {
     opacity: 1;
     transform: translateY(-5px);
 }
+
 
 @keyframes popUp {
     from {
