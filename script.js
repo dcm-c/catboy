@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon.className = "fas fa-fish cat-icon";
                     container.classList.add('shark-mode');
                     showBubble("BLÅHAJ MÓD AKTIVÁLVA! 🦈🌊");
+                    document.body.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" style=\"font-size:24px\"><text y=\"24\">🦈</text></svg>'), auto";
                 }
             });
         }
@@ -450,4 +451,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    function initUwUfier() {
+        let uwuMode = false;
+        const uwuBtn = document.getElementById('uwu-btn');
+
+        if (uwuBtn) {
+            uwuBtn.addEventListener('click', () => {
+                if (uwuMode) return; // Csak egyszer lehessen rányomni
+                uwuMode = true;
+
+                const paragraphs = document.querySelectorAll('p, h1, h2, h3, h5, .accordion-body');
+                paragraphs.forEach(p => {
+                    let text = p.innerHTML;
+                    text = text.replace(/r/g, 'w').replace(/R/g, 'W')
+                        .replace(/l/g, 'w').replace(/L/g, 'W');
+
+                    text = text.replace(/\./g, () => Math.random() > 0.5 ? ' UwU.' : ' :3.');
+
+                    p.innerHTML = text;
+                });
+                alert("UwU mód aktiválva! :3");
+            });
+        }
+    }
+    let secretBuffer = "";
+    document.addEventListener('keydown', (e) => {
+        secretBuffer += e.key.toLowerCase();
+
+        if (secretBuffer.length > 10) {
+            secretBuffer = secretBuffer.substring(1);
+        }
+
+        if (secretBuffer.includes("faxom")) {
+            document.body.style.transition = "all 1s";
+            document.body.style.filter = "invert(100%) hue-rotate(180deg)";
+            setTimeout(() => {
+                window.location.href = "faxom.html";
+            }, 1000);
+        }
+
+        if (secretBuffer.includes("fovi") || secretBuffer.includes("cirkusz")) {
+            window.location.href = "fovi.html";
+        }
+    });
+    console.log(
+        "%c🎀 Hahó! Felvetted már a programozó zoknidat? 🎀\n",
+        "color: #f5a9b8; font-size: 24px; font-weight: bold; text-shadow: 1px 1px 2px #000;"
+    );
+    console.log(
+        "%cTudtad, hogy vannak rejtett oldalak? Próbáld meg beírni a billentyűzeten, hogy 'faxom' vagy 'fovi'...",
+        "color: #5bcefa; font-size: 14px; font-style: italic;"
+    );
 });
