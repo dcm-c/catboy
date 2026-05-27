@@ -231,39 +231,69 @@ document.addEventListener('DOMContentLoaded', () => {
                 let addedCount = 0;
                 const maxImages = 15;
 
+                // Segédfüggvény egy kép DOM-ba illesztéséhez
+                function addImageToGrid(imgUrl, title, author, permalink) {
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
+
+                    colDiv.innerHTML = `
+                        <div class="photo-wrapper" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#imageModal"
+                                data-img-src="${imgUrl}"
+                                data-title="${title}" 
+                                data-author="Feltöltötte: u/${author}"
+                                data-post-url="${permalink}"> 
+                            <div class="blur-bg" style="background-image: url('${imgUrl}');"></div>
+                            <img src="${imgUrl}" class="main-photo" alt="${title}" loading="lazy">
+                            
+                            <div class="photo-overlay">
+                                <i class="fab fa-reddit fa-2x mb-2"></i>
+                                <h5 class="text-truncate px-2">${title}</h5>
+                            </div>
+                        </div>
+                    `;
+
+                    gridElement.appendChild(colDiv);
+                    setTimeout(() => colDiv.classList.add('animate-in'), 100 + (addedCount * 50));
+                }
+
                 posts.forEach(postData => {
                     const post = postData.data;
                     if (addedCount >= maxImages) return;
 
-                    const isImage = post.url.match(/\.(jpeg|jpg|gif|png)$/) != null || post.post_hint === 'image';
+                    const permalink = `https://www.reddit.com${post.permalink}`;
 
-                    if (isImage) {
-                        const colDiv = document.createElement('div');
-                        colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
+                    // 1. ESET: Hagyományos 1 képes poszt
+                    const isStandardImage = post.url && (post.url.match(/\.(jpeg|jpg|gif|png)$/) != null || post.post_hint === 'image');
 
-                        // FONTOS: Itt mentjük el a Reddit permalinket!
-                        const permalink = `https://www.reddit.com${post.permalink}`;
+                    // 2. ESET: Reddit Galéria (Több kép)
+                    const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
 
-                        colDiv.innerHTML = `
-                            <div class="photo-wrapper" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#imageModal"
-                                    data-img-src="${post.url}"
-                                    data-title="${post.title}" 
-                                    data-author="Feltöltötte: u/${post.author}"
-                                    data-post-url="${permalink}"> <div class="blur-bg" style="background-image: url('${post.url}');"></div>
-                                <img src="${post.url}" class="main-photo" alt="${post.title}" loading="lazy">
-                                
-                                <div class="photo-overlay">
-                                    <i class="fab fa-reddit fa-2x mb-2"></i>
-                                    <h5 class="text-truncate px-2">${post.title}</h5>
-                                </div>
-                            </div>
-                        `;
-
-                        gridElement.appendChild(colDiv);
-                        setTimeout(() => colDiv.classList.add('animate-in'), 100 + (addedCount * 50));
+                    if (isStandardImage) {
+                        addImageToGrid(post.url, post.title, post.author, permalink);
                         addedCount++;
+                    }
+                    else if (isGallery) {
+                        // Végigmegyünk a galéria összes képén
+                        const items = post.gallery_data.items;
+                        items.forEach((item, index) => {
+                            if (addedCount >= maxImages) return;
+
+                            const mediaId = item.media_id;
+                            const mediaMeta = post.media_metadata[mediaId];
+
+                            if (mediaMeta && mediaMeta.status === 'valid' && mediaMeta.s && mediaMeta.s.u) {
+                                // A Reddit API "&amp;"-ként adja vissza az url-t, ezt dekódolni kell "&"-re
+                                const imgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
+
+                                // Jelezzük a címben, hogy ez egy galéria hanyadik képe
+                                const galleryTitle = items.length > 1 ? `${post.title} (${index + 1}/${items.length})` : post.title;
+
+                                addImageToGrid(imgUrl, galleryTitle, post.author, permalink);
+                                addedCount++;
+                            }
+                        });
                     }
                 });
 
@@ -277,39 +307,72 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (spinner) spinner.style.display = 'none';
             });
     }
-
+    // =========================================================
+    // B. FŐOLDAL FUNKCIÓI
+    // =========================================================
     // =========================================================
     // B. FŐOLDAL FUNKCIÓI
     // =========================================================
     function initHomePage(container) {
         const subreddit = 'MagyarFemboyCommunity';
-        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=1`)
+
+        // Lekérünk 10 posztot, hogy biztosan legyen köztük legalább egy képes
+        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=10`)
             .then(res => res.json())
             .then(data => {
-                const post = data.data.children[0].data;
-                const permalink = `https://www.reddit.com${post.permalink}`;
-                let imageHtml = '';
+                const posts = data.data.children;
+                let selectedPost = null;
+                let finalImgUrl = '';
 
-                if (post.url && post.url.match(/\.(jpeg|jpg|gif|png)$/)) {
-                    imageHtml = `
-                        <div class="reddit-image-wrapper">
-                            <div class="blur-bg" style="background-image: url('${post.url}');"></div>
-                            <img src="${post.url}" class="main-photo" alt="Reddit Post">
-                        </div>
-                    `;
+                // Keressük meg az első olyan posztot, amiben ténylegesen van kép
+                for (let i = 0; i < posts.length; i++) {
+                    const post = posts[i].data;
+
+                    const isStandardImage = post.url && (post.url.match(/\.(jpeg|jpg|gif|png)$/) != null || post.post_hint === 'image');
+                    const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
+
+                    if (isStandardImage) {
+                        selectedPost = post;
+                        finalImgUrl = post.url;
+                        break; // Megtaláltuk, kilépünk a ciklusból
+                    }
+                    else if (isGallery) {
+                        // Galéria esetén az első kép URL-jét szedjük ki
+                        const firstMediaId = post.gallery_data.items[0].media_id;
+                        const mediaMeta = post.media_metadata[firstMediaId];
+
+                        if (mediaMeta && mediaMeta.s && mediaMeta.s.u) {
+                            selectedPost = post;
+                            finalImgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
+                            break; // Megtaláltuk, kilépünk a ciklusból
+                        }
+                    }
                 }
 
-                container.innerHTML = `
-                    ${imageHtml}
-                    <h5 class="fw-bold text-truncate"><a href="${permalink}" target="_blank" class="text-dark text-decoration-none">${post.title}</a></h5>
-                    <div class="d-flex justify-content-between text-muted small mt-2">
-                        <span>👤 u/${post.author}</span>
-                        <span>🔼 ${post.ups}</span>
-                    </div>
-                `;
+                if (selectedPost && finalImgUrl) {
+                    const permalink = `https://www.reddit.com${selectedPost.permalink}`;
+
+                    const imageHtml = `
+                        <div class="reddit-image-wrapper">
+                            <div class="blur-bg" style="background-image: url('${finalImgUrl}');"></div>
+                            <img src="${finalImgUrl}" class="main-photo" alt="Reddit Post">
+                        </div>
+                    `;
+
+                    container.innerHTML = `
+                        ${imageHtml}
+                        <h5 class="fw-bold text-truncate mt-2"><a href="${permalink}" target="_blank" class="text-dark text-decoration-none">${selectedPost.title}</a></h5>
+                        <div class="d-flex justify-content-between text-muted small mt-2">
+                            <span>👤 u/${selectedPost.author}</span>
+                            <span>🔼 ${selectedPost.ups}</span>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '<p class="text-center text-muted small mt-3">Nem találtunk új képes posztot a subredditen.</p>';
+                }
             })
             .catch(err => {
-                container.innerHTML = '<p class="text-center text-muted small">Nem sikerült betölteni.</p>';
+                container.innerHTML = '<p class="text-center text-muted small mt-3">Nem sikerült betölteni a Reddit posztot.</p>';
             });
     }
 

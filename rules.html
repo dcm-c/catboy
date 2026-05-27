@@ -228,6 +228,88 @@
                 </div>
             </div>
         </div>
+        <div class="container my-5 pt-4 border-top border-secondary border-opacity-10">
+            <div class="container my-5 pt-4 border-top border-secondary border-opacity-10">
+                <div class="text-center mb-4">
+                    <p class="text-muted small mb-2">Valami rosszat tettél és lecsapott rád a banhammer?
+
+                        <a href="#unbanCollapse" class="btn btn-sm btn-outline-primary unban-trigger rounded-pill mx-1"
+                            data-bs-toggle="collapse">
+                            <i class="fa-brands"></i> Unban kérelem
+                        </a>
+                    </p>
+                </div>
+
+                <div class=" collapse" id="unbanCollapse">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-6">
+                            <div class="custom-card p-4 border border-danger border-opacity-25"
+                                style="background: rgba(255, 255, 255, 0.95);">
+                                <h4 class="fw-bold text-center text-danger mb-3">Gyónási és Kegyelmi Ív 📜</h4>
+                                <p class="text-muted text-center small mb-4">Töltsd ki az alábbi mezőket, és a
+                                    moderátor
+                                    cica-bíróság felülbírálja az esetedet.</p>
+
+                                <form action="https://formspree.io/f/xvgeqprb" method="POST">
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Melyik platformról lettél
+                                            kitiltva?</label>
+                                        <select name="platform" id="banPlatform" class="form-select rounded-pill"
+                                            required>
+                                            <option value="discord">Discord</option>
+                                            <option value="reddit">Reddit</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Felhasználóneved (Discord tag vagy
+                                            Reddit u/ név):</label>
+                                        <input type="text" name="username" class="form-control rounded-pill"
+                                            placeholder="pl. catboy#1234 vagy u/catboy" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Röviden, mi volt a kitiltás oka? (Max
+                                            1-2 mondat)</label>
+                                        <input type="text" name="short_reason" class="form-control rounded-pill"
+                                            placeholder="pl. Túl sok NSFW mémet küldtem rossz csatornába" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Bővebb kifejtés (Miért érdemelsz
+                                            unbant?):</label>
+                                        <textarea name="appeal_essay" class="form-control" rows="5"
+                                            placeholder="Itt írhatsz regényt arról, hogy miért bántad meg a bűneidet, és miért leszel jó cica legközelebb..."
+                                            style="border-radius: 15px;" required></textarea>
+                                    </div>
+
+                                    <div class="mb-3 form-check small">
+                                        <input type="checkbox" class="form-check-input" id="pledge1" required>
+                                        <label class="form-check-label text-muted" for="pledge1">Esküszöm, hogy
+                                            átolvastam a szabályzatot és nem sértem meg újra. :3</label>
+                                    </div>
+                                    <div class="mb-4 form-check small">
+                                        <input type="checkbox" class="form-check-input" id="pledge2" required>
+                                        <label class="form-check-label text-muted" for="pledge2">Elfogadom, hogy
+                                            ha újra
+                                            bannolnak,
+                                            az végleges.</label>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="submit"
+                                            class="btn btn-danger rounded-pill fw-bold px-4 shadow-sm">
+                                            <i class="fa-solid fa-paper-plane me-2"></i> Kérelem elküldése
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <div id="corner-cat" class="d-none d-sm-block corner-cat">
