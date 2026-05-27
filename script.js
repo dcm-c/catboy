@@ -451,27 +451,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    function initUwUfier() {
-        let uwuMode = false;
-        const uwuBtn = document.getElementById('uwu-btn');
+    // --- UWU-FIKÁTOR MOTOR ---
+    let isUwUified = false;
+    let originalTexts = new Map();
 
-        if (uwuBtn) {
-            uwuBtn.addEventListener('click', () => {
-                if (uwuMode) return; // Csak egyszer lehessen rányomni
-                uwuMode = true;
+    document.body.addEventListener('click', function (e) {
+        if (e.target && e.target.id === 'btn-uwu-mode') {
+            const btn = e.target;
+            if (!isUwUified) {
+                btn.innerHTML = "✨ UwU Mód: ON 🎀";
+                btn.style.background = "var(--pink)";
+                btn.style.color = "white";
+                applyUwUJS(document.body);
+                isUwUified = true;
+            } else {
+                // Frissítés gombnyomásra a visszaállításhoz
+                window.location.reload();
+            }
+        }
+    });
 
-                const paragraphs = document.querySelectorAll('p, h1, h2, h3, h5, .accordion-body');
-                paragraphs.forEach(p => {
-                    let text = p.innerHTML;
-                    text = text.replace(/r/g, 'w').replace(/R/g, 'W')
-                        .replace(/l/g, 'w').replace(/L/g, 'W');
+    function applyUwUJS(element) {
+        const emojis = [' :3', ' UwU', ' OwO', ' nyau~', ' mrrrp*'];
 
-                    text = text.replace(/\./g, () => Math.random() > 0.5 ? ' UwU.' : ' :3.');
+        // Csak a szöveges csomópontokat járjuk be, hogy a HTML tag-ek ne sérüljenek
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+        let node;
 
-                    p.innerHTML = text;
-                });
-                alert("UwU mód aktiválva! :3");
+        while (node = walker.nextNode()) {
+            // Kihagyjuk a script, style, iframe és kód blokkokat
+            const parentTag = node.parentElement.tagName.toLowerCase();
+            if (['script', 'style', 'iframe', 'noscript', 'textarea', 'input'].includes(parentTag)) continue;
+            if (node.parentElement.id === 'btn-uwu-mode' || node.parentElement.closest('#btn-uwu-mode')) continue;
+
+            let text = node.nodeValue;
+            if (text.trim().length === 0) continue;
+
+            // Szöveg átalakítása
+            text = text.replace(/[rl]/g, 'w').replace(/[RL]/g, 'W');
+
+            // Random cukiság beszúrása a mondatvégekre
+            text = text.replace(/([.!?])/g, (match) => {
+                return match + emojis[Math.floor(Math.random() * emojis.length)];
             });
+
+            node.nodeValue = text;
         }
     }
     let secretBuffer = "";
@@ -494,6 +518,68 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "fovi.html";
         }
     });
+    let labelClicks = 0;
+    document.body.addEventListener('click', function (e) {
+        if (e.target && e.target.textContent.includes('Beceneved ✨')) {
+            labelClicks++;
+            if (labelClicks === 5) {
+                document.body.style.filter = "contrast(150%) saturate(200%)";
+                document.body.classList.add('theme-win11'); // A faxstyle.css-ben lévő transzformáció
+                alert("import happiness... ERROR: Túl sok Monster Energy! ⚡ Látod a hangokat?");
+                setTimeout(() => {
+                    document.body.style.filter = "none";
+                    document.body.classList.remove('theme-win11');
+                    labelClicks = 0;
+                }, 4000);
+            }
+        }
+    });
+    // --- KONAMI KÓD: CÁPA ESŐ ---
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                triggerSharkApocalypse();
+                konamiIndex = 0;
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    function triggerSharkApocalypse() {
+        alert("⚠️ VESZÉLY: KRITIKUS BLÅHAJ TÚLTENGÉS ÉSZLELVE! 🦈");
+        document.body.style.animation = "wobble 0.2s infinite alternate"; // faxstyle.css mintára
+
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => {
+                const shark = document.createElement('div');
+                shark.innerHTML = "🦈";
+                shark.style.position = "fixed";
+                shark.style.top = "-50px";
+                shark.style.left = Math.random() * window.innerWidth + "px";
+                shark.style.fontSize = Math.random() * (40 - 20) + 20 + "px";
+                shark.style.zIndex = "20000";
+                shark.style.transition = "transform 3s linear";
+                shark.style.pointerEvents = "none";
+                document.body.appendChild(shark);
+
+                // Animáció indítása
+                setTimeout(() => {
+                    shark.style.transform = `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
+                }, 50);
+
+                // Eltávolítás
+                setTimeout(() => shark.remove(), 3100);
+            }, i * 150);
+        }
+
+        // Remegés leállítása
+        setTimeout(() => { document.body.style.animation = "none"; }, 5000);
+    }
     console.log(
         "%c🎀 Hahó! Felvetted már a programozó zoknidat? 🎀\n",
         "color: #f5a9b8; font-size: 24px; font-weight: bold; text-shadow: 1px 1px 2px #000;"
