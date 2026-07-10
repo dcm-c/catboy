@@ -225,8 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const subreddit = 'MagyarFemboyCommunity';
 
         // api.reddit.com használata a stabilabb CORS hozzáférésért
-        fetch(`https://api.reddit.com/r/${subreddit}/new.json?limit=30`)
-            .then(res => res.json())
+        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=30`).then(res => res.json())
             .then(data => {
                 const posts = data.data.children;
                 let addedCount = 0;
@@ -320,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initHomePage(container) {
         const subreddit = 'MagyarFemboyCommunity';
 
-        fetch(`https://api.reddit.com/r/${subreddit}/new.json?limit=15`)
+        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=15`)
             .then(res => res.json())
             .then(data => {
                 const posts = data.data.children;
