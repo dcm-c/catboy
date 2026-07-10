@@ -224,8 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const subreddit = 'MagyarFemboyCommunity';
 
-        // api.reddit.com használata a stabilabb CORS hozzáférésért
-        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=30`).then(res => res.json())
+        // Cél URL (api.reddit.com a legstabilabb)
+        const targetUrl = `https://api.reddit.com/r/${subreddit}/new.json?limit=30`;
+        // Stabil AllOrigins proxy használata a nyers adatok lekéréséhez
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
+        fetch(proxyUrl)
+            .then(res => {
+                if (!res.ok) throw new Error(`Hálózati hiba: ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 const posts = data.data.children;
                 let addedCount = 0;
@@ -263,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const permalink = `https://www.reddit.com${post.permalink}`;
 
-                    // Robusztusabb kép-ellenőrzés
                     let isStandardImage = false;
                     let finalImgUrl = post.url;
 
@@ -305,22 +312,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (callback) callback();
             })
             .catch(err => {
-                console.error('Reddit hiba:', err);
-                if (statusText) statusText.innerText = 'Hiba a betöltéskor.';
+                console.error('Reddit AllOrigins Fetch hiba:', err);
+                if (statusText) statusText.innerText = 'Nem sikerült betölteni a képeket a Redditről.';
                 if (spinner) spinner.style.display = 'none';
             });
     }
-    // =========================================================
-    // B. FŐOLDAL FUNKCIÓI
-    // =========================================================
-    // =========================================================
-    // B. FŐOLDAL FUNKCIÓI
-    // =========================================================
+
     function initHomePage(container) {
         const subreddit = 'MagyarFemboyCommunity';
 
-        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=15`)
-            .then(res => res.json())
+        const targetUrl = `https://api.reddit.com/r/${subreddit}/new.json?limit=15`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
+        fetch(proxyUrl)
+            .then(res => {
+                if (!res.ok) throw new Error(`Hálózati hiba: ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 const posts = data.data.children;
                 let selectedPost = null;
@@ -382,6 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(err => {
+                console.error('Reddit Főoldal AllOrigins hiba:', err);
                 container.innerHTML = '<p class="text-center text-muted small mt-3">Nem sikerült betölteni a Reddit posztot.</p>';
             });
     }
