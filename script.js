@@ -224,14 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const subreddit = 'MagyarFemboyCommunity';
 
-        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=30`)
+        // api.reddit.com használata a stabilabb CORS hozzáférésért
+        fetch(`https://api.reddit.com/r/${subreddit}/new.json?limit=30`)
             .then(res => res.json())
             .then(data => {
                 const posts = data.data.children;
                 let addedCount = 0;
                 const maxImages = 15;
 
-                // Segédfüggvény egy kép DOM-ba illesztéséhez
                 function addImageToGrid(imgUrl, title, author, permalink) {
                     const colDiv = document.createElement('div');
                     colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
@@ -264,18 +264,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const permalink = `https://www.reddit.com${post.permalink}`;
 
-                    // 1. ESET: Hagyományos 1 képes poszt
-                    const isStandardImage = post.url && (post.url.match(/\.(jpeg|jpg|gif|png)$/) != null || post.post_hint === 'image');
+                    // Robusztusabb kép-ellenőrzés
+                    let isStandardImage = false;
+                    let finalImgUrl = post.url;
 
-                    // 2. ESET: Reddit Galéria (Több kép)
+                    if (post.post_hint === 'image' || (post.url && post.url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                        isStandardImage = true;
+                        finalImgUrl = post.url.replace(/&amp;/g, '&');
+                    } else if (post.preview && post.preview.images && post.preview.images.length > 0) {
+                        isStandardImage = true;
+                        finalImgUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+                    }
+
                     const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
 
-                    if (isStandardImage) {
-                        addImageToGrid(post.url, post.title, post.author, permalink);
+                    if (isStandardImage && !isGallery) {
+                        addImageToGrid(finalImgUrl, post.title, post.author, permalink);
                         addedCount++;
                     }
                     else if (isGallery) {
-                        // Végigmegyünk a galéria összes képén
                         const items = post.gallery_data.items;
                         items.forEach((item, index) => {
                             if (addedCount >= maxImages) return;
@@ -284,10 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const mediaMeta = post.media_metadata[mediaId];
 
                             if (mediaMeta && mediaMeta.status === 'valid' && mediaMeta.s && mediaMeta.s.u) {
-                                // A Reddit API "&amp;"-ként adja vissza az url-t, ezt dekódolni kell "&"-re
                                 const imgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
-
-                                // Jelezzük a címben, hogy ez egy galéria hanyadik képe
                                 const galleryTitle = items.length > 1 ? `${post.title} (${index + 1}/${items.length})` : post.title;
 
                                 addImageToGrid(imgUrl, galleryTitle, post.author, permalink);
@@ -316,35 +320,42 @@ document.addEventListener('DOMContentLoaded', () => {
     function initHomePage(container) {
         const subreddit = 'MagyarFemboyCommunity';
 
-        // Lekérünk 10 posztot, hogy biztosan legyen köztük legalább egy képes
-        fetch(`https://www.reddit.com/r/${subreddit}/new.json?limit=10`)
+        fetch(`https://api.reddit.com/r/${subreddit}/new.json?limit=15`)
             .then(res => res.json())
             .then(data => {
                 const posts = data.data.children;
                 let selectedPost = null;
                 let finalImgUrl = '';
 
-                // Keressük meg az első olyan posztot, amiben ténylegesen van kép
                 for (let i = 0; i < posts.length; i++) {
                     const post = posts[i].data;
 
-                    const isStandardImage = post.url && (post.url.match(/\.(jpeg|jpg|gif|png)$/) != null || post.post_hint === 'image');
+                    let isStandardImage = false;
+                    let tempUrl = post.url;
+
+                    if (post.post_hint === 'image' || (post.url && post.url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                        isStandardImage = true;
+                        tempUrl = post.url.replace(/&amp;/g, '&');
+                    } else if (post.preview && post.preview.images && post.preview.images.length > 0) {
+                        isStandardImage = true;
+                        tempUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+                    }
+
                     const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
 
-                    if (isStandardImage) {
+                    if (isStandardImage && !isGallery) {
                         selectedPost = post;
-                        finalImgUrl = post.url;
-                        break; // Megtaláltuk, kilépünk a ciklusból
+                        finalImgUrl = tempUrl;
+                        break;
                     }
                     else if (isGallery) {
-                        // Galéria esetén az első kép URL-jét szedjük ki
                         const firstMediaId = post.gallery_data.items[0].media_id;
                         const mediaMeta = post.media_metadata[firstMediaId];
 
                         if (mediaMeta && mediaMeta.s && mediaMeta.s.u) {
                             selectedPost = post;
                             finalImgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
-                            break; // Megtaláltuk, kilépünk a ciklusból
+                            break;
                         }
                     }
                 }
@@ -514,7 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    // --- UWU-FIKÁTOR MOTOR ---
     let isUwUified = false;
     let originalTexts = new Map();
 
@@ -522,13 +532,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target && e.target.id === 'btn-uwu-mode') {
             const btn = e.target;
             if (!isUwUified) {
-                btn.innerHTML = "✨ UwU Mód: ON 🎀";
                 btn.style.background = "var(--pink)";
                 btn.style.color = "white";
                 applyUwUJS(document.body);
                 isUwUified = true;
             } else {
-                // Frissítés gombnyomásra a visszaállításhoz
                 window.location.reload();
             }
         }

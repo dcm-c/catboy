@@ -2,7 +2,12 @@
     --pink: #f5a9b8;
     --blue: #5bcefa;
     --dark: #4a4a4a;
+    --light: #f8f9fa;
     --bg-gradient: linear-gradient(135deg, #fff5f7 0%, #e6f7ff 100%);
+    --femboy-grad: linear-gradient(90deg, #5bcefa, #f5a9b8, #ffffff, #f5a9b8, #5bcefa);
+    --trans-grad: linear-gradient(90deg, #5bcefa, #f5a9b8, #ffffff, #f5a9b8, #5bcefa);
+    --pride-grad: linear-gradient(90deg, #FF0018, #FFA52C, #FFFF41, #008018, #0000F9, #86007D, #FF0018);
+    --mlm-grad: linear-gradient(90deg, #078d70, #98e8c1, #ffffff, #7bade2, #3d1a78, #078d70);
 }
 
 body {
@@ -743,6 +748,47 @@ footer {
 }
 
 /* --- FUN ELEGMEK (Macska & Premium) --- */
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 10px rgba(245, 169, 184, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(91, 206, 250, 0.6);
+    }
+
+    100% {
+        box-shadow: 0 0 10px rgba(245, 169, 184, 0.3);
+    }
+}
 
 /* 1. Macska a sarokban */
 .corner-cat {
@@ -820,6 +866,79 @@ footer {
     transform: translateY(-5px);
 }
 
+/* 1. Animált szöveg színek */
+.text-grad-femboy {
+    background: var(--femboy-grad);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientMove 4s linear infinite;
+}
+
+.text-grad-pride {
+    background: var(--pride-grad);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientMove 5s linear infinite;
+}
+
+.text-grad-mlm {
+    background: var(--mlm-grad);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientMove 4s linear infinite;
+}
+
+/* 2. Lebegő kártyák és elemek */
+.floating-element {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* 3. Animált szegélyek (Pl. Navbar alá vagy kártyák tetejére) */
+.border-bottom-pride {
+    position: relative;
+}
+
+.border-bottom-pride::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--pride-grad);
+    background-size: 200% auto;
+    animation: gradientMove 3s linear infinite;
+}
+
+.border-bottom-trans {
+    position: relative;
+}
+
+.border-bottom-trans::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--trans-grad);
+    background-size: 200% auto;
+    animation: gradientMove 3s linear infinite;
+}
+
+/* 4. Kártya Hover Glow Effekt (Femboy színekben) */
+.custom-card.glow-hover {
+    transition: all 0.3s ease;
+}
+
+.custom-card.glow-hover:hover {
+    transform: translateY(-5px);
+    animation: glowPulse 2s infinite;
+    border-color: var(--blue);
+}
 
 @keyframes popUp {
     from {
@@ -883,6 +1002,125 @@ footer {
 
 .custom-accordion .accordion-button::after {
     transition: transform 0.3s ease;
+}
+
+/* --- ÚJ GLOWING UWU MÓD GOMB --- */
+.btn-uwu-glowing {
+    background: linear-gradient(135deg, #f5a9b8 0%, #ffc2cd 100%);
+    color: white !important;
+    font-weight: 800;
+    border: none;
+    padding: 6px 18px !important;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(245, 169, 184, 0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    animation: uwuPulse 2s infinite;
+}
+
+.btn-uwu-glowing:hover {
+    background: linear-gradient(135deg, #5bcefa 0%, #f5a9b8 100%);
+    transform: scale(1.1) rotate(3deg);
+    box-shadow: 0 6px 20px rgba(91, 206, 250, 0.6);
+    color: white !important;
+}
+
+.btn-uwu-glowing:active {
+    transform: scale(0.95);
+}
+
+/* Pulzáló fény aura animáció */
+@keyframes uwuPulse {
+    0% {
+        box-shadow: 0 4px 12px rgba(245, 169, 184, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 20px rgba(245, 169, 184, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 4px 12px rgba(245, 169, 184, 0.4);
+    }
+}
+
+.discord-role-mention {
+    background-color: rgba(245, 169, 184, 0.15);
+    color: #d63384;
+    border: 1px solid rgba(245, 169, 184, 0.4);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85em;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* --- JAVÍTOTT DISCORD STÍLUSOK (MAGAS KONTRASZT) --- */
+.discord-role-mention {
+    background-color: rgba(245, 169, 184, 0.25);
+    color: #c2185b !important;
+    /* Erős, olvasható sötétrózsaszín */
+    border: 1px solid #f5a9b8;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85em;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.discord-role-mention.disabled-role {
+    background-color: rgba(245, 169, 184, 0.05);
+    color: #9e6b7d !important;
+    /* Halványabb, de még olvasható */
+    border: 1px solid rgba(245, 169, 184, 0.4);
+}
+
+.discord-channel-mention {
+    background-color: rgba(88, 101, 242, 0.15);
+    color: #3f51b5 !important;
+    /* Erős sötétkék */
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* Új osztály a fixen olvasható szövegekért */
+.rules-text {
+    color: #333333 !important;
+    font-weight: 500;
+}
+
+.admin-badge {
+    background-color: rgba(255, 170, 0, 0.15);
+    /* Halvány sárga/arany háttér */
+    color: #cc7a00 !important;
+    /* Erős, sötétebb sárga-arany a jó olvashatóságért */
+    border: 1px solid rgba(255, 170, 0, 0.4);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85em;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.mod-badge {
+    background-color: rgba(88, 101, 242, 0.15);
+    /* Halvány Discord-kék háttér */
+    color: #3f51b5 !important;
+    /* Erős kék szín */
+    border: 1px solid rgba(88, 101, 242, 0.4);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85em;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 /* Mobilon ne lógjon ki a képernyőről */
