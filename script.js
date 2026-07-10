@@ -224,175 +224,174 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const subreddit = 'MagyarFemboyCommunity';
 
-        // Cél URL (api.reddit.com a legstabilabb)
-        const targetUrl = `https://api.reddit.com/r/${subreddit}/new.json?limit=30`;
-        // Stabil AllOrigins proxy használata a nyers adatok lekéréséhez
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+        // Egyedi globális callback függvény létrehozása a JSONP-nek
+        const callbackName = 'jsonp_reddit_gallery_' + Math.round(Math.random() * 100000);
 
-        fetch(proxyUrl)
-            .then(res => {
-                if (!res.ok) throw new Error(`Hálózati hiba: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                const posts = data.data.children;
-                let addedCount = 0;
-                const maxImages = 15;
+        window[callbackName] = function (data) {
+            // Takarítás magunk után
+            delete window[callbackName];
+            document.getElementById(callbackName)?.remove();
 
-                function addImageToGrid(imgUrl, title, author, permalink) {
-                    const colDiv = document.createElement('div');
-                    colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
+            const posts = data.data.children;
+            let addedCount = 0;
+            const maxImages = 15;
 
-                    colDiv.innerHTML = `
-                        <div class="photo-wrapper" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#imageModal"
-                                data-img-src="${imgUrl}"
-                                data-title="${title}" 
-                                data-author="Feltöltötte: u/${author}"
-                                data-post-url="${permalink}"> 
-                            <div class="blur-bg" style="background-image: url('${imgUrl}');"></div>
-                            <img src="${imgUrl}" class="main-photo" alt="${title}" loading="lazy">
-                            
-                            <div class="photo-overlay">
-                                <i class="fab fa-reddit fa-2x mb-2"></i>
-                                <h5 class="text-truncate px-2">${title}</h5>
-                            </div>
+            function addImageToGrid(imgUrl, title, author, permalink) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
+
+                colDiv.innerHTML = `
+                    <div class="photo-wrapper" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#imageModal"
+                            data-img-src="${imgUrl}"
+                            data-title="${title}" 
+                            data-author="Feltöltötte: u/${author}"
+                            data-post-url="${permalink}"> 
+                        <div class="blur-bg" style="background-image: url('${imgUrl}');"></div>
+                        <img src="${imgUrl}" class="main-photo" alt="${title}" loading="lazy">
+                        
+                        <div class="photo-overlay">
+                            <i class="fab fa-reddit fa-2x mb-2"></i>
+                            <h5 class="text-truncate px-2">${title}</h5>
                         </div>
-                    `;
+                    </div>
+                `;
 
-                    gridElement.appendChild(colDiv);
-                    setTimeout(() => colDiv.classList.add('animate-in'), 100 + (addedCount * 50));
+                gridElement.appendChild(colDiv);
+                setTimeout(() => colDiv.classList.add('animate-in'), 100 + (addedCount * 50));
+            }
+
+            posts.forEach(postData => {
+                const post = postData.data;
+                if (addedCount >= maxImages) return;
+
+                const permalink = `https://www.reddit.com${post.permalink}`;
+                let isStandardImage = false;
+                let finalImgUrl = post.url;
+
+                if (post.post_hint === 'image' || (post.url && post.url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                    isStandardImage = true;
+                    finalImgUrl = post.url.replace(/&amp;/g, '&');
+                } else if (post.preview && post.preview.images && post.preview.images.length > 0) {
+                    isStandardImage = true;
+                    finalImgUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
                 }
 
-                posts.forEach(postData => {
-                    const post = postData.data;
-                    if (addedCount >= maxImages) return;
+                const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
 
-                    const permalink = `https://www.reddit.com${post.permalink}`;
+                if (isStandardImage && !isGallery) {
+                    addImageToGrid(finalImgUrl, post.title, post.author, permalink);
+                    addedCount++;
+                }
+                else if (isGallery) {
+                    const items = post.gallery_data.items;
+                    items.forEach((item, index) => {
+                        if (addedCount >= maxImages) return;
 
-                    let isStandardImage = false;
-                    let finalImgUrl = post.url;
+                        const mediaId = item.media_id;
+                        const mediaMeta = post.media_metadata[mediaId];
 
-                    if (post.post_hint === 'image' || (post.url && post.url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
-                        isStandardImage = true;
-                        finalImgUrl = post.url.replace(/&amp;/g, '&');
-                    } else if (post.preview && post.preview.images && post.preview.images.length > 0) {
-                        isStandardImage = true;
-                        finalImgUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
-                    }
+                        if (mediaMeta && mediaMeta.status === 'valid' && mediaMeta.s && mediaMeta.s.u) {
+                            const imgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
+                            const galleryTitle = items.length > 1 ? `${post.title} (${index + 1}/${items.length})` : post.title;
 
-                    const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
-
-                    if (isStandardImage && !isGallery) {
-                        addImageToGrid(finalImgUrl, post.title, post.author, permalink);
-                        addedCount++;
-                    }
-                    else if (isGallery) {
-                        const items = post.gallery_data.items;
-                        items.forEach((item, index) => {
-                            if (addedCount >= maxImages) return;
-
-                            const mediaId = item.media_id;
-                            const mediaMeta = post.media_metadata[mediaId];
-
-                            if (mediaMeta && mediaMeta.status === 'valid' && mediaMeta.s && mediaMeta.s.u) {
-                                const imgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
-                                const galleryTitle = items.length > 1 ? `${post.title} (${index + 1}/${items.length})` : post.title;
-
-                                addImageToGrid(imgUrl, galleryTitle, post.author, permalink);
-                                addedCount++;
-                            }
-                        });
-                    }
-                });
-
-                if (spinner) spinner.style.display = 'none';
-                if (statusText) statusText.style.display = 'none';
-                if (callback) callback();
-            })
-            .catch(err => {
-                console.error('Reddit AllOrigins Fetch hiba:', err);
-                if (statusText) statusText.innerText = 'Nem sikerült betölteni a képeket a Redditről.';
-                if (spinner) spinner.style.display = 'none';
+                            addImageToGrid(imgUrl, galleryTitle, post.author, permalink);
+                            addedCount++;
+                        }
+                    });
+                }
             });
+
+            if (spinner) spinner.style.display = 'none';
+            if (statusText) statusText.style.display = 'none';
+            if (callback) callback();
+        };
+
+        // Dinamikus script tag beszúrása a JSONP kéréshez
+        const script = document.createElement('script');
+        script.id = callbackName;
+        script.src = `https://www.reddit.com/r/${subreddit}/new.json?limit=30&jsonp=${callbackName}`;
+        script.onerror = function () {
+            if (statusText) statusText.innerText = 'Nem sikerült betölteni a Reddit adatokat (Script hiba).';
+            if (spinner) spinner.style.display = 'none';
+        };
+        document.body.appendChild(script);
     }
 
     function initHomePage(container) {
         const subreddit = 'MagyarFemboyCommunity';
+        const callbackName = 'jsonp_reddit_home_' + Math.round(Math.random() * 100000);
 
-        const targetUrl = `https://api.reddit.com/r/${subreddit}/new.json?limit=15`;
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+        window[callbackName] = function (data) {
+            delete window[callbackName];
+            document.getElementById(callbackName)?.remove();
 
-        fetch(proxyUrl)
-            .then(res => {
-                if (!res.ok) throw new Error(`Hálózati hiba: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                const posts = data.data.children;
-                let selectedPost = null;
-                let finalImgUrl = '';
+            const posts = data.data.children;
+            let selectedPost = null;
+            let finalImgUrl = '';
 
-                for (let i = 0; i < posts.length; i++) {
-                    const post = posts[i].data;
+            for (let i = 0; i < posts.length; i++) {
+                const post = posts[i].data;
+                let isStandardImage = false;
+                let tempUrl = post.url;
 
-                    let isStandardImage = false;
-                    let tempUrl = post.url;
+                if (post.post_hint === 'image' || (post.url && post.url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
+                    isStandardImage = true;
+                    tempUrl = post.url.replace(/&amp;/g, '&');
+                } else if (post.preview && post.preview.images && post.preview.images.length > 0) {
+                    isStandardImage = true;
+                    tempUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+                }
 
-                    if (post.post_hint === 'image' || (post.url && post.url.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i))) {
-                        isStandardImage = true;
-                        tempUrl = post.url.replace(/&amp;/g, '&');
-                    } else if (post.preview && post.preview.images && post.preview.images.length > 0) {
-                        isStandardImage = true;
-                        tempUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
-                    }
+                const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
 
-                    const isGallery = post.is_gallery && post.media_metadata && post.gallery_data;
+                if (isStandardImage && !isGallery) {
+                    selectedPost = post;
+                    finalImgUrl = tempUrl;
+                    break;
+                }
+                else if (isGallery) {
+                    const firstMediaId = post.gallery_data.items[0].media_id;
+                    const mediaMeta = post.media_metadata[firstMediaId];
 
-                    if (isStandardImage && !isGallery) {
+                    if (mediaMeta && mediaMeta.s && mediaMeta.s.u) {
                         selectedPost = post;
-                        finalImgUrl = tempUrl;
+                        finalImgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
                         break;
                     }
-                    else if (isGallery) {
-                        const firstMediaId = post.gallery_data.items[0].media_id;
-                        const mediaMeta = post.media_metadata[firstMediaId];
-
-                        if (mediaMeta && mediaMeta.s && mediaMeta.s.u) {
-                            selectedPost = post;
-                            finalImgUrl = mediaMeta.s.u.replace(/&amp;/g, '&');
-                            break;
-                        }
-                    }
                 }
+            }
 
-                if (selectedPost && finalImgUrl) {
-                    const permalink = `https://www.reddit.com${selectedPost.permalink}`;
+            if (selectedPost && finalImgUrl) {
+                const permalink = `https://www.reddit.com${selectedPost.permalink}`;
+                const imageHtml = `
+                    <div class="reddit-image-wrapper">
+                        <div class="blur-bg" style="background-image: url('${finalImgUrl}');"></div>
+                        <img src="${finalImgUrl}" class="main-photo" alt="Reddit Post">
+                    </div>
+                `;
 
-                    const imageHtml = `
-                        <div class="reddit-image-wrapper">
-                            <div class="blur-bg" style="background-image: url('${finalImgUrl}');"></div>
-                            <img src="${finalImgUrl}" class="main-photo" alt="Reddit Post">
-                        </div>
-                    `;
+                container.innerHTML = `
+                    ${imageHtml}
+                    <h5 class="fw-bold text-truncate mt-2"><a href="${permalink}" target="_blank" class="text-dark text-decoration-none">${selectedPost.title}</a></h5>
+                    <div class="d-flex justify-content-between text-muted small mt-2">
+                        <span>👤 u/${selectedPost.author}</span>
+                        <span>🔼 ${selectedPost.ups}</span>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '<p class="text-center text-muted small mt-3">Nem találtunk új képes posztot.</p>';
+            }
+        };
 
-                    container.innerHTML = `
-                        ${imageHtml}
-                        <h5 class="fw-bold text-truncate mt-2"><a href="${permalink}" target="_blank" class="text-dark text-decoration-none">${selectedPost.title}</a></h5>
-                        <div class="d-flex justify-content-between text-muted small mt-2">
-                            <span>👤 u/${selectedPost.author}</span>
-                            <span>🔼 ${selectedPost.ups}</span>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = '<p class="text-center text-muted small mt-3">Nem találtunk új képes posztot a subredditen.</p>';
-                }
-            })
-            .catch(err => {
-                console.error('Reddit Főoldal AllOrigins hiba:', err);
-                container.innerHTML = '<p class="text-center text-muted small mt-3">Nem sikerült betölteni a Reddit posztot.</p>';
-            });
+        const script = document.createElement('script');
+        script.id = callbackName;
+        script.src = `https://www.reddit.com/r/${subreddit}/new.json?limit=15&jsonp=${callbackName}`;
+        script.onerror = function () {
+            container.innerHTML = '<p class="text-center text-muted small mt-3">Nem sikerült elérni a Reddit-et.</p>';
+        };
+        document.body.appendChild(script);
     }
 
     // =========================================================
