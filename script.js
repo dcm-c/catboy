@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" title="Rick Roll" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                     </div>
                     <div class="text-center p-3" style="background: #fff;">
-                        <h3 class="fw-bold text-danger">NA NEE! 🕺</h3>
-                        <p class="mb-0">Sose add fel...</p>
+                        <h3 class="fw-bold text-danger">XD CRINGE</h3>
+                        <p class="mb-0">....</p>
                         <button class="btn btn-secondary mt-3" data-bs-dismiss="modal">Bezárás</button>
                     </div>
                 `;
