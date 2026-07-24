@@ -1,183 +1,252 @@
 <!DOCTYPE html>
 <html lang="hu">
 
-<head>
+<head>a
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programok | MFSZ</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="style.css">
-    </noscript>
+    <title>Események | MFSZ</title>
+
+    <!-- Bootstrap CSS beemelése (hogy illeszkedjen a keretrendszerhez) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
+    <!-- A TE eredeti stíluslapod -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Egy-két apró, egyedi kiegészítés a kártyákhoz és a pride szöveghez -->
+    <style>
+        body {
+            /* Finom világos átmenet, ha a style.css nem írja felül */
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+        }
+
+        .pride-text {
+            background: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .event-icon {
+            font-size: 2.2rem;
+            line-height: 1;
+        }
+
+        .card {
+            transition: transform 0.2s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.85);
+            /* Kicsit áttetsző, hogy látszódjon az átmenet */
+            backdrop-filter: blur(5px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
 </head>
 
-<body>
-    <div id="navbar-placeholder"></div>
-    <section class="py-5 mt-5">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold mb-3">Programnaptár <span style="color: var(--pink)">🎉</span></h1>
-            <p class="lead text-muted" style="max-width: 600px; margin: 0 auto;">
-                Találkozz velünk élőben vagy online! Itt találod a hivatalos MFSZ eseményeket.
-                Gyere bátran, nem harapunk (csak a cápák)! 🦈
-            </p>
-        </div>
-    </section>
+<body class="text-dark">
 
-    <section class="pb-5">
-        <div class="container">
-            <div class="row justify-content-center g-4">
-
-                <div class="col-lg-9">
-                    <div class="event-card-modern p-4 d-flex align-items-center flex-column flex-md-row gap-4">
-                        <div class="date-box">
-                            <span class="month">JAN</span>
-                            <span class="day">21</span>
-                        </div>
-
-                        <div class="flex-grow-1 text-center text-md-start">
-                            <h3 class="h4 fw-bold mb-2">Téli MondoCon Találkozó 💎</h3>
-                            <div class="event-meta mb-3">
-                                <span><i class="fas fa-clock"></i> 10:00 - 18:00</span>
-                                <span><i class="fas fa-map-marker-alt"></i> Hungexpo, Budapest</span>
-                                <span class="badge bg-info text-white rounded-pill">Élő találkozó</span>
-                            </div>
-                            <p class="text-muted mb-0">
-                                A legnagyobb hazai anime és gamer rendezvény! A hideg nem akadály egy igazi femboynak.
-                                Gyere el te is.
-                            </p>
-                        </div>
-
-                        <div>
-                            <a href="#" class="btn btn-primary-custom shadow-sm text-nowrap">Ott leszek! 🙋‍♀️</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-9">
-                    <div class="event-card-modern p-4 d-flex align-items-center flex-column flex-md-row gap-4"
-                        style="border-left-color: #00fe2a;">
-                        <div class="date-box" style="background: linear-gradient(135deg, #107929, #00fe2a);">
-                            <span class="month">DEC</span>
-                            <span class="day">20</span>
-                        </div>
-
-                        <div class="flex-grow-1 text-center text-md-start">
-                            <h3 class="h4 fw-bold mb-2">Femboy Karácsony 🎄</h3>
-                            <div class="event-meta mb-3">
-                                <span><i class="fas fa-clock"></i> 10:00 - 20:00</span>
-                                <span><i class="fas fa-map-marker-alt"></i>Budapest</span>
-                            </div>
-                            <p class="text-muted mb-0">
-                                Karácsony elött szerver találkozó. Részletek a Discord szerveren.
-                            </p>
-                        </div>
-
-                        <div>
-                            <a href="#" class="btn btn-secondary-custom shadow-sm text-nowrap">Érdekel 👀</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-9">
-                    <div class="event-card-modern p-4 d-flex align-items-center flex-column flex-md-row gap-4"
-                        style="border-left-color: #9b59b6;">
-                        <div class="date-box" style="background: linear-gradient(135deg, #9b59b6, #e056fd);">
-                            <span class="month">ÁPR</span>
-                            <span class="day">10</span>
-                        </div>
-
-                        <div class="flex-grow-1 text-center text-md-start">
-                            <h3 class="h4 fw-bold mb-2">Minecraft Szerver 🎮</h3>
-                            <div class="event-meta mb-3">
-                                <span><i class="fas fa-wifi"></i> AnyTime</span>
-                                <span><i class="fas fa-globe"></i> Online (Discord)</span>
-                                <span class="badge bg-success text-white rounded-pill">Gaming</span>
-                            </div>
-                            <p class="text-muted mb-0">
-                                Indul az MFSZ hivatalos szervere! IP cím a Discordon.
-                                <br>Építsünk közösen egy cuki birodalmat.
-
-                            </p>
-                        </div>
-
-                        <div>
-                            <a href="index#social-stats" class="btn btn-secondary-custom shadow-sm text-nowrap">Irány a
-                                Discord
-                                🎮</a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5 bg-white bg-opacity-50">
-        <div class="container">
-            <h2 class="text-center fw-bold mb-5">Rendszeres Programok 🔄</h2>
-            <div class="row g-4 justify-content-center">
-
-                <div class="col-md-4">
-                    <div class="custom-card p-4 text-center h-100">
-                        <div class="regular-event-icon mx-auto">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <h5>Discord Voice Est</h5>
-                        <p class="text-muted small">Minden Pénteken 20:00-tól</p>
-                        <p>Játék, beszélgetés, filmnézés vagy csak chill a voice csatornákon.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="custom-card p-4 text-center h-100">
-                        <div class="regular-event-icon mx-auto">
-                            <i class="fas fa-coffee"></i>
-                        </div>
-                        <h5>Havi Kávézás</h5>
-                        <p class="text-muted small">Minden hónap 1. szombatján</p>
-                        <p>Beülős beszélgetés egy hangulatos budapesti kávézóban vagy teázóban.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="custom-card p-4 text-center h-100">
-                        <div class="regular-event-icon mx-auto">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <h5>Outfit Check Péntek</h5>
-                        <p class="text-muted small">Minden Pénteken (Online)</p>
-                        <p>Posztold a heti legjobb szettedet a #outfits szobába és gyűjtsd a bókokat!</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-    <div id="corner-cat" class="d-none d-sm-block corner-cat">
-        <div class="speech-bubble" id="cat-bubble">Nyau! 😽</div>
-        <i class="fas fa-cat cat-icon"></i>
+    <!-- A script.js valószínűleg ide tölti be a Navbart, de biztos ami biztos, itt egy alap Bootstrap navbar a zászlóval -->
+    <div id="navbar-placeholder">
     </div>
 
-    <div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-5" style="border: 3px solid gold;">
-                <h2 class="fw-bold mb-5">👑 Prémium Tagság</h2>
-                <p class="lead">A tartalom megtekintéséhez életkor-ellenőrzés szükséges.</p>
-                <p class="fw-bold text-danger">Elmúltál már 18 éves?</p>
+    <!-- Fő tartalom -->
+    <main class="container py-4 mb-5">
 
-                <div class="d-flex justify-content-center gap-3 mt-3">
-                    <button class="btn btn-success btn-lg px-4" id="btn-age-yes">IGEN</button>
-                    <button class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">NEM</button>
+        <!-- Fejléc szekció -->
+        <header class="py-5 mt-5 text-center page-header">
+            <div class="container">
+                <div class="text-center mb-5 pb-3">
+                    <h1 class="display-4 fw-bold pride-text mb-3">Programok</h1>
+                    <p class="lead text-secondary mx-auto" style="max-width: 700px;">
+                        Rengeteg eseményünk van mind online mind IRL. Hiszen mi a jól szervezett káoszban és a
+                        rendszeres
+                        fűérintésben hiszünk. További információkat a találkozóinkról Discordunkon találsz.
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <!-- IRL Események -->
+        <h3 class="border-bottom pb-2 mb-4 text-center">Megmozdulások <span class="text-warning">IRL</span></h3>
+        <div class="row g-4 mb-5">
+
+            <!-- Túra -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-success d-flex align-items-center mb-3">
+                            <span class="event-icon me-3">🌲</span> Fűérintés
+                        </h4>
+                        <p class="card-text">
+                            Évente legalább 4 alkalommal szervezünk rövid (1 napos) túrákat a vadonban. Általában
+                            <strong>Budapest környékén</strong> kószálunk. Tökéletes alkalom kiszellőztetni a
+                            gamer-barlang szagát!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MondoCon -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title d-flex align-items-center mb-3" style="color: #f5a9b8;">
+                            <span class="event-icon me-3">🌸</span> MondoCon & Afterparty
+                        </h4>
+                        <p class="card-text">
+                            Évente 3x hivatalos szervertalálkozó a Conon! <em>(A téli cont néha passzoljuk a hideg
+                                miatt).</em> A Con után pedig mindig egy budapesti, hangulatos <strong>(gaymer)
+                                bar-ban</strong> találkozunk.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Urbex -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-secondary d-flex align-items-center mb-3">
+                            <span class="event-icon me-3">🏚️</span> Rendszeres Urbex
+                        </h4>
+                        <p class="card-text">
+                            Elhagyatott helyek felfedezése, por, romok és pókhálók. Rendszeresen bemászunk felfedezni
+                            olyan helyeket, amikről a nagymamád azt mondaná: <em>"oda be ne menj, fiam!"</em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Egyéb -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-info d-flex align-items-center mb-3">
+                            <span class="event-icon me-3">🦈</span> Egyéb Kalandok
+                        </h4>
+                        <p class="card-text">
+                            A spontaneitás a fegyverünk: strandolások, aquapark, nyári hétvégi chillek, állatkert. És
+                            persze a legszentebb hagyomány: a <strong>közös IKEA cápavásárlás!</strong>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="footer-placeholder"></div>
 
+        <!-- Discord Események -->
+        <h3 class="border-bottom pb-2 mb-4 text-center">Élet a <span style="color: #732982;">Discordon</span></h3>
+        <div class="row g-4">
+
+            <!-- Minecraft -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0 border-start border-danger border-5">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title text-success d-flex align-items-center mb-0">
+                                <span class="event-icon me-3">⛏️</span> Minecraft Szerver
+                            </h4>
+                            <span class="badge bg-danger fs-6">S.O.S</span>
+                        </div>
+                        <p class="card-text">
+                            Jelenleg <strong>ÜZEMEN KÍVÜL!</strong> Felhívás: A blokkos világunk megmentőre vár. Ha
+                            értesz a szerverekhez és van kedved gatyába rázni, azonnal csapj zajt a Discordon!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Minigames -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary d-flex align-items-center mb-3">
+                            <span class="event-icon me-3">🎮</span> Minigame Estek
+                        </h4>
+                        <p class="card-text">
+                            Ahol a barátságok véget érnek! Rendszeres <em>Among Us</em>, <em>Goose Goose Duck (GGD)</em>
+                            és <em>Gartic Phone</em> partik. Gyere és derítsd ki ki a sus!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Politika -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-danger d-flex align-items-center mb-3">
+                            <span class="event-icon me-3">🔥</span> Kultúrálatlan Vitaest
+                        </h4>
+                        <p class="card-text">
+                            Bármikor. Váratlanul. Kultúrálatlanul megindul a Politikai Vitaest.
+                            <strong>Figyelem:</strong> A politikarangot <em>kizárólag</em> erős idegzetűeknek
+                            javasoljuk!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keresztény -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="card-title text-dark d-flex align-items-center mb-3">
+                            <span class="event-icon me-3">✝️</span> Keresztény Propaganda
+                        </h4>
+                        <div class="mt-auto pt-3 mt-3 fst-italic text-muted">
+                            <p id="bible-text" class="mb-1 small fw-medium">"Betöltés folyamatban..."</p>
+                            <footer id="bible-ref" class="blockquote-footer mt-1 text-end small"></footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- A script.js valószínűleg ide tölti be a Footert, de itt egy fallback -->
+    <div id="footer-placeholder">
+    </div>
+
+    <!-- Bootstrap JS beemelése -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- A TE eredeti script fájlod -->
     <script src="script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Betöltjük a JSON fájlt, ami a motiváló igéket tartalmazza
+            fetch('data/verses.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Nem sikerült betölteni a verses.json fájlt.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Véletlenszerű ige kiválasztása
+                    const randomIndex = Math.floor(Math.random() * data.length);
+                    const verse = data[randomIndex];
+
+                    // HTML elemek frissítése
+                    document.getElementById('bible-text').textContent = verse.text;
+                    document.getElementById('bible-ref').textContent = verse.ref;
+                })
+                .catch(error => {
+                    console.error('Hiba az ige betöltésekor:', error);
+                    // Fallback (ha a json még nincs feltöltve a szerverre)
+                    document.getElementById('bible-text').textContent = '"Mindenre van erőm a Krisztusban, a ki engem megerősít."';
+                    document.getElementById('bible-ref').textContent = 'Filippi 4:13';
+                });
+        });
+    </script>
+
 </body>
 
 </html>
