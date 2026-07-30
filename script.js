@@ -222,67 +222,57 @@ document.addEventListener('DOMContentLoaded', () => {
         if (spinner) spinner.style.display = 'inline-block';
         if (statusText) statusText.style.display = 'block';
 
-        const subreddit = 'MagyarFemboyCommunity';
-
-        // Reddit RSS URL-jének átkonvertálása az RSS2JSON API-n keresztül
-        const rssUrl = encodeURIComponent(`https://www.reddit.com/r/${subreddit}/new/.rss`);
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
-
-        fetch(apiUrl)
-            .then(res => {
-                if (!res.ok) throw new Error('Hálózat hiba');
-                return res.json();
-            })
-            .then(data => {
-                if (data.status !== 'ok') throw new Error('RSS feldolgozási hiba');
-
-                const posts = data.items;
+        // ÚJ: A saját Cloudflare Worker API-nkat hívjuk!
+        fetch('/api/reddit')
+            .then(res => res.json())
+            .then(posts => {
                 let addedCount = 0;
-                const maxImages = 15;
+                const maxPosts = 15;
 
                 posts.forEach(post => {
-                    if (addedCount >= maxImages) return;
+                    if (addedCount >= maxPosts) return;
 
-                    // Kép kinyerése a poszt tartalmából (HTML stringből)
-                    const imgMatch = post.content.match(/<img[^>]+src="([^">]+)"/);
-                    let finalImgUrl = null;
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
 
-                    if (imgMatch && imgMatch[1]) {
-                        finalImgUrl = imgMatch[1];
-                    } else if (post.thumbnail) {
-                        finalImgUrl = post.thumbnail;
+                    const imagesJson = JSON.stringify(post.images).replace(/"/g, '&quot;');
+                    const firstImg = post.images[0];
+                    const imageCount = post.images.length;
+                    let imagesHtml = '';
+
+                    // HTML felépítése attól függően, hány kép van (max 3-at mutatunk a kártyán)
+                    if (imageCount === 1) {
+                        imagesHtml = `<img src="${firstImg}" class="main-photo" alt="${post.title}" loading="lazy">`;
+                    } else {
+                        const gridClass = imageCount === 2 ? 'grid-2' : 'grid-3';
+                        const maxDisplay = Math.min(imageCount, 3);
+                        imagesHtml = `<div class="multi-photo-grid ${gridClass}">`;
+                        for (let i = 0; i < maxDisplay; i++) {
+                            imagesHtml += `<img src="${post.images[i]}" alt="Gallery Image ${i + 1}" loading="lazy">`;
+                        }
+                        imagesHtml += `</div><div class="image-count-badge"><i class="far fa-images"></i> +${imageCount}</div>`;
                     }
 
-                    // Ha találtunk képet a posztban
-                    if (finalImgUrl) {
-                        const colDiv = document.createElement('div');
-                        colDiv.className = 'col-12 col-sm-6 col-lg-4 gallery-col reddit all';
+                    colDiv.innerHTML = `
+                    <div class="photo-wrapper" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#imageModal"
+                            data-images="${imagesJson}"
+                            data-title="${post.title}" 
+                            data-author="Feltöltötte: u/${post.author}"
+                            data-post-url="${post.url}"> 
+                        <div class="blur-bg" style="background-image: url('${firstImg}');"></div>
+                        ${imagesHtml}
+                        <div class="photo-overlay">
+                            <i class="fab fa-reddit fa-2x mb-2"></i>
+                            <h5 class="text-truncate px-2">${post.title}</h5>
+                        </div>
+                    </div>
+                `;
 
-                        // A Reddit author mező néha tartalmazza a Reddit URL-t is, kitisztítjuk
-                        let authorName = post.author.replace('/u/', '');
-
-                        colDiv.innerHTML = `
-                            <div class="photo-wrapper" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#imageModal"
-                                    data-img-src="${finalImgUrl}"
-                                    data-title="${post.title}" 
-                                    data-author="Feltöltötte: u/${authorName}"
-                                    data-post-url="${post.link}"> 
-                                <div class="blur-bg" style="background-image: url('${finalImgUrl}');"></div>
-                                <img src="${finalImgUrl}" class="main-photo" alt="${post.title}" loading="lazy">
-                                
-                                <div class="photo-overlay">
-                                    <i class="fab fa-reddit fa-2x mb-2"></i>
-                                    <h5 class="text-truncate px-2">${post.title}</h5>
-                                </div>
-                            </div>
-                        `;
-
-                        gridElement.appendChild(colDiv);
-                        setTimeout(() => colDiv.classList.add('animate-in'), 100 + (addedCount * 50));
-                        addedCount++;
-                    }
+                    gridElement.appendChild(colDiv);
+                    setTimeout(() => colDiv.classList.add('animate-in'), 100 + (addedCount * 50));
+                    addedCount++;
                 });
 
                 if (spinner) spinner.style.display = 'none';
@@ -290,69 +280,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (callback) callback();
             })
             .catch(err => {
-                console.error('Reddit RSS Fetch hiba:', err);
-                if (statusText) statusText.innerText = 'Nem sikerült betölteni a képeket a Redditről.';
+                console.error('Reddit API hiba:', err);
+                if (statusText) statusText.innerText = 'Nem sikerült betölteni a képeket.';
                 if (spinner) spinner.style.display = 'none';
             });
     }
 
     function initHomePage(container) {
-        const subreddit = 'MagyarFemboyCommunity';
-        const rssUrl = encodeURIComponent(`https://www.reddit.com/r/${subreddit}/new/.rss`);
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
+        fetch('/api/reddit')
+            .then(res => res.json())
+            .then(posts => {
+                if (posts.length > 0) {
+                    const selectedPost = posts[0]; // A legújabb poszt, aminek van képe
+                    const firstImgUrl = selectedPost.images[0];
+                    const imageCount = selectedPost.images.length;
 
-        fetch(apiUrl)
-            .then(res => {
-                if (!res.ok) throw new Error('Hálózat hiba');
-                return res.json();
-            })
-            .then(data => {
-                if (data.status !== 'ok') throw new Error('RSS feldolgozási hiba');
-
-                const posts = data.items;
-                let selectedPost = null;
-                let finalImgUrl = '';
-
-                for (let i = 0; i < posts.length; i++) {
-                    const post = posts[i];
-
-                    const imgMatch = post.content.match(/<img[^>]+src="([^">]+)"/);
-                    if (imgMatch && imgMatch[1]) {
-                        finalImgUrl = imgMatch[1];
-                        selectedPost = post;
-                        break;
-                    } else if (post.thumbnail) {
-                        finalImgUrl = post.thumbnail;
-                        selectedPost = post;
-                        break;
-                    }
-                }
-
-                if (selectedPost && finalImgUrl) {
-                    let authorName = selectedPost.author.replace('/u/', '');
+                    let badgeHtml = imageCount > 1 ? `<div class="image-count-badge" style="position:absolute; top:10px; right:10px;"><i class="far fa-images"></i> +${imageCount}</div>` : '';
 
                     const imageHtml = `
-                        <div class="reddit-image-wrapper">
-                            <div class="blur-bg" style="background-image: url('${finalImgUrl}');"></div>
-                            <img src="${finalImgUrl}" class="main-photo" alt="Reddit Post">
-                        </div>
-                    `;
+                    <div class="reddit-image-wrapper" style="position:relative;">
+                        <div class="blur-bg" style="background-image: url('${firstImgUrl}');"></div>
+                        <img src="${firstImgUrl}" class="main-photo" alt="Reddit Post">
+                        ${badgeHtml}
+                    </div>
+                `;
 
                     container.innerHTML = `
-                        ${imageHtml}
-                        <h5 class="fw-bold text-truncate mt-2"><a href="${selectedPost.link}" target="_blank" class="text-dark text-decoration-none">${selectedPost.title}</a></h5>
-                        <div class="d-flex justify-content-between text-muted small mt-2">
-                            <span>👤 u/${authorName}</span>
-                            <span><i class="fab fa-reddit text-danger"></i> Új poszt</span>
-                        </div>
-                    `;
+                    ${imageHtml}
+                    <h5 class="fw-bold text-truncate mt-2"><a href="${selectedPost.url}" target="_blank" class="text-dark text-decoration-none">${selectedPost.title}</a></h5>
+                    <div class="d-flex justify-content-between text-muted small mt-2">
+                        <span>👤 u/${selectedPost.author}</span>
+                        <span><i class="fab fa-reddit text-danger"></i> Új poszt</span>
+                    </div>
+                `;
                 } else {
-                    container.innerHTML = '<p class="text-center text-muted small mt-3">Nem találtunk új képes posztot.</p>';
+                    container.innerHTML = '<p class="text-center text-muted small mt-3">Jelenleg nincs képpel rendelkező poszt.</p>';
                 }
             })
             .catch(err => {
-                console.error('Reddit RSS Főoldal hiba:', err);
-                container.innerHTML = '<p class="text-center text-muted small mt-3">Nem sikerült elérni a Reddit-et.</p>';
+                console.error('Reddit Főoldal hiba:', err);
+                container.innerHTML = '<p class="text-center text-muted small mt-3">Nem sikerült elérni az adatokat.</p>';
             });
     }
 
@@ -365,28 +332,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextBtn = document.getElementById('nextImageBtn');
 
         if (imageModal) {
-            // Amikor a modal megnyílik
             imageModal.addEventListener('show.bs.modal', function (event) {
-                // 1. Frissítjük a látható képek listáját (a szűrés miatt fontos!)
-                // Csak azokat gyűjtjük ki, amelyeknek az oszlopa (.gallery-col) nem rejtett (.d-none)
-                visiblePhotoWrappers = Array.from(document.querySelectorAll('.gallery-col:not(.d-none) .photo-wrapper'));
+                flatGalleryList = [];
+                const visibleCols = document.querySelectorAll('.gallery-col:not(.d-none) .photo-wrapper');
+                let clickedWrapper = event.relatedTarget;
+                let startIndex = 0;
 
-                const wrapper = event.relatedTarget; // Amire kattintottak
+                // Végigmegyünk az összes látható kártyán és "kiterítjük" a képeket egy listába
+                visibleCols.forEach(wrapper => {
+                    const title = wrapper.getAttribute('data-title');
+                    const author = wrapper.getAttribute('data-author');
+                    const postUrl = wrapper.getAttribute('data-post-url');
+                    const instaUrl = wrapper.getAttribute('data-insta-url');
 
-                // 2. Megkeressük, hanyadik kép ez a listában
-                currentImageIndex = visiblePhotoWrappers.indexOf(wrapper);
+                    let imgs = [];
+                    const dataImagesStr = wrapper.getAttribute('data-images');
+                    if (dataImagesStr) {
+                        imgs = JSON.parse(dataImagesStr); // Reddit poszt több képpel
+                    } else {
+                        imgs = [wrapper.getAttribute('data-img-src')]; // Hardcoded képek
+                    }
 
-                // 3. Frissítjük a modal tartalmát
-                updateModalContent(wrapper);
+                    // Ha erre a wrapperre kattintottak, elmentjük a kezdő indexet
+                    if (wrapper === clickedWrapper) {
+                        startIndex = flatGalleryList.length;
+                    }
+
+                    imgs.forEach((imgUrl, subIndex) => {
+                        flatGalleryList.push({
+                            imgSrc: imgUrl,
+                            title: title,
+                            author: author,
+                            postUrl: postUrl,
+                            instaUrl: instaUrl,
+                            counterText: imgs.length > 1 ? `(${subIndex + 1}/${imgs.length})` : ''
+                        });
+                    });
+                });
+
+                currentImageIndex = startIndex;
+                updateModalContent(flatGalleryList[currentImageIndex]);
             });
 
-            // Gomb események
             if (prevBtn) prevBtn.addEventListener('click', showPreviousImage);
             if (nextBtn) nextBtn.addEventListener('click', showNextImage);
 
-            // Billentyűzet esemény (bal/jobb nyíl)
             document.addEventListener('keydown', function (e) {
-                // Csak akkor, ha a modal nyitva van (van rajta 'show' class)
                 if (imageModal.classList.contains('show')) {
                     if (e.key === 'ArrowLeft') showPreviousImage();
                     if (e.key === 'ArrowRight') showNextImage();
@@ -395,41 +386,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Segédfüggvény: Modal tartalom frissítése
-    function updateModalContent(wrapper) {
-        if (!wrapper) return;
+    function updateModalContent(dataObj) {
+        if (!dataObj) return;
 
         const modalImage = document.getElementById('modalImage');
         const modalTitle = document.getElementById('modalTitle');
         const modalDesc = document.getElementById('modalDesc');
         const modalRedditLink = document.getElementById('modalRedditLink');
-        const modalInstaLink = document.getElementById('modalInstaLink'); // ÚJ
+        const modalInstaLink = document.getElementById('modalInstaLink');
 
-        // Adatok kinyerése
-        const imgSrc = wrapper.getAttribute('data-img-src');
-        const title = wrapper.getAttribute('data-title');
-        const author = wrapper.getAttribute('data-author');
-        const postUrl = wrapper.getAttribute('data-post-url'); // Reddit link
-        const instaUrl = wrapper.getAttribute('data-insta-url'); // ÚJ: Instagram link
+        if (modalImage) modalImage.src = dataObj.imgSrc;
+        if (modalTitle) modalTitle.textContent = `${dataObj.title || ""} ${dataObj.counterText}`;
+        if (modalDesc) modalDesc.textContent = dataObj.author || "";
 
-        // Tartalom beállítása
-        if (modalImage) modalImage.src = imgSrc;
-        if (modalTitle) modalTitle.textContent = title || "";
-        if (modalDesc) modalDesc.textContent = author || "";
-
-        // Reddit link kezelése
         if (modalRedditLink) {
-            if (postUrl && postUrl !== "null") {
-                modalRedditLink.href = postUrl;
-                modalRedditLink.classList.remove('d-none'); // Megjelenítjük
+            if (dataObj.postUrl && dataObj.postUrl !== "null") {
+                modalRedditLink.href = dataObj.postUrl;
+                modalRedditLink.classList.remove('d-none');
             } else {
-                modalRedditLink.classList.add('d-none'); // Elrejtjük
+                modalRedditLink.classList.add('d-none');
             }
         }
-        // Instagram gomb kezelése
+
         if (modalInstaLink) {
-            if (instaUrl && instaUrl !== "null" && instaUrl !== "") {
-                modalInstaLink.href = instaUrl;
+            if (dataObj.instaUrl && dataObj.instaUrl !== "null" && dataObj.instaUrl !== "") {
+                modalInstaLink.href = dataObj.instaUrl;
                 modalInstaLink.classList.remove('d-none');
             } else {
                 modalInstaLink.classList.add('d-none');
@@ -437,31 +418,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Léptető függvények
     function showPreviousImage() {
-        if (visiblePhotoWrappers.length === 0) return;
-
-        if (currentImageIndex > 0) {
-            currentImageIndex--;
-        } else {
-            // Körkörös léptetés: az elejéről a végére ugrunk
-            currentImageIndex = visiblePhotoWrappers.length - 1;
-        }
-        updateModalContent(visiblePhotoWrappers[currentImageIndex]);
+        if (flatGalleryList.length === 0) return;
+        currentImageIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : flatGalleryList.length - 1;
+        updateModalContent(flatGalleryList[currentImageIndex]);
     }
 
     function showNextImage() {
-        if (visiblePhotoWrappers.length === 0) return;
-
-        if (currentImageIndex < visiblePhotoWrappers.length - 1) {
-            currentImageIndex++;
-        } else {
-            // Körkörös léptetés: a végéről az elejére ugrunk
-            currentImageIndex = 0;
-        }
-        updateModalContent(visiblePhotoWrappers[currentImageIndex]);
+        if (flatGalleryList.length === 0) return;
+        currentImageIndex = (currentImageIndex < flatGalleryList.length - 1) ? currentImageIndex + 1 : 0;
+        updateModalContent(flatGalleryList[currentImageIndex]);
     }
-
     // =========================================================
     // D. BETÖLTŐ FÜGGVÉNY (Navbar/Footer)
     // =========================================================
