@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /data/*
 Disallow: /fovi.html
-Sitemap: https://magyarfemboy.hu/sitemap.xml
+Sitemap: https://femboy.hu/sitemap.xml
