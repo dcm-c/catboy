@@ -1,0 +1,628 @@
+/* =========================================================
+   TÉMÁK: Sötét és Buzi mód
+   A világos téma a style.css-ben él, ez a fájl csak felülírja.
+   - [data-bs-theme="dark"]  -> a sötét ÉS a buzi mód közös alapja
+   - [data-theme="buzi"]     -> csak a szivárványos extrák
+   Betöltés: a style.css UTÁN kell szerepelnie a lapokon.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   0. Sima váltás a téma kézi cseréjekor (theme.js adja rá az osztályt)
+   --------------------------------------------------------- */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease !important;
+}
+
+/* ---------------------------------------------------------
+   1. Témaváltó gomb a navbarban
+   --------------------------------------------------------- */
+.theme-toggle {
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.theme-toggle .theme-toggle-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+@media (min-width: 992px) {
+
+    /* Asztali nézetben csak az ikon látszik, hogy elférjen a menüsor */
+    .navbar-nav .nav-link.theme-toggle {
+        padding: 8px 12px !important;
+    }
+
+    .theme-toggle .theme-toggle-label {
+        display: none;
+    }
+}
+
+@media (max-width: 991px) {
+    .theme-toggle .theme-toggle-icon {
+        margin-right: 0.5rem;
+    }
+}
+
+/* ---------------------------------------------------------
+   2. SÖTÉT ALAP (sötét + buzi mód)
+   --------------------------------------------------------- */
+:root[data-bs-theme="dark"] {
+    --dark: #ebe7f5;
+    /* a törzsszöveg színe (a body color: var(--dark)) */
+    --light: #1a1626;
+    --bg-gradient: linear-gradient(135deg, #15111f 0%, #0d1824 100%);
+    --surface: #1f1a2e;
+    --surface-2: #272138;
+    --surface-3: #2e2742;
+    --glass: rgba(24, 19, 36, 0.88);
+    --band: rgba(255, 255, 255, 0.035);
+    --ink-strong: #f4f1fb;
+    --ink-soft: #b9b3cc;
+    --line: rgba(255, 255, 255, 0.1);
+    --purple-ink: #d9a0e6;
+
+    /* Bootstrap saját változói, hogy a komponensei (űrlap, harmonika, lista) illeszkedjenek */
+    --bs-body-bg: #15111f;
+    --bs-body-color: #ebe7f5;
+    --bs-emphasis-color: #f4f1fb;
+    --bs-secondary-color: rgba(222, 218, 236, 0.78);
+    --bs-tertiary-bg: #272138;
+    --bs-secondary-bg: #2e2742;
+    --bs-border-color: rgba(255, 255, 255, 0.12);
+    --bs-card-bg: #1f1a2e;
+    color-scheme: dark;
+}
+
+:root[data-bs-theme="dark"] body {
+    background: var(--bg-gradient);
+    color: var(--dark);
+}
+
+/* Bootstrap kemény, !important színosztályai: ezeket külön kell felülírni */
+[data-bs-theme="dark"] .text-dark {
+    color: var(--dark) !important;
+}
+
+[data-bs-theme="dark"] .text-secondary {
+    color: var(--ink-soft) !important;
+}
+
+[data-bs-theme="dark"] .text-primary {
+    color: #7db4ff !important;
+}
+
+[data-bs-theme="dark"] .text-success {
+    color: #5fd39a !important;
+}
+
+[data-bs-theme="dark"] .text-danger {
+    color: #ff7b86 !important;
+}
+
+[data-bs-theme="dark"] .text-warning {
+    color: #ffd65c !important;
+}
+
+[data-bs-theme="dark"] .text-info {
+    color: #6edff6 !important;
+}
+
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--band) !important;
+}
+
+[data-bs-theme="dark"] .text-purple {
+    color: var(--purple-ink) !important;
+}
+
+/* Navigáció */
+[data-bs-theme="dark"] .navbar-glass {
+    background: var(--glass);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+[data-bs-theme="dark"] .navbar-nav .nav-link {
+    background-color: var(--surface);
+}
+
+[data-bs-theme="dark"] .navbar-nav .nav-link:hover {
+    background-color: var(--blue);
+}
+
+[data-bs-theme="dark"] .navbar-nav .nav-link.active-page {
+    background-color: var(--pink);
+}
+
+[data-bs-theme="dark"] .navbar-nav .nav-link.nav-premium {
+    background-color: #33290f;
+    color: #ffd65c !important;
+}
+
+[data-bs-theme="dark"] .nav-pills .nav-link {
+    background-color: var(--surface-3);
+    color: var(--dark);
+}
+
+[data-bs-theme="dark"] .nav-pills .nav-link:hover {
+    background-color: var(--surface-2);
+    color: var(--pink);
+}
+
+[data-bs-theme="dark"] .navbar-collapse {
+    background: var(--glass);
+}
+
+/* Kártyák, panelek */
+[data-bs-theme="dark"] .custom-card,
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .event-card-modern {
+    background: var(--surface);
+    color: var(--dark);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+[data-bs-theme="dark"] .custom-card.appeal-card {
+    background: var(--surface);
+}
+
+[data-bs-theme="dark"] .review-card {
+    background: var(--surface-2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .btn-secondary-custom,
+[data-bs-theme="dark"] .btn-filter {
+    background-color: var(--surface);
+}
+
+[data-bs-theme="dark"] .btn-secondary-custom:hover {
+    background-color: var(--blue);
+}
+
+[data-bs-theme="dark"] .btn-filter:hover,
+[data-bs-theme="dark"] .btn-filter.active {
+    background: var(--pink);
+    color: #3a1520;
+}
+
+[data-bs-theme="dark"] .regular-event-icon {
+    background: rgba(91, 206, 250, 0.14);
+}
+
+/* Űrlapok */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: var(--surface-2);
+    border-color: var(--line);
+    color: var(--dark);
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: rgba(235, 231, 245, 0.45);
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    background-color: var(--surface-2);
+    color: var(--dark);
+    border-color: var(--pink);
+}
+
+/* Szabályzat oldal */
+[data-bs-theme="dark"] .rules-text {
+    color: var(--ink-strong) !important;
+}
+
+[data-bs-theme="dark"] .channel-tag {
+    background: var(--surface-3);
+    color: #aab4ff;
+}
+
+[data-bs-theme="dark"] .role-tag {
+    background: rgba(245, 169, 184, 0.12);
+    color: #ff9cc2;
+}
+
+[data-bs-theme="dark"] .discord-role-mention {
+    background-color: rgba(245, 169, 184, 0.18);
+    color: #ff9cc2 !important;
+    border-color: rgba(245, 169, 184, 0.45);
+}
+
+[data-bs-theme="dark"] .discord-role-mention.disabled-role {
+    background-color: rgba(245, 169, 184, 0.06);
+    color: #b99aa6 !important;
+}
+
+[data-bs-theme="dark"] .discord-channel-mention,
+[data-bs-theme="dark"] .mod-badge {
+    background-color: rgba(120, 134, 255, 0.18);
+    color: #aab4ff !important;
+    border-color: rgba(120, 134, 255, 0.45);
+}
+
+[data-bs-theme="dark"] .admin-badge {
+    background-color: rgba(255, 170, 0, 0.16);
+    color: #ffbe4d !important;
+    border-color: rgba(255, 170, 0, 0.45);
+}
+
+/* GYIK-harmonika */
+[data-bs-theme="dark"] .custom-accordion .accordion-button.collapsed {
+    color: var(--dark) !important;
+}
+
+[data-bs-theme="dark"] .custom-accordion .accordion-body {
+    color: var(--ink-soft);
+}
+
+/* Vélemény-carousel nyilai: a Bootstrap "carousel-dark" sötét ikonokat ad, itt világos kell */
+[data-bs-theme="dark"] .carousel-dark .carousel-control-prev-icon,
+[data-bs-theme="dark"] .carousel-dark .carousel-control-next-icon {
+    filter: none;
+}
+
+/* Macska a sarokban */
+[data-bs-theme="dark"] .cat-icon {
+    text-shadow: 2px 2px 0 #000;
+}
+
+[data-bs-theme="dark"] .speech-bubble {
+    background: var(--surface);
+    color: var(--dark);
+    border-color: var(--pink);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] .speech-bubble::after {
+    border-color: var(--pink) transparent transparent transparent;
+}
+
+/* Lábléc */
+[data-bs-theme="dark"] footer {
+    background: var(--glass);
+    border-top-color: var(--line);
+}
+
+[data-bs-theme="dark"] #btn-uwu-mode {
+    background: var(--surface) !important;
+    color: var(--dark);
+}
+
+/* Galéria */
+[data-bs-theme="dark"] .photo-wrapper,
+[data-bs-theme="dark"] .reddit-image-wrapper {
+    background: var(--surface-2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] .gallery-empty {
+    color: var(--ink-soft);
+}
+
+/* Az events/fogalom oldal saját, beágyazott stílusai miatt kell a nagyobb specificitás */
+[data-bs-theme="dark"] .pride-text {
+    background: linear-gradient(to right, #ff5c6c, #ffa94d, #ffe86b, #4cd48a, #6ea8ff, #c28bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+[data-bs-theme="dark"] .highlight-box {
+    background: linear-gradient(to right, rgba(245, 169, 184, 0.16), rgba(91, 206, 250, 0.16));
+}
+
+/* Prémium ablak */
+.modal-content.premium-modal-content {
+    background: #fff0f3;
+    border: 3px solid gold;
+    backdrop-filter: none;
+}
+
+[data-bs-theme="dark"] .modal-content.premium-modal-content {
+    background: #2b2433;
+    color: var(--dark);
+}
+
+/* Reddit-kártya a főoldalon */
+.reddit-post-link {
+    color: var(--dark);
+    text-decoration: none;
+}
+
+.reddit-post-link:hover {
+    color: var(--pink);
+}
+
+/* ---------------------------------------------------------
+   3. BUZI MÓD (sötét alap + szivárvány mindenhol + UwU szöveg, lásd theme.js)
+   --------------------------------------------------------- */
+:root[data-theme="buzi"] {
+    --surface: rgba(28, 14, 52, 0.90);
+    --surface-2: rgba(40, 22, 70, 0.92);
+    --surface-3: rgba(52, 30, 88, 0.94);
+    --glass: rgba(24, 11, 46, 0.88);
+    --ink-soft: #f1e9ff;
+    --bs-body-bg: #1b1030;
+    --bs-secondary-color: rgba(255, 255, 255, 0.92);
+    --rainbow: #ff2d55, #ff9500, #ffd60a, #30d158, #0a84ff, #bf5af2, #ff2d55;
+    --rainbow-border: linear-gradient(90deg, var(--rainbow));
+    background: #1b1030;
+}
+
+@keyframes buziFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+/* A szivárványos HÁTTÉR: fix, a viewportnál 3x szélesebb réteg, amit transzformációval
+   csúsztatunk (3 teljes szivárványperiódus, a mozgás 1 periódusnyi, így zökkenőmentesen ismétlődik).
+   A fölötte lévő sötétítő réteg miatt a fehér szöveg is olvasható marad. */
+:root[data-theme="buzi"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 300%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(14, 6, 32, 0.38), rgba(14, 6, 32, 0.38)),
+        linear-gradient(100deg,
+            #ff2d55 0%, #ff9500 5.55%, #ffd60a 11.1%, #30d158 16.65%, #0a84ff 22.2%, #bf5af2 27.75%,
+            #ff2d55 33.33%, #ff9500 38.88%, #ffd60a 44.43%, #30d158 49.98%, #0a84ff 55.53%, #bf5af2 61.08%,
+            #ff2d55 66.66%, #ff9500 72.21%, #ffd60a 77.76%, #30d158 83.31%, #0a84ff 88.86%, #bf5af2 94.41%,
+            #ff2d55 100%);
+    animation: buziBackdrop 40s linear infinite;
+    will-change: transform;
+}
+
+@keyframes buziBackdrop {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-33.3333%);
+    }
+}
+
+:root[data-theme="buzi"] body {
+    background: transparent;
+}
+
+/* Vékony szivárványcsík az oldal tetején */
+:root[data-theme="buzi"] body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    z-index: 1060;
+    background: var(--rainbow-border);
+    background-size: 200% 100%;
+    animation: buziFlow 4s linear infinite;
+    pointer-events: none;
+}
+
+/* A háttéren közvetlenül álló szövegek: fehér, erős árnyékkal (a háttér végig színes) */
+:root[data-theme="buzi"] h1,
+:root[data-theme="buzi"] h2,
+:root[data-theme="buzi"] .lead,
+:root[data-theme="buzi"] header p,
+:root[data-theme="buzi"] section>.container>.text-center p,
+:root[data-theme="buzi"] .text-secondary {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
+    background: none;
+    text-shadow: 0 2px 0 rgba(20, 5, 40, 0.55), 0 0 18px rgba(20, 5, 40, 0.55);
+    animation: none;
+}
+
+:root[data-theme="buzi"] h1 .gradient-text,
+:root[data-theme="buzi"] h1 .pride-text,
+:root[data-theme="buzi"] .pride-text {
+    background: none;
+    -webkit-text-fill-color: #fff;
+    color: #fff;
+}
+
+/* Sávok és üres szekciók: sötét üveg, hogy a szöveg a színes háttéren is olvasható legyen */
+:root[data-theme="buzi"] .bg-white,
+:root[data-theme="buzi"] .hero-section .container,
+:root[data-theme="buzi"] .page-header .container {
+    background-color: transparent !important;
+}
+
+:root[data-theme="buzi"] section.bg-white {
+    background-color: rgba(20, 8, 42, 0.58) !important;
+    backdrop-filter: blur(6px);
+}
+
+/* Szivárványkeretes kártyák: a belső (padding-box) réteg sötét üveg, a keret mozgó szivárvány */
+:root[data-theme="buzi"] .custom-card,
+:root[data-theme="buzi"] .card,
+:root[data-theme="buzi"] .review-card,
+:root[data-theme="buzi"] .event-card-modern {
+    border: 3px solid transparent !important;
+    background:
+        linear-gradient(var(--surface), var(--surface)) padding-box,
+        linear-gradient(90deg, var(--rainbow)) border-box !important;
+    background-size: auto, 300% 100% !important;
+    animation: buziFlow 10s linear infinite;
+    color: #fff;
+    backdrop-filter: blur(8px);
+}
+
+:root[data-theme="buzi"] .review-card {
+    background:
+        linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+        linear-gradient(90deg, var(--rainbow)) border-box !important;
+    background-size: auto, 300% 100% !important;
+    border-radius: 14px;
+}
+
+/* A kártyákon belüli kártyák (GYIK) ne animáljanak külön */
+:root[data-theme="buzi"] .accordion-item.custom-card {
+    animation: none;
+}
+
+/* Kártyán belüli címsorok: mozgó szivárványszöveg a sötét üvegen */
+:root[data-theme="buzi"] .custom-card h3,
+:root[data-theme="buzi"] .custom-card h4,
+:root[data-theme="buzi"] .custom-card h5,
+:root[data-theme="buzi"] .card h3,
+:root[data-theme="buzi"] .card h4,
+:root[data-theme="buzi"] .card h5,
+:root[data-theme="buzi"] .review-card h5,
+:root[data-theme="buzi"] .text-pink,
+:root[data-theme="buzi"] .custom-card .fw-bold.text-dark {
+    background: linear-gradient(90deg, var(--rainbow));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent !important;
+    animation: buziFlow 5s linear infinite;
+    text-shadow: none;
+}
+
+/* Bootstrap színosztályok a sötét üvegen: élénk, de olvasható tónusok maradnak a témaszabályokból */
+:root[data-theme="buzi"] .text-muted,
+:root[data-theme="buzi"] .small.text-muted {
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Gombok */
+:root[data-theme="buzi"] .btn-primary-custom,
+:root[data-theme="buzi"] .btn-filter.active,
+:root[data-theme="buzi"] .btn-filter:hover,
+:root[data-theme="buzi"] .custom-accordion .accordion-button:not(.collapsed) {
+    background: linear-gradient(90deg, var(--rainbow)) !important;
+    background-size: 200% 100% !important;
+    animation: buziFlow 4s linear infinite;
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+    border-color: transparent;
+    box-shadow: 0 5px 20px rgba(191, 90, 242, 0.5);
+}
+
+:root[data-theme="buzi"] .btn-secondary-custom,
+:root[data-theme="buzi"] .btn-filter,
+:root[data-theme="buzi"] .navbar-nav .nav-link {
+    border: 2px solid transparent !important;
+    background:
+        linear-gradient(var(--surface), var(--surface)) padding-box,
+        linear-gradient(90deg, var(--rainbow)) border-box;
+    background-size: auto, 300% 100%;
+    animation: buziFlow 8s linear infinite;
+    color: #fff !important;
+}
+
+:root[data-theme="buzi"] .navbar-nav .nav-link.active-page,
+:root[data-theme="buzi"] .navbar-nav .nav-link:hover,
+:root[data-theme="buzi"] .btn-secondary-custom:hover {
+    background: linear-gradient(90deg, var(--rainbow)) !important;
+    background-size: 200% 100% !important;
+    animation: buziFlow 3s linear infinite;
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+:root[data-theme="buzi"] .navbar-glass {
+    border-bottom: 3px solid transparent;
+    border-image: var(--rainbow-border) 1;
+}
+
+/* Űrlapmezők és modálok */
+:root[data-theme="buzi"] .form-control,
+:root[data-theme="buzi"] .form-select {
+    border: 2px solid transparent;
+    background:
+        linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+        linear-gradient(90deg, var(--rainbow)) border-box;
+    background-size: auto, 300% 100%;
+}
+
+/* Macska: szivárványos ikon */
+:root[data-theme="buzi"] .cat-icon {
+    background: linear-gradient(90deg, var(--rainbow));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: buziFlow 4s linear infinite;
+    text-shadow: none;
+    filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+/* Lábléc, UwU gomb és szövegkijelölés */
+:root[data-theme="buzi"] footer {
+    border-top: 4px solid transparent;
+    border-image: var(--rainbow-border) 1;
+}
+
+:root[data-theme="buzi"] #btn-uwu-mode {
+    background: linear-gradient(90deg, var(--rainbow)) !important;
+    background-size: 200% 100% !important;
+    animation: buziFlow 3s linear infinite;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    border-image: none !important;
+    border-color: #fff !important;
+}
+
+:root[data-theme="buzi"] ::selection {
+    background: #ff2d9b;
+    color: #fff;
+}
+
+:root[data-theme="buzi"] .photo-wrapper:hover {
+    box-shadow: 0 10px 28px rgba(191, 90, 242, 0.7);
+}
+
+/* Csillámok és konfetti (theme.js hozza létre) */
+.buzi-particle {
+    position: fixed;
+    z-index: 20000;
+    pointer-events: none;
+    user-select: none;
+    line-height: 1;
+    transform: translate(-50%, -50%);
+    animation: buziParticle 0.9s ease-out forwards;
+}
+
+@keyframes buziParticle {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 30px))) scale(0.3) rotate(var(--rot, 90deg));
+    }
+}
+
+/* ---------------------------------------------------------
+   4. Mozgáscsökkentés: ha a rendszer kéri, a témák nem animálnak
+   --------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+
+    :root[data-theme="buzi"]::before,
+    :root[data-theme="buzi"] body::before,
+    :root[data-theme="buzi"] *,
+    .buzi-particle {
+        animation: none !important;
+    }
+}

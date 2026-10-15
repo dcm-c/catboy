@@ -4,39 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
     <title>Femboy Starter Pack | MFSZ 🎀</title>
+    <meta name="description"
+        content="Építsd meg a saját femboy karaktered! Válassz felszerelést a zsebpénzedből, oldj fel kombókat, teljesíts küldetéseket és oszd meg az eredményed.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
-    <style>
-        .starter-card {
-            border: 3px dashed var(--pink);
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .starter-card:hover {
-            transform: scale(1.03) translateY(-5px);
-            border-style: solid;
-            box-shadow: 0 10px 20px rgba(245, 169, 184, 0.3);
-        }
-
-        .starter-card.selected {
-            background: #fff0f3;
-            border: 3px solid var(--blue);
-            box-shadow: 0 5px 15px rgba(91, 206, 250, 0.4);
-        }
-
-        .stat-badge {
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="starterpack.css">
 </head>
 
 <body>
@@ -46,185 +24,91 @@
     <header class="py-5 mt-5 text-center">
         <div class="container">
             <h1 class="display-4 fw-bold">Hivatalos Femboy Starter Pack 🛍️</h1>
-            <p class="lead text-muted mx-auto" style="max-width: 700px;">
-                Még új vagy az MFSZ-ben? Nem tudod, mivel indul a felszerelés?
-                Kattints az elemekre a kosarad összeállításához és számold ki a pontszámod!
+            <p class="lead text-muted mx-auto" style="max-width: 760px;">
+                Építsd meg a saját karaktered! Minden helyre egy tárgy kerülhet, a zsebpénzed pedig véges.
+                Keresd a jó párosításokat, teljesíts küldetéseket, és oszd meg a végeredményt a többiekkel.
             </p>
         </div>
     </header>
 
-    <section class="pb-5">
+    <main class="pb-5" id="sp-root">
         <div class="container">
-            <div class="row g-4 justify-content-center" id="pack-grid">
+            <noscript>
+                <div class="alert alert-warning text-center">A karakterépítőhöz JavaScript kell. 😿</div>
+            </noscript>
 
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="25"
-                        data-stat="C++ kódolási sebesség +15%">
-                        <div class="display-3 mb-2">🧦</div>
-                        <h4 class="fw-bold">Programozó Zokni</h4>
-                        <p class="text-muted small">Csíkos, combközépig érő verzió. Elengedhetetlen a memóriabiztonság
-                            megértéséhez.</p>
-                        <span class="badge bg-pink stat-badge">Power: +25 OwO</span>
-                    </div>
+            <div class="row g-4">
+                <!-- KARAKTERLAP (mobilon felül, asztali nézetben jobbra tapad) -->
+                <div class="col-lg-4 order-lg-2">
+                    <aside id="sp-sheet" class="sp-sheet custom-card p-4" aria-label="Karakterlap">
+                        <div class="sp-avatar text-center" id="sp-avatar">
+                            <div class="sp-aura" aria-hidden="true"></div>
+                            <div class="sp-face" id="sp-face" aria-hidden="true">🐱</div>
+                        </div>
+                        <h2 class="h5 fw-bold text-center mt-2 mb-1" id="sp-title">Civil</h2>
+                        <p class="text-center fw-bold mb-3" id="sp-rank" aria-live="polite">Civilek szintje (Válassz felszerelést!)</p>
+
+                        <div class="text-center mb-3">
+                            <div class="sp-score display-5 fw-bold text-pink" id="sp-score">0 OwO</div>
+                            <small class="text-muted">Legjobb eredményed: <strong id="sp-best">0 OwO</strong></small>
+                        </div>
+
+                        <div class="sp-money mb-3">
+                            <div class="d-flex justify-content-between small fw-bold">
+                                <span>💰 Zsebpénz</span><span id="sp-money">60&nbsp;000&nbsp;Ft</span>
+                            </div>
+                            <div class="sp-money-track" role="presentation"><div class="sp-money-fill" id="sp-money-fill"></div></div>
+                        </div>
+
+                        <div id="sp-bars" class="sp-bars mb-3"></div>
+
+                        <div id="sp-equip" class="sp-equip mb-3" aria-label="Felszerelt tárgyak"></div>
+
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="button" class="btn btn-primary-custom" id="sp-surprise">🎲 Meglepetés csomag</button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-secondary-custom flex-fill" id="sp-share">🔗 Megosztás</button>
+                                <button type="button" class="btn btn-secondary-custom flex-fill" id="sp-reset">🧹 Nullázás</button>
+                            </div>
+                        </div>
+
+                        <h3 class="h6 fw-bold">🔗 Kombók</h3>
+                        <ul id="sp-combos" class="sp-list list-unstyled mb-3" aria-live="polite"></ul>
+
+                        <h3 class="h6 fw-bold d-flex justify-content-between">
+                            <span>🏅 Küldetések</span><span class="text-muted fw-normal" id="sp-quest-count">0/6</span>
+                        </h3>
+                        <ul id="sp-quests" class="sp-list list-unstyled mb-0"></ul>
+                    </aside>
                 </div>
 
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="30" data-stat="Valorant Aim +20%">
-                        <div class="display-3 mb-2">🎧</div>
-                        <h4 class="fw-bold">Cicafüles Fejhallgató</h4>
-                        <p class="text-muted small">Kizárólag RGB világítással szerelt változat. Aktiválja a belső gamer
-                            démont.</p>
-                        <span class="badge bg-pink stat-badge">Power: +30 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="20" data-stat="Vesekő Speedrun +50%">
-                        <div class="display-3 mb-2">⚡</div>
-                        <h4 class="fw-bold">Ultra White Monster</h4>
-                        <p class="text-muted small">A szent elixír. Hajnali 3-as voice chat és kódolás mellé
-                            alapértelmezett üzemanyag.</p>
-                        <span class="badge bg-pink stat-badge">Power: +20 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="40" data-stat="Szoba Uptime 99.9%">
-                        <div class="display-3 mb-2">🦈</div>
-                        <h4 class="fw-bold">IKEA Blåhaj</h4>
-                        <p class="text-muted small">A plüss cápa, aki valójában a szoba és az egész infrastruktúra
-                            főadminisztrátora.</p>
-                        <span class="badge bg-pink stat-badge">Power: +40 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="35" data-stat="Flexibilitás +80%">
-                        <div class="display-3 mb-2">👗</div>
-                        <h4 class="fw-bold">Skót kockás szoknya</h4>
-                        <p class="text-muted small">A tökéletes aerodinamika és kényelem biztosítása érdekében,
-                            szigorúan SFW pörgésekhez.</p>
-                        <span class="badge bg-pink stat-badge">Power: +35 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="15" data-stat="Heteroszexualitás -40%">
-                        <div class="display-3 mb-2">🐧</div>
-                        <h4 class="fw-bold">Arch Linux OS</h4>
-                        <p class="text-muted small">"I use Arch btw." Mert egy igazi szakszervezeti tag terminálból
-                            konfigurálja a drip-et.</p>
-                        <span class="badge bg-pink stat-badge">Power: +15 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="20" data-stat="Hangstabilitás +35%">
-                        <div class="display-3 mb-2">🎀</div>
-                        <h4 class="fw-bold">Taktikai Choker</h4>
-                        <p class="text-muted small">Cuki bársony nyakörv csengővel. Automatikusan stabilizálja és 2
-                            oktávval megemeli a
-                            hangszínedet a hajnali Discord voice chatek alatt.</p>
-                        <span class="badge bg-pink stat-badge">Power: +20 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="15" data-stat="IT Diplomaközelség +50%">
-                        <div class="display-3 mb-2">🥫</div>
-                        <h4 class="fw-bold">Monsteres Doboz-Torony</h4>
-                        <p class="text-muted small">A szoba sarkában instabilan tornyosuló üres fémdobozok. Minél
-                            magasabb és
-                            veszélyesebb a piramis, annál tisztábban látod a hangokat.</p>
-                        <span class="badge bg-pink stat-badge">Power: +15 OwO</span>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-sm-6">
-                    <div class="starter-card p-4 text-center h-100" data-power="50" data-stat="Mentális Pajzs +200%">
-                        <div class="display-3 mb-2">🦈🦈🦈</div>
-                        <h4 class="fw-bold">Blåhaj Hadsereg</h4>
-                        <p class="text-muted small">Mert egyetlen plüsscápa nem képes elhárítani a külvilág teljes
-                            toxicitását. Öt darab
-                            felett teljes körű szobai adminisztrátornak számítasz.</p>
-                        <span class="badge bg-pink stat-badge">Power: +50 OwO</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="row justify-content-center mt-5">
-                <div class="col-lg-6">
-                    <div class="custom-card p-4 text-center" style="border: 2px solid var(--blue);">
-                        <h3 class="fw-bold">Femboy Szintmérő 📊</h3>
-                        <div class="display-4 fw-bold text-pink my-3" id="total-power">0 OwO</div>
-                        <h5 class="fw-bold" id="rank-title">Civilek szintje (Válassz felszerelést!)</h5>
-                        <p id="stat-list" class="text-muted small mt-2">-</p>
-                    </div>
+                <!-- ÜZLET -->
+                <div class="col-lg-8 order-lg-1">
+                    <div id="sp-shop"></div>
                 </div>
             </div>
-
-
-
         </div>
-    </section>
+    </main>
+
+    <!-- Mobilon lebegő összegző sáv (a karakterlapra ugrik) -->
+    <button type="button" class="sp-mobile-bar d-lg-none" id="sp-mobile-bar" aria-label="Ugrás a karakterlapra">
+        <span>🧬 <strong id="sp-mobile-score">0 OwO</strong></span>
+        <span>💰 <span id="sp-mobile-money">60&nbsp;000&nbsp;Ft</span></span>
+        <span aria-hidden="true">↑</span>
+    </button>
+
+    <div class="sp-toast" id="sp-toast" role="status" aria-live="polite"></div>
+
+    <div id="corner-cat" class="d-none d-sm-block corner-cat">
+        <div class="speech-bubble" id="cat-bubble">Nyau! 😽</div>
+        <i class="fas fa-cat cat-icon"></i>
+    </div>
 
     <div id="footer-placeholder"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Navbar és Footer betöltése
-            fetch('navbar.html').then(r => r.text()).then(t => document.getElementById('navbar-placeholder').innerHTML = t);
-            fetch('footer.html').then(r => r.text()).then(t => document.getElementById('footer-placeholder').innerHTML = t);
-
-            const cards = document.querySelectorAll('.starter-card');
-            const powerDisplay = document.getElementById('total-power');
-            const rankTitle = document.getElementById('rank-title');
-            const statList = document.getElementById('stat-list');
-
-            let currentPower = 0;
-            let activeStats = [];
-
-            cards.forEach(card => {
-                card.addEventListener('click', () => {
-                    card.classList.toggle('selected');
-                    const power = parseInt(card.getAttribute('data-power'));
-                    const stat = card.getAttribute('data-stat');
-
-                    if (card.classList.contains('selected')) {
-                        currentPower += power;
-                        activeStats.push(stat);
-                    } else {
-                        currentPower -= power;
-                        activeStats = activeStats.filter(s => s !== stat);
-                    }
-
-                    // Kijelzés frissítése
-                    powerDisplay.innerText = currentPower + " OwO";
-                    statList.innerText = activeStats.length > 0 ? activeStats.join(' | ') : "-";
-
-                    // Rang beállítása
-                    if (currentPower === 0) {
-                        rankTitle.innerText = "Civilek szintje (Válassz felszerelést!)";
-                        rankTitle.style.color = "inherit";
-                    } else if (currentPower > 0 && currentPower <= 40) {
-                        rankTitle.innerText = "Gyanútlan Érdeklődő 🧐";
-                        rankTitle.style.color = "gray";
-                    } else if (currentPower > 40 && currentPower <= 90) {
-                        rankTitle.innerText = "Kezdő IT Hallgató / Junior Femboy 💻";
-                        rankTitle.style.color = "var(--blue)";
-                    } else if (currentPower > 90 && currentPower < 165) {
-                        rankTitle.innerText = "Haladó Cuki Tisztségviselő 🏳️‍🌈🎀";
-                        rankTitle.style.color = "var(--pink)";
-                    } else {
-                        rankTitle.innerText = "🏆 LEGENDÁS ELIT SZAKSZERVEZETI ADMIN (100% Uptime) 🦈";
-                        rankTitle.style.color = "gold";
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="script.js"></script>
+    <script src="starterpack.js"></script>
 </body>
 
 </html>

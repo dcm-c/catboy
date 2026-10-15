@@ -17,10 +17,6 @@
             "binding": "REDDIT_CACHE",
             "id": "ae6ead97d687423d86e7c4dc65bbf72c"
         }
-    ],
-    "triggers": {
-        "crons": [
-            "*/5 * * * *"
-        ]
-    }
+    ]
+    // A Devvit-fogadáshoz titok kell (nem ide, hanem: wrangler secret put DEVVIT_SECRET). Lásd: docs/DEVVIT.md
 }

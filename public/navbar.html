@@ -28,8 +28,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-bold" href="#" id="btn-premium"
-                        style=" background-color: whitesmoke; border-color: gold !important;">
+                    <a class="nav-link nav-premium fw-bold" href="#" id="btn-premium">
                         👑Premium
                     </a>
                 </li>
@@ -38,6 +37,13 @@
                         🛍️StarterPack
                     </a>
                 </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link theme-toggle" data-theme-toggle data-no-uwu
+                        aria-label="Téma váltása">
+                        <span class="theme-toggle-icon" aria-hidden="true">🌙</span><span
+                            class="theme-toggle-label ms-1">Téma</span>
+                    </button>
+                </li>
             </ul>
         </div>
     </div>
@@ -45,7 +51,7 @@
 </nav>
 <div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4" style="background: #fff0f3; border: 3px solid gold;">
+        <div class="modal-content premium-modal-content text-center p-4">
             <h2 class="fw-bold mb-3">👑 Prémium Tagság</h2>
             <p class="lead">A tartalom megtekintéséhez életkor-ellenőrzés szükséges.</p>
             <p class="fw-bold text-danger">Elmúltál már 18 éves?</p>
@@ -57,4 +63,3 @@
         </div>
     </div>
 </div>
-<script src="script.js"></script>
