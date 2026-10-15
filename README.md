@@ -8,6 +8,7 @@ Ezen a repón található a femboy.hu weboldal teljes forráskódja (Cloudflare 
 |---|---|
 | `public/` | A statikus oldal (HTML, CSS, JS, képek, adatfájlok) |
 | `src/index.js` | A Worker: `/api/reddit` (galéria-adat) és `/api/reddit/ingest` (Devvit-fogadás) |
+| `devvit/` | A Reddit-on futó Devvit-app: posztok → Worker, új posztok → Discord-kártya (lásd `devvit/README.md`) |
 | `public/theme.js`, `themes.css` | Téma: világos / sötét / **buzi mód** (szivárvány + UwU szövegmód) |
 | `public/starterpack.*` | A Starter Pack karakterépítő játék |
 | `public/data/reddit_backup.json` | A galéria Reddit-archívuma (NSFW posztok automatikusan kiszűrve) |

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "femboy-hu-sync",
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "permissions": {
+    "reddit": true,
+    "redis": true,
+    "http": {
+      "enable": true,
+      "domains": ["femboy.hu", "discord.com"]
+    }
+  },
+  "triggers": {
+    "onPostSubmit": "/internal/triggers/post-submit",
+    "onPostUpdate": "/internal/triggers/post-update",
+    "onPostNsfwUpdate": "/internal/triggers/post-nsfw-update",
+    "onPostSpoilerUpdate": "/internal/triggers/post-spoiler-update",
+    "onPostFlairUpdate": "/internal/triggers/post-flair-update",
+    "onPostDelete": "/internal/triggers/post-delete",
+    "onModAction": "/internal/triggers/mod-action"
+  },
+  "scheduler": {
+    "tasks": {
+      "retry-pending": {
+        "endpoint": "/internal/scheduler/retry-pending",
+        "cron": "*/5 * * * *"
+      }
+    }
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "femboy.hu galéria szinkron",
+        "description": "Az utolsó 50 poszt elküldése a femboy.hu galériának (Discord-értesítés nélkül)",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/backfill"
+      }
+    ]
+  },
+  "settings": {
+    "global": {
+      "ingestSecret": {
+        "type": "string",
+        "label": "femboy.hu ingest titok (a Worker DEVVIT_SECRET értéke)",
+        "isSecret": true,
+        "defaultValue": ""
+      },
+      "discordWebhookUrl": {
+        "type": "string",
+        "label": "Discord webhook URL az új posztokhoz (https://discord.com/api/webhooks/...)",
+        "isSecret": true,
+        "defaultValue": ""
+      }
+    }
+  },
+  "scripts": {
+    "build": "npm run build"
+  }
+}

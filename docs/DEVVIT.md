@@ -6,7 +6,11 @@
 nem ad önkiszolgálóan. Ezért az oldal **nem kérdezi le a Redditet**. Helyette a subredditen futó
 **Devvit-app** *küldi be* a posztokat a Workernek.
 
-Amíg a Devvit-app nem készül el, a galéria a `public/data/reddit_backup.json` archívumot használja.
+A Devvit-app kódja a [`devvit/`](../devvit/README.md) mappában van (telepítés, titkok, Discord: ott). Amíg nincs
+feltöltve és telepítve, a galéria a `public/data/reddit_backup.json` archívumot használja.
+
+> **Fontos:** a Devvit-app a **Reddit platformján** fut, nem Cloudflare-en (a Devvit nem hosztolható máshol).
+> A Cloudflare-oldal a Worker, ami fogadja és kiszolgálja az adatot. Ez a kettő együtt adja a megoldást.
 
 ## Adatfolyam
 
