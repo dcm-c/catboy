@@ -4,15 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
     <title>Házirend | MFSZ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
-    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="style.css">
-    </noscript>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="themes.css">
 </head>
 
 <body>
@@ -148,7 +147,7 @@
                                             <div>• Extrém fétisek</div>
                                         </div>
                                     </div>
-                                    <p class="small mt-2 mb-0" style="color: #666;"><em>Önbántalmazás említése tilos
+                                    <p class="small mt-2 mb-0 text-muted"><em>Önbántalmazás említése tilos
                                             (kivéve a vent szobákban,
                                             ha aktívan segítségre van szükséged). Engedély nélküli hirdetés / promóció
                                             szintén tiltott.</em></p>
@@ -304,8 +303,7 @@
                 <div class=" collapse" id="unbanCollapse">
                     <div class="row justify-content-center">
                         <div class="col-lg-6">
-                            <div class="custom-card p-4 border border-danger border-opacity-25"
-                                style="background: rgba(255, 255, 255, 0.95);">
+                            <div class="custom-card appeal-card p-4 border border-danger border-opacity-25">
                                 <h4 class="fw-bold text-center text-danger mb-3">Gyónási és Kegyelmi Ív 📜</h4>
                                 <p class="text-muted text-center small mb-4">Töltsd ki az alábbi mezőket, és a moderátor
                                     cica-bíróság felülbírálja az esetedet.</p>
@@ -375,20 +373,6 @@
         <i class="fas fa-cat cat-icon"></i>
     </div>
 
-    <div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-4" style="background: #fff0f3; border: 3px solid gold;">
-                <h2 class="fw-bold mb-3">👑 Prémium Tagság</h2>
-                <p class="lead">A tartalom megtekintéséhez életkor-ellenőrzés szükséges.</p>
-                <p class="fw-bold text-danger">Elmúltál már 18 éves?</p>
-
-                <div class="d-flex justify-content-center gap-3 mt-3">
-                    <button class="btn btn-success btn-lg px-4" id="btn-age-yes">IGEN</button>
-                    <button class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">NEM</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div id="footer-placeholder"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

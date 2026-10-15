@@ -52,6 +52,11 @@ body {
     box-shadow: 0 4px 10px rgba(245, 169, 184, 0.3);
 }
 
+.navbar-nav .nav-link.nav-premium {
+    background-color: whitesmoke;
+    border-color: gold !important;
+}
+
 /* Navbar Glassmorphism */
 .navbar-glass {
     background: rgba(255, 255, 255, 0.9);
@@ -807,6 +812,38 @@ footer {
     color: var(--pink);
 }
 
+/* Az oldalak által használt, de eddig sehol sem definiált segédosztályok */
+.text-blue {
+    color: var(--blue) !important;
+}
+
+.border-pink {
+    border-color: var(--pink) !important;
+}
+
+.border-blue {
+    border-color: var(--blue) !important;
+}
+
+.bg-blue {
+    background-color: var(--blue) !important;
+}
+
+.badge.bg-pink {
+    background-color: var(--pink) !important;
+    color: #4a1f2c !important;
+}
+
+/* Az events/fogalom oldalon használt lila kiemelés (a téma felülírhatja) */
+.text-purple {
+    color: #732982;
+}
+
+/* Üres galéria-kategória üzenete */
+.gallery-empty {
+    color: #6c757d;
+}
+
 /* --- FUN ELEGMEK (Macska & Premium) --- */
 @keyframes gradientMove {
     0% {
@@ -1000,6 +1037,22 @@ footer {
     border-color: var(--blue);
 }
 
+/* A script.js easter egg-jei (cápa-apokalipszis, "Beceneved" x5) használják; eddig csak a
+   faxstyle.css-ben léteztek, így a főoldalon nem történt semmi. */
+@keyframes wobble {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    100% {
+        transform: rotate(-3deg) scale(1.02);
+    }
+}
+
+.theme-win11 {
+    transform: skewX(5deg);
+}
+
 @keyframes popUp {
     from {
         transform: translateX(-50%) scale(0);
@@ -1026,14 +1079,49 @@ footer {
 }
 
 /* --- ÉRTÉKELÉS CAROUSEL NYILAK --- */
-.carousel-control-prev {
-    left: -100px;
-    /* Kijjebb toljuk balra */
+/* A nyilak eddig fixen -100px-re voltak kitolva, ami 1400px alatt a képernyőn kívülre
+   került (a body overflow-x: hidden miatt el is tűntek). Most a carousel oldalsó
+   sávjában ülnek, és csak széles képernyőn mennek a tartalom mellé. */
+#reviewsCarousel {
+    padding: 0 3.25rem;
 }
 
-.carousel-control-next {
-    right: -100px;
-    /* Kijjebb toljuk jobbra */
+#reviewsCarousel .carousel-control-prev,
+#reviewsCarousel .carousel-control-next {
+    width: 3rem;
+}
+
+#reviewsCarousel .carousel-control-prev {
+    left: 0;
+}
+
+#reviewsCarousel .carousel-control-next {
+    right: 0;
+}
+
+@media (max-width: 575.98px) {
+    #reviewsCarousel {
+        padding: 0 2.25rem;
+    }
+
+    #reviewsCarousel .carousel-control-prev,
+    #reviewsCarousel .carousel-control-next {
+        width: 2rem;
+    }
+}
+
+@media (min-width: 1400px) {
+    #reviewsCarousel {
+        padding: 0;
+    }
+
+    #reviewsCarousel .carousel-control-prev {
+        left: -4.5rem;
+    }
+
+    #reviewsCarousel .carousel-control-next {
+        right: -4.5rem;
+    }
 }
 
 /* --- Egyedi GYIK Harmonika Stílusok --- */
@@ -1183,17 +1271,6 @@ footer {
     display: inline-block;
 }
 
-/* Mobilon ne lógjon ki a képernyőről */
-@media (max-width: 768px) {
-    .carousel-control-prev {
-        left: 0;
-    }
-
-    .carousel-control-next {
-        right: 0;
-    }
-}
-
 /* Animáció a szűréshez */
 @keyframes fadeInScale {
     from {
@@ -1304,4 +1381,17 @@ footer {
         background-color: var(--pink) !important;
     }
 
+}
+
+/* Ha a rendszer csökkentett mozgást kér, kikapcsoljuk a dekoratív animációkat */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

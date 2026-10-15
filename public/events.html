@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="hu">
 
-<head>a
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
     <title>Események | MFSZ</title>
 
     <!-- Bootstrap CSS beemelése (hogy illeszkedjen a keretrendszerhez) -->
@@ -13,6 +14,7 @@
     <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
     <!-- A TE eredeti stíluslapod -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="themes.css">
 
     <!-- Egy-két apró, egyedi kiegészítés a kártyákhoz és a pride szöveghez -->
     <style>
@@ -216,20 +218,6 @@
         <i class="fas fa-cat cat-icon"></i>
     </div>
 
-    <div class="modal fade" id="premiumModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center p-4" style="background: goldenrod; border: 3px solid gold;">
-                <h2 class="fw-bold mb-3">👑 Prémium Tagság</h2>
-                <p class="lead">A tartalom megtekintéséhez életkor-ellenőrzés szükséges.</p>
-                <p class="fw-bold text-danger">Elmúltál már 18 éves?</p>
-
-                <div class="d-flex justify-content-center gap-3 mt-3">
-                    <button class="btn btn-success btn-lg px-4" id="btn-age-yes">IGEN</button>
-                    <button class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">NEM</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div id="footer-placeholder">
     </div>
 
