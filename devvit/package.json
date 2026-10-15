@@ -1,0 +1,25 @@
+{
+  "name": "femboy-hu-sync",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Devvit-app: r/MagyarFemboyCommunity -> femboy.hu galéria + Discord értesítések",
+  "scripts": {
+    "build": "esbuild src/server/index.ts --bundle --platform=node --format=cjs --target=node22 --outfile=dist/server/index.cjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/*.test.ts\"",
+    "login": "devvit login",
+    "upload": "devvit upload",
+    "playtest": "devvit playtest"
+  },
+  "dependencies": {
+    "@devvit/web": "latest",
+    "@hono/node-server": "latest",
+    "hono": "latest"
+  },
+  "devDependencies": {
+    "devvit": "latest",
+    "esbuild": "latest",
+    "typescript": "latest"
+  }
+}
