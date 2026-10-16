@@ -1,114 +1,14 @@
 <!DOCTYPE html>
 <html lang="hu">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="theme.js"></script>
-    <title>Femboy Starter Pack | MFSZ 🎀</title>
-    <meta name="description"
-        content="Építsd meg a saját femboy karaktered! Válassz felszerelést a zsebpénzedből, oldj fel kombókat, teljesíts küldetéseket és oszd meg az eredményed.">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="themes.css">
-    <link rel="stylesheet" href="starterpack.css">
+    <title>Pasztell Életút | MFSZ 🎀</title>
+    <meta http-equiv="refresh" content="0; url=eletut.html">
+    <link rel="canonical" href="https://femboy.hu/eletut.html">
+    <meta name="robots" content="noindex">
 </head>
-
 <body>
-
-    <div id="navbar-placeholder"></div>
-
-    <header class="py-5 mt-5 text-center">
-        <div class="container">
-            <h1 class="display-4 fw-bold">Hivatalos Femboy Starter Pack 🛍️</h1>
-            <p class="lead text-muted mx-auto" style="max-width: 760px;">
-                Építsd meg a saját karaktered! Minden helyre egy tárgy kerülhet, a zsebpénzed pedig véges.
-                Keresd a jó párosításokat, teljesíts küldetéseket, és oszd meg a végeredményt a többiekkel.
-            </p>
-        </div>
-    </header>
-
-    <main class="pb-5" id="sp-root">
-        <div class="container">
-            <noscript>
-                <div class="alert alert-warning text-center">A karakterépítőhöz JavaScript kell. 😿</div>
-            </noscript>
-
-            <div class="row g-4">
-                <!-- KARAKTERLAP (mobilon felül, asztali nézetben jobbra tapad) -->
-                <div class="col-lg-4 order-lg-2">
-                    <aside id="sp-sheet" class="sp-sheet custom-card p-4" aria-label="Karakterlap">
-                        <div class="sp-avatar text-center" id="sp-avatar">
-                            <div class="sp-aura" aria-hidden="true"></div>
-                            <div class="sp-face" id="sp-face" aria-hidden="true">🐱</div>
-                        </div>
-                        <h2 class="h5 fw-bold text-center mt-2 mb-1" id="sp-title">Civil</h2>
-                        <p class="text-center fw-bold mb-3" id="sp-rank" aria-live="polite">Civilek szintje (Válassz felszerelést!)</p>
-
-                        <div class="text-center mb-3">
-                            <div class="sp-score display-5 fw-bold text-pink" id="sp-score">0 OwO</div>
-                            <small class="text-muted">Legjobb eredményed: <strong id="sp-best">0 OwO</strong></small>
-                        </div>
-
-                        <div class="sp-money mb-3">
-                            <div class="d-flex justify-content-between small fw-bold">
-                                <span>💰 Zsebpénz</span><span id="sp-money">60&nbsp;000&nbsp;Ft</span>
-                            </div>
-                            <div class="sp-money-track" role="presentation"><div class="sp-money-fill" id="sp-money-fill"></div></div>
-                        </div>
-
-                        <div id="sp-bars" class="sp-bars mb-3"></div>
-
-                        <div id="sp-equip" class="sp-equip mb-3" aria-label="Felszerelt tárgyak"></div>
-
-                        <div class="d-grid gap-2 mb-3">
-                            <button type="button" class="btn btn-primary-custom" id="sp-surprise">🎲 Meglepetés csomag</button>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-secondary-custom flex-fill" id="sp-share">🔗 Megosztás</button>
-                                <button type="button" class="btn btn-secondary-custom flex-fill" id="sp-reset">🧹 Nullázás</button>
-                            </div>
-                        </div>
-
-                        <h3 class="h6 fw-bold">🔗 Kombók</h3>
-                        <ul id="sp-combos" class="sp-list list-unstyled mb-3" aria-live="polite"></ul>
-
-                        <h3 class="h6 fw-bold d-flex justify-content-between">
-                            <span>🏅 Küldetések</span><span class="text-muted fw-normal" id="sp-quest-count">0/6</span>
-                        </h3>
-                        <ul id="sp-quests" class="sp-list list-unstyled mb-0"></ul>
-                    </aside>
-                </div>
-
-                <!-- ÜZLET -->
-                <div class="col-lg-8 order-lg-1">
-                    <div id="sp-shop"></div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Mobilon lebegő összegző sáv (a karakterlapra ugrik) -->
-    <button type="button" class="sp-mobile-bar d-lg-none" id="sp-mobile-bar" aria-label="Ugrás a karakterlapra">
-        <span>🧬 <strong id="sp-mobile-score">0 OwO</strong></span>
-        <span>💰 <span id="sp-mobile-money">60&nbsp;000&nbsp;Ft</span></span>
-        <span aria-hidden="true">↑</span>
-    </button>
-
-    <div class="sp-toast" id="sp-toast" role="status" aria-live="polite"></div>
-
-    <div id="corner-cat" class="d-none d-sm-block corner-cat">
-        <div class="speech-bubble" id="cat-bubble">Nyau! 😽</div>
-        <i class="fas fa-cat cat-icon"></i>
-    </div>
-
-    <div id="footer-placeholder"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
-    <script src="starterpack.js"></script>
+    <p>A Starter Pack átalakult: <a href="eletut.html">Pasztell Életút</a>.</p>
 </body>
-
 </html>

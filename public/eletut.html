@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <title>Pasztell Életút | MFSZ 🎀</title>
+    <meta name="description"
+        content="Pasztell Életút: egy kattintgatós életjáték 14-től 25 éves korig. Fedezd fel magad, tanulj, dolgozz, költözz el, járj conra, és találd meg a saját femboy-utad.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="eletut.css">
+</head>
+
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <header class="py-5 mt-5 text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Pasztell Életút 🎀</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 760px;">
+                Egy kattintgatós életjáték 14-től 25 éves korig: kíváncsiság, titkolózás, az első con, költözés,
+                karrier, és végül a híres femboy death. Ami nem halál, hanem az, amikor már semmit nem kell bizonygatnod.
+            </p>
+        </div>
+    </header>
+
+    <main class="pb-5" id="el-root">
+        <div class="container">
+            <noscript>
+                <div class="alert alert-warning text-center">A játékhoz JavaScript kell. 😿</div>
+            </noscript>
+
+            <!-- KARAKTERKÉSZÍTŐ -->
+            <section id="el-intro" aria-label="Új játék" hidden>
+                <div class="el-card">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-4">
+                            <div class="el-create-preview" id="el-preview" aria-hidden="true"></div>
+                        </div>
+                        <div class="col-md-8">
+                            <h2 class="h4 fw-bold mb-3">Ki leszel?</h2>
+                            <label class="fw-bold mb-1" for="el-name">Neved</label>
+                            <div class="mb-3"><input class="el-input" id="el-name" maxlength="16" autocomplete="off" placeholder="Nyau" data-no-uwu></div>
+
+                            <div class="fw-bold mb-1" id="el-hs-l">Hajformád</div>
+                            <div class="el-choices mb-3" id="el-hs" role="group" aria-labelledby="el-hs-l"></div>
+
+                            <div class="fw-bold mb-1" id="el-hc-l">Hajszíned</div>
+                            <div class="el-choices mb-3" id="el-hc" role="group" aria-labelledby="el-hc-l"></div>
+
+                            <div class="fw-bold mb-1" id="el-sk-l">Bőrszíned</div>
+                            <div class="el-choices mb-3" id="el-sk" role="group" aria-labelledby="el-sk-l"></div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-primary-custom" id="el-start">Kezdődjön az életút!</button>
+                                <button type="button" class="btn btn-secondary-custom" id="el-resume" hidden>Folytatom a mentést</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="el-note mb-1">
+                        A játék 14 éves korodtól indul, és egy játékhónap kb. 15 másodperc. Közben dönthetsz,
+                        mit titkolsz, mit mersz, és mire költesz. A játékban 18 éves kortól van kaszinó is
+                        (csak játékpénz, havi kerettel és önkizárással). Minden kitalált történet, a mentésed csak a saját böngésződben él.
+                    </p>
+                </div>
+            </section>
+
+            <!-- JÁTÉK -->
+            <section id="el-game" aria-label="Játék" hidden>
+                <div class="el-card mb-3 el-hud" data-no-uwu>
+                    <div class="el-hud-top">
+                        <div>
+                            <div class="el-age"><span id="el-age">14 év</span> · <span id="el-month">szeptember</span></div>
+                            <div class="el-chapter" id="el-chapter"></div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div class="el-speed" role="group" aria-label="Sebesség" id="el-speed"></div>
+                            <button type="button" class="el-iconbtn" id="el-menu-save" title="Mentés" aria-label="Mentés"></button>
+                            <button type="button" class="el-iconbtn" id="el-menu-new" title="Új játék" aria-label="Új játék"></button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="el-timeline" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Életút" id="el-timeline">
+                            <div class="el-timeline-fill" id="el-timeline-fill"></div>
+                        </div>
+                        <div class="el-ticks" aria-hidden="true"><span>14</span><span>16</span><span>18</span><span>20</span><span>23</span><span>25</span></div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="el-card" style="position: sticky; top: 76px;">
+                            <div class="el-stage mb-3">
+                                <div id="el-scene"></div>
+                                <div class="el-floats" id="el-floats" data-no-uwu></div>
+                                <div class="el-stage-tag" id="el-tag"></div>
+                                <button type="button" class="el-viewbtn" id="el-view" data-no-uwu></button>
+                                <div class="el-bad-alert" id="el-alert" hidden></div>
+                            </div>
+
+                            <div class="el-stats mb-3" id="el-stats" data-no-uwu></div>
+                            <div class="el-month-line mb-3" id="el-monthline" data-no-uwu></div>
+
+                            <div class="el-actions">
+                                <button type="button" class="el-act main" id="el-act-mirror" data-no-uwu></button>
+                                <button type="button" class="el-act" id="el-act-work" data-no-uwu></button>
+                                <button type="button" class="el-act" id="el-act-study" data-no-uwu></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="el-card">
+                            <div class="el-tabs" id="el-tabs" role="tablist" aria-label="Menü"></div>
+                            <div class="el-panel" id="el-panel" role="tabpanel" aria-live="off"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BEFEJEZÉS -->
+            <section id="el-end" aria-label="Befejezés" hidden>
+                <div class="el-card">
+                    <div class="el-end-art mb-3" id="el-end-art"></div>
+                    <div class="el-kicker">Femboy death · 25 éves vagy</div>
+                    <h2 class="fw-bold" id="el-end-title"></h2>
+                    <p id="el-end-text" class="mb-3"></p>
+                    <ul class="el-epi mb-3" id="el-end-epi"></ul>
+                    <div class="el-end-stats mb-3" id="el-end-stats" data-no-uwu></div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary-custom" id="el-end-again">Új életút</button>
+                        <button type="button" class="btn btn-secondary-custom" id="el-end-share">Megosztás</button>
+                        <a class="btn btn-secondary-custom" id="el-end-discord" target="_blank" rel="noopener noreferrer">Csatlakozom a Discordhoz</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="el-toasts" id="el-toasts" role="status" aria-live="polite"></div>
+    <div id="el-modal-host"></div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script src="eletut-data.js"></script>
+    <script src="eletut-events.js"></script>
+    <script src="eletut-engine.js"></script>
+    <script src="eletut-char.js"></script>
+    <script src="eletut-art.js"></script>
+    <script src="eletut.js"></script>
+</body>
+
+</html>
