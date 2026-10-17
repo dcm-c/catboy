@@ -89,7 +89,7 @@ test('a tippben ígért önbizalom-küszöb tényleg ott fordul át', () => {
         const run = (conf) => {
             const s = E.newState({ name: 'T' });
             s.conf = conf; s.money = 500000; s.comm = 50; s.out = false;
-            ['crop', 'macskaful', 'smink', 'szoknya'].forEach((id) => { const it = D.find(D.ITEMS, id); s.items[id] = true; s.equipped[it.slot] = id; });
+            ['crop', 'macskaful', 'szemuveg', 'szoknya'].forEach((id) => { const it = D.find(D.ITEMS, id); s.items[id] = true; s.equipped[it.slot] = id; });
             E.setRng(mulberry32(7));
             E.showEvent(s, ev);
             E.choose(s, idx);
@@ -104,7 +104,7 @@ test('a tippben ígért önbizalom-küszöb tényleg ott fordul át', () => {
 
 test('minden tárgynak van statja, a kombók létező tárgyakra hivatkoznak', () => {
     const known = {};
-    D.ITEMS.concat(D.DECOR, D.PETS).forEach((x) => { known[x.id] = true; assert.ok(x.st && Object.keys(x.st).length, x.id + ' nincs stat'); });
+    D.ITEMS.concat(D.DECOR, D.PETS, D.BEAUTY).forEach((x) => { known[x.id] = true; assert.ok(x.st && Object.keys(x.st).length, x.id + ' nincs stat'); });
     D.ITEMS.forEach((it) => { assert.ok(D.SLOTS.find((sl) => sl.id === it.slot), it.id + ' ismeretlen hely'); if (it.paint) assert.match(it.paint, /^#[0-9a-f]{6}$/i); });
     D.COMBOS.forEach((c) => {
         c.need.forEach((n) => (Array.isArray(n) ? n : [n]).forEach((id) => assert.ok(known[id], c.id + ': ismeretlen tárgy ' + id)));

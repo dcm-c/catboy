@@ -256,6 +256,74 @@
             ]
         },
 
+        // ===== Barátok és smink: ismétlődő események =====
+        {
+            id: 's_lilla_sleepover', art: 'friends', weight: 2, once: false, cooldown: 10, minAge: 15,
+            when: function (s, c) { return engine().bond(s, 'lilla') >= 25 && s.housing === 'szulo'; },
+            title: 'Lilla átjön éjszakára',
+            text: function (s, c) { return 'Lilla azt írja, hogy átjönne filmezni, és hozna rágcsát is. ' + (c.d.secret ? 'A szobád rejtett fele viszont éppen kint van.' : 'A szobád pont olyan, amilyennek lennie kell.') + (c.look ? ' A tükör előtt még gyorsan megigazítod a sminkedet: ' + c.look + '.' : ''); },
+            choices: [
+                { label: 'Beengeded, a cuccaiddal együtt', tip: 'Kockázat, de őszinte este', do: function (s, A, c) { A.bond('lilla', 6); A.conf(30); A.comm(3); A.risk(c.d.secret ? 10 : 0); A.log('Lilla nálad aludt.'); return 'Lilla végignézi a polcokat, és csak ennyit mond: „Ez nagyon te vagy.” A film közben végig nevettek, és a végén a vállad mellett alszik el.'; } },
+                { label: 'Elrejtesz mindent', tip: 'Biztonságos, de kicsit szomorú', do: function (s, A) { A.bond('lilla', 2); A.risk(-2); A.conf(3); return 'Gyorsan eltűntetsz minden árulkodó dolgot. Jó este, de közben végig figyeled az ajtót.'; } },
+                { label: 'Inkább lemondod', do: function (s, A) { A.bond('lilla', -2); A.conf(-4); return 'Kitalálsz valami kifogást. Lilla nem sértődik meg, de a hangján hallod, hogy észrevette.'; } }
+            ]
+        },
+        {
+            id: 's_makeup_compliment', art: 'friends', weight: 3, once: false, cooldown: 8, minAge: 15,
+            when: function (s, c) { return c.lookCount >= 2 && !c.d.secret; },
+            title: 'Valaki észreveszi a sminkedet',
+            text: function (s, c) { return 'Útközben valaki megáll, és rád mosolyog: „Ez a ' + c.look + ' nagyon jól áll neked. Hol vetted?” Egy pillanatra megáll az idő.'; },
+            choices: [
+                { label: 'Elmeséled a trükköt', do: function (s, A) { A.conf(45); A.comm(4); A.skill('smink', 20); A.log('Valaki megdicsérte a sminkedet.'); return 'Szívesen elmondod, mit hogyan raktál fel. A végén még a számát is megkapod, hogy küldj róla képet.'; } },
+                { label: 'Elpirulsz és megköszönöd', do: function (s, A) { A.conf(25); A.comm(1); return 'Alig tudsz kinyögni egy „köszönöm”-et, de egész nap mosolyogsz.'; } },
+                { label: 'Továbbmész', do: function (s, A) { A.conf(5); return 'Gyorsan továbbsétálsz. A szíved még sokáig dobog.'; } }
+            ]
+        },
+        {
+            id: 's_nori_con_invite', art: 'con', weight: 2, once: false, cooldown: 12, minAge: 18,
+            when: function (s) { return s.stats.cons >= 1 && engine().bond(s, 'nori') >= 20 && s.money >= 6000; },
+            title: 'Nori meghív egy kisebb találkozóra',
+            text: 'Nori egy pici, házi hangulatú találkozót szervez a con-ismerősöknek: társasjáték, sütemény, közös rajzolás. Azt írja, hogy téged mindenképp látni szeretne.',
+            choices: [
+                { label: 'Elmész és viszel valamit', tip: '6 000 Ft', req: function (s) { return s.money >= 6000; }, reqText: 'Kell hozzá 6 000 Ft', do: function (s, A, c) { A.money(-6000); A.bond('nori', 6); A.conf(50); A.comm(8); A.skill('rajz', 12); return 'A nap egyik legjobb pillanata, amikor kinyitod a dobozt, és mindenki a ' + (c.look ? c.look : 'kedvenc sütiket') + ' dicséri. Késő estig rajzoltok.'; } },
+                { label: 'Csak beszélgetni mész', do: function (s, A) { A.bond('nori', 3); A.conf(20); A.comm(3); return 'Egy sarokban ülsz, és hallgatod a többieket. Nori időnként odanyomja a kezedbe a rajzfüzetét.'; } },
+                { label: 'Kihagyod', do: function (s, A) { A.bond('nori', -2); A.conf(-3); return 'Megírod, hogy nem tudsz menni. Nori küld egy matricát, de érződik, hogy sajnálja.'; } }
+            ]
+        },
+        {
+            id: 's_bence_mod', art: 'discord', weight: 2, once: false, cooldown: 14, minAge: 17.5,
+            when: function (s) { return s.flags.discord && engine().bond(s, 'bence') >= 25; },
+            title: 'Bence moderátort keres',
+            text: 'Bence privátban ír: a szervernek szüksége lenne egy új moderátorra, aki türelmes és kedves az újakkal. Szerinte te pont ilyen vagy.',
+            choices: [
+                { label: 'Vállalod', tip: 'Fáradságos, de sokat ad a közösségnek', do: function (s, A) { A.bond('bence', 6); A.conf(40); A.comm(14); A.energy(-15); A.log('Moderátor lettél a szerveren.'); return 'Az első héten három újat köszöntesz, egyet megvigasztalsz, és egy vitát is lecsendesítesz. Fáradtan, de büszkén zárod le a gépet.'; } },
+                { label: 'Besegítesz alkalmanként', do: function (s, A) { A.bond('bence', 3); A.conf(15); A.comm(5); return 'Nem lesz belőled hivatalos moderátor, de néha beugrasz. Bence így is hálás.'; } },
+                { label: 'Nemet mondasz', do: function (s, A) { A.conf(-2); return 'Megköszönöd a bizalmat, de most nem. Bence megérti.'; } }
+            ]
+        },
+        {
+            id: 's_partner_anniv', art: 'cafe', weight: 3, once: false, cooldown: 12, minAge: 23.5,
+            when: function (s) { return !!s.flags.partner && engine().bond(s, 'zsombor') >= 20; },
+            title: 'Évforduló',
+            text: function (s, c) { return 'Rájössz, hogy ma van az első kávétok évfordulója. ' + (c.look ? 'A ' + c.look + ' mellé ' : '') + 'Zsombor még nem szólt semmit, de a naptárában ott a bejegyzés.'; },
+            choices: [
+                { label: 'Meglepetés vacsora', tip: '15 000 Ft', req: function (s) { return s.money >= 15000; }, reqText: 'Kell hozzá 15 000 Ft', do: function (s, A) { A.money(-15000); A.bond('zsombor', 8); A.conf(70); A.log('Évfordulós vacsora.'); return 'Gyertyák, tészta és egy kézzel írt kártya. Zsombor szó nélkül átölel, aztán sokáig nem engedi el.'; } },
+                { label: 'Egy kézzel rajzolt képeslap', tip: 'Ingyen', do: function (s, A) { A.bond('zsombor', 5); A.conf(40); A.skill('rajz', 8); return 'Az asztalnál rajzolod, mielőtt megjön. Zsombor kitűzi a hűtőre, és el sem engedi a mosolyát.'; } },
+                { label: 'Majdnem elfelejted', do: function (s, A) { A.bond('zsombor', -3); A.conf(-10); return 'Zsombor mosolyog, de egy kicsit elhallgat. Legközelebb jobban figyelsz.'; } }
+            ]
+        },
+        {
+            id: 's_family_dinner', art: 'family', weight: 2, once: false, cooldown: 10, minAge: 16,
+            when: function (s) { return s.parents === 'accepting' && engine().bond(s, 'csalad') >= 30; },
+            title: 'Vasárnapi ebéd',
+            text: function (s, c) { return 'Anya átküld egy üzenetet: vasárnap a nagymama is jön. ' + (c.look ? 'Apa még viccelődik is: „Az a ' + c.look + ' nagyon jól áll neked.”' : 'A hangulat ritkán volt ilyen jó.'); },
+            choices: [
+                { label: 'Elmész és segítesz főzni', do: function (s, A) { A.bond('csalad', 6); A.conf(35); A.energy(-8); return 'Együtt vágjátok a zöldséget, és apa elmeséli, hogyan ismerkedett meg anyával. Csendes, meleg délután.'; } },
+                { label: 'Csak a desszertre érsz oda', do: function (s, A) { A.bond('csalad', 2); A.conf(10); return 'Épp időben érsz oda. Senki nem szól semmit, csak jut neked a legnagyobb darab.'; } },
+                { label: 'Lemondod', do: function (s, A) { A.bond('csalad', -3); A.conf(-5); return 'Anya azt mondja, hogy semmi baj, de a hangján érződik a csalódottság.'; } }
+            ]
+        },
+
         // ===== 3. fejezet: Kibontakozás (18-19) =====
         chapter('ch3', 18, 'school',
             'Tizennyolc éves vagy. Nagykorú. A világ hirtelen nagyobb lett, és te is: az, hogy mit kezdesz vele, ezután már rajtad múlik.'),
@@ -386,7 +454,7 @@
             'Huszonhárom éves vagy. Már tudod, ki vagy. A kérdés inkább az, mivé szeretnél válni. Közeledik a híres huszonötödik, amiről a közösségben annyit viccelődnek.'),
         {
             id: 'e_date', art: 'cafe', prio: 1, minAge: 23.0,
-            when: function (s) { return s.flags.discord; },
+            when: function (s) { return s.flags.discord && !s.flags.partner; },
             title: 'Egy üzenet',
             text: function (s, c) { return 'Valaki, akivel a szerveren és a conon is sokat beszéltél, azt írja: „Van kedved egy kávéra? Nem a chatben.” ' + (c.outfit.length ? 'Gondolkodsz, hogy mit vennél fel: ' + c.outfitText + '?' : ''); },
             choices: [
@@ -739,6 +807,13 @@
         { id: 'szerencse', name: 'Szerencse-csillag', desc: 'Nagy nyeremény a kaszinóban', check: function (s) { return !!s.flags.sensible || !!s.flags.chaser; } },
         { id: 'megallj', name: 'Megállj-t mondtál', desc: 'Önkizárást kérsz a kaszinóból', check: function (s) { return !!s.flags.selfExcluded; } },
         { id: 'tiszta', name: 'Tiszta lap', desc: 'A végéig nem játszol a kaszinóban', check: function (s) { return !!s.ending && s.gamble.plays === 0; } },
+        { id: 'baratok', name: 'Barátok', desc: 'Egy barátnál 50 kötelék', check: function (s) { return D.PEOPLE.some(function (p) { return engine().bond(s, p.id) >= 50; }); } },
+        { id: 'kor', name: 'Mindenkit ismersz', desc: 'Mind a 6 ismerőst megismered', check: function (s) { return D.PEOPLE.every(function (p) { return s.social.known && s.social.known[p.id]; }); } },
+        { id: 'sminkes', name: 'Sminkes', desc: 'Felteszel egy sminkelemet', check: function (s) { return engine().lookCount(s) >= 1; } },
+        { id: 'teljesarc', name: 'Teljes arc', desc: 'Minden arcsmink-helyen van termék', check: function (s) { return D.FULL_LOOK_SLOTS.every(function (sl) { return engine().lookApplied(s)[sl]; }); } },
+        { id: 'manikur', name: 'Manikűr', desc: 'Körömlakk vagy körömdísz van rajtad', check: function (s) { return !!engine().lookApplied(s).nails; } },
+        { id: 'kozmetikus', name: 'Kozmetikus', desc: 'Smink képesség 3. szint', check: function (s) { return lvl(s, 'smink') >= 3; } },
+        { id: 'parom', name: 'Pár', desc: 'Együtt vagy valakivel', check: function (s) { return !!s.flags.partner; } },
         { id: 'halal', name: 'Femboy Death', desc: 'Eléred a huszonötödik születésnapot', check: function (s) { return !!s.ending; } }
     ];
 

@@ -75,7 +75,12 @@
         gear: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
         drink: '<path d="M7 3h10l-1.5 18h-7z"/><path d="M7 9h10"/>',
         palette: '<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2.5 1.5-2.5H17a4 4 0 0 0 4-4A9 9 0 0 0 12 3z"/><circle cx="7.5" cy="11" r="1" fill="currentColor"/><circle cx="10" cy="7" r="1" fill="currentColor"/><circle cx="15" cy="7.5" r="1" fill="currentColor"/>',
-        chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>'
+        chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+        lips: '<path d="M3 12c3-3 6-3 9-1 3-2 6-2 9 1-2 5-5 7-9 7s-7-2-9-7z"/><path d="M3 12c4 1 14 1 18 0"/>',
+        blush: '<circle cx="12" cy="12" r="9"/><path d="M6 13l2-2M9 14l2-2M18 13l-2-2M15 14l-2-2"/>',
+        lash: '<path d="M3 15c3-4 15-4 18 0"/><path d="M5 13l-2-3M9 11.5l-1-4M13 11V7M17 11.5l1-4M20 13l2-3"/>',
+        pen: '<path d="M3 21l3-1L19 7l-2-2L4 18z"/><path d="M14 5l3 3"/>',
+        nail: '<path d="M8 21V11a4 4 0 0 1 8 0v10z"/><path d="M8 14h8"/>'
     };
     A.icons = Object.keys(ICONS);
     A.sprite = function () {
@@ -257,7 +262,7 @@
     // =========================================================
     var THUMB_VB = {
         hair: '-27 -186 54 62', face: '-27 -186 54 62', neck: '-26 -148 52 46', top: '-27 -130 54 68',
-        bottom: '-34 -84 68 86', legs: '-24 -64 48 68', shoes: '-22 -36 44 40', back: '-34 -136 68 100'
+        bottom: '-30 -98 60 74', legs: '-28 -84 56 84', shoes: '-21 -28 42 34', back: '-32 -132 64 82'
     };
     var ICON_DRAW = {
         poszter: function () { return rect(8, 6, 20, 28, '#f5a9b8', 'rx="2" stroke="#fff" stroke-width="2"') + path('M18 14 l2.4 5 5.4.7 -4 3.8 1.1 5.4 -4.9 -2.7 -4.9 2.7 1.1 -5.4 -4 -3.8 5.4 -.7z', '#fff') + rect(32, 12, 18, 24, '#9fd6f5', 'rx="2" stroke="#fff" stroke-width="2"') + circ(41, 22, 5, '#fff'); },
@@ -293,6 +298,29 @@
         }
         var f = ICON_DRAW[id];
         return '<svg viewBox="0 0 60 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Előnézet">' + (f ? f() : '') + '</svg>';
+    };
+
+
+    // Smink-termék miniatűrje: az arc (vagy a kéz) kivágása, csak az adott termékkel
+    var LOOK_VB = {
+        lips: '-7.4 -144 14.8 18', blush: '-12 -155.5 24 29.3', shadow: '-11 -160 22 26.8', liner: '-11 -160 22 26.8',
+        lashes: '-11 -160 22 26.8', deco: '-12 -155.5 24 29.3', nails: '-30 -80 22 27'
+    };
+    A.beautyThumb = function (slot, id, o) {
+        o = o || {};
+        var mk = {};
+        mk[slot] = { style: id, color: o.color || null };
+        var mood = slot === 'lips' || slot === 'deco' ? 'happy' : 'neutral';
+        var body = A.avatar({ skin: o.skin || 's2', hairStyle: o.hairStyle || 'bob', hairColor: o.hairColor || 'rozsa', outfit: {}, makeup: mk, mood: mood, pose: 'idle', uid: 'bt' });
+        return '<svg viewBox="' + (LOOK_VB[slot] || LOOK_VB.blush) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Előnézet">' + body + '</svg>';
+    };
+    // Barát portréja (fej és váll), a PEOPLE táblázat alapján
+    A.personSvg = function (id) {
+        var p = D.find(D.PEOPLE, id);
+        if (!p) return '';
+        var l = p.look;
+        var body = A.avatar({ skin: l.skin, hairStyle: l.hairStyle, hairColor: l.hairColor, outfit: l.outfit, makeup: l.makeup, mood: l.mood || 'neutral', pose: 'idle', uid: 'pp' + id });
+        return '<svg viewBox="-27 -186 54 66" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + p.name + '">' + body + '</svg>';
     };
 
     // v: { housing, comp, decor:{}, pets:{}, outfit:{}, colors:{}, pack:{}, skin, hairStyle, hairColor, mood, scale, month, studying, working, broken }
@@ -440,10 +468,29 @@
         // karakter
         var sc = (v.scale || 1) * 1.14;
         out.push('<g class="av-wrap" transform="translate(204 270) scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, mood: v.mood, pose: v.pose, uid: 'rm'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'rm'
         }) + '</g>');
         // lábnyomok árnyék
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A szobád és a karaktered">' + out.join('') + '</svg>';
+    };
+
+    // Arckép: fej és váll nagyban (a Smink fülhöz)
+    A.facecam = function (v) {
+        var wall = WALLS[v.housing] || WALLS.szulo;
+        var out = [];
+        out.push('<defs><linearGradient id="fc-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + shade(wall, 0.35) + '"/><stop offset="1" stop-color="' + shade(wall, -0.04) + '"/></linearGradient>');
+        out.push('<radialGradient id="fc-glow" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>');
+        out.push(rect(0, 0, 400, 300, 'url(#fc-bg)') + rect(0, 0, 400, 300, 'url(#fc-glow)'));
+        [[70, 80, 40], [340, 60, 28], [350, 230, 44], [50, 240, 30]].forEach(function (b, i) {
+            out.push(circ(b[0], b[1], b[2], ['#f5a9b8', '#9fd6f5', '#c3adee', '#ffe08a'][i % 4], 'opacity=".2"'));
+        });
+        [[84, 130], [316, 150], [96, 44], [330, 262]].forEach(function (p) {
+            out.push(path('M' + p[0] + ' ' + (p[1] - 7) + ' l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z', '#fff', 'opacity=".9" class="twinkle"'));
+        });
+        out.push('<g transform="translate(200 872) scale(5)">' + A.avatar({
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood === 'happy' ? 'neutral' : v.mood, pose: 'idle', uid: 'fc'
+        }) + '</g>');
+        return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arckép a sminkhez">' + out.join('') + '</svg>';
     };
 
     // Közelkép: a karakter derékig, a szoba színeivel a háttérben (a "Közelkép" gombhoz)
@@ -462,7 +509,7 @@
         });
         var sc = 1.95 * (0.9 + 0.1 * (v.scale || 1));
         out.push('<g transform="translate(200 ' + Math.round(425) + ') scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, mood: v.mood, pose: v.pose, uid: 'cu'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'cu'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Közelkép a karakteredről">' + out.join('') + '</svg>';
     };
@@ -471,7 +518,13 @@
     // ESEMÉNY-JELENETEK (400 x 240)
     // =========================================================
     function figure(x, y, o, scale) {
-        return '<g transform="translate(' + x + ' ' + y + ') scale(' + (scale || 1) + ')">' + A.avatar(o) + '</g>';
+        return '<g transform="translate(' + x + ' ' + (y - 7) + ') scale(' + (scale || 1) + ')">' + A.avatar(o) + '</g>';
+    }
+    function guestFigure(o, x, y, scale, mood) {
+        var p = o && o.guest ? D.find(D.PEOPLE, o.guest) : null;
+        if (!p) return '';
+        var l = p.look;
+        return figure(x, y, { skin: l.skin, hairStyle: l.hairStyle, hairColor: l.hairColor, outfit: l.outfit, makeup: l.makeup, mood: mood || l.mood || 'neutral', pose: 'idle', uid: 'g' + p.id }, scale);
     }
     function bunting(y, n) {
         var s = '', cols = ['#f5a9b8', '#9fd6f5', '#fdf6fa', '#c3adee', '#ffe08a'];
@@ -643,7 +696,19 @@
             s += rect(210, 130, 22, 20, '#fdf6fa', 'rx="4" stroke="#d8c6e8" stroke-width="1.5"') + rect(248, 130, 22, 20, '#fdf6fa', 'rx="4" stroke="#d8c6e8" stroke-width="1.5"');
             s += path('M232 138 q8 0 8 6 t-8 6', 'none', 'stroke="#d8c6e8" stroke-width="1.5"');
             s += path('M240 92 q10 -14 20 0 q10 16 -20 28 q-30 -12 -20 -28 q10 -14 20 0z', '#f5a9b8', 'opacity=".85" transform="translate(0 -10) scale(.8) translate(60 20)"');
+            s += guestFigure(o, 118, 238, 1.1, 'happy');
             s += figure(330, 238, Object.assign({}, o, { mood: 'happy' }), 1.1);
+            return s;
+        },
+
+        friends: function (o) {
+            var s = '<defs><linearGradient id="sc-fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3f8"/><stop offset="1" stop-color="#eef9f2"/></linearGradient></defs>' + rect(0, 0, 400, 240, 'url(#sc-fr)') + rect(0, 190, 400, 50, '#b9dfae');
+            s += circ(340, 42, 20, '#ffe9a6') + ell(90, 56, 36, 12, 'rgba(255,255,255,.85)') + ell(130, 50, 24, 10, 'rgba(255,255,255,.85)');
+            [[40, 150], [350, 140]].forEach(function (tr) { s += rect(tr[0] - 5, tr[1], 10, 52, '#a9825c') + circ(tr[0], tr[1] - 10, 32, '#8fd1a0') + circ(tr[0] - 18, tr[1] + 4, 20, '#7cc78e') + circ(tr[0] + 18, tr[1] + 2, 20, '#a3dcae'); });
+            s += rect(110, 168, 180, 8, '#d9b98c', 'rx="3"') + rect(120, 176, 8, 22, '#b8935e') + rect(272, 176, 8, 22, '#b8935e') + rect(112, 138, 176, 6, '#d9b98c', 'rx="3"') + rect(124, 144, 5, 24, '#c49e6c') + rect(270, 144, 5, 24, '#c49e6c');
+            s += guestFigure(o, 150, 238, 1.15, 'happy');
+            s += figure(252, 238, Object.assign({}, o, { mood: 'happy' }), 1.15);
+            s += path('M200 70 l3 7 7.5 1 -5.5 5 1.5 7.5 -6.5 -4 -6.5 4 1.5 -7.5 -5.5 -5 7.5 -1z', '#ffe08a', 'opacity=".9"');
             return s;
         },
 
@@ -673,7 +738,7 @@
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
         var fn = SCENES[id] || SCENES.room;
-        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, mood: v.mood, uid: 'sc' + id });
+        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood, uid: 'sc' + id, guest: v.guest });
         if (id === 'room') return body;
         return '<svg class="eletut-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illusztráció">' + body + '</svg>';
     };
@@ -691,6 +756,7 @@
             housing: s.housing, comp: s.comp, decor: s.decor, pets: s.pets,
             outfit: (function () { var vis = {}; var list = E.visibleOutfit(s); D.SLOTS.forEach(function (sl) { if (sl.wear && list.indexOf(s.equipped[sl.id]) >= 0 && s.equipped[sl.id]) vis[sl.id] = s.equipped[sl.id]; }); return vis; })(),
             colors: (E.isSecret(s) && s.hiding) ? {} : E.outfitColors(s),
+            makeup: E.lookOf(s),
             pack: (E.isSecret(s) && s.hiding) ? {} : { gear: s.equipped.gear, drink: s.equipped.drink, buddy: s.equipped.buddy },
             skin: s.skin, hairStyle: s.hairStyle, hairColor: s.hairColor,
             mood: mood, pose: mood === 'happy' ? 'wave' : (mood === 'proud' ? 'hips' : 'idle'), scale: 0.84 + 0.16 * Math.min(1, (age - 14) / 5), month: s.month,

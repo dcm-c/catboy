@@ -89,7 +89,10 @@
     function drainEvents() {
         if (S.flagsNew && S.flagsNew.length) {
             S.flagsNew.forEach(function (f) {
-                if (f.type === 'skill') {
+                if (f.type === 'person') {
+                    var pe = D.find(D.PEOPLE, f.id);
+                    toast('Új ismerős: ' + (pe ? pe.name : '') + ' (Barátok fül)', 'good');
+                } else if (f.type === 'skill') {
                     var sk = D.find(D.SKILLS, f.id);
                     toast((sk ? sk.name : 'Képesség') + ': ' + f.level + '. szint!', 'good');
                 }
@@ -349,11 +352,11 @@
         var sig = stageView + JSON.stringify(v);
         if (!force && sig === lastSceneSig) return;
         lastSceneSig = sig;
-        $('el-scene').innerHTML = stageView === 'close' ? A.closeup(v) : A.room(v);
+        $('el-scene').innerHTML = stageView === 'face' ? A.facecam(v) : (stageView === 'close' ? A.closeup(v) : A.room(v));
         var vb = $('el-view');
         clear(vb);
-        vb.appendChild(icon(stageView === 'close' ? 'house' : 'eye'));
-        vb.appendChild(el('span', '', stageView === 'close' ? 'Szoba' : 'Közelkép'));
+        vb.appendChild(icon(stageView === 'room' ? 'eye' : (stageView === 'close' ? 'face' : 'house')));
+        vb.appendChild(el('span', '', stageView === 'room' ? 'Közelkép' : (stageView === 'close' ? 'Arckép' : 'Szoba')));
     }
 
     function floatText(text, cls) {
@@ -369,11 +372,20 @@
     // ---------- Menü (csoportosított oldalsáv) ----------
     var tabsHasCasino = false;
     var NAV = [
-        { label: 'Stílus', tabs: [['szekreny', 'shirt', 'Szekrény'], ['szoba', 'sparkle', 'Szoba']] },
+        { label: 'Stílus', tabs: [['szekreny', 'shirt', 'Szekrény'], ['smink', 'lips', 'Smink'], ['szoba', 'sparkle', 'Szoba']] },
         { label: 'Fejlődés', tabs: [['gep', 'monitor', 'Gép'], ['tanulas', 'book', 'Tanulás'], ['munka', 'briefcase', 'Munka']] },
-        { label: 'Élet', tabs: [['lakas', 'house', 'Lakás'], ['lepesek', 'star', 'Merész lépések'], ['elmenyek', 'gift', 'Élmények'], ['kaszino', 'dice', 'Kaszinó']] },
+        { label: 'Élet', tabs: [['baratok', 'users', 'Barátok'], ['lakas', 'house', 'Lakás'], ['lepesek', 'star', 'Merész lépések'], ['elmenyek', 'gift', 'Élmények'], ['kaszino', 'dice', 'Kaszinó']] },
         { label: 'Napló', tabs: [['naplo', 'calendar', 'Napló'], ['eredmenyek', 'trophy', 'Eredmények']] }
     ];
+    function selectTab(id) {
+        var wasBeauty = tab === 'smink';
+        tab = id; panelNote = null; casinoView = null; socialNote = null;
+        if (id === 'smink' && stageView !== 'face') { prevStage = stageView; stageView = 'face'; renderScene(true); }
+        else if (wasBeauty && id !== 'smink' && stageView === 'face') { stageView = prevStage || 'room'; renderScene(true); }
+        buildTabs(); renderPanel();
+    }
+    var prevStage = 'room';
+    var socialNote = null;
     function buildTabs() {
         var host = $('el-tabs');
         clear(host);
@@ -391,7 +403,7 @@
                 b.setAttribute('aria-selected', String(tab === t[0]));
                 b.appendChild(icon(t[1]));
                 b.appendChild(el('span', '', t[2]));
-                b.addEventListener('click', function () { tab = t[0]; panelNote = null; casinoView = null; buildTabs(); renderPanel(); var pn = $('el-panel'); if (pn && window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) pn.scrollIntoView({ block: 'nearest' }); });
+                b.addEventListener('click', function () { selectTab(t[0]); var pn = $('el-panel'); if (pn && window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) pn.scrollIntoView({ block: 'nearest' }); });
                 row.appendChild(b);
             });
             box.appendChild(row);
@@ -461,7 +473,7 @@
         clear(p);
         p.setAttribute('role', 'tabpanel');
         addNote(p);
-        var fn = { szekreny: pWardrobe, szoba: pRoom, gep: pComputer, tanulas: pStudy, munka: pJobs, lakas: pHousing, lepesek: pSteps, elmenyek: pExp, kaszino: pCasino, naplo: pLog, eredmenyek: pAch }[tab];
+        var fn = { szekreny: pWardrobe, smink: pBeauty, baratok: pFriends, szoba: pRoom, gep: pComputer, tanulas: pStudy, munka: pJobs, lakas: pHousing, lepesek: pSteps, elmenyek: pExp, kaszino: pCasino, naplo: pLog, eredmenyek: pAch }[tab];
         if (fn) fn(p);
         p.scrollTop = scroll;
         refreshAfford();
@@ -589,7 +601,7 @@
             tx.appendChild(el('b', '', c.combo.name + (c.active ? ' ✓' : '')));
             var names = c.combo.need.map(function (n) {
                 var ids = Array.isArray(n) ? n : [n];
-                return ids.map(function (id) { var it = D.find(D.ITEMS, id) || D.find(D.DECOR, id) || D.find(D.PETS, id); return it ? it.name : id; }).join(' / ');
+                return ids.map(function (id) { var it = D.find(D.ITEMS, id) || D.find(D.DECOR, id) || D.find(D.PETS, id) || D.find(D.BEAUTY, id); return it ? it.name : id; }).join(' / ');
             });
             tx.appendChild(el('span', 'el-note', names.join(' + ')));
             var bonus = D.STATS.filter(function (x) { return c.combo.bonus[x.id]; }).map(function (x) { return x.label + ' +' + c.combo.bonus[x.id]; }).join(', ');
@@ -649,6 +661,255 @@
         });
         wrap.appendChild(row);
         return wrap;
+    }
+
+
+    // --- Smink ---
+    var lookSlot = 'lips';
+    function blobUrl(svg) {
+        try { return URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })); }
+        catch (e) { return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
+    }
+    function imgFromSvg(key, makeSvg, cls) {
+        var url = thumbCache[key];
+        if (!url) { url = blobUrl(makeSvg()); thumbCache[key] = url; }
+        var img = el('img', cls || 'el-thumb');
+        img.src = url; img.alt = ''; img.decoding = 'async';
+        return img;
+    }
+    function beautyThumbEl(b, colorHex) {
+        var key = ['bt', b.id, colorHex || '', S.skin, S.hairStyle, S.hairColor].join('|');
+        return imgFromSvg(key, function () { return A.beautyThumb(b.slot, b.id, { color: colorHex, skin: S.skin, hairStyle: S.hairStyle, hairColor: S.hairColor }); });
+    }
+    function lookColorHex(slot, colorId) {
+        var list = D.LOOK_COLORS[slot] || [];
+        var c = D.find(list, colorId) || list[0];
+        return c ? c.color : null;
+    }
+    function lookSwatches(b) {
+        var wrap = el('div', 'el-paint');
+        var cap = el('span', 'el-paint-cap');
+        cap.appendChild(icon('palette'));
+        cap.appendChild(document.createTextNode(' Szín'));
+        wrap.appendChild(cap);
+        var row = el('div', 'el-swatches');
+        var cur = S.look[b.slot] && S.look[b.slot].id === b.id ? (S.look[b.slot].color || (D.LOOK_COLORS[b.slot][0] || {}).id) : null;
+        (D.LOOK_COLORS[b.slot] || []).forEach(function (c) {
+            var sw = el('button', 'el-sw');
+            sw.type = 'button';
+            sw.style.background = c.color;
+            sw.setAttribute('aria-label', b.name + ' színe: ' + c.label);
+            sw.title = c.label;
+            sw.setAttribute('aria-pressed', String(cur === c.id));
+            sw.addEventListener('click', act(function () {
+                if (!S.look[b.slot] || S.look[b.slot].id !== b.id) E.applyBeauty(S, b.slot, b.id);
+                reportResult(E.setLookColor(S, b.slot, c.id));
+            }));
+            row.appendChild(sw);
+        });
+        wrap.appendChild(row);
+        return wrap;
+    }
+    function pBeauty(p) {
+        var secret = E.isSecret(S);
+        var st = E.stats(S);
+        var lvl = E.lvl(S, 'smink');
+        var cnt = E.lookCount(S);
+
+        var sum = el('div', 'el-item el-sum');
+        var head = el('div', 'el-sum-head');
+        head.appendChild(el('h4', '', 'Sminkasztal'));
+        head.appendChild(chip(cnt + ' / ' + D.LOOK_SLOTS.length + ' hely sminkelve', cnt === D.LOOK_SLOTS.length ? 'hot' : ''));
+        sum.appendChild(head);
+        sum.appendChild(el('div', 'el-note', 'Smink és stílus: ' + lvl + '. szint. A haladó termékekhez magasabb szint kell (Tanulás fül), és minden szint 4%-kal csökkenti az árakat.' + (st.fullLook ? ' Teljes arc: +' + Object.keys(D.FULL_LOOK_BONUS).map(function (k) { return D.FULL_LOOK_BONUS[k] + ' ' + D.find(D.STATS, k).label.toLowerCase(); }).join(', +') + '.' : ' Ha az ajak, a pír, a szemhéj, a szemkihúzó és a pillák is ki van töltve, teljes arc bónusz jár.')));
+        if (secret && S.hiding) sum.appendChild(el('div', 'el-note', 'Most rejtőzködsz: a smink nem látszik, és statot sem ad.'));
+        p.appendChild(sum);
+
+        var bar = el('div', 'el-slotbar');
+        bar.setAttribute('role', 'tablist');
+        bar.setAttribute('aria-label', 'Smink-hely');
+        D.LOOK_SLOTS.forEach(function (sl) {
+            var items = D.BEAUTY.filter(function (b) { return b.slot === sl.id; });
+            var have = items.filter(function (b) { return S.beauty[b.id]; }).length;
+            var b2 = el('button', 'el-slot' + (lookSlot === sl.id ? ' on' : ''));
+            b2.type = 'button';
+            b2.setAttribute('role', 'tab');
+            b2.setAttribute('aria-selected', String(lookSlot === sl.id));
+            b2.appendChild(icon(sl.icon));
+            b2.appendChild(el('span', '', sl.label));
+            b2.appendChild(el('small', '', have + '/' + items.length));
+            if (S.look[sl.id]) b2.classList.add('filled');
+            b2.addEventListener('click', function () { lookSlot = sl.id; renderPanel(); });
+            bar.appendChild(b2);
+        });
+        p.appendChild(bar);
+
+        var tools = el('div', 'el-tools');
+        tools.appendChild(actionBtn('Lemosom az egészet', act(function () { D.LOOK_SLOTS.forEach(function (sl) { E.applyBeauty(S, sl.id, null); }); }), { cls: 'alt' }));
+        p.appendChild(tools);
+
+        var g = el('div', 'el-grid');
+        D.BEAUTY.filter(function (b) { return b.slot === lookSlot; }).forEach(function (b) {
+            var owned = !!S.beauty[b.id];
+            var cur = S.look[b.slot];
+            var on = !!(cur && cur.id === b.id);
+            var locked = b.skill && lvl < b.skill;
+            var colorHex = b.tone ? lookColorHex(b.slot, on ? cur.color : null) : null;
+            var chips = [];
+            if (b.click) chips.push(['+' + f1(b.click) + ' kattintás', 'plus']);
+            if (secret && b.risk) chips.push(['Titok +' + b.risk, 'minus']);
+            statChips(b.st).forEach(function (c) { chips.push(c); });
+            if (b.skill) chips.push(['Smink ' + b.skill + '. szint', locked ? 'minus' : 'plus']);
+            var price = E.beautyPrice(S, b.cost);
+            var btn;
+            if (!owned) {
+                if (locked) btn = el('div', 'el-note', 'Zárolva: Smink és stílus ' + b.skill + '. szint kell hozzá (Tanulás fül).');
+                else btn = actionBtn('Megveszem · ' + fF(price), act(function () { reportResult(E.buyBeauty(S, b.id)); }), { cost: price });
+            } else btn = actionBtn(on ? 'Fent van ✓ (lemosom)' : 'Felhordom', act(function () { E.applyBeauty(S, b.slot, on ? null : b.id); }), { cls: on ? 'alt' : 'blue' });
+            g.appendChild(itemCard({ title: b.name, desc: b.desc, owned: owned, worn: on, chips: chips, btn: btn, extra: owned && b.tone ? lookSwatches(b) : null, thumb: beautyThumbEl(b, colorHex) }));
+        });
+        p.appendChild(g);
+    }
+
+    // --- Barátok ---
+    var SOCIAL_SCENE = { lilla: 'friends', bence: 'discord', nori: 'con', kata: 'office', csalad: 'family', zsombor: 'cafe' };
+    function personThumb(id) {
+        return imgFromSvg('pp|' + id, function () { return A.personSvg(id); }, 'el-portrait');
+    }
+    function monthsAgo(s, id) {
+        var l = s.social.last[id];
+        if (l === undefined) return null;
+        return s.month - l;
+    }
+    function perkLine(person, perks) {
+        var parts = [];
+        var eff = Math.max(0, E.bond(S, person.id) - person.start);
+        for (var k in person.perk) {
+            var v = person.perk[k] * eff;
+            if (!v) continue;
+            if (k === 'passive') parts.push('+' + f1(v) + ' önbizalom/mp');
+            else if (k === 'click') parts.push('+' + f1(v) + ' kattintás');
+            else if (k === 'regen') parts.push('+' + f1(v) + ' energia/mp');
+            else if (k === 'comm') parts.push('+' + f1(v) + ' közösség/hó');
+            else if (k === 'risk') parts.push('−' + f1(v) + ' titok/hó');
+            else if (k === 'pay') parts.push('+' + f1(v * 100) + '% fizetés');
+        }
+        return parts.join(' · ');
+    }
+    function socialResultBox(r) {
+        var box = el('div', 'el-social-result ' + r.tone);
+        var host = el('div', 'el-social-art');
+        var v = currentView();
+        v.guest = r.who;
+        v.mood = 'happy';
+        host.innerHTML = A.scene(SOCIAL_SCENE[r.who] || 'friends', v);
+        box.appendChild(host);
+        var tx = el('div', 'el-social-tx');
+        tx.appendChild(el('p', '', r.text));
+        var meta = [];
+        meta.push((r.bond >= 0 ? '+' : '−') + f1(Math.abs(r.bond)) + ' kötelék');
+        if (r.conf) meta.push('+' + grp(r.conf) + ' önbizalom');
+        if (r.bonus) meta.push('+' + fF(r.bonus));
+        var chips = el('div', 'el-chips');
+        meta.forEach(function (m) { chips.appendChild(chip(m, 'plus')); });
+        tx.appendChild(chips);
+        box.appendChild(tx);
+        return box;
+    }
+    function pFriends(p) {
+        var list = E.people(S);
+        var perks = E.perks(S);
+        var sum = el('div', 'el-item el-sum');
+        var head = el('div', 'el-sum-head');
+        head.appendChild(el('h4', '', 'Barátok és kapcsolatok'));
+        var known = list.filter(function (x) { return x.unlocked; }).length;
+        head.appendChild(chip(known + ' / ' + list.length + ' ismerős', ''));
+        sum.appendChild(head);
+        var tot = [];
+        if (perks.passive) tot.push('+' + f1(perks.passive) + ' önbizalom/mp');
+        if (perks.click) tot.push('+' + f1(perks.click) + ' kattintás');
+        if (perks.regen) tot.push('+' + f1(perks.regen) + ' energia/mp');
+        if (perks.comm) tot.push('+' + f1(perks.comm) + ' közösség/hó');
+        if (perks.risk) tot.push('−' + f1(perks.risk) + ' titok/hó');
+        if (perks.pay) tot.push('+' + f1(perks.pay * 100) + '% fizetés');
+        sum.appendChild(el('div', 'el-note', tot.length ? 'Most a barátaid ennyit adnak: ' + tot.join(' · ') + '.' : 'Minden kapcsolat hasznos: a kötelék növelésével tartós bónuszokat kapsz. Ha ' + D.SOCIAL_DECAY_AFTER + ' hónapig nem találkoztok, lassan kopik.'));
+        p.appendChild(sum);
+
+        if (socialNote) p.appendChild(socialResultBox(socialNote));
+
+        list.forEach(function (x) {
+            var pe = x.person;
+            var card = el('div', 'el-item el-person' + (x.unlocked ? '' : ' locked'));
+            var top = el('div', 'el-person-top');
+            var pw = el('div', 'el-portrait-box');
+            if (x.unlocked) pw.appendChild(personThumb(pe.id)); else pw.appendChild(icon('lock'));
+            top.appendChild(pw);
+            var meta = el('div', 'el-person-meta');
+            meta.appendChild(el('h4', '', x.unlocked ? pe.name : 'Ismeretlen'));
+            meta.appendChild(el('div', 'el-note', x.unlocked ? pe.role : unlockHint(pe)));
+            if (x.unlocked) {
+                var bar = el('div', 'el-bar bond');
+                var fill = el('i');
+                fill.style.width = Math.min(100, x.bond) + '%';
+                bar.appendChild(fill);
+                bar.setAttribute('role', 'img');
+                bar.setAttribute('aria-label', 'Kötelék: ' + Math.floor(x.bond) + ' / 100');
+                var brow = el('div', 'el-bond-row');
+                brow.appendChild(el('span', '', 'Kötelék'));
+                brow.appendChild(el('b', '', Math.floor(x.bond) + ' / 100'));
+                meta.appendChild(brow);
+                meta.appendChild(bar);
+                var ago = monthsAgo(S, pe.id);
+                var note = perkLine(pe, perks);
+                meta.appendChild(el('div', 'el-note', 'Hatás: ' + (note || pe.perkText) + (pe.perkReq === 'partner' && !S.flags.partner ? ' (ha összejöttök)' : '')));
+                if (ago !== null && ago >= D.SOCIAL_DECAY_AFTER - 1) meta.appendChild(el('div', 'el-note warn', 'Rég beszéltetek: a kötelék hamarosan kopni kezd.'));
+            }
+            top.appendChild(meta);
+            card.appendChild(top);
+            if (x.unlocked) {
+                var acts = el('div', 'el-social-acts');
+                D.SOCIAL.filter(function (a) { return a.who === pe.id; }).forEach(function (a) {
+                    var can = E.canSocial(S, a.id);
+                    var row = el('div', 'el-social-row' + (can.ok ? '' : ' off'));
+                    var b = el('button', 'el-btn' + (can.ok ? ' blue' : ' alt'));
+                    b.type = 'button';
+                    b.textContent = a.name;
+                    b.disabled = !can.ok;
+                    if (can.ok) { b.dataset.cost = String(a.cost); b.dataset.cur = 'money'; }
+                    b.addEventListener('click', act(function () {
+                        var r = E.doSocial(S, a.id);
+                        if (!r.ok) { reportResult(r); return; }
+                        socialNote = r;
+                        happyUntil = performance.now() + 2600;
+                        if (r.special === 'partner') toast('Összejöttél Zsomborral!', 'good');
+                        else if (r.special === 'rejected') toast('Zsombor most még barátként gondol rád.', 'bad');
+                        else if (r.special === 'parents') toast('A szüleid elfogadtak!', 'good');
+                        else toast(pe.name + ': ' + (r.tone === 'great' ? 'nagyszerű volt!' : r.tone === 'ok' ? 'jó volt.' : 'kicsit döcögős volt.'), r.tone === 'meh' ? '' : 'good');
+                    }));
+                    row.appendChild(b);
+                    var info = el('div', 'el-social-info');
+                    info.appendChild(el('span', 'el-note', a.desc));
+                    var cs = el('div', 'el-chips');
+                    if (a.cost) cs.appendChild(chip(fF(a.cost), 'minus'));
+                    cs.appendChild(chip('Energia −' + a.energy, ''));
+                    if (a.minBond) cs.appendChild(chip('Kötelék ' + a.minBond + '+', ''));
+                    info.appendChild(cs);
+                    if (!can.ok) info.appendChild(el('span', 'el-note warn', can.reason));
+                    row.appendChild(info);
+                    acts.appendChild(row);
+                });
+                card.appendChild(acts);
+            }
+            p.appendChild(card);
+        });
+    }
+    function unlockHint(pe) {
+        var u = pe.unlock || {};
+        if (u.flag === 'discord') return 'Csatlakozz a Discord-szerverhez, és megismerkedtek.';
+        if (u.cons) return 'Menj el egy conra: ott találkoztok.';
+        if (u.job) return 'Vállalj állást: a munkahelyen találkoztok.';
+        if (u.anyOf) return 'Legyél legalább ' + (u.minAge || 16) + ' éves, és bízd rá valakire a titkod, vagy gyarapítsd a közösséged.';
+        return 'Még nem ismered.';
     }
 
     // --- Szoba ---
@@ -1370,7 +1631,7 @@
             if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast('Vágólapra másolva.', 'good'); }, function () { toast(text); });
             else toast(text);
         });
-        $('el-view').addEventListener('click', function () { stageView = stageView === 'close' ? 'room' : 'close'; renderScene(true); });
+        $('el-view').addEventListener('click', function () { stageView = stageView === 'room' ? 'close' : (stageView === 'close' ? 'face' : 'room'); renderScene(true); });
         $('el-start').addEventListener('click', startNew);
         $('el-resume').addEventListener('click', resume);
         $('el-name').addEventListener('keydown', function (e) { if (e.key === 'Enter') startNew(); });

@@ -394,3 +394,36 @@
 .el-sbs.compact { grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 6px 10px; }
 .el-sbs.compact .el-sb-top { font-size: .78rem; }
 .el-sbs.compact .el-bar { height: 7px; }
+
+/* ---------- Smink és Barátok ---------- */
+.el-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.el-note.warn { color: var(--el-minus); font-weight: 600; }
+.el-bar.bond > i { background: linear-gradient(90deg, #f08aa0, #e86a96); }
+
+.el-person { display: grid; gap: 10px; }
+.el-person.locked { opacity: .72; }
+.el-person-top { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: start; }
+.el-portrait-box {
+    width: 84px; height: 96px; border-radius: 14px; overflow: hidden; display: grid; place-items: center; color: var(--el-soft);
+    background: linear-gradient(180deg, #fde6ee, #e9e4fb);
+}
+[data-bs-theme="dark"] .el-portrait-box { background: linear-gradient(180deg, #3a2a52, #26203f); }
+.el-portrait { width: 100%; height: 100%; object-fit: cover; display: block; }
+.el-person-meta { display: grid; gap: 4px; min-width: 0; }
+.el-person-meta h4 { margin: 0; }
+.el-bond-row { display: flex; justify-content: space-between; font-size: .82rem; font-weight: 700; }
+
+.el-social-acts { display: grid; gap: 8px; }
+.el-social-row { display: grid; grid-template-columns: minmax(130px, 170px) 1fr; gap: 10px; align-items: start; padding: 8px; border-radius: 12px; background: var(--el-surface-2); }
+.el-social-row.off { opacity: .78; }
+.el-social-row .el-btn { width: 100%; }
+.el-social-info { display: grid; gap: 4px; min-width: 0; }
+@media (max-width: 520px) { .el-social-row { grid-template-columns: 1fr; } .el-person-top { grid-template-columns: 64px 1fr; } .el-portrait-box { width: 64px; height: 74px; } }
+
+.el-social-result { display: grid; grid-template-columns: minmax(150px, 210px) 1fr; gap: 12px; align-items: center; padding: 10px; border-radius: 16px; border: 2px solid var(--el-line); background: var(--el-surface); }
+.el-social-result.great { border-color: var(--el-plus); }
+.el-social-result.meh { border-color: var(--el-line); opacity: .95; }
+.el-social-art svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+.el-social-tx { display: grid; gap: 8px; }
+.el-social-tx p { margin: 0; color: var(--el-ink); line-height: 1.5; }
+@media (max-width: 520px) { .el-social-result { grid-template-columns: 1fr; } }
