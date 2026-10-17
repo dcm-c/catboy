@@ -52,7 +52,7 @@
             out: false, hiding: false, parents: 'unknown',
             student: false,
 
-            steps: {}, items: {}, equipped: {}, hideout: {}, decor: {}, pets: {},
+            steps: {}, items: {}, equipped: {}, colors: {}, hideout: {}, decor: {}, pets: {},
             comp: 0, skills: {}, skillProg: {}, activeSkill: null,
             housing: 'szulo', job: null, jobMonths: 0,
             debtMonths: 0, allowanceCut: 0, saleUntil: -1, brokenUntil: -1, rentBump: 0,
@@ -90,8 +90,69 @@
     E.visibleOutfit = function (s) {
         if (E.isSecret(s) && s.hiding) return [];
         var out = [];
-        D.SLOTS.forEach(function (slot) { if (s.equipped[slot.id]) out.push(s.equipped[slot.id]); });
+        D.SLOTS.forEach(function (slot) { if (slot.wear && s.equipped[slot.id]) out.push(s.equipped[slot.id]); });
         return out;
+    };
+
+    // Egy tárgy színe (hex): a játékos választása vagy az alapszín; null, ha nem festhető
+    E.paintOf = function (s, id) {
+        var it = find(D.ITEMS, id);
+        if (!it || !it.paint) return null;
+        var c = find(D.PALETTE, s.colors && s.colors[id]);
+        return c ? c.color : it.paint;
+    };
+    E.setColor = function (s, id, paletteId) {
+        var it = find(D.ITEMS, id);
+        if (!it || !it.paint) return { ok: false, reason: 'Ez a tárgy nem festhető' };
+        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
+        if (paletteId === null || paletteId === undefined) { delete s.colors[id]; return { ok: true }; }
+        if (!find(D.PALETTE, paletteId)) return { ok: false, reason: 'Ismeretlen szín' };
+        s.colors[id] = paletteId;
+        return { ok: true };
+    };
+    // Az avatárnak átadandó színek (hely szerint), csak a viselt festhető tárgyakra
+    E.outfitColors = function (s) {
+        var out = {};
+        D.SLOTS.forEach(function (slot) {
+            var id = s.equipped[slot.id];
+            if (id && slot.wear) { var c = E.paintOf(s, id); if (c) out[slot.id] = c; }
+        });
+        return out;
+    };
+
+    // Statpontok: viselt / kéznél lévő tárgyak + szobadíszek + társ + kombók
+    E.activeIds = function (s) {
+        var ids = {}, hide = E.isSecret(s) && s.hiding;
+        D.SLOTS.forEach(function (slot) {
+            var id = s.equipped[slot.id];
+            if (id && (!slot.wear || !hide)) ids[id] = true;
+        });
+        Object.keys(s.decor).forEach(function (k) { if (s.decor[k]) ids[k] = true; });
+        Object.keys(s.pets).forEach(function (k) { if (s.pets[k]) ids[k] = true; });
+        return ids;
+    };
+    E.comboActive = function (combo, ids) {
+        return combo.need.every(function (n) {
+            return Array.isArray(n) ? n.some(function (x) { return ids[x]; }) : !!ids[n];
+        });
+    };
+    E.stats = function (s) {
+        var ids = E.activeIds(s), base = {}, bonus = {}, total = {};
+        D.STATS.forEach(function (st) { base[st.id] = 0; bonus[st.id] = 0; });
+        function addTo(map, st) { if (st) for (var k in st) if (k in map) map[k] += st[k]; }
+        D.ITEMS.forEach(function (it) { if (ids[it.id]) addTo(base, it.st); });
+        D.DECOR.forEach(function (d) { if (ids[d.id]) addTo(base, d.st); });
+        D.PETS.forEach(function (p) { if (ids[p.id]) addTo(base, p.st); });
+        var combos = D.COMBOS.map(function (c) { return { combo: c, active: E.comboActive(c, ids) }; });
+        combos.forEach(function (c) { if (c.active) addTo(bonus, c.combo.bonus); });
+        var filled = D.SLOTS.filter(function (sl) { return s.equipped[sl.id]; }).length;
+        var full = filled === D.SLOTS.length;
+        if (full) addTo(bonus, D.FULL_SET_BONUS);
+        var score = 0;
+        D.STATS.forEach(function (st) { total[st.id] = Math.max(0, base[st.id] + bonus[st.id]); score += total[st.id]; });
+        var rank = D.RANKS[0], rankIndex = 0;
+        D.RANKS.forEach(function (r, i) { if (score >= r.min) { rank = r; rankIndex = i; } });
+        return { base: base, bonus: bonus, total: total, combos: combos, filled: filled, full: full, score: score, rank: rank, rankIndex: rankIndex };
     };
 
     E.derive = function (s) {
@@ -109,6 +170,7 @@
             if (!it) return;
             eqClick += it.click; eqPassive += it.passive; eqRisk += it.risk;
         });
+        var st = E.stats(s).total;
         var stepClick = 0, stepPassive = 0;
         D.STEPS.forEach(function (st) { if (s.steps[st.id]) { stepClick += st.click || 0; stepPassive += st.passive || 0; } });
         var decClick = 0, decPassive = 0, regen = 1.5 + housing.comfort * 0.15;
@@ -120,10 +182,11 @@
 
         var d = {
             secret: secret, w: w, housing: housing, comp: comp, broken: broken, job: job,
-            eqRisk: eqRisk,
-            clickConf: (1 + stepClick + eqClick * w + lvl('smink') * 0.5 + lvl('varras') * 0.3 + decClick),
-            passiveConf: stepPassive + eqPassive * w + online + decPassive + lvl('rajz') * 0.3 + lvl('angol') * 0.2 + s.comm * 0.02,
-            regen: regen,
+            eqRisk: eqRisk + st.chaos * 0.1,
+            stat: st,
+            clickConf: (1 + stepClick + eqClick * w + lvl('smink') * 0.5 + lvl('varras') * 0.3 + decClick) * (1 + st.cute * 0.006) + st.chaos * 0.02,
+            passiveConf: stepPassive + eqPassive * w + online + decPassive + lvl('rajz') * 0.3 + lvl('angol') * 0.2 + s.comm * 0.02 + st.gamer * 0.05,
+            regen: regen + st.chill * 0.012,
             energyMax: 100,
             hideoutDecay: 0
         };
@@ -153,6 +216,9 @@
             if (lvl('prog') >= 2) inc.freelance += (lvl('prog') - 1) * D.FREELANCE_PROG;
         }
         if (!broken && s.comp >= 4 && lvl('stream') >= 1) inc.stream = lvl('stream') * (D.STREAM_BASE + s.comm * D.STREAM_PER_COMM);
+        var codeMul = 1 + d.stat.code * 0.004;
+        inc.job = Math.round(inc.job * codeMul);
+        inc.freelance = Math.round(inc.freelance * codeMul);
         inc.total = inc.allowance + inc.job + inc.scholarship + inc.freelance + inc.stream;
 
         var cost = { rent: 0, living: 0, upkeep: 0 };
@@ -660,9 +726,19 @@
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
             choices: ev.choices.map(function (ch, i) {
                 var okReq = !ch.req || ch.req(s, c);
-                return { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || '') };
+                var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || ''), check: null };
+                var need = E.confNeed(ch);
+                if (need && !ch.req) out.check = { need: need, have: Math.floor(s.conf), ok: s.conf >= need };
+                return out;
             })
         };
+    };
+
+    // A választás tippjéből kiolvasott önbizalom-küszöb ("Legalább 150 önbizalom kell", "250+ önbizalom esetén ...")
+    E.confNeed = function (ch) {
+        if (ch.need !== undefined) return ch.need;
+        var m = /(\d+)\+?\s*önbizalom/.exec(ch.tip || '');
+        return m ? parseInt(m[1], 10) : 0;
     };
 
     E.choose = function (s, idx) {
@@ -711,7 +787,7 @@
         s.debtMonths = s.money < 0 ? s.debtMonths + 1 : 0;
         s.lastNet = delta;
 
-        if (s.flags.discord && !d.broken) s.comm += 0.15 * s.comp;
+        if (s.flags.discord && !d.broken) s.comm += 0.15 * s.comp + d.stat.gamer * 0.01;
         if (d.secret) {
             if (!s.hiding) s.risk = clamp(s.risk + d.eqRisk * 0.12, 0, 100);
             s.risk = clamp(s.risk - (1 + d.hideoutDecay), 0, 100);
@@ -720,7 +796,7 @@
         if (s.allowanceCut > 0) s.allowanceCut--;
         if (s.job) s.jobMonths++;
         var g = s.gamble;
-        g.urge = clamp(g.urge - (g.monthSpent === 0 ? 4 : 1), 0, 100);
+        g.urge = clamp(g.urge - (g.monthSpent === 0 ? 4 : 1) - d.stat.chill * 0.03, 0, 100);
         g.monthSpent = 0;
 
         s.month++;
@@ -793,7 +869,7 @@
         var numeric = ['month', 'sec', 'conf', 'money', 'energy', 'risk', 'comm', 'comp', 'jobMonths', 'debtMonths', 'allowanceCut', 'saleUntil', 'brokenUntil', 'rentBump', 'lastCon', 'speed'];
         numeric.forEach(function (k) { s[k] = num(raw[k], s[k]); });
         ['out', 'hiding', 'student', 'paused'].forEach(function (k) { s[k] = !!raw[k]; });
-        ['steps', 'items', 'equipped', 'hideout', 'decor', 'pets', 'skills', 'skillProg', 'flags', 'seen', 'lastSeen', 'ach', 'stats', 'expCd'].forEach(function (k) {
+        ['steps', 'items', 'equipped', 'colors', 'hideout', 'decor', 'pets', 'skills', 'skillProg', 'flags', 'seen', 'lastSeen', 'ach', 'stats', 'expCd'].forEach(function (k) {
             if (raw[k] && typeof raw[k] === 'object' && !Array.isArray(raw[k])) s[k] = Object.assign(s[k] && typeof s[k] === 'object' ? s[k] : {}, raw[k]);
         });
         if (raw.gamble && typeof raw.gamble === 'object') s.gamble = Object.assign(s.gamble, raw.gamble);

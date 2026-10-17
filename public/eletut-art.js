@@ -57,7 +57,25 @@
         arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
         gift: '<rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 14h18M12 9c-3 0-5-1-5-3s3-3 5 0c2-3 5-2 5 0s-2 3-5 3z"/>',
         save: '<path d="M5 3h12l4 4v14H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/>',
-        trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>'
+        trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>',
+        game: '<rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.6" cy="14" r="1" fill="currentColor"/>',
+        code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+        leaf: '<path d="M5 19C5 10 10 5 20 5c0 10-5 15-14 15M5 19c4-5 7-8 11-10"/>',
+        moon: '<path d="M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10z"/>',
+        flag: '<path d="M5 21V4M5 4h13l-3 4 3 4H5"/>',
+        buddy: '<circle cx="12" cy="10" r="5"/><circle cx="7.5" cy="5.5" r="2"/><circle cx="16.5" cy="5.5" r="2"/><path d="M6 21c0-4 3-6 6-6s6 2 6 6z"/>',
+        hair: '<path d="M12 3C7 3 4 7 4 12v9M12 3c5 0 8 4 8 9v9M8 8c3 0 6-1 8-4"/>',
+        top: '<path d="M8 3L3 6l2 4 3-1v11h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+        bottom: '<path d="M8 4h8l5 16H3zM8 4v4M16 4v4"/>',
+        legs: '<path d="M9 3h6v8l4 6a3 3 0 0 1-3 4H9a3 3 0 0 1-3-3z"/><path d="M9 7h6"/>',
+        shoes: '<path d="M3 15l5-2 2-6h4v6l7 2v4H3z"/>',
+        neck: '<path d="M5 4c0 8 3 12 7 12s7-4 7-12"/><circle cx="12" cy="19" r="2.5"/>',
+        back: '<rect x="6" y="6" width="12" height="15" rx="4"/><path d="M9 6V4a3 3 0 0 1 6 0v2M9 14h6"/>',
+        face: '<circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 7 2 8 0M9 9.5h.01M15 9.5h.01"/>',
+        gear: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+        drink: '<path d="M7 3h10l-1.5 18h-7z"/><path d="M7 9h10"/>',
+        palette: '<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2.5 1.5-2.5H17a4 4 0 0 0 4-4A9 9 0 0 0 12 3z"/><circle cx="7.5" cy="11" r="1" fill="currentColor"/><circle cx="10" cy="7" r="1" fill="currentColor"/><circle cx="15" cy="7.5" r="1" fill="currentColor"/>',
+        chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>'
     };
     A.icons = Object.keys(ICONS);
     A.sprite = function () {
@@ -187,7 +205,97 @@
         return '<g class="cat">' + s + '</g>';
     }
 
-    // v: { housing, comp, decor:{}, pets:{}, outfit:{}, skin, hairStyle, hairColor, mood, scale, month, studying, working, broken }
+    // Plüss cápa (bal oldalra néz; flip: tükrözés)
+    function shark(x, y, k, flip) {
+        var s = '<g transform="translate(' + x + ' ' + y + ') scale(' + (flip ? -k : k) + ' ' + k + ')">';
+        s += path('M-17 0 C-15 -9 -3 -12 6 -9 C12 -7 16 -3 19 -7 L21 -1 C18 1 14 3 12 6 C4 9 -12 9 -17 0z', '#6f9fd6', 'stroke="#5483bb" stroke-width="1"');
+        s += path('M-15 2 C-8 6 4 7 11 5 C6 8 -8 8 -15 2z', '#f7fbff');
+        s += path('M-2 -10 L2 -17 L5 -9z', '#5f8fc6');
+        s += circ(-10, -2.4, 1.3, '#2e2a3a') + circ(-10.4, -2.8, .4, '#fff');
+        s += path('M-6 5 q3 4 6 0', 'none', 'stroke="#5483bb" stroke-width="1" stroke-linecap="round"');
+        return s + '</g>';
+    }
+    function roomExtras(v, decor, deskY, bx, by) {
+        var o = [], pk = v.pack || {};
+        if (pk.gear === 'kbd') {
+            o.push(rect(36, deskY - 5, 48, 5, '#f6b5c5', 'rx="1.5" stroke="#e58aa3" stroke-width=".8"'));
+            for (var k = 0; k < 9; k++) o.push(rect(39 + k * 5, deskY - 4, 3.4, 1.6, '#fdf6fa') + rect(39 + k * 5, deskY - 2, 3.4, 1.2, '#9fd6f5'));
+        } else if (pk.gear === 'konzol') {
+            o.push(rect(88, deskY - 12, 16, 12, '#c3adee', 'rx="3" stroke="#8a74c6" stroke-width=".8"') + rect(91, deskY - 10.5, 10, 6, '#9fd6c4', 'rx="1"') + circ(92, deskY - 3, 1.2, '#f08aa0') + circ(100, deskY - 3, 1.2, '#f08aa0'));
+        } else if (pk.gear === 'arch') {
+            o.push(rect(88, deskY - 3, 12, 3, '#4a4056', 'rx=".8"') + rect(100, deskY - 2.4, 4, 1.8, '#d9d2e8') + rect(90, deskY - 2.4, 5, 1.2, '#5bcefa'));
+        }
+        if (pk.drink === 'monster') {
+            o.push(rect(140, deskY - 15, 8, 15, '#fdf8fd', 'rx="2" stroke="#d8c6e8" stroke-width=".8"') + rect(141, deskY - 10, 6, 3, '#6bd1c4') + path('M142 ' + (deskY - 13) + ' l2 -2 l2 2', 'none', 'stroke="#c8bcd8" stroke-width=".8"'));
+        } else if (pk.drink === 'matcha') {
+            o.push(path('M139 ' + (deskY - 14) + ' h10 l-1.6 14 h-6.8z', '#fdf6fa', 'stroke="#d8c6e8" stroke-width=".8"') + rect(139.6, deskY - 14, 8.8, 4, '#a8d98f') + rect(138, deskY - 15.6, 12, 2, '#a8d98f', 'rx="1"'));
+            o.push(line('M142 ' + (deskY - 17) + ' q-2 -5 1 -8', 'rgba(150,130,170,.5)', 1.2, 'class="steam"'));
+        }
+        if (decor.lava) {
+            o.push(path('M126 ' + deskY + ' h9 l-1.4 -26 h-6.2z', '#c8bcd8') + path('M127.6 ' + (deskY - 4) + ' h5.8 l-.8 -20 h-4.2z', '#f6b5c5', 'class="lava"'));
+            o.push(circ(130.5, deskY - 16, 2.2, '#ffd2e0', 'class="twinkle"') + circ(130, deskY - 8, 1.6, '#ffd2e0') + path('M127.4 ' + (deskY - 26) + ' q3.4 -5 6.2 0z', '#b8a8d0'));
+        }
+        if (decor.dobozok) {
+            var tower = [[26, 232], [27.5, 224], [25.5, 216], [27, 208], [26, 200]];
+            tower.forEach(function (t, i) {
+                o.push(rect(t[0], t[1] - 8, 11, 8, i % 2 ? '#fdf8fd' : '#7ad6c8', 'rx="1.6" stroke="#b9aecb" stroke-width=".6"') + rect(t[0] + 1, t[1] - 5.4, 9, 1.6, i % 2 ? '#7ad6c8' : '#fdf8fd'));
+            });
+        }
+        var b = pk.buddy;
+        if (b === 'blahaj') o.push(shark(bx + 66, by - 12, 0.85, false));
+        else if (b === 'sun') {
+            o.push(ell(bx + 52, by - 6, 10, 8, '#e8b38a', 'stroke="#c99468" stroke-width=".8"') + path('M' + (bx + 44) + ' ' + (by - 10) + ' l2 -4 l2 3 l2 -4 l2 4 l2 -3 l2 3', 'none', 'stroke="#c99468" stroke-width="1.2" stroke-linecap="round"'));
+            o.push(circ(bx + 46, by - 6, 1, '#2e2a3a') + circ(bx + 43.6, by - 3.6, 1.2, '#f08aa0'));
+        } else if (b === 'army') {
+            o.push(shark(bx + 52, by - 12, 0.8, false) + shark(bx + 82, by - 14, 0.7, true) + shark(bx + 8, by + 44, 0.6, false) + shark(bx + 30, by + 46, 0.6, true) + shark(bx + 54, by + 44, 0.6, false));
+        }
+        return o.join('');
+    }
+
+    // =========================================================
+    // MINIATŰRÖK (a kártyákhoz): viselt tárgyaknál az avatár kivágott részlete, a többinél kis ikonrajz
+    // =========================================================
+    var THUMB_VB = {
+        hair: '-27 -186 54 62', face: '-27 -186 54 62', neck: '-26 -148 52 46', top: '-27 -130 54 68',
+        bottom: '-34 -84 68 86', legs: '-24 -64 48 68', shoes: '-22 -36 44 40', back: '-34 -136 68 100'
+    };
+    var ICON_DRAW = {
+        poszter: function () { return rect(8, 6, 20, 28, '#f5a9b8', 'rx="2" stroke="#fff" stroke-width="2"') + path('M18 14 l2.4 5 5.4.7 -4 3.8 1.1 5.4 -4.9 -2.7 -4.9 2.7 1.1 -5.4 -4 -3.8 5.4 -.7z', '#fff') + rect(32, 12, 18, 24, '#9fd6f5', 'rx="2" stroke="#fff" stroke-width="2"') + circ(41, 22, 5, '#fff'); },
+        zaszlo: function () { var o = ''; ['#5bcefa', '#f5a9b8', '#ffffff', '#f5a9b8', '#5bcefa'].forEach(function (c, i) { o += rect(12, 10 + i * 6, 38, 6, c); }); return o + line('M12 8 V42', '#8a7a60', 2); },
+        ledfeny: function () { var o = line('M2 12 Q15 30 30 14 T58 14', '#9a86b8', 1.2); for (var i = 0; i < 6; i++) o += circ(6 + i * 10, 16 + Math.sin(i * 1.6) * 7, 3, ['#ffe08a', '#f7a8c4', '#9fd6f5'][i % 3]); return o; },
+        agytakaro: function () { return circ(18, 26, 11, '#f7a8c4', 'stroke="#fff" stroke-width="2"') + circ(38, 30, 10, '#9fd6f5', 'stroke="#fff" stroke-width="2"') + path('M24 40 q16 -10 30 2 v6 h-30z', '#fdf6fa'); },
+        novenyek: function () { return rect(20, 30, 20, 16, '#e8b38a', 'rx="3"') + path('M30 32 q-14 -10 -14 -26 q10 8 14 26 M30 32 q14 -14 16 -28 q-14 10 -16 28 M30 32 q0 -20 -2 -34 q8 14 2 34', '#7cc78e'); },
+        tukor: function () { return rect(20, 4, 22, 42, '#d6cfe6', 'rx="6"') + rect(23, 7, 16, 36, '#eaf5fb', 'rx="4"') + path('M25 16 l12 -4 v6 l-12 4z', 'rgba(255,255,255,.8)'); },
+        polc: function () { return rect(6, 32, 48, 5, '#d9c3a0', 'rx="2"') + rect(12, 14, 9, 18, '#f5a9b8', 'rx="4"') + circ(16.5, 10, 6, '#fdf6fa') + rect(28, 20, 10, 12, '#9fd6f5', 'rx="3"') + circ(33, 16, 4.6, '#fdf6fa') + rect(43, 12, 8, 20, '#c3adee', 'rx="3"') + circ(47, 8, 5, '#f7d26a'); },
+        lava: function () { return path('M22 46 h16 l-2.4 -34 h-11.2z', '#c8bcd8') + path('M24.4 40 h11.2 l-1.2 -26 h-8.8z', '#f6b5c5') + circ(30, 28, 3.6, '#ffd2e0') + circ(29, 20, 2.4, '#ffd2e0') + path('M23.4 12 q6.6 -9 13.2 0z', '#b8a8d0'); },
+        dobozok: function () { var o = ''; [[19, 46], [21, 38], [18, 30], [20, 22], [19, 14]].forEach(function (t, i) { o += rect(t[0], t[1] - 8, 20, 8, i % 2 ? '#fdf8fd' : '#7ad6c8', 'rx="2" stroke="#b9aecb" stroke-width=".8"') + rect(t[0] + 2, t[1] - 5.4, 16, 2, i % 2 ? '#7ad6c8' : '#fdf8fd'); }); return o; },
+        cica: function () { return '<g transform="translate(-32 -4) scale(1.1)">' + catArt(58, 36) + '</g>'; },
+        kbd: function () { var o = rect(4, 20, 52, 18, '#f6b5c5', 'rx="3" stroke="#e58aa3" stroke-width="1"'); for (var r = 0; r < 3; r++) for (var k = 0; k < 8; k++) o += rect(8 + k * 6, 23 + r * 5, 4.4, 3.6, r === 2 && k > 1 && k < 6 ? '#9fd6f5' : '#fdf6fa', 'rx=".8"'); return o; },
+        konzol: function () { return rect(10, 6, 40, 38, '#c3adee', 'rx="6" stroke="#8a74c6" stroke-width="1.2"') + rect(16, 11, 28, 18, '#9fd6c4', 'rx="2"') + path('M22 20 h8 M26 16 v8', 'none', 'stroke="#2e2a3a" stroke-width="1.6"') + circ(20, 36, 3, '#f08aa0') + circ(40, 36, 2.4, '#fdf6fa') + circ(35, 36, 2.4, '#fdf6fa'); },
+        arch: function () { return rect(6, 20, 34, 12, '#4a4056', 'rx="2"') + rect(40, 22.6, 12, 6.8, '#d9d2e8', 'rx="1"') + rect(10, 23, 18, 3, '#5bcefa', 'rx="1"') + circ(34, 27, 1.6, '#f08aa0'); },
+        monster: function () { return rect(20, 6, 20, 38, '#fdf8fd', 'rx="4" stroke="#d8c6e8" stroke-width="1.2"') + rect(20, 18, 20, 10, '#6bd1c4') + path('M26 12 l4 -4 l4 4', 'none', 'stroke="#c8bcd8" stroke-width="1.6"') + path('M25 38 h10', 'none', 'stroke="#d8c6e8" stroke-width="1.6"'); },
+        matcha: function () { return path('M16 14 h28 l-4 30 h-20z', '#fdf6fa', 'stroke="#d8c6e8" stroke-width="1.2"') + rect(17.4, 14, 25.2, 9, '#a8d98f') + rect(13, 10, 34, 5, '#a8d98f', 'rx="2.4"') + line('M24 6 q-3 -6 1 -9 M32 6 q-3 -6 1 -9', 'rgba(150,130,170,.6)', 1.6); },
+        sun: function () { return ell(30, 30, 20, 15, '#e8b38a', 'stroke="#c99468" stroke-width="1.2"') + path('M14 20 l4 -8 l4 6 l4 -8 l4 8 l4 -6 l4 6', 'none', 'stroke="#c99468" stroke-width="2" stroke-linecap="round"') + circ(16, 30, 1.8, '#2e2a3a') + circ(12, 35, 2.4, '#f08aa0') + path('M34 38 q3 3 6 0', 'none', 'stroke="#c99468" stroke-width="1.4"'); },
+        blahaj: function () { return '<g transform="translate(30 28) scale(1.15)">' + shark(0, 0, 1, false).replace(/^<g[^>]*>/, '<g>') + '</g>'; },
+        army: function () { return '<g>' + shark(18, 18, 0.62, false) + shark(42, 18, 0.62, true) + shark(30, 30, 0.7, false) + shark(16, 42, 0.6, true) + shark(44, 42, 0.6, false) + '</g>'; }
+    };
+    // kind: slot azonosító vagy 'decor' / 'pet'; o: {id, color, skin, hairStyle, hairColor}
+    A.thumb = function (slot, id, o) {
+        o = o || {};
+        var wearVb = THUMB_VB[slot];
+        if (wearVb) {
+            var out = {}, cols = {};
+            out[slot] = id;
+            if (o.color) cols[slot] = o.color;
+            // a kivágáshoz kellő alap: ha kalap nélküli ruhadarab, akkor is látszik a test
+            var body = A.avatar({ skin: o.skin || 's2', hairStyle: o.hairStyle || 'bob', hairColor: o.hairColor || 'rozsa', outfit: out, colors: cols, mood: 'neutral', pose: 'idle', uid: 'th' });
+            return '<svg viewBox="' + wearVb + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Előnézet">' + body + '</svg>';
+        }
+        var f = ICON_DRAW[id];
+        return '<svg viewBox="0 0 60 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Előnézet">' + (f ? f() : '') + '</svg>';
+    };
+
+    // v: { housing, comp, decor:{}, pets:{}, outfit:{}, colors:{}, pack:{}, skin, hairStyle, hairColor, mood, scale, month, studying, working, broken }
     A.room = function (v) {
         var h = v.housing || 'szulo';
         var decor = v.decor || {};
@@ -246,7 +354,7 @@
         }
 
         // dekoráció
-        if (decor.lights) {
+        if (decor.ledfeny) {
             out.push(line('M0 10 Q50 34 100 10 T200 10 T300 10 T400 10', '#9a86b8', 1.2));
             for (var l = 0; l < 14; l++) {
                 var lx = l * 30 + 8;
@@ -327,10 +435,12 @@
         }
         if (v.pets && v.pets.cica) out.push(catArt(bx + 88, by - 6));
 
+        out.push(roomExtras(v, decor, deskY, bx, by));
+
         // karakter
         var sc = (v.scale || 1) * 1.14;
         out.push('<g class="av-wrap" transform="translate(204 270) scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, mood: v.mood, pose: v.pose, uid: 'rm'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, mood: v.mood, pose: v.pose, uid: 'rm'
         }) + '</g>');
         // lábnyomok árnyék
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A szobád és a karaktered">' + out.join('') + '</svg>';
@@ -352,7 +462,7 @@
         });
         var sc = 1.95 * (0.9 + 0.1 * (v.scale || 1));
         out.push('<g transform="translate(200 ' + Math.round(425) + ') scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, mood: v.mood, pose: v.pose, uid: 'cu'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, mood: v.mood, pose: v.pose, uid: 'cu'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Közelkép a karakteredről">' + out.join('') + '</svg>';
     };
@@ -563,7 +673,7 @@
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
         var fn = SCENES[id] || SCENES.room;
-        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, mood: v.mood, uid: 'sc' + id });
+        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, mood: v.mood, uid: 'sc' + id });
         if (id === 'room') return body;
         return '<svg class="eletut-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illusztráció">' + body + '</svg>';
     };
@@ -579,7 +689,9 @@
         else if (s.conf > 5000) mood = 'proud';
         return {
             housing: s.housing, comp: s.comp, decor: s.decor, pets: s.pets,
-            outfit: (function () { var vis = {}; var list = E.visibleOutfit(s); D.SLOTS.forEach(function (sl) { if (list.indexOf(s.equipped[sl.id]) >= 0 && s.equipped[sl.id]) vis[sl.id] = s.equipped[sl.id]; }); return vis; })(),
+            outfit: (function () { var vis = {}; var list = E.visibleOutfit(s); D.SLOTS.forEach(function (sl) { if (sl.wear && list.indexOf(s.equipped[sl.id]) >= 0 && s.equipped[sl.id]) vis[sl.id] = s.equipped[sl.id]; }); return vis; })(),
+            colors: (E.isSecret(s) && s.hiding) ? {} : E.outfitColors(s),
+            pack: (E.isSecret(s) && s.hiding) ? {} : { gear: s.equipped.gear, drink: s.equipped.drink, buddy: s.equipped.buddy },
             skin: s.skin, hairStyle: s.hairStyle, hairColor: s.hairColor,
             mood: mood, pose: mood === 'happy' ? 'wave' : (mood === 'proud' ? 'hips' : 'idle'), scale: 0.84 + 0.16 * Math.min(1, (age - 14) / 5), month: s.month,
             studying: !!s.activeSkill, working: !!s.job, broken: d.broken
