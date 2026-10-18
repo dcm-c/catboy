@@ -3,7 +3,7 @@
    A színek változókban élnek, így a világos / sötét / buzi téma felülírhatja őket.
    ========================================================= */
 
-#el-root {
+#el-root, .el-overlay, .el-toasts {
     --el-surface: #ffffff;
     --el-surface-2: #fff0f3;
     --el-line: rgba(245, 169, 184, 0.55);
@@ -16,7 +16,7 @@
     --el-blue: #2d9fd0;
 }
 
-[data-bs-theme="dark"] #el-root {
+[data-bs-theme="dark"] #el-root, [data-bs-theme="dark"] .el-overlay {
     --el-surface: #1f1a2e;
     --el-surface-2: #2a2340;
     --el-line: rgba(245, 169, 184, 0.35);
@@ -29,7 +29,7 @@
     --el-blue: #5bcefa;
 }
 
-[data-theme="buzi"] #el-root {
+[data-theme="buzi"] #el-root, [data-theme="buzi"] .el-overlay {
     --el-surface: rgba(28, 14, 52, 0.9);
     --el-surface-2: rgba(52, 30, 88, 0.94);
     --el-ink: #ffffff;
@@ -160,18 +160,33 @@
 [data-bs-theme="dark"] .el-act.main { background: linear-gradient(180deg, #3b2c58, #2f2348); color: #ffe7ef; }
 [data-bs-theme="dark"] .el-act.main small { color: #cfc4e6; }
 .el-act:disabled, .el-act.cant { opacity: .55; }
-.el-act:focus-visible, .el-btn:focus-visible, .el-choice:focus-visible, .el-tab:focus-visible, .el-iconbtn:focus-visible, .el-speed button:focus-visible, .el-swatch:focus-visible {
+.el-act:focus-visible, .el-btn:focus-visible, .el-choice:focus-visible, .el-tab:focus-visible, .el-iconbtn:focus-visible, .el-speed button:focus-visible, .el-swatch:focus-visible, .el-slot:focus-visible, .el-sw:focus-visible {
     outline: 3px solid var(--blue, #5bcefa); outline-offset: 2px;
 }
 
-/* ---------- Fülek ---------- */
-.el-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; scrollbar-width: thin; }
+/* ---------- Menü (oldalsáv) + panel ---------- */
+.el-main { display: grid; grid-template-columns: 158px minmax(0, 1fr); gap: 14px; align-items: start; }
+.el-nav { display: grid; gap: 12px; position: sticky; top: 76px; }
+.el-nav-group { display: grid; gap: 4px; }
+.el-nav-label { font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--el-soft); padding: 0 6px; }
+.el-nav-row { display: grid; gap: 4px; }
 .el-tab {
-    flex: none; border: 2px solid var(--el-line); background: var(--el-surface); color: var(--el-ink); border-radius: 999px;
-    padding: 6px 14px; font: inherit; font-weight: 700; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; position: relative;
+    border: 2px solid transparent; background: transparent; color: var(--el-ink); border-radius: 12px;
+    padding: 7px 10px; font: inherit; font-weight: 700; cursor: pointer; display: flex; gap: 8px; align-items: center; text-align: left;
+    position: relative; min-height: 40px; line-height: 1.15;
 }
+.el-tab:hover { background: var(--el-surface-2); }
 .el-tab[aria-selected="true"] { background: var(--pink, #f5a9b8); border-color: var(--pink, #f5a9b8); color: #3a2f45; }
 .el-tab .dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: #d9567a; border: 2px solid var(--el-surface); }
+@media (max-width: 767.98px) {
+    .el-main { grid-template-columns: 1fr; }
+    .el-nav { position: static; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+    .el-nav-row { grid-template-columns: 1fr 1fr; }
+    .el-tab { padding: 6px 8px; font-size: .9rem; min-height: 44px; border-color: var(--el-line); }
+}
+@media (max-width: 460px) {
+    .el-nav { grid-template-columns: 1fr; }
+}
 .el-panel { display: grid; gap: 10px; }
 .el-section-title { font-weight: 700; margin: 8px 0 0; color: var(--el-soft); font-size: .95rem; text-transform: uppercase; letter-spacing: .04em; }
 .el-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
@@ -264,7 +279,13 @@
 .el-opt:hover:not(:disabled) { border-color: var(--blue, #5bcefa); }
 .el-opt b { font-weight: 700; }
 .el-opt small { color: var(--el-soft); }
-.el-opt:disabled { opacity: .55; cursor: not-allowed; }
+.el-opt:disabled, .el-opt.locked { cursor: not-allowed; border-style: dashed; border-color: var(--el-line); background: var(--el-surface-2); }
+.el-opt.locked b { color: var(--el-soft); }
+.el-lock { color: var(--el-minus); font-weight: 700; }
+.el-check { font-weight: 700; }
+.el-check.ok { color: var(--el-plus); }
+.el-check.warn { color: #a86a10; }
+[data-bs-theme="dark"] .el-check.warn, [data-theme="buzi"] .el-check.warn { color: #ffc46b; }
 .el-result-box { border-left: 5px solid var(--blue, #5bcefa); background: var(--el-surface); padding: 10px 14px; border-radius: 10px; }
 
 /* ---------- Befejezés ---------- */
@@ -287,7 +308,7 @@
 /* ---------- Buzi mód ---------- */
 [data-theme="buzi"] .el-card, [data-theme="buzi"] .el-item, [data-theme="buzi"] .el-modal { background: rgba(28, 14, 52, .9); }
 [data-theme="buzi"] .el-opt, [data-theme="buzi"] .el-ach div, [data-theme="buzi"] .el-end-stats div { background: rgba(52, 30, 88, .94); }
-[data-theme="buzi"] .el-tab, [data-theme="buzi"] .el-choice { background: rgba(52, 30, 88, .9); }
+[data-theme="buzi"] .el-choice { background: rgba(52, 30, 88, .9); }
 [data-theme="buzi"] .el-tab[aria-selected="true"] { background: #ff9ccd; color: #2a0f44; }
 
 @media (max-width: 575.98px) {
@@ -308,3 +329,101 @@
     padding: 3px 12px; font: inherit; font-weight: 700; font-size: .85rem; cursor: pointer;
 }
 .el-viewbtn:focus-visible { outline: 3px solid var(--blue, #5bcefa); outline-offset: 2px; }
+
+/* ---------- Szekrény: statok, kombók, miniatűrök, színek ---------- */
+.el-sum { gap: 8px; }
+.el-sum-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.el-sbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 14px; }
+.el-sb { display: grid; gap: 3px; }
+.el-sb-top { display: flex; justify-content: space-between; gap: 6px; font-size: .88rem; font-weight: 700; }
+.el-sb-top .l { display: inline-flex; gap: 4px; align-items: center; }
+.el-bar.stat.pink > i { background: #e86a96; }
+.el-bar.stat.blue > i { background: #2d9fd0; }
+.el-bar.stat.violet > i { background: #8a6fe0; }
+.el-bar.stat.amber > i { background: #e39a2d; }
+.el-bar.stat.green > i { background: #3fae7a; }
+.el-chip.stat { background: transparent; border: 1.5px solid currentColor; }
+.el-chip.stat.pink { color: #b53a68; }
+.el-chip.stat.blue { color: #1f7aa6; }
+.el-chip.stat.violet { color: #6a4fc0; }
+.el-chip.stat.amber { color: #a86a10; }
+.el-chip.stat.green { color: #1b7a50; }
+[data-bs-theme="dark"] .el-chip.stat.pink, [data-theme="buzi"] .el-chip.stat.pink { color: #ff9cc0; }
+[data-bs-theme="dark"] .el-chip.stat.blue, [data-theme="buzi"] .el-chip.stat.blue { color: #7fdcff; }
+[data-bs-theme="dark"] .el-chip.stat.violet, [data-theme="buzi"] .el-chip.stat.violet { color: #c3b0ff; }
+[data-bs-theme="dark"] .el-chip.stat.amber, [data-theme="buzi"] .el-chip.stat.amber { color: #ffc46b; }
+[data-bs-theme="dark"] .el-chip.stat.green, [data-theme="buzi"] .el-chip.stat.green { color: #8ff0be; }
+
+.el-combos { border: 2px solid var(--el-line); border-radius: 16px; background: var(--el-surface); padding: 8px 12px; }
+.el-combos summary { cursor: pointer; font-weight: 700; padding: 4px 0; }
+.el-combo-list { display: grid; gap: 6px; margin-top: 8px; max-height: 320px; overflow: auto; }
+.el-combo { display: grid; grid-template-columns: 24px 1fr; gap: 8px; align-items: start; padding: 6px 8px; border-radius: 10px; opacity: .7; }
+.el-combo.on { opacity: 1; background: var(--el-surface-2); box-shadow: 0 0 0 2px var(--el-plus) inset; }
+.el-combo-tx { display: grid; gap: 1px; }
+
+.el-slotbar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.el-slot {
+    border: 2px solid var(--el-line); background: var(--el-surface); color: var(--el-ink); border-radius: 12px;
+    padding: 4px 10px; font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; min-height: 40px;
+}
+.el-slot small { color: var(--el-soft); font-weight: 600; }
+.el-slot.filled { border-color: var(--blue, #5bcefa); }
+.el-slot.on { background: var(--pink, #f5a9b8); border-color: var(--pink, #f5a9b8); color: #3a2f45; }
+.el-slot.on small { color: #5a4a68; }
+
+.el-item.has-thumb { grid-template-columns: 72px 1fr; column-gap: 10px; align-items: start; }
+.el-item.has-thumb > :not(.el-thumbbox) { grid-column: 2; }
+.el-thumbbox {
+    grid-column: 1; grid-row: 1 / span 6; width: 72px; height: 88px; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
+    background: linear-gradient(180deg, #fde6ee, #e9e4fb);
+}
+[data-bs-theme="dark"] .el-thumbbox { background: linear-gradient(180deg, #3a2a52, #26203f); }
+.el-thumb { width: 100%; height: 100%; object-fit: contain; display: block; }
+.el-item.has-thumb .el-btn { justify-self: start; }
+@media (max-width: 360px) { .el-item.has-thumb { grid-template-columns: 1fr; } .el-item.has-thumb > :not(.el-thumbbox) { grid-column: 1; } .el-thumbbox { grid-row: auto; width: 100%; height: 100px; } }
+
+.el-paint { display: grid; gap: 4px; }
+.el-paint-cap { font-size: .8rem; font-weight: 700; color: var(--el-soft); display: inline-flex; gap: 4px; align-items: center; }
+.el-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.el-sw {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(58, 47, 69, .35); padding: 0; cursor: pointer; position: relative;
+}
+.el-sw.base::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; border: 2px dotted rgba(58, 47, 69, .55); }
+.el-sw[aria-pressed="true"] { border-color: var(--el-ink); box-shadow: 0 0 0 3px var(--blue, #5bcefa); }
+
+.el-sbs.compact { grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 6px 10px; }
+.el-sbs.compact .el-sb-top { font-size: .78rem; }
+.el-sbs.compact .el-bar { height: 7px; }
+
+/* ---------- Smink és Barátok ---------- */
+.el-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.el-note.warn { color: var(--el-minus); font-weight: 600; }
+.el-bar.bond > i { background: linear-gradient(90deg, #f08aa0, #e86a96); }
+
+.el-person { display: grid; gap: 10px; }
+.el-person.locked { opacity: .72; }
+.el-person-top { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: start; }
+.el-portrait-box {
+    width: 84px; height: 96px; border-radius: 14px; overflow: hidden; display: grid; place-items: center; color: var(--el-soft);
+    background: linear-gradient(180deg, #fde6ee, #e9e4fb);
+}
+[data-bs-theme="dark"] .el-portrait-box { background: linear-gradient(180deg, #3a2a52, #26203f); }
+.el-portrait { width: 100%; height: 100%; object-fit: cover; display: block; }
+.el-person-meta { display: grid; gap: 4px; min-width: 0; }
+.el-person-meta h4 { margin: 0; }
+.el-bond-row { display: flex; justify-content: space-between; font-size: .82rem; font-weight: 700; }
+
+.el-social-acts { display: grid; gap: 8px; }
+.el-social-row { display: grid; grid-template-columns: minmax(130px, 170px) 1fr; gap: 10px; align-items: start; padding: 8px; border-radius: 12px; background: var(--el-surface-2); }
+.el-social-row.off { opacity: .78; }
+.el-social-row .el-btn { width: 100%; }
+.el-social-info { display: grid; gap: 4px; min-width: 0; }
+@media (max-width: 520px) { .el-social-row { grid-template-columns: 1fr; } .el-person-top { grid-template-columns: 64px 1fr; } .el-portrait-box { width: 64px; height: 74px; } }
+
+.el-social-result { display: grid; grid-template-columns: minmax(150px, 210px) 1fr; gap: 12px; align-items: center; padding: 10px; border-radius: 16px; border: 2px solid var(--el-line); background: var(--el-surface); }
+.el-social-result.great { border-color: var(--el-plus); }
+.el-social-result.meh { border-color: var(--el-line); opacity: .95; }
+.el-social-art svg { width: 100%; height: auto; display: block; border-radius: 12px; }
+.el-social-tx { display: grid; gap: 8px; }
+.el-social-tx p { margin: 0; color: var(--el-ink); line-height: 1.5; }
+@media (max-width: 520px) { .el-social-result { grid-template-columns: 1fr; } }

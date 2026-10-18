@@ -52,7 +52,8 @@
             out: false, hiding: false, parents: 'unknown',
             student: false,
 
-            steps: {}, items: {}, equipped: {}, hideout: {}, decor: {}, pets: {},
+            steps: {}, items: {}, equipped: {}, colors: {}, hideout: {}, decor: {}, pets: {},
+            beauty: {}, look: {}, social: { bond: {}, last: {}, cd: {} },
             comp: 0, skills: {}, skillProg: {}, activeSkill: null,
             housing: 'szulo', job: null, jobMonths: 0,
             debtMonths: 0, allowanceCut: 0, saleUntil: -1, brokenUntil: -1, rentBump: 0,
@@ -87,11 +88,279 @@
         return Math.max(10, Math.round(cost * f / 10) * 10);
     };
 
+
+    // ---------------------------------------------------------
+    // Smink
+    // ---------------------------------------------------------
+    function hidden(s) { return E.isSecret(s) && s.hiding; }
+    E.beautyPrice = function (s, cost) {
+        var f = 1 - 0.04 * E.lvl(s, 'smink');
+        if (s.saleUntil >= s.month) f *= 0.8;
+        return Math.max(10, Math.round(cost * f / 10) * 10);
+    };
+    E.lookColors = function (slot) { return D.LOOK_COLORS[slot] || null; };
+    // Az aktív termékek azonosítói (hely szerint), a rejtőzködés alatt üres
+    E.lookApplied = function (s) {
+        var out = {};
+        if (hidden(s)) return out;
+        D.LOOK_SLOTS.forEach(function (sl) { var a = s.look[sl.id]; if (a && s.beauty[a.id]) out[sl.id] = a.id; });
+        return out;
+    };
+    E.lookCount = function (s) { return Object.keys(E.lookApplied(s)).length; };
+    // Az avatárnak átadandó smink: {hely: {style, color}}
+    E.lookOf = function (s) {
+        var out = {}, ap = E.lookApplied(s);
+        Object.keys(ap).forEach(function (slot) {
+            var b = find(D.BEAUTY, ap[slot]), a = s.look[slot], col = null;
+            if (b && b.tone) {
+                var list = D.LOOK_COLORS[slot] || [];
+                var c = find(list, a.color) || list[0];
+                col = c ? c.color : null;
+            }
+            out[slot] = { style: ap[slot], color: col };
+        });
+        return out;
+    };
+    E.lookText = function (s) {
+        var ap = E.lookApplied(s), parts = [];
+        D.LOOK_SLOTS.forEach(function (sl) {
+            var id = ap[sl.id], b = id && find(D.BEAUTY, id);
+            if (!b) return;
+            var nm = lcFirst(b.name);
+            if (b.tone) { var c = find(D.LOOK_COLORS[sl.id] || [], s.look[sl.id].color) || (D.LOOK_COLORS[sl.id] || [])[0]; if (c) nm = lcFirst(c.label) + ' ' + nm; }
+            parts.push(nm);
+        });
+        return parts.length ? joinList(parts.slice(0, 3)) : '';
+    };
+    E.buyBeauty = function (s, id) {
+        var b = find(D.BEAUTY, id);
+        if (!b) return { ok: false, reason: 'Ismeretlen termék' };
+        if (s.beauty[id]) return { ok: false, reason: 'Ez már a tiéd' };
+        if (b.skill && E.lvl(s, 'smink') < b.skill) return { ok: false, reason: 'Smink és stílus ' + b.skill + '. szint kell hozzá' };
+        var cost = E.beautyPrice(s, b.cost);
+        if (s.money < cost) return { ok: false, reason: 'Nincs elég pénzed' };
+        s.money -= cost; s.stats.spent += cost;
+        s.beauty[id] = true;
+        if (!s.look[b.slot]) s.look[b.slot] = { id: id, color: null };
+        if (E.isSecret(s)) s.risk = clamp(s.risk + b.risk * 0.5, 0, 100);
+        E.log(s, 'Megvetted: ' + b.name + '.');
+        return { ok: true };
+    };
+    E.applyBeauty = function (s, slot, id) {
+        if (!find(D.LOOK_SLOTS, slot)) return { ok: false, reason: 'Ismeretlen hely' };
+        if (id === null || id === undefined) { delete s.look[slot]; return { ok: true }; }
+        var b = find(D.BEAUTY, id);
+        if (!b || b.slot !== slot || !s.beauty[id]) return { ok: false, reason: 'Ez nem érhető el' };
+        var prev = s.look[slot];
+        s.look[slot] = { id: id, color: prev && prev.color && b.tone ? prev.color : null };
+        return { ok: true };
+    };
+    E.setLookColor = function (s, slot, colorId) {
+        var a = s.look[slot], b = a && find(D.BEAUTY, a.id);
+        if (!b || !b.tone) return { ok: false, reason: 'Ennek nincs színe' };
+        if (!find(D.LOOK_COLORS[slot] || [], colorId)) return { ok: false, reason: 'Ismeretlen szín' };
+        a.color = colorId;
+        return { ok: true };
+    };
+
+    // ---------------------------------------------------------
+    // Barátok és társas élet
+    // ---------------------------------------------------------
+    function unlockOk(s, u) {
+        if (!u) return true;
+        if (u.flag && !s.flags[u.flag]) return false;
+        if (u.cons && s.stats.cons < u.cons) return false;
+        if (u.job && !s.job) return false;
+        if (u.minAge && E.ageYears(s) < u.minAge) return false;
+        if (u.minComm && s.comm < u.minComm) return false;
+        if (u.step && !s.steps[u.step]) return false;
+        if (u.anyOf) return u.anyOf.some(function (x) { return unlockOk(s, x); });
+        return true;
+    }
+    E.personUnlocked = function (s, id) {
+        var p = find(D.PEOPLE, id);
+        if (!p) return false;
+        if (s.social.known && s.social.known[id]) return true; // egyszer megismert barát nem tűnik el (pl. ha felmondasz)
+        return unlockOk(s, p.unlock);
+    };
+    E.bond = function (s, id) {
+        var p = find(D.PEOPLE, id);
+        if (!p) return 0;
+        var b = s.social && s.social.bond ? s.social.bond[id] : undefined;
+        return typeof b === 'number' ? b : p.start;
+    };
+    E.people = function (s) {
+        return D.PEOPLE.map(function (p) {
+            var un = E.personUnlocked(s, p.id);
+            return { person: p, unlocked: un, bond: E.bond(s, p.id), last: s.social.last[p.id] };
+        });
+    };
+    // Személyek hatása (a kötelék pontonkénti hatása)
+    E.perks = function (s) {
+        var out = { passive: 0, click: 0, regen: 0, comm: 0, risk: 0, pay: 0 };
+        D.PEOPLE.forEach(function (p) {
+            if (!E.personUnlocked(s, p.id)) return;
+            if (p.perkReq === 'partner' && !s.flags.partner) return;
+            var b = E.bond(s, p.id);
+            var eff = Math.max(0, b - p.start); // csak a megszerzett kötelék számít
+            for (var k in p.perk) out[k] += p.perk[k] * eff;
+        });
+        return out;
+    };
+    E.canSocial = function (s, id) {
+        var a = find(D.SOCIAL, id);
+        if (!a) return fail('Ismeretlen');
+        var p = find(D.PEOPLE, a.who);
+        if (!E.personUnlocked(s, a.who)) return fail('Még nem ismered');
+        if (a.minAge && E.ageYears(s) < a.minAge) return fail(a.minAge + ' éves kortól');
+        var n = a.needs || {};
+        if (a.minBond && E.bond(s, a.who) < a.minBond) return fail('Kötelék: ' + a.minBond + ' kell (most ' + Math.floor(E.bond(s, a.who)) + ')');
+        if (n.items && Object.keys(s.items).length < n.items) return fail('Legalább ' + n.items + ' darab saját ruha kell');
+        if (n.look && E.lookCount(s) < n.look) return fail('Legalább ' + n.look + ' sminkelt hely kell (Smink fül)');
+        if (n.comp && s.comp < n.comp) return fail('Jobb gép kell: ' + D.COMPUTERS[n.comp].name);
+        if (n.job && !s.job) return fail('Állás kell hozzá');
+        if (n.out && !s.out) return fail('Először el kell mondanod a szüleidnek');
+        if (n.secret && !E.isSecret(s)) return fail('Csak titkolózás alatt van értelme');
+        if (n.moved && s.housing === 'szulo') return fail('Csak akkor, ha már elköltöztél');
+        if (n.parentsTense && s.parents !== 'tense') return fail('Erre most nincs szükség');
+        if (n.partner === true && !s.flags.partner) return fail('Csak ha már együtt vagytok');
+        if (n.partner === false && s.flags.partner) return fail('Ez már megtörtént');
+        if (n.skill) for (var k in n.skill) if ((s.skills[k] || 0) < n.skill[k]) return fail(find(D.SKILLS, k).name + ' ' + n.skill[k] + '. szint');
+        if ((s.social.cd[id] || -1) >= s.month) return fail('Még ' + (s.social.cd[id] - s.month + 1) + ' hónapig nem érhető el');
+        if (s.money < a.cost) return fail('Nincs elég pénzed');
+        if (s.energy < a.energy) return fail('Kevés az energiád (' + a.energy + ' kell)');
+        return ok();
+    };
+    E.doSocial = function (s, id) {
+        var r = E.canSocial(s, id);
+        if (!r.ok) return r;
+        var a = find(D.SOCIAL, id), p = find(D.PEOPLE, a.who);
+        var st = E.stats(s).total, bond0 = E.bond(s, a.who);
+        var look = a.look ? E.lookCount(s) : 0;
+        var q = rng() + bond0 * 0.004 + st.cute * 0.003 + look * 0.04;
+        var tone = q >= 0.85 ? 'great' : (q >= 0.25 ? 'ok' : 'meh');
+        var mult = tone === 'great' ? 1.6 : (tone === 'ok' ? 1 : 0.4);
+        var d = E.derive(s);
+        spend(s, a.cost);
+        s.energy = clamp(s.energy - a.energy, 0, 100);
+        var gain = Math.round(a.bond * mult * 10) / 10;
+        var conf = Math.round(a.conf * mult * d.clickConf);
+        s.social.bond[a.who] = clamp(bond0 + gain, 0, 100);
+        s.social.last[a.who] = s.month;
+        s.social.known = s.social.known || {};
+        s.social.known[a.who] = true;
+        s.social.cd[id] = s.month + a.cd - 1;
+        s.conf += conf;
+        if (a.comm) s.comm += a.comm * mult;
+        if (a.skillPts) for (var k in a.skillPts) {
+            var sid = k === '_active' ? s.activeSkill : k;
+            if (sid) addSkillProgress(s, sid, a.skillPts[k] * mult);
+        }
+        var text = tone === 'great' ? a.great : (tone === 'ok' ? a.text : p.meh[Math.floor(rng() * p.meh.length)]);
+        var res = { ok: true, tone: tone, text: text, bond: gain, conf: conf, who: a.who, special: null };
+        if (a.special === 'riskDown') {
+            if (E.isSecret(s)) s.risk = clamp(s.risk - (tone === 'great' ? 14 : tone === 'ok' ? 10 : 5), 0, 100);
+            s.flags.lillaKnows = true;
+        } else if (a.special === 'con') {
+            s.stats.cons++; s.lastCon = s.month;
+        } else if (a.special === 'bonus' && s.job) {
+            var bonus = Math.round(find(D.JOBS, s.job).pay * 0.03 * mult / 100) * 100;
+            s.money += bonus; s.stats.earned += bonus;
+            res.bonus = bonus;
+        } else if (a.special === 'parents') {
+            if (tone !== 'meh') { s.parents = 'accepting'; res.special = 'parents'; E.log(s, 'Őszintén beszéltél a szüleiddel, és elfogadtak.'); }
+            else s.social.cd[id] = s.month + 1;
+        } else if (a.special === 'allowance') {
+            if (s.housing === 'szulo' && s.allowanceCut > 0 && tone !== 'meh') s.allowanceCut = Math.max(0, s.allowanceCut - 1);
+        } else if (a.special === 'date') {
+            var pr = clamp(0.3 + s.social.bond[a.who] * 0.006 + st.cute * 0.004 + look * 0.03, 0.1, 0.92);
+            if (tone === 'meh') pr *= 0.6;
+            if (rng() < pr) {
+                s.flags.partner = true; s.flags.dated = true; res.special = 'partner';
+                E.log(s, 'Összejöttél Zsomborral.');
+            } else {
+                res.special = 'rejected';
+                res.text = 'Zsombor kedvesen nemet mond: „Nagyon fontos vagy nekem, de most még barátként.” Fáj, de őszinte volt, és ez is számít.';
+                s.social.bond[a.who] = clamp(s.social.bond[a.who] - 4, 0, 100);
+                res.bond = Math.round((s.social.bond[a.who] - bond0) * 10) / 10;
+            }
+        }
+        E.log(s, p.name + ': ' + lcFirst(a.name) + '.');
+        return res;
+    };
+
     E.visibleOutfit = function (s) {
         if (E.isSecret(s) && s.hiding) return [];
         var out = [];
-        D.SLOTS.forEach(function (slot) { if (s.equipped[slot.id]) out.push(s.equipped[slot.id]); });
+        D.SLOTS.forEach(function (slot) { if (slot.wear && s.equipped[slot.id]) out.push(s.equipped[slot.id]); });
         return out;
+    };
+
+    // Egy tárgy színe (hex): a játékos választása vagy az alapszín; null, ha nem festhető
+    E.paintOf = function (s, id) {
+        var it = find(D.ITEMS, id);
+        if (!it || !it.paint) return null;
+        var c = find(D.PALETTE, s.colors && s.colors[id]);
+        return c ? c.color : it.paint;
+    };
+    E.setColor = function (s, id, paletteId) {
+        var it = find(D.ITEMS, id);
+        if (!it || !it.paint) return { ok: false, reason: 'Ez a tárgy nem festhető' };
+        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
+        if (paletteId === null || paletteId === undefined) { delete s.colors[id]; return { ok: true }; }
+        if (!find(D.PALETTE, paletteId)) return { ok: false, reason: 'Ismeretlen szín' };
+        s.colors[id] = paletteId;
+        return { ok: true };
+    };
+    // Az avatárnak átadandó színek (hely szerint), csak a viselt festhető tárgyakra
+    E.outfitColors = function (s) {
+        var out = {};
+        D.SLOTS.forEach(function (slot) {
+            var id = s.equipped[slot.id];
+            if (id && slot.wear) { var c = E.paintOf(s, id); if (c) out[slot.id] = c; }
+        });
+        return out;
+    };
+
+    // Statpontok: viselt / kéznél lévő tárgyak + szobadíszek + társ + kombók
+    E.activeIds = function (s) {
+        var ids = {}, hide = E.isSecret(s) && s.hiding;
+        D.SLOTS.forEach(function (slot) {
+            var id = s.equipped[slot.id];
+            if (id && (!slot.wear || !hide)) ids[id] = true;
+        });
+        Object.keys(s.decor).forEach(function (k) { if (s.decor[k]) ids[k] = true; });
+        Object.keys(s.pets).forEach(function (k) { if (s.pets[k]) ids[k] = true; });
+        var lk = E.lookApplied(s);
+        Object.keys(lk).forEach(function (k) { ids[lk[k]] = true; });
+        return ids;
+    };
+    E.comboActive = function (combo, ids) {
+        return combo.need.every(function (n) {
+            return Array.isArray(n) ? n.some(function (x) { return ids[x]; }) : !!ids[n];
+        });
+    };
+    E.stats = function (s) {
+        var ids = E.activeIds(s), base = {}, bonus = {}, total = {};
+        D.STATS.forEach(function (st) { base[st.id] = 0; bonus[st.id] = 0; });
+        function addTo(map, st) { if (st) for (var k in st) if (k in map) map[k] += st[k]; }
+        D.ITEMS.forEach(function (it) { if (ids[it.id]) addTo(base, it.st); });
+        D.DECOR.forEach(function (d) { if (ids[d.id]) addTo(base, d.st); });
+        D.PETS.forEach(function (p) { if (ids[p.id]) addTo(base, p.st); });
+        D.BEAUTY.forEach(function (b) { if (ids[b.id]) addTo(base, b.st); });
+        var combos = D.COMBOS.map(function (c) { return { combo: c, active: E.comboActive(c, ids) }; });
+        combos.forEach(function (c) { if (c.active) addTo(bonus, c.combo.bonus); });
+        var filled = D.SLOTS.filter(function (sl) { return s.equipped[sl.id]; }).length;
+        var full = filled === D.SLOTS.length;
+        if (full) addTo(bonus, D.FULL_SET_BONUS);
+        var lkAp = E.lookApplied(s);
+        var fullLook = D.FULL_LOOK_SLOTS.every(function (sl) { return !!lkAp[sl]; });
+        if (fullLook) addTo(bonus, D.FULL_LOOK_BONUS);
+        var score = 0;
+        D.STATS.forEach(function (st) { total[st.id] = Math.max(0, base[st.id] + bonus[st.id]); score += total[st.id]; });
+        var rank = D.RANKS[0], rankIndex = 0;
+        D.RANKS.forEach(function (r, i) { if (score >= r.min) { rank = r; rankIndex = i; } });
+        return { base: base, bonus: bonus, total: total, combos: combos, filled: filled, full: full, fullLook: fullLook, score: score, rank: rank, rankIndex: rankIndex };
     };
 
     E.derive = function (s) {
@@ -109,9 +378,13 @@
             if (!it) return;
             eqClick += it.click; eqPassive += it.passive; eqRisk += it.risk;
         });
+        var lkAp = E.lookApplied(s);
+        Object.keys(lkAp).forEach(function (k) { var b = find(D.BEAUTY, lkAp[k]); if (b) { eqClick += b.click; eqRisk += b.risk; } });
+        var st = E.stats(s).total;
+        var perks = E.perks(s);
         var stepClick = 0, stepPassive = 0;
         D.STEPS.forEach(function (st) { if (s.steps[st.id]) { stepClick += st.click || 0; stepPassive += st.passive || 0; } });
-        var decClick = 0, decPassive = 0, regen = 1.5 + housing.comfort * 0.15;
+        var decClick = 0, decPassive = 0, regen = 1.5 + housing.comfort * 0.15 + perks.regen;
         D.DECOR.forEach(function (d) { if (s.decor[d.id]) { decClick += d.click || 0; decPassive += d.passive || 0; regen += d.regen || 0; } });
         D.PETS.forEach(function (p) { if (s.pets[p.id]) { decPassive += p.passive || 0; regen += p.regen || 0; } });
 
@@ -120,10 +393,11 @@
 
         var d = {
             secret: secret, w: w, housing: housing, comp: comp, broken: broken, job: job,
-            eqRisk: eqRisk,
-            clickConf: (1 + stepClick + eqClick * w + lvl('smink') * 0.5 + lvl('varras') * 0.3 + decClick),
-            passiveConf: stepPassive + eqPassive * w + online + decPassive + lvl('rajz') * 0.3 + lvl('angol') * 0.2 + s.comm * 0.02,
-            regen: regen,
+            eqRisk: eqRisk + st.chaos * 0.1,
+            stat: st, perks: perks,
+            clickConf: (1 + stepClick + perks.click + eqClick * w + lvl('smink') * 0.5 + lvl('varras') * 0.3 + decClick) * (1 + st.cute * 0.006) + st.chaos * 0.02,
+            passiveConf: stepPassive + eqPassive * w + online + decPassive + lvl('rajz') * 0.3 + lvl('angol') * 0.2 + s.comm * 0.02 + st.gamer * 0.05 + perks.passive,
+            regen: regen + st.chill * 0.012,
             energyMax: 100,
             hideoutDecay: 0
         };
@@ -153,6 +427,9 @@
             if (lvl('prog') >= 2) inc.freelance += (lvl('prog') - 1) * D.FREELANCE_PROG;
         }
         if (!broken && s.comp >= 4 && lvl('stream') >= 1) inc.stream = lvl('stream') * (D.STREAM_BASE + s.comm * D.STREAM_PER_COMM);
+        var codeMul = 1 + d.stat.code * 0.004;
+        inc.job = Math.round(inc.job * codeMul * (1 + perks.pay));
+        inc.freelance = Math.round(inc.freelance * codeMul);
         inc.total = inc.allowance + inc.job + inc.scholarship + inc.freelance + inc.stream;
 
         var cost = { rent: 0, living: 0, upkeep: 0 };
@@ -189,6 +466,9 @@
             ownedWardrobe: ownedWardrobe,
             ownedText: ownedWardrobe.length ? joinList(ownedWardrobe.map(function (i) { return lcFirst(i.name); })) : '',
             pet: s.pets.cica ? 'cica' : null,
+            look: E.lookText(s),
+            lookCount: E.lookCount(s),
+            hasLook: function (id) { return E.lookApplied(s)[(find(D.BEAUTY, id) || {}).slot] === id; },
             netLoss: s.gamble.wagered - s.gamble.paid,
             has: function (id) { return visible.some(function (i) { return i.id === id; }); },
             owns: function (id) { return !!(s.items[id] || s.decor[id] || s.pets[id]); },
@@ -226,6 +506,11 @@
             rentBump: function (f) { s.rentBump = Math.min(0.3, s.rentBump + f); },
             moveHome: function () { s.housing = 'szulo'; s.flags.movedBack = true; },
             con: function () { s.stats.cons++; s.lastCon = s.month; },
+            bond: function (who, n) {
+                if (!find(D.PEOPLE, who)) return;
+                s.social.bond[who] = clamp(E.bond(s, who) + n, 0, 100);
+                s.social.last[who] = s.month;
+            },
             rand: function () { return rng(); }
         };
         return A;
@@ -660,9 +945,19 @@
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
             choices: ev.choices.map(function (ch, i) {
                 var okReq = !ch.req || ch.req(s, c);
-                return { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || '') };
+                var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || ''), check: null };
+                var need = E.confNeed(ch);
+                if (need && !ch.req) out.check = { need: need, have: Math.floor(s.conf), ok: s.conf >= need };
+                return out;
             })
         };
+    };
+
+    // A választás tippjéből kiolvasott önbizalom-küszöb ("Legalább 150 önbizalom kell", "250+ önbizalom esetén ...")
+    E.confNeed = function (ch) {
+        if (ch.need !== undefined) return ch.need;
+        var m = /(\d+)\+?\s*önbizalom/.exec(ch.tip || '');
+        return m ? parseInt(m[1], 10) : 0;
     };
 
     E.choose = function (s, idx) {
@@ -711,16 +1006,36 @@
         s.debtMonths = s.money < 0 ? s.debtMonths + 1 : 0;
         s.lastNet = delta;
 
-        if (s.flags.discord && !d.broken) s.comm += 0.15 * s.comp;
+        if (s.flags.discord && !d.broken) s.comm += 0.15 * s.comp + d.stat.gamer * 0.01;
+        s.comm += d.perks.comm * (1 + 0);
         if (d.secret) {
             if (!s.hiding) s.risk = clamp(s.risk + d.eqRisk * 0.12, 0, 100);
-            s.risk = clamp(s.risk - (1 + d.hideoutDecay), 0, 100);
+            s.risk = clamp(s.risk - (1 + d.hideoutDecay + d.perks.risk), 0, 100);
         } else s.risk = 0;
+
+        // Barátok: új ismerősök, kopó kötelék
+        s.social.known = s.social.known || {};
+        D.PEOPLE.forEach(function (p) {
+            if (!s.social.known[p.id] && E.personUnlocked(s, p.id)) {
+                s.social.known[p.id] = true;
+                s.social.last[p.id] = s.month;
+                s.flagsNew = (s.flagsNew || []).concat([{ type: 'person', id: p.id }]);
+                E.log(s, 'Új ismerős: ' + p.name + ' (' + p.role.toLowerCase() + ').');
+            }
+            if (!s.social.known[p.id]) return;
+            var last = s.social.last[p.id];
+            if (last === undefined) { s.social.last[p.id] = s.month; return; }
+            if (s.month - last >= D.SOCIAL_DECAY_AFTER) {
+                var b = E.bond(s, p.id);
+                var floor = p.id === 'csalad' ? 10 : 0;
+                s.social.bond[p.id] = Math.max(floor, b - D.SOCIAL_DECAY * (p.id === 'zsombor' && s.flags.partner ? 0.5 : 1));
+            }
+        });
 
         if (s.allowanceCut > 0) s.allowanceCut--;
         if (s.job) s.jobMonths++;
         var g = s.gamble;
-        g.urge = clamp(g.urge - (g.monthSpent === 0 ? 4 : 1), 0, 100);
+        g.urge = clamp(g.urge - (g.monthSpent === 0 ? 4 : 1) - d.stat.chill * 0.03, 0, 100);
         g.monthSpent = 0;
 
         s.month++;
@@ -793,10 +1108,28 @@
         var numeric = ['month', 'sec', 'conf', 'money', 'energy', 'risk', 'comm', 'comp', 'jobMonths', 'debtMonths', 'allowanceCut', 'saleUntil', 'brokenUntil', 'rentBump', 'lastCon', 'speed'];
         numeric.forEach(function (k) { s[k] = num(raw[k], s[k]); });
         ['out', 'hiding', 'student', 'paused'].forEach(function (k) { s[k] = !!raw[k]; });
-        ['steps', 'items', 'equipped', 'hideout', 'decor', 'pets', 'skills', 'skillProg', 'flags', 'seen', 'lastSeen', 'ach', 'stats', 'expCd'].forEach(function (k) {
+        ['steps', 'items', 'equipped', 'colors', 'hideout', 'decor', 'pets', 'beauty', 'look', 'skills', 'skillProg', 'flags', 'seen', 'lastSeen', 'ach', 'stats', 'expCd'].forEach(function (k) {
             if (raw[k] && typeof raw[k] === 'object' && !Array.isArray(raw[k])) s[k] = Object.assign(s[k] && typeof s[k] === 'object' ? s[k] : {}, raw[k]);
         });
         if (raw.gamble && typeof raw.gamble === 'object') s.gamble = Object.assign(s.gamble, raw.gamble);
+        if (raw.social && typeof raw.social === 'object') {
+            ['bond', 'last', 'cd', 'known'].forEach(function (k) {
+                if (raw.social[k] && typeof raw.social[k] === 'object' && !Array.isArray(raw.social[k])) s.social[k] = Object.assign({}, raw.social[k]);
+            });
+        }
+        // Régi mentések: a "Pír" és a "Teljes smink-szett" ruhatárgyak a Smink fülre költöztek
+        if (s.items.pir) { s.beauty.pi_termeszetes = true; if (!s.look.blush) s.look.blush = { id: 'pi_termeszetes', color: null }; }
+        if (s.items.smink) {
+            ['aj_fenyes', 'pl_hosszu', 'sz_finom', 'ki_finom'].forEach(function (id) { s.beauty[id] = true; var b = find(D.BEAUTY, id); if (!s.look[b.slot]) s.look[b.slot] = { id: id, color: null }; });
+        }
+        Object.keys(s.items).forEach(function (k) { if (!find(D.ITEMS, k)) delete s.items[k]; });
+        Object.keys(s.equipped).forEach(function (slot) { var it = find(D.ITEMS, s.equipped[slot]); if (!it || it.slot !== slot) delete s.equipped[slot]; });
+        Object.keys(s.beauty).forEach(function (k) { if (!find(D.BEAUTY, k)) delete s.beauty[k]; });
+        Object.keys(s.look).forEach(function (slot) {
+            var a = s.look[slot], b = a && find(D.BEAUTY, a.id);
+            if (!a || !b || b.slot !== slot || !s.beauty[a.id] || !find(D.LOOK_SLOTS, slot)) { delete s.look[slot]; return; }
+            if (a.color && !find(D.LOOK_COLORS[slot] || [], a.color)) a.color = null;
+        });
         s.month = clamp(Math.floor(s.month), 0, D.MONTHS);
         s.comp = clamp(Math.floor(s.comp), 0, D.COMPUTERS.length - 1);
         s.speed = [1, 2, 4].indexOf(s.speed) >= 0 ? s.speed : 1;

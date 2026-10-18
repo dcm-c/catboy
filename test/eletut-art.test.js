@@ -9,6 +9,7 @@ const pub = path.join(__dirname, '..', 'public');
 const D = require(path.join(pub, 'eletut-data.js'));
 require(path.join(pub, 'eletut-events.js'));
 const E = require(path.join(pub, 'eletut-engine.js'));
+require(path.join(pub, 'eletut-assets.js'));
 const C = require(path.join(pub, 'eletut-char.js'));
 const A = require(path.join(pub, 'eletut-art.js'));
 

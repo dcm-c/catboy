@@ -271,7 +271,7 @@ test('események: minden esemény szövege és minden választása hibátlanul l
 });
 
 test('minden esemény art-azonosítója ismert jelenet', () => {
-    const known = new Set(['room', 'phone', 'shop', 'family', 'work', 'school', 'discord', 'con', 'casino', 'moving', 'office', 'stage', 'sunset', 'cafe', 'street', 'bills']);
+    const known = new Set(['room', 'phone', 'shop', 'family', 'work', 'school', 'discord', 'con', 'casino', 'moving', 'office', 'stage', 'sunset', 'cafe', 'friends', 'street', 'bills']);
     const bad = Ev.EVENTS.filter((e) => !known.has(e.art)).map((e) => e.id + ':' + e.art);
     assert.deepEqual(bad, []);
     Ev.ENDINGS.forEach((en) => assert.ok(known.has(en.art), en.id));
