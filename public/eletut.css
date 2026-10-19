@@ -430,3 +430,7 @@
 .el-social-tx { display: grid; gap: 8px; }
 .el-social-tx p { margin: 0; color: var(--el-ink); line-height: 1.5; }
 @media (max-width: 520px) { .el-social-result { grid-template-columns: 1fr; } }
+
+/* Finom mozgások: az alvó karakter "z"-i lebegnek (csak ha a rendszer nem kért csökkentett mozgást) */
+@keyframes el-zzz { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+@media (prefers-reduced-motion: no-preference) { .zzz { animation: el-zzz 2.6s ease-in-out infinite; } }

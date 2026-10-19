@@ -106,7 +106,7 @@
             'Tizennégy éves vagy. A szoba a családé, a gondolataid viszont már csak a tieid. Valami új kezd bontakozni benned, és még nem tudod pontosan, mi az. Egy dolgot viszont biztosan tudsz: ezt egyelőre magadban tartod.'),
 
         {
-            id: 'e_video', art: 'phone', prio: 1, minAge: 14.08,
+            id: 'e_video', mood: 'surprised', art: 'phone', prio: 1, minAge: 14.08,
             title: 'Az a videó',
             text: 'Késő este görgetsz a telefonodon, amikor feljön egy videó: egy srác pasztell pulcsiban, macskafülekkel, olyan nyugodtan, mintha ez lenne a világ legtermészetesebb dolga. Nem tudod, miért, de nem tudsz elszakadni tőle.',
             choices: [
@@ -115,7 +115,7 @@
             ]
         },
         {
-            id: 'e_search', art: 'phone', prio: 1, minAge: 14.3,
+            id: 'e_search', mood: 'shy', art: 'phone', prio: 1, minAge: 14.3,
             title: 'Titkos keresés',
             text: function (s, c) {
                 return 'Éjszaka van, és te ' + (s.comp === 0 ? 'a nappali családi gépe' : c.az(c.pc)) + ' előtt ülsz. Beírod a keresőbe: „mi az a femboy”. Kiderül, hogy nem vagy egyedül, és hogy sokan vannak, akik pontosan így éreznek.';
@@ -135,7 +135,7 @@
             ]
         },
         {
-            id: 'e_mom_door', art: 'family', prio: 1, minAge: 15.2,
+            id: 'e_mom_door', mood: 'surprised', art: 'family', prio: 1, minAge: 15.2,
             when: function (s, c) { return c.d.secret; },
             title: 'Anya benyit',
             text: function (s, c) {
@@ -149,7 +149,7 @@
             ]
         },
         {
-            id: 'e_alias', art: 'phone', prio: 1, minAge: 15.5,
+            id: 'e_alias', mood: 'shy', art: 'phone', prio: 1, minAge: 15.5,
             title: 'Egy új név',
             text: 'Az interneten úgy érzed, hogy más lehetnél. Nyithatsz egy álneves fiókot, amit senki nem kapcsol hozzád, és ahol a kedvenc stílusokat követheted.',
             choices: [
@@ -171,7 +171,7 @@
             ]
         },
         {
-            id: 'e_classmate', art: 'school', prio: 1, minAge: 16.4,
+            id: 'e_classmate', mood: 'shy', art: 'school', prio: 1, minAge: 16.4,
             title: 'Megjegyzés a folyosón',
             text: function (s, c) {
                 return 'A folyosón egy osztálytársad végigmér, és hangosan megjegyzi: „Ez meg mi?”' + (c.outfit.length ? ' (Rajtad ma: ' + c.outfitText + '.)' : '');
@@ -214,7 +214,7 @@
             ]
         },
         {
-            id: 'e_caught', art: 'family', trigger: function (s) { return s.risk >= 100 && !s.out; }, once: false, cooldown: 12,
+            id: 'e_caught', mood: 'sad', art: 'family', trigger: function (s) { return s.risk >= 100 && !s.out; }, once: false, cooldown: 12,
             title: 'Lebuktál',
             text: function (s, c) {
                 return 'Anya takarítás közben megtalálja a titkos dolgaidat' + (c.ownedText ? ' (' + c.ownedText + ')' : '') + '. Amikor hazaérsz, mindent az asztalra rakott. Nem kiabál, csak vár.';
@@ -226,7 +226,7 @@
             ]
         },
         {
-            id: 'e_exam', art: 'school', prio: 1, minAge: 17.8,
+            id: 'e_exam', mood: 'sad', art: 'school', prio: 1, minAge: 17.8,
             title: 'Érettségi',
             text: function (s, c) { return 'Az érettségi hetében ' + (s.comp === 0 ? 'a családi gépen' : c.az(c.pc) + ' előtt') + ' tanulsz éjszakánként. A fejed tele van tételekkel, és közben a jövőd is ott lebeg a háttérben.'; },
             choices: [
@@ -235,7 +235,7 @@
             ]
         },
         {
-            id: 'e_hidden_find', art: 'family', weight: 2, once: false, cooldown: 14, minAge: 15,
+            id: 'e_hidden_find', mood: 'surprised', art: 'family', weight: 2, once: false, cooldown: 14, minAge: 15,
             when: function (s, c) { return c.d.secret && c.ownedWardrobe.length >= 1; },
             title: 'Anya a mosásnál',
             text: function (s, c) { return 'Anya a szennyest rendezgeti, és a kezében megáll egy ruha. Felemeli és rád néz. A szekrényed rejtett fele: ' + c.ownedText + '.'; },
@@ -269,7 +269,7 @@
             ]
         },
         {
-            id: 's_makeup_compliment', art: 'friends', weight: 3, once: false, cooldown: 8, minAge: 15,
+            id: 's_makeup_compliment', mood: 'shy', art: 'friends', weight: 3, once: false, cooldown: 8, minAge: 15,
             when: function (s, c) { return c.lookCount >= 2 && !c.d.secret; },
             title: 'Valaki észreveszi a sminkedet',
             text: function (s, c) { return 'Útközben valaki megáll, és rád mosolyog: „Ez a ' + c.look + ' nagyon jól áll neked. Hol vetted?” Egy pillanatra megáll az idő.'; },
@@ -328,7 +328,7 @@
         chapter('ch3', 18, 'school',
             'Tizennyolc éves vagy. Nagykorú. A világ hirtelen nagyobb lett, és te is: az, hogy mit kezdesz vele, ezután már rajtad múlik.'),
         {
-            id: 'e_adult', art: 'school', prio: 1, minAge: 18.05,
+            id: 'e_adult', mood: 'happy', art: 'school', prio: 1, minAge: 18.05,
             title: 'Nagykorú vagy',
             text: 'Túl vagy az érettségin. A szüleid és az osztálytársaid is azt kérdezik: „Mi lesz most?” Te csak azt tudod, hogy szabadabb vagy, mint bármikor.',
             choices: [
@@ -338,7 +338,7 @@
             ]
         },
         {
-            id: 'e_con', art: 'con', prio: 1, minAge: 18.2,
+            id: 'e_con', mood: 'happy', art: 'con', prio: 1, minAge: 18.2,
             when: function (s) { return s.flags.discord; },
             title: 'Con-meghívó',
             text: function (s, c) {
@@ -360,7 +360,7 @@
             ]
         },
         {
-            id: 'e_dinner', art: 'family', prio: 1, minAge: 18.6,
+            id: 'e_dinner', mood: 'sad', art: 'family', prio: 1, minAge: 18.6,
             when: function (s) { return !s.out && s.housing === 'szulo'; },
             title: 'Vasárnapi ebéd',
             text: 'Vasárnapi ebéd, az egész család az asztalnál. Apa a hírekről beszél, anya megkérdezi, hogy mi van veled mostanában. A válasz a nyelved hegyén van.',
@@ -422,14 +422,14 @@
             ]
         },
         {
-            id: 'e_grad', art: 'school', prio: 1, minAge: 22.0,
+            id: 'e_grad', mood: 'happy', art: 'school', prio: 1, minAge: 22.0,
             when: function (s) { return s.student; },
             title: 'A diploma',
             text: 'Három év kemény munka után kezedben a diploma. A hallgatói lét véget ér, az ösztöndíj és a kedvezmények is. Cserébe teljes állást is vállalhatsz.',
             choices: [{ label: 'Átveszed', do: function (s, A) { A.student(false); A.conf(60); A.money(20000); A.log('Megszerezted a diplomádat.'); return 'A családod ott áll a tömegben. Anya kendővel törölgeti a szemét. Hazaúton mindenki hallgat, aztán nevetni kezdtek.'; } }]
         },
         {
-            id: 'e_moved', art: 'moving', trigger: function (s) { return s.flags.moved && !s.seen.e_moved; },
+            id: 'e_moved', mood: 'happy', art: 'moving', trigger: function (s) { return s.flags.moved && !s.seen.e_moved; },
             title: 'Az első saját otthon',
             text: function (s, c) { return 'Beköltözöl ide: ' + c.home + '. Az első, amit felállítasz, ' + c.az(c.pc) + (c.ownedWardrobe.length ? ', a második a ruháid kipakolása' : '') + '. Az ajtó mögött egyszerre nyugalom és izgalom.'; },
             choices: [
@@ -439,7 +439,7 @@
             ]
         },
         {
-            id: 'e_broke', art: 'bills', trigger: function (s) { return s.debtMonths >= 2; }, once: false, cooldown: 12,
+            id: 'e_broke', mood: 'sad', art: 'bills', trigger: function (s) { return s.debtMonths >= 2; }, once: false, cooldown: 12,
             title: 'Kifutottál a pénzből',
             text: function (s, c) { return 'Két hónapja nem fizeted rendesen a lakbért és a számlákat (' + c.home + '). A tulajdonos komoly hangon ír. Valamit tenned kell.'; },
             choices: [
@@ -453,7 +453,7 @@
         chapter('ch5', 23, 'sunset',
             'Huszonhárom éves vagy. Már tudod, ki vagy. A kérdés inkább az, mivé szeretnél válni. Közeledik a híres huszonötödik, amiről a közösségben annyit viccelődnek.'),
         {
-            id: 'e_date', art: 'cafe', prio: 1, minAge: 23.0,
+            id: 'e_date', mood: 'shy', art: 'cafe', prio: 1, minAge: 23.0,
             when: function (s) { return s.flags.discord && !s.flags.partner; },
             title: 'Egy üzenet',
             text: function (s, c) { return 'Valaki, akivel a szerveren és a conon is sokat beszéltél, azt írja: „Van kedved egy kávéra? Nem a chatben.” ' + (c.outfit.length ? 'Gondolkodsz, hogy mit vennél fel: ' + c.outfitText + '?' : ''); },
@@ -507,7 +507,7 @@
 
         // ===== Véletlen események: a kerete a játékos helyzete =====
         {
-            id: 'r_note_good', art: 'street', weight: 3, once: false, cooldown: 6, minAge: 15,
+            id: 'r_note_good', mood: 'happy', art: 'street', weight: 3, once: false, cooldown: 6, minAge: 15,
             when: function (s, c) { return !c.d.secret && c.outfit.some(function (i) { return i.notes && i.notes.some(function (n) { return n.tone === 'good'; }); }); },
             title: 'Valaki észrevesz',
             text: function (s, c) {
@@ -537,7 +537,7 @@
             ]
         },
         {
-            id: 'r_note_bad', art: 'street', weight: 2, once: false, cooldown: 8, minAge: 15,
+            id: 'r_note_bad', mood: 'sad', art: 'street', weight: 2, once: false, cooldown: 8, minAge: 15,
             when: function (s, c) { return !c.d.secret && c.outfit.some(function (i) { return i.notes && i.notes.some(function (n) { return n.tone === 'bad'; }); }); },
             title: 'Egy megjegyzés',
             text: function (s, c) {
@@ -583,7 +583,7 @@
             ]
         },
         {
-            id: 'r_firststream', art: 'stage', weight: 4, minAge: 18,
+            id: 'r_firststream', mood: 'shy', art: 'stage', weight: 4, minAge: 18,
             when: function (s) { return s.comp >= 4 && lvl(s, 'stream') >= 1; },
             title: 'Az első élő adás',
             text: function (s, c) { return 'Életedben először élőben streamelsz. ' + (c.outfit.length ? 'Rajtad: ' + c.outfitText + '.' : '') + ' A chatben tizenhat ember van, és mind kedves. A kezed remeg, a hangod mégis nyugodt.'; },
@@ -651,7 +651,7 @@
             choices: [{ label: 'Büszke vagy magadra', do: function (s, A) { A.conf(15); if (s.jobMonths >= 3 && s.jobMonths % 3 === 0) { A.money(Math.round(s.job ? D.find(D.JOBS, s.job).pay * 0.1 : 0)); return 'A hónap végén egy kis jutalmat is kapsz.'; } return 'Jó érzés, hogy van tétje annak, amit csinálsz.'; } }]
         },
         {
-            id: 'r_laptop_dies', art: 'room', weight: 3, minAge: 17,
+            id: 'r_laptop_dies', mood: 'surprised', art: 'room', weight: 3, minAge: 17,
             when: function (s) { return s.comp >= 1; },
             title: 'Meghalt a gép',
             text: function (s, c) { return 'Egyik este ' + c.az(c.pc) + ' hirtelen elsötétedik és nem indul újra. A szíved nagyot ugrik: ott van rajta minden, amin dolgozol.'; },
@@ -678,19 +678,19 @@
             ]
         },
         {
-            id: 'r_sale', art: 'shop', weight: 2, once: false, cooldown: 12, minAge: 14,
+            id: 'r_sale', mood: 'happy', art: 'shop', weight: 2, once: false, cooldown: 12, minAge: 14,
             title: 'Akció a webshopban',
             text: 'A kedvenc ruhaboltod egy hétre 20% kedvezményt hirdet mindenre. Pont most jó alkalom lenne bevásárolni.',
             choices: [{ label: 'Kihasználod', tip: 'A következő hónapban 20% kedvezmény', do: function (s, A) { A.sale(1); return 'A következő hónapban minden ruha és dekoráció 20%-kal olcsóbb.'; } }]
         },
         {
-            id: 'r_flu', art: 'room', weight: 1, once: false, cooldown: 14, minAge: 14,
+            id: 'r_flu', mood: 'sleepy', art: 'room', weight: 1, once: false, cooldown: 14, minAge: 14,
             title: 'Megfáztál',
             text: 'Reggel torokfájással ébredsz. Egész nap takaró alatt fekszel, és a laptopon sorozatot nézel.',
             choices: [{ label: 'Pihensz', do: function (s, A) { A.energy(-50); A.conf(-3); return 'Két napig nem megy semmi. Utána újra rendben leszel.'; } }]
         },
         {
-            id: 'r_cringe', art: 'phone', weight: 1, once: false, cooldown: 12, minAge: 15,
+            id: 'r_cringe', mood: 'shy', art: 'phone', weight: 1, once: false, cooldown: 12, minAge: 15,
             title: 'Cringe emlék',
             text: 'Éjjel eszedbe jut egy régi, kínos pillanat. Az agyad elhatározza, hogy most van itt az ideje, hogy mindent újra átélj.',
             choices: [

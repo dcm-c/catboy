@@ -982,6 +982,7 @@
         return {
             id: ev.id, title: s.event.title, text: s.event.text, art: s.event.art,
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
+            mood: typeof ev.mood === 'function' ? ev.mood(s, c) : (ev.mood || ''),
             choices: ev.choices.map(function (ch, i) {
                 var okReq = !ch.req || ch.req(s, c);
                 var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || ''), check: null };

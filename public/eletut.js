@@ -1503,7 +1503,7 @@
         m.setAttribute('aria-modal', 'true');
         m.setAttribute('aria-labelledby', 'el-modal-title');
         var art = el('div', 'el-modal-art');
-        art.innerHTML = A.scene(v.art, Object.assign(currentView(), { uid: 'ev' }));
+        art.innerHTML = A.scene(v.art, Object.assign(currentView(), { uid: 'ev', emood: v.mood || undefined }));
         m.appendChild(art);
         var body = el('div', 'el-modal-body');
         if (v.kicker) body.appendChild(el('div', 'el-kicker', v.kicker));
