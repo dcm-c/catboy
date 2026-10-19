@@ -369,7 +369,7 @@
         for (var q = 0; q < 9; q++) out.push(line('M' + (q * 52 + (q % 2) * 20) + ' ' + (WB + 14 + (q % 3) * 13) + ' v13', shade(floor, -0.1), 1, 'opacity=".4"'));
 
         // ablak
-        var wx = big ? 240 : 258, wy = big ? 26 : 38, ww = big ? 120 : 88, wh = big ? 128 : 100;
+        var wx = big ? 240 : 258, wy = big ? 32 : 38, ww = big ? 120 : 88, wh = big ? 128 : 100;
         box('window', 'wall', wx - 8, wy - 5, wx + ww + 8, wy + wh + 8);
         out.push(rect(wx - 5, wy - 5, ww + 10, wh + 10, '#ffffff', 'rx="5" stroke="#c9b8d8" stroke-width=".9"'));
         out.push(rect(wx, wy, ww, wh, 'url(#rm-sky)', 'rx="2" stroke="#c9b8d8" stroke-width=".9"'));
@@ -424,20 +424,28 @@
 
         // dekoráció
         if (decor.ledfeny) {
-            out.push(line('M0 10 Q50 34 100 10 T200 10 T300 10 T400 10', '#9a86b8', 1.2));
-            for (var l = 0; l < 14; l++) {
-                var lx = l * 30 + 8;
-                var ly = 10 + Math.sin(l * 1.57) * 10 + 8;
-                out.push(circ(lx, ly.toFixed(1), 3.2, ['#ffe08a', '#f7a8c4', '#9fd6f5'][l % 3], 'class="twinkle" style="animation-delay:' + (l * 0.2) + 's"'));
-            }
+            // négy lehajló fűzér-ív (mindegyik 100 széles, a végein szögnél rögzítve); az égők az íven, kis foglalattal lógnak
+            var sw = '';
+            for (var si2 = 0; si2 < 4; si2++) sw += (si2 ? ' Q' : 'M0 8 Q') + (si2 * 100 + 50) + ' 24 ' + (si2 * 100 + 100) + ' 8';
+            out.push(path(sw, 'none', 'stroke="#9a86b8" stroke-width="1.2" stroke-linecap="round"'));
+            for (var nl = 0; nl <= 4; nl++) out.push(circ(nl * 100, 8, 1.6, '#b8a8d0', 'stroke="#9a86b8" stroke-width=".6"'));
+            var bulbN = 0;
+            for (var sg2 = 0; sg2 < 4; sg2++) [0.2, 0.5, 0.8].forEach(function (t) {
+                var bxp = sg2 * 100 + 100 * t, byp = 8 + 32 * t * (1 - t);
+                out.push(rect(bxp - 1, byp, 2, 2.6, '#7c6a98', 'stroke="none"') + circ(bxp, byp + 5.6, 3, ['#ffe08a', '#f7a8c4', '#9fd6f5'][bulbN % 3], 'class="twinkle" style="animation-delay:' + (bulbN * 0.2) + 's"'));
+                bulbN++;
+            });
+            box('ledfeny', 'wall', 0, 0, 400, 22);
         }
         if (decor.poszter) {
-            box('poszter', 'wall', 24, 22, 140, 74);
+            box('poszter', 'wall', 24, 26, 140, 78);
+            out.push('<g transform="translate(0 4)">');
             out.push(rect(24, 24, 36, 48, '#f5a9b8', 'rx="2" stroke="#ffffff" stroke-width="3"') + path('M42 38 l4 8 9 1.2 -6.6 6.2 1.8 9 -8.2 -4.4 -8.2 4.4 1.8 -9 -6.6 -6.2 9 -1.2z', '#ffffff', 'stroke="none"'));
             out.push(rect(70, 30, 34, 44, '#9fd6f5', 'rx="2" stroke="#ffffff" stroke-width="3"') + circ(87, 48, 9, '#ffffff', 'stroke="none"') + path('M76 70 q11 -16 22 0z', '#ffffff', 'opacity=".85" stroke="none"'));
             out.push(rect(112, 22, 28, 38, '#c3adee', 'rx="2" stroke="#ffffff" stroke-width="3"') + path('M126 32 l5 9 h-10z M126 52 l5 -9 h-10z', '#ffffff', 'opacity=".9" stroke="none"'));
+            out.push('</g>');
         }
-        if (decor.zaszlo) { out.push(prop('transflag', 176, 52, 52, { noShadow: true })); box('zaszlo', 'wall', 150, 13, 202, 46); }
+        if (decor.zaszlo) { out.push(prop('transflag', 176, 65, 52, { noShadow: true })); box('zaszlo', 'wall', 150, 26, 202, 59); }
         if (decor.polc) {
             var shR = big ? 224 : 238;
             out.push(rect(150, 80, shR - 150, 5, '#d9b98c', 'rx="2"') + rect(158, 85, 4, 5, '#c49e6c') + rect(shR - 12, 85, 4, 5, '#c49e6c'));
@@ -447,7 +455,7 @@
                 out.push(prop(it[0], sx + it[1] / 2, 80, it[1], { noShadow: true }));
                 sx += it[1] + 4;
             });
-            box('polc', 'wall', 150, 59, shR, 85);
+            box('polc', 'wall', 150, 61, shR, 85);
         }
 
         // asztal és gép (a gép a lapra áll, az asztal a padlóra)
