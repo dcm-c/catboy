@@ -477,6 +477,23 @@
         return s;
     }
     function topDetails(u, kind) {
+        return topDetails0(u, kind) + softFolds(kind);
+    }
+    // finom ráncok és varrások: hónalj-redők, szegély-hullám, nyakvarrás (a jelmezek saját részletet kapnak)
+    function softFolds(kind) {
+        var def = TOPDEF[kind];
+        if (!kind || !def || COS_TOP[kind]) return '';
+        var col = topFill(kind), fd = shade(col, -0.3), s = '';
+        [1, -1].forEach(function (sg) {
+            s += L('M' + (sg * 9.6) + ' -86 C' + (sg * 7.4) + ' -83.6 ' + (sg * 6.8) + ' -80.4 ' + (sg * 7.6) + ' -77', fd, 0.7, 'opacity=".32"');
+            s += L('M' + (sg * 7.6) + ' -70 C' + (sg * 5.6) + ' -67.6 ' + (sg * 5.4) + ' -64.6 ' + (sg * 6.4) + ' -62', fd, 0.6, 'opacity=".24"');
+        });
+        s += L('M-8.4 ' + (def.y1 + 3.2) + ' C-4 ' + (def.y1 + 1.6) + ' 4 ' + (def.y1 + 4.6) + ' 8.4 ' + (def.y1 + 2.4), fd, 0.7, 'opacity=".3"');
+        if (kind === 'tee' || kind === 'crop') s += L('M-6.8 -94 C-3 -90.6 3 -90.6 6.8 -94', fd, 0.9, 'opacity=".38"') + L('M-6 -92.4 C-3 -89.6 3 -89.6 6 -92.4', tint(col, 0.5), 0.5, 'opacity=".6"');
+        if (kind !== 'kabat') s += L('M0 -76 C-.4 -72 .4 -68 0 -64', fd, 0.5, 'opacity=".16"');
+        return s;
+    }
+    function topDetails0(u, kind) {
         if (!kind) return '';
         var col = topFill(kind), s = '';
         if (COS_TOP[kind]) return cosTop(u, kind, col);
@@ -755,7 +772,19 @@
         if (style === 'hosszu') d = 'M-28 -124 C-30 -150 -16 -160 0 -160 C16 -160 30 -150 28 -124 C30.4 -108 31.6 -92 30 -74 C28.4 -69 22 -67.4 15 -69 L-15 -69 C-22 -67.4 -28.4 -69 -30 -74 C-31.6 -92 -30.4 -108 -28 -124Z';
         else if (style === 'rovid') d = 'M-26.6 -124 C-28.4 -149 -14 -159 0 -159 C14 -159 28.4 -149 26.6 -124 C27 -116 25 -110 22.6 -107 C14 -106 -14 -106 -22.6 -107 C-25 -110 -27 -116 -26.6 -124Z';
         else d = 'M-28 -124 C-30 -150 -16 -160 0 -160 C16 -160 30 -150 28 -124 C29.6 -112 28.6 -102 24.4 -96.6 C14 -94 -14 -94 -24.4 -96.6 C-28.6 -102 -29.6 -112 -28 -124Z';
-        return P(d, fill, 'stroke="' + edge + '" stroke-width="1.2" stroke-linejoin="round"');
+        var base = fill.charAt(0) === '#' ? fill : '#f4a3b8', dk = shade(base, -0.2), out = P(d, fill, 'stroke="' + edge + '" stroke-width="1.2" stroke-linejoin="round"');
+        // mélységet adó réteg: sötétebb alsó tincsek + hajvég-pödrés
+        if (style === 'hosszu') {
+            out += P('M-23 -100 C-24 -88 -24 -80 -22 -73 L-12 -72 C-14 -82 -15 -92 -15 -104Z', dk, 'opacity=".2"') + P('M23 -100 C24 -88 24 -80 22 -73 L12 -72 C14 -82 15 -92 15 -104Z', dk, 'opacity=".2"');
+            out += L('M-9 -96 C-9.6 -86 -9 -78 -7 -71', dk, 0.8, 'opacity=".35"') + L('M9 -96 C9.6 -86 9 -78 7 -71', dk, 0.8, 'opacity=".35"') + L('M0 -92 L0 -70', dk, 0.7, 'opacity=".25"');
+            out += L('M-28.6 -76 C-31 -72.6 -29 -69.6 -25 -70.4', edge, 1.1) + L('M28.6 -76 C31 -72.6 29 -69.6 25 -70.4', edge, 1.1);
+        } else if (style === 'bob') {
+            out += P('M-24 -112 C-25 -104 -24 -99 -21 -96 L-13 -95.6 C-15 -101 -15.6 -108 -15 -114Z', dk, 'opacity=".2"') + P('M24 -112 C25 -104 24 -99 21 -96 L13 -95.6 C15 -101 15.6 -108 15 -114Z', dk, 'opacity=".2"');
+            out += L('M-28.4 -102 C-31 -98.6 -28.6 -95.6 -24.6 -96.6', edge, 1.1) + L('M28.4 -102 C31 -98.6 28.6 -95.6 24.6 -96.6', edge, 1.1);
+        } else {
+            out += L('M-14 -150 C-20 -140 -23 -128 -22.6 -112', dk, 0.8, 'opacity=".3"') + L('M14 -150 C20 -140 23 -128 22.6 -112', dk, 0.8, 'opacity=".3"');
+        }
+        return out;
     }
     function hairFront(u, style, fill, edge, c) {
         var s = '';
@@ -782,8 +811,13 @@
             var sc = shade(fill.charAt(0) === '#' ? fill : '#f4a3b8', -0.16);
             s += L('M6 -150 C9 -143 11 -139 12.4 -135', sc, 0.8, 'opacity=".5"') + L('M-8 -151 C-11 -145 -14.6 -139.6 -17 -134', sc, 0.8, 'opacity=".5"') + L('M-1.4 -152 C-1 -145 -1.2 -138 -1.4 -132', sc, 0.8, 'opacity=".4"');
         }
-        // fény-sáv a feje tetején
+        // fény-sáv a feje tetején + kettős csillanás és szálak
         s += P('M-17 -149 C-9 -154 6 -154.4 14 -150 C6 -150.6 -8 -150.4 -17 -149Z', '#fff', 'opacity=".38"');
+        var hb = fill.charAt(0) === '#' ? fill : '#f4a3b8';
+        s += L('M-20 -142.6 C-13 -149 -3 -150.6 6 -149.4', tint(hb, 0.6), 1.3, 'opacity=".5"') + L('M9 -149.2 C13 -148.2 16.6 -146 19 -142.8', tint(hb, 0.6), 0.9, 'opacity=".4"');
+        s += L('M-12 -141 C-13.4 -137.4 -15.4 -135 -18.6 -133.4', shade(hb, -0.22), 0.7, 'opacity=".45"') + L('M11 -142 C12.6 -138.4 14.4 -136 17.6 -134.4', shade(hb, -0.22), 0.7, 'opacity=".45"');
+        // elszabadult tincs
+        s += L('M4 -157 C6 -162 11 -162.6 12.6 -159.6', edge, 0.9, 'opacity=".8"');
         return s;
     }
     function earSkin(c, style) {
@@ -936,14 +970,35 @@
     // =========================================================
     // ARC: szem, száj, pír, smink
     // =========================================================
+    var EYEST = 'kerek';
     function eyeOpen(c, mood) {
         var s = '', ec = c.eye;
+        if (EYEST === 'macska') {
+            // keskenyebb, a külső sarkában felfelé húzott, függőleges pupilla
+            s += P('M-5.6 .6 C-5 -5.2 2.4 -7.4 6.4 -2 C7 1 5.6 5.6 0 6.6 C-4.2 6 -5.6 3.4 -5.6 .6Z', '#ffffff');
+            s += P('M-4.8 .6 C-4.4 -4.4 2 -6.2 5.6 -1.8 C6 1 4.8 4.8 0 5.8 C-3.6 5.2 -4.8 3 -4.8 .6Z', ec);
+            s += P('M-4.4 -1.4 C-3 -5 2 -5.6 5.2 -2 C2 -3.4 -1.6 -3.2 -4.4 -1.4Z', shade(ec, -0.45), 'opacity=".5"');
+            s += EL(0.2, 0.6, 1.5, 4.4, '#2b2133');
+            s += CI(-1.8, -2.4, 1.5, '#fff') + CI(2.2, 3, .7, '#fff', 'opacity=".9"');
+            return s;
+        }
+        if (EYEST === 'almos') {
+            // nagy, magas ovális szem, alul fényes sáv
+            s += EL(0, 0.2, 5.5, 7.4, '#ffffff');
+            s += EL(0, 0.8, 4.8, 6.9, ec);
+            s += P('M-4.8 .8 A4.8 6.9 0 0 1 4.8 .8 Q0 -2.6 -4.8 .8Z', shade(ec, -0.45), 'opacity=".5"');
+            s += P('M-3.8 4.2 A4.8 6.9 0 0 0 3.8 4.2 Q0 2 -3.8 4.2Z', tint(ec, 0.55), 'opacity=".6"');
+            s += EL(0, 1.4, 2.2, 3.8, '#2b2133');
+            s += CI(-1.7, -2.8, 1.7, '#fff') + CI(1.9, 3.4, .8, '#fff', 'opacity=".9"');
+            return s;
+        }
         s += EL(0, 0, 5.9, 6.7, '#ffffff');
         s += EL(0, 0.4, 5.1, 6.3, ec);
         s += P('M-5.1 .4 A5.1 6.3 0 0 1 5.1 .4 Q0 -2.2 -5.1 .4Z', shade(ec, -0.45), 'opacity=".5"');
         s += P('M-4 3.6 A5.1 6.3 0 0 0 4 3.6 Q0 1.8 -4 3.6Z', tint(ec, 0.5), 'opacity=".55"');
-        s += EL(0, 1.2, 2.4, 3.6, '#2b2133');
+        s += EL(0, 1.2, EYEST === 'csillogo' ? 2.9 : 2.4, EYEST === 'csillogo' ? 4.1 : 3.6, '#2b2133');
         s += CI(-1.8, -2.5, 1.9, '#fff') + CI(2, 3, .9, '#fff', 'opacity=".9"');
+        if (EYEST === 'csillogo') s += sparkle(2.6, -3.4, 1.1, '#fff', 'opacity=".95"') + CI(-3, 2.6, .55, '#fff', 'opacity=".85"') + CI(0.4, 4.4, .45, '#fff', 'opacity=".8"');
         return s;
     }
     function shadowLayer(c) {
@@ -1134,7 +1189,8 @@
         CUR_MOOD = mood;
         s += blushLayer(u, c);
         s += decoLayer(c);
-        s += eye(1, mood, c) + eye(-1, mood, c);
+        var eyes = eye(1, mood, c) + eye(-1, mood, c);
+        s += (mood === 'sleep' || mood === 'happy') ? eyes : '<g class="av-eyes">' + eyes + '</g>';
         s += brows(mood, c.hairD);
         s += mouth(mood, c);
         if (mood === 'sad') [1, -1].forEach(function (sg) {
@@ -1169,6 +1225,7 @@
             eye: EYES[hairId] || '#7a6a9a'
         };
         K = {};
+        EYEST = (o.eyes === 'macska' || o.eyes === 'almos' || o.eyes === 'csillogo') ? o.eyes : 'kerek';
         PT = {}; PD = ''; PDONE = {};
         var kind = {};
         var pats = (o.patterns && typeof o.patterns === 'object') ? o.patterns : null;
@@ -1207,7 +1264,7 @@
         out.push(defs(u, col).replace(/LIPOM/g, u + '-lipom'));
         out.push(EL(0, 0.4, 23, 3.2, 'rgba(59,45,74,.16)'));
         out.push(backBehind(u, kind.back));
-        out.push(hairBack(u, style, hairFill, edge));
+        out.push('<g class="av-hair">' + hairBack(u, style, hairFill, edge) + '</g>');
 
         // lábak, lábszár-viselet, cipő
         var legBlock = legsBase(col) + legWear(u, kind.legs, col) + shoes(u, kind.shoes || '');

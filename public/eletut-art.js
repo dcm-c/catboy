@@ -432,7 +432,7 @@
         var bx = 268, by = 190;
         if (h === 'garzon' || h === 'lakas') {
             out.push(gshadow(bx + 62, WB + 6, 70, 0.14));
-            out.push(rect(bx + 10, by + 40, 8, WB - by - 40, '#8a74c6') + rect(bx + 108, by + 40, 8, WB - by - 40, '#8a74c6'));
+            out.push(rect(bx + 10, by + 40, 8, 8, '#8a74c6') + rect(bx + 108, by + 40, 8, 8, '#8a74c6'));
             out.push(rect(bx - 2, by - 18, 126, 52, '#c3adee', 'rx="12"'));
             out.push(rect(bx + 6, by - 2, 110, 36, '#d7c6f4', 'rx="9"'));
             out.push(rect(bx - 8, by - 8, 14, 42, '#b199e6', 'rx="7"') + rect(bx + 118, by - 8, 14, 42, '#b199e6', 'rx="7"'));
@@ -462,7 +462,7 @@
 
         // karakter: alszik az ágyban, tanul ülve egy puffon, vagy áll a padlón (mindig árnyékkal)
         var sc = (v.scale || 1) * 0.86;
-        var base = { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'rm' };
+        var base = { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'rm' };
         if (v.sleeping) {
             out.push('<g transform="translate(' + (bx + 128) + ' ' + (by - 4) + ') rotate(-90) scale(' + sc.toFixed(3) + ')">' + A.avatar(Object.assign({}, base, { mood: 'sleep', pose: 'idle' })) + '</g>');
             // takaró a testen: a fejnél kezdődik a hasa alatt, a lábnál ér véget
@@ -480,6 +480,7 @@
             if (v.studying) out.push(prop('books', px, ground - 17, 26, { noShadow: true }));
         } else {
             out.push('<g class="av-wrap" transform="translate(206 266) scale(' + sc.toFixed(3) + ')">' + A.avatar(base) + '</g>');
+            if (v.fx) out.push(A.fx(base.mood, 206 + 24 * sc, 266 - 162 * sc, sc * 1.1));
         }
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A szobád és a karaktered">' + propDefs() + out.join('') + '</svg>';
     };
@@ -502,7 +503,7 @@
         var wall = WALLS[v.housing] || WALLS.szulo;
         var out = [softBg(wall)];
         out.push('<g transform="translate(200 594) scale(3.5)">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood === 'happy' ? 'neutral' : v.mood, pose: 'idle', uid: 'fc'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood === 'happy' ? 'neutral' : v.mood, pose: 'idle', uid: 'fc'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arckép a sminkhez">' + out.join('') + '</svg>';
     };
@@ -513,7 +514,7 @@
         var out = [softBg(wall)];
         var sc = 2.25 * (0.94 + 0.06 * (v.scale || 1));
         out.push('<g transform="translate(200 452) scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, pose: v.pose === 'sit' ? 'idle' : v.pose, uid: 'cu'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, pose: v.pose === 'sit' ? 'idle' : v.pose, uid: 'cu'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Közelkép a karakteredről">' + out.join('') + '</svg>';
     };
@@ -523,10 +524,26 @@
     // A talaj (padló/járda/fű) mindig y=172 alatt kezdődik; a karakterek talpa y=222 körül van, árnyékkal.
     // =========================================================
     var HZ = 172; // horizont / fal alja
+    // Lebegő hangulatjelek a fej fölött (csak az élő színtéren; a CSS animálja, csökkentett mozgásnál állnak)
+    var FX = {
+        happy: ['#f58fae', 'heart'], proud: ['#ffd36b', 'star'], shy: ['#f58fae', 'heart'],
+        sad: ['#8fc3ea', 'drop'], surprised: ['#ffd36b', 'bang']
+    };
+    A.fx = function (mood, x, y, sc) {
+        var f = FX[mood];
+        if (!f) return '';
+        var shape = f[1] === 'heart' ? '<path d="M0 3 C-5 -1 -3 -5 0 -2.4 C3 -5 5 -1 0 3Z" fill="' + f[0] + '" stroke="#fff" stroke-width=".7"/>'
+            : f[1] === 'star' ? '<path d="M0 -4 L1.2 -1.2 L4 0 L1.2 1.2 L0 4 L-1.2 1.2 L-4 0 L-1.2 -1.2Z" fill="' + f[0] + '" stroke="#fff" stroke-width=".6"/>'
+            : f[1] === 'drop' ? '<path d="M0 -3.4 C2.6 0 2.4 2.6 0 2.8 C-2.4 2.6 -2.6 0 0 -3.4Z" fill="' + f[0] + '" stroke="#fff" stroke-width=".6"/>'
+            : '<path d="M-.9 -4 H.9 L.6 .8 H-.6Z M0 3.4 m-1 0 a1 1 0 1 0 2 0 a1 1 0 1 0 -2 0" fill="' + f[0] + '"/>';
+        var g = '', k = sc || 1;
+        for (var i = 0; i < 3; i++) g += '<g transform="translate(' + (x + (i - 1) * 15 * k).toFixed(1) + ' ' + (y - (i % 2) * 7 * k).toFixed(1) + ') scale(' + (k * (1.5 - i * 0.2)).toFixed(2) + ')"><g class="fx-bit" style="animation-delay:' + (i * 0.7) + 's">' + shape + '</g></g>';
+        return '<g class="fx-float" aria-hidden="true">' + g + '</g>';
+    };
     function figure(x, y, o, scale) {
         var sc = scale || 0.78;
         if (o && o.emood) o = Object.assign({}, o, { mood: o.emood });
-        return gshadow(x, y + 0.5, 21 * sc, 0.18) + '<g transform="translate(' + x + ' ' + y + ') scale(' + sc + ')">' + A.avatar(o) + '</g>';
+        return gshadow(x, y + 0.5, 21 * sc, 0.18) + '<g transform="translate(' + x + ' ' + y + ') scale(' + sc + ')">' + A.avatar(o) + '</g>' + (o && o.fx ? A.fx(o.mood, x + 22 * sc, y - 162 * sc, sc * 1.1) : '');
     }
     // háttér-szereplők: ugyanaz a karakterrajz, más haj/ruha (n: egyedi azonosító a rajz-azonosítókhoz)
     var NPC = {
@@ -792,7 +809,7 @@
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
         var fn = SCENES[id] || SCENES.room;
-        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, uid: 'sc' + id, guest: v.guest });
+        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, fx: v.fx, uid: 'sc' + id, guest: v.guest });
         if (id === 'room') return body;
         return '<svg class="eletut-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illusztráció">' + propDefs() + body + '</svg>';
     };
@@ -816,7 +833,7 @@
             patterns: (E.isSecret(s) && s.hiding) ? {} : E.outfitPats(s),
             makeup: E.lookOf(s),
             pack: (E.isSecret(s) && s.hiding) ? {} : { gear: s.equipped.gear, drink: s.equipped.drink, buddy: s.equipped.buddy },
-            skin: s.skin, hairStyle: s.hairStyle, hairColor: s.hairColor,
+            skin: s.skin, hairStyle: s.hairStyle, hairColor: s.hairColor, eyeStyle: s.eyeStyle,
             mood: mood, pose: sleeping ? 'idle' : (s.activeSkill && mood !== 'happy' ? 'sit' : (mood === 'happy' ? 'wave' : (mood === 'proud' ? 'hips' : 'idle'))), scale: 0.9 + 0.1 * Math.min(1, (age - 14) / 5), month: s.month,
             studying: !!s.activeSkill, working: !!s.job, broken: d.broken, sleeping: sleeping
         };

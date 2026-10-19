@@ -434,3 +434,15 @@
 /* Finom mozgások: az alvó karakter "z"-i lebegnek (csak ha a rendszer nem kért csökkentett mozgást) */
 @keyframes el-zzz { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
 @media (prefers-reduced-motion: no-preference) { .zzz { animation: el-zzz 2.6s ease-in-out infinite; } }
+
+/* Élő karakter: lassú légzés, pislogás, enyhén lengő haj, lebegő hangulatjelek (csak a színtéren, nem a bélyegképeken) */
+@keyframes el-breath { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.006, 1.014); } }
+@keyframes el-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+@keyframes el-sway { 0%, 100% { transform: rotate(-.7deg); } 50% { transform: rotate(.7deg); } }
+@keyframes el-fx { 0% { opacity: 0; transform: translateY(5px) scale(.7); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px) scale(1.1); } }
+@media (prefers-reduced-motion: no-preference) {
+    .av-body { transform-origin: 0 0; animation: el-breath 4.2s ease-in-out infinite; }
+    .av-eyes { transform-box: fill-box; transform-origin: center; animation: el-blink 5.5s infinite; }
+    .av-hair { transform-origin: 0 -110px; animation: el-sway 6s ease-in-out infinite; }
+    .fx-bit { animation: el-fx 2.8s ease-out infinite; }
+}
