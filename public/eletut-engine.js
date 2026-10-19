@@ -52,7 +52,7 @@
             out: false, hiding: false, parents: 'unknown',
             student: false,
 
-            steps: {}, items: {}, equipped: {}, colors: {}, hideout: {}, decor: {}, pets: {},
+            steps: {}, items: {}, equipped: {}, colors: {}, pats: {}, hideout: {}, decor: {}, pets: {},
             beauty: {}, look: {}, social: { bond: {}, last: {}, cd: {} },
             comp: 0, skills: {}, skillProg: {}, activeSkill: null,
             housing: 'szulo', job: null, jobMonths: 0,
@@ -312,6 +312,45 @@
         s.colors[id] = paletteId;
         return { ok: true };
     };
+    // Minta: s.pats[id] = { p: mintaId | null (egyszínű), a: paletteId | null (alap: a tárgy "pat2" színe) }
+    // Visszaadja a tárgy aktuális mintáját: { id, color } vagy null (egyszínű)
+    E.patOf = function (s, id) {
+        var it = find(D.ITEMS, id);
+        if (!it || !D.patternsFor(it).length) return null;
+        var st = s.pats && s.pats[id];
+        var pid = st && st.p !== undefined ? st.p : (it.pat || null);
+        if (!pid || !find(D.PATTERNS, pid)) return null;
+        var ac = st && st.a ? find(D.PALETTE, st.a) : null;
+        return { id: pid, color: ac ? ac.color : (it.pat2 || null) };
+    };
+    E.setPat = function (s, id, patId) {
+        var it = find(D.ITEMS, id);
+        if (!it) return { ok: false, reason: 'Ismeretlen tárgy' };
+        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
+        var allowed = D.patternsFor(it);
+        if (!allowed.length) return { ok: false, reason: 'Ez a tárgy nem mintázható' };
+        if (patId !== null && !allowed.some(function (p) { return p.id === patId; })) return { ok: false, reason: 'Ez a minta ide nem illik' };
+        s.pats[id] = Object.assign({}, s.pats[id], { p: patId });
+        return { ok: true };
+    };
+    E.setPatColor = function (s, id, paletteId) {
+        var it = find(D.ITEMS, id);
+        if (!it || !D.patternsFor(it).length) return { ok: false, reason: 'Ez a tárgy nem mintázható' };
+        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
+        if (paletteId !== null && !find(D.PALETTE, paletteId)) return { ok: false, reason: 'Ismeretlen szín' };
+        s.pats[id] = Object.assign({}, s.pats[id], { a: paletteId });
+        return { ok: true };
+    };
+    // Az avatárnak átadandó minták (hely szerint), csak a viselt mintázható tárgyakra
+    E.outfitPats = function (s) {
+        var out = {};
+        D.SLOTS.forEach(function (slot) {
+            var id = s.equipped[slot.id];
+            if (id && slot.wear) { var p = E.patOf(s, id); if (p) out[slot.id] = p; }
+        });
+        return out;
+    };
+
     // Az avatárnak átadandó színek (hely szerint), csak a viselt festhető tárgyakra
     E.outfitColors = function (s) {
         var out = {};
@@ -1108,7 +1147,7 @@
         var numeric = ['month', 'sec', 'conf', 'money', 'energy', 'risk', 'comm', 'comp', 'jobMonths', 'debtMonths', 'allowanceCut', 'saleUntil', 'brokenUntil', 'rentBump', 'lastCon', 'speed'];
         numeric.forEach(function (k) { s[k] = num(raw[k], s[k]); });
         ['out', 'hiding', 'student', 'paused'].forEach(function (k) { s[k] = !!raw[k]; });
-        ['steps', 'items', 'equipped', 'colors', 'hideout', 'decor', 'pets', 'beauty', 'look', 'skills', 'skillProg', 'flags', 'seen', 'lastSeen', 'ach', 'stats', 'expCd'].forEach(function (k) {
+        ['steps', 'items', 'equipped', 'colors', 'pats', 'hideout', 'decor', 'pets', 'beauty', 'look', 'skills', 'skillProg', 'flags', 'seen', 'lastSeen', 'ach', 'stats', 'expCd'].forEach(function (k) {
             if (raw[k] && typeof raw[k] === 'object' && !Array.isArray(raw[k])) s[k] = Object.assign(s[k] && typeof s[k] === 'object' ? s[k] : {}, raw[k]);
         });
         if (raw.gamble && typeof raw.gamble === 'object') s.gamble = Object.assign(s.gamble, raw.gamble);

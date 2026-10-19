@@ -80,7 +80,8 @@
         blush: '<circle cx="12" cy="12" r="9"/><path d="M6 13l2-2M9 14l2-2M18 13l-2-2M15 14l-2-2"/>',
         lash: '<path d="M3 15c3-4 15-4 18 0"/><path d="M5 13l-2-3M9 11.5l-1-4M13 11V7M17 11.5l1-4M20 13l2-3"/>',
         pen: '<path d="M3 21l3-1L19 7l-2-2L4 18z"/><path d="M14 5l3 3"/>',
-        nail: '<path d="M8 21V11a4 4 0 0 1 8 0v10z"/><path d="M8 14h8"/>'
+        nail: '<path d="M8 21V11a4 4 0 0 1 8 0v10z"/><path d="M8 14h8"/>',
+        mask: '<path d="M3 8c3-2 6-3 9-3s6 1 9 3c0 6-3 11-9 11S3 14 3 8z"/><path d="M7 10.5c1-.8 2.4-.8 3.2 0M13.8 10.5c.8-.8 2.2-.8 3.2 0M9 15c2 1.2 4 1.2 6 0"/>'
     };
     A.icons = Object.keys(ICONS);
     A.sprite = function () {
@@ -249,7 +250,7 @@
     // =========================================================
     var THUMB_VB = {
         hair: '-28 -166 56 68', face: '-28 -158 56 68', neck: '-24 -112 48 58', top: '-26 -104 52 64',
-        bottom: '-26 -70 52 63', legs: '-24 -58 48 58', shoes: '-16 -34 32 39', back: '-30 -110 60 73'
+        bottom: '-26 -70 52 63', legs: '-24 -58 48 58', shoes: '-16 -34 32 39', back: '-30 -110 60 73', cosplay: '-36 -196 72 206'
     };
     var ICON_DRAW = {
         poszter: function () { return iconProp('picture', 1.5); },
@@ -278,8 +279,11 @@
         if (wearVb) {
             var out = {}, cols = {};
             out[slot] = id;
+            if (slot === 'legs' || slot === 'shoes') out.bottom = 'tenisz'; // a farmer ne takarja el a zoknit és a cipőt
             if (o.color) cols[slot] = o.color;
-            var body = A.avatar({ skin: o.skin || 's2', hairStyle: o.hairStyle || 'bob', hairColor: o.hairColor || 'rozsa', outfit: out, colors: cols, mood: 'neutral', pose: 'idle', uid: 'th' });
+            var pt = {};
+            if (o.pat !== undefined) pt[slot] = o.pat; // null: egyszínű; objektum: {id, color}
+            var body = A.avatar({ skin: o.skin || 's2', hairStyle: o.hairStyle || 'bob', hairColor: o.hairColor || 'rozsa', outfit: out, colors: cols, patterns: o.pat !== undefined ? pt : undefined, mood: 'neutral', pose: 'idle', uid: 'th' });
             return '<svg viewBox="' + wearVb + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Előnézet">' + body + '</svg>';
         }
         var f = ICON_DRAW[id];
@@ -435,7 +439,7 @@
         // karakter a padlón, árnyékkal
         var sc = (v.scale || 1) * 0.86;
         out.push('<g class="av-wrap" transform="translate(206 266) scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'rm'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'rm'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A szobád és a karaktered">' + out.join('') + '</svg>';
     };
@@ -458,7 +462,7 @@
         var wall = WALLS[v.housing] || WALLS.szulo;
         var out = [softBg(wall)];
         out.push('<g transform="translate(200 594) scale(3.5)">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood === 'happy' ? 'neutral' : v.mood, pose: 'idle', uid: 'fc'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood === 'happy' ? 'neutral' : v.mood, pose: 'idle', uid: 'fc'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arckép a sminkhez">' + out.join('') + '</svg>';
     };
@@ -469,7 +473,7 @@
         var out = [softBg(wall)];
         var sc = 2.25 * (0.94 + 0.06 * (v.scale || 1));
         out.push('<g transform="translate(200 452) scale(' + sc.toFixed(3) + ')">' + A.avatar({
-            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'cu'
+            skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, pose: v.pose, uid: 'cu'
         }) + '</g>');
         return '<svg class="eletut-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Közelkép a karakteredről">' + out.join('') + '</svg>';
     };
@@ -747,7 +751,7 @@
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
         var fn = SCENES[id] || SCENES.room;
-        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, makeup: v.makeup, mood: v.mood, uid: 'sc' + id, guest: v.guest });
+        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, uid: 'sc' + id, guest: v.guest });
         if (id === 'room') return body;
         return '<svg class="eletut-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illusztráció">' + body + '</svg>';
     };
@@ -765,6 +769,7 @@
             housing: s.housing, comp: s.comp, decor: s.decor, pets: s.pets,
             outfit: (function () { var vis = {}; var list = E.visibleOutfit(s); D.SLOTS.forEach(function (sl) { if (sl.wear && list.indexOf(s.equipped[sl.id]) >= 0 && s.equipped[sl.id]) vis[sl.id] = s.equipped[sl.id]; }); return vis; })(),
             colors: (E.isSecret(s) && s.hiding) ? {} : E.outfitColors(s),
+            patterns: (E.isSecret(s) && s.hiding) ? {} : E.outfitPats(s),
             makeup: E.lookOf(s),
             pack: (E.isSecret(s) && s.hiding) ? {} : { gear: s.equipped.gear, drink: s.equipped.drink, buddy: s.equipped.buddy },
             skin: s.skin, hairStyle: s.hairStyle, hairColor: s.hairColor,

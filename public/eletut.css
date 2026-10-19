@@ -374,15 +374,18 @@
 .el-item.has-thumb { grid-template-columns: 72px 1fr; column-gap: 10px; align-items: start; }
 .el-item.has-thumb > :not(.el-thumbbox) { grid-column: 2; }
 .el-thumbbox {
-    grid-column: 1; grid-row: 1 / span 6; width: 72px; height: 88px; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
+    grid-column: 1; grid-row: 1 / span 6; width: 72px; height: 88px; border-radius: 12px; display: block; overflow: hidden;
     background: linear-gradient(180deg, #fde6ee, #e9e4fb);
 }
+.el-thumbbox.tall { height: 150px; }
 [data-bs-theme="dark"] .el-thumbbox { background: linear-gradient(180deg, #3a2a52, #26203f); }
 .el-thumb { width: 100%; height: 100%; object-fit: contain; display: block; }
 .el-item.has-thumb .el-btn { justify-self: start; }
 @media (max-width: 360px) { .el-item.has-thumb { grid-template-columns: 1fr; } .el-item.has-thumb > :not(.el-thumbbox) { grid-column: 1; } .el-thumbbox { grid-row: auto; width: 100%; height: 100px; } }
 
 .el-paint { display: grid; gap: 4px; }
+.el-paint-stack { display: grid; gap: 8px; }
+.el-select:focus-visible { outline: 3px solid var(--el-blue); outline-offset: 1px; }
 .el-paint-cap { font-size: .8rem; font-weight: 700; color: var(--el-soft); display: inline-flex; gap: 4px; align-items: center; }
 .el-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
 .el-sw {

@@ -55,6 +55,7 @@
         { id: 'neck', label: 'Nyak', icon: 'neck', wear: true },
         { id: 'back', label: 'Hátul', icon: 'back', wear: true },
         { id: 'face', label: 'Arc', icon: 'face', wear: true },
+        { id: 'cosplay', label: 'Jelmez', icon: 'mask', wear: true },
         { id: 'gear', label: 'Cucc', icon: 'gear', wear: false },
         { id: 'drink', label: 'Üzemanyag', icon: 'drink', wear: false },
         { id: 'buddy', label: 'Plüss', icon: 'buddy', wear: false }
@@ -85,6 +86,40 @@
         { id: 'fekete', label: 'Fekete', color: '#4a4056' }
     ];
 
+    // ---------- Minták és feliratok ----------
+    // slots: ezeken a helyeken választható; kind 'print' (nyomtatott grafika) és 'text' (felirat) csak a "prints" ruhákon.
+    D.PATTERNS = [
+        { id: 'stripe', label: 'Csíkos', slots: ['top', 'bottom', 'legs'] },
+        { id: 'dots', label: 'Pöttyös', slots: ['top', 'bottom', 'legs'] },
+        { id: 'plaid', label: 'Kockás', slots: ['top', 'bottom', 'legs'] },
+        { id: 'hearts', label: 'Szíves', slots: ['top', 'bottom', 'legs'] },
+        { id: 'stars', label: 'Csillagos', slots: ['top', 'bottom', 'legs'] },
+        { id: 'checker', label: 'Sakktábla', slots: ['top', 'bottom', 'legs'] },
+        { id: 'trans', label: 'Zászló-csíkok', slots: ['top', 'legs'], fixed: true },
+        { id: 'rainbow', label: 'Szivárvány-csíkok', slots: ['top', 'bottom', 'legs'], fixed: true },
+        { id: 'g_heart', label: 'Nagy szív', slots: ['top'], kind: 'print' },
+        { id: 'g_cat', label: 'Cica-arc', slots: ['top'], kind: 'print' },
+        { id: 'g_star', label: 'Nagy csillag', slots: ['top'], kind: 'print' },
+        { id: 'g_rainbow', label: 'Szivárvány-ív', slots: ['top'], kind: 'print', fixed: true },
+        { id: 'g_bolt', label: 'Villám', slots: ['top'], kind: 'print' },
+        { id: 'sl_nyau', label: 'Felirat: NYAU', slots: ['top'], kind: 'text', text: 'NYAU' },
+        { id: 'sl_uwu', label: 'Felirat: UwU', slots: ['top'], kind: 'text', text: 'UwU' },
+        { id: 'sl_cutie', label: 'Felirat: CUTIE', slots: ['top'], kind: 'text', text: 'CUTIE' },
+        { id: 'sl_femboy', label: 'Felirat: FEMBOY', slots: ['top'], kind: 'text', text: 'FEMBOY' },
+        { id: 'sl_arch', label: 'Felirat: ARCH BTW', slots: ['top'], kind: 'text', text: 'ARCH BTW' },
+        { id: 'sl_404', label: 'Felirat: 404 BOY', slots: ['top'], kind: 'text', text: '404 BOY' },
+        { id: 'sl_puha', label: 'Felirat: PUHA', slots: ['top'], kind: 'text', text: 'PUHA' }
+    ];
+    // Mely mintákat kaphatja ez a tárgy (üres tömb: nem mintázható)
+    D.patternsFor = function (item) {
+        if (!item || item.nopat) return [];
+        return D.PATTERNS.filter(function (p) {
+            if (p.slots.indexOf(item.slot) < 0) return false;
+            if (p.kind && !item.prints) return false;
+            return true;
+        });
+    };
+
     D.ITEMS = [
         { id: 'hajgumi', slot: 'hair', name: 'Pasztell hajgumi', cost: 1500, click: 0.2, passive: 0, risk: 3, st: { cute: 5, chill: 2 }, paint: '#f4a3b8', desc: 'Apróság, de a tiéd.', notes: [{ tone: 'good', text: 'Valaki a buszon megdicséri a hajgumidat: „Ez nagyon aranyos színű.”' }] },
         { id: 'masni', slot: 'hair', name: 'Selyem hajmasni', cost: 4500, click: 0.5, passive: 0, risk: 5, st: { cute: 8 }, paint: '#f4a3b8', desc: 'Egy masni, ami mindent megváltoztat.', notes: [{ tone: 'good', text: 'A pénztáros mosolyogva megjegyzi, hogy milyen szép a masnid.' }] },
@@ -101,12 +136,12 @@
         { id: 'rovid', slot: 'bottom', name: 'Magas derekú rövidnadrág', cost: 6000, click: 0.5, passive: 0, risk: 5, st: { cute: 6, chill: 4 }, paint: '#a9cdee', desc: 'Nyárias és bátor.', notes: [] },
         { id: 'szoknya', slot: 'bottom', name: 'Plisszírozott szoknya', cost: 13000, click: 1.5, passive: 0, risk: 12, st: { cute: 14, chaos: 6, chill: 4 }, paint: '#f4a3b8', desc: 'Egy pörgés, és mindenki tudja, ki vagy.', notes: [{ tone: 'funny', text: 'Szeles nap van, a szoknyád úgy viselkedik, mint egy vitorla. A hajad is. Minden.' }, { tone: 'bad', text: 'Két srác nevetgél a szoknyád láttán, de egyikük utána odaszól: „Jó cucc, tényleg.”' }] },
         { id: 'tenisz', slot: 'bottom', name: 'Tenisz szoknya', cost: 24000, click: 2.5, passive: 0, risk: 11, st: { cute: 12, chaos: 2 }, paint: '#fdf6fa', desc: 'Sportos és aranyos egyszerre.', notes: [{ tone: 'good', text: 'A parkban valaki megkérdezi, hogy teniszezel-e. „Most már igen” — vágod rá.' }] },
-        { id: 'kilt', slot: 'bottom', name: 'Kockás kilt', cost: 30000, click: 3.2, passive: 0, risk: 9, st: { cute: 12, chaos: 6, code: 2 }, desc: 'Skót hagyomány, femboy lelkület.', notes: [{ tone: 'funny', text: 'Egy idős úr szerint „a kilt a férfiruhák királya”. Egyetértesz.' }] },
-        { id: 'estelyi', slot: 'bottom', name: 'Selyem estélyi szoknya', cost: 140000, click: 6, passive: 0.5, risk: 8, st: { cute: 20, chill: 8 }, paint: '#b89fe8', desc: 'Földig érő, selymes, és minden mozdulatnál hullámzik.', notes: [{ tone: 'funny', text: 'A szoknyád akkora, hogy a villamoson két embernek kell odébb lépnie. Te nevetsz a legjobban.' }] },
+        { id: 'kilt', slot: 'bottom', nopat: true, name: 'Kockás kilt', cost: 30000, click: 3.2, passive: 0, risk: 9, st: { cute: 12, chaos: 6, code: 2 }, desc: 'Skót hagyomány, femboy lelkület.', notes: [{ tone: 'funny', text: 'Egy idős úr szerint „a kilt a férfiruhák királya”. Egyetértesz.' }] },
+        { id: 'estelyi', slot: 'bottom', nopat: true, name: 'Selyem estélyi szoknya', cost: 140000, click: 6, passive: 0.5, risk: 8, st: { cute: 20, chill: 8 }, paint: '#b89fe8', desc: 'Földig érő, selymes, és minden mozdulatnál hullámzik.', notes: [{ tone: 'funny', text: 'A szoknyád akkora, hogy a villamoson két embernek kell odébb lépnie. Te nevetsz a legjobban.' }] },
 
         { id: 'zokni', slot: 'legs', name: 'Pasztell térdzokni', cost: 3200, click: 0.4, passive: 0, risk: 4, st: { cute: 6, code: 8 }, paint: '#fdf6fa', desc: 'Az első lépés a megfelelő irányba.', notes: [] },
         { id: 'combzokni', slot: 'legs', name: 'Combzokni', cost: 7500, click: 1.2, passive: 0, risk: 9, st: { cute: 10, code: 6, chaos: 2 }, paint: '#f4a3b8', desc: 'Egyszerűen kell. Nem kell magyarázni.', notes: [{ tone: 'good', text: 'Egy lány az utcán megáll: „Hol van ilyen combzokni? Muszáj tudnom.”' }] },
-        { id: 'harisnya', slot: 'legs', name: 'Csipke harisnya', cost: 19000, click: 2.5, passive: 0, risk: 8, st: { cute: 12, chaos: 4 }, desc: 'Finom, törékeny, és rád van szabva.', notes: [] },
+        { id: 'harisnya', slot: 'legs', nopat: true, name: 'Csipke harisnya', cost: 19000, click: 2.5, passive: 0, risk: 8, st: { cute: 12, chaos: 4 }, desc: 'Finom, törékeny, és rád van szabva.', notes: [] },
 
         { id: 'choker', slot: 'neck', name: 'Bársony choker', cost: 5200, click: 0.8, passive: 0, risk: 7, st: { cute: 10, chill: 4, gamer: 2 }, paint: '#3a2f45', desc: 'Egy kis csengővel, ami minden lépésnél csilingel.', notes: [{ tone: 'good', text: 'A kollégád odaszól: „Szép a chokered, úgy csilingel, mint egy kis macska.”' }] },
         { id: 'nyakmasni', slot: 'neck', name: 'Nyakmasni', cost: 9500, click: 1.2, passive: 0, risk: 4, st: { cute: 8, code: 4 }, paint: '#8fd3f4', desc: 'Egyszerre iskolás és elegáns.', notes: [] },
@@ -133,7 +168,20 @@
         { id: 'monster', slot: 'drink', name: 'Ultra White Monster', cost: 600, click: 0.3, passive: 0, risk: 1, st: { gamer: 8, code: 6, chaos: 14, chill: -8 }, desc: 'A szent elixír. A hajnali 3-as voice chat alapértelmezett üzemanyaga.', notes: [] },
         { id: 'sun', slot: 'buddy', name: 'Cica-sün plüss', cost: 5000, click: 0, passive: 0.2, risk: 0, st: { cute: 12, chill: 8 }, desc: 'Nem cica, nem sün, mégis mindkettő.', notes: [] },
         { id: 'blahaj', slot: 'buddy', name: 'Plüss cápa', cost: 13000, click: 0, passive: 0.4, risk: 0, st: { cute: 10, chill: 18 }, desc: 'A szoba főadminisztrátora. Mindig kéznél van, ha ölelés kell.', notes: [] },
-        { id: 'army', slot: 'buddy', name: 'Plüss cápa-hadsereg', cost: 45000, click: 0, passive: 1, risk: 0, st: { cute: 16, chill: 30, chaos: 10 }, desc: 'Öt cápa, egy cél: távol tartani a külvilág toxicitását.', notes: [] }
+        { id: 'army', slot: 'buddy', name: 'Plüss cápa-hadsereg', cost: 45000, click: 0, passive: 1, risk: 0, st: { cute: 16, chill: 30, chaos: 10 }, desc: 'Öt cápa, egy cél: távol tartani a külvilág toxicitását.', notes: [] },
+        // Új ruhák: a "look" mondja meg, melyik rajzot használják; a "pat"/"pat2" az alapminta és a minta színe; a "prints" azt jelenti, hogy feliratot és nyomtatott mintát is kaphat.
+        { id: 'feliratos', slot: 'top', look: 'tee', prints: true, pat: 'sl_nyau', pat2: '#f4a3b8', name: 'Feliratos póló', cost: 2800, click: 0.3, passive: 0, risk: 5, st: { cute: 6, chaos: 3, code: 2 }, paint: '#fdf8fd', desc: 'Egy mondat a mellkasodon. A minta és a felirat átállítható.', notes: [{ tone: 'funny', text: 'Valaki hangosan felolvassa a pólód feliratát a buszon. Megköszönöd.' }] },
+        { id: 'tengeresz', slot: 'top', look: 'tee', pat: 'stripe', pat2: '#7f9fe0', name: 'Csíkos tengerész-póló', cost: 4200, click: 0.4, passive: 0, risk: 3, st: { cute: 7, chill: 5 }, paint: '#fdf8fd', desc: 'Klasszikus csík, tengerparti hangulat. Egyszínűre és mintásra is átállítható.', notes: [] },
+        { id: 'csikoscomb', slot: 'legs', look: 'combzokni', pat: 'stripe', pat2: '#f4a3b8', name: 'Csíkos combzokni', cost: 9800, click: 1.4, passive: 0, risk: 9, st: { cute: 12, code: 6, chaos: 3 }, paint: '#fdf6fa', desc: 'Az ikonikus csíkos darab. A csík és az alapszín külön állítható.', notes: [{ tone: 'good', text: 'Egy lány az utcán odaszól: „Az a csíkos combzokni mennyire jó!”' }] },
+        { id: 'szivarvanyzokni', slot: 'legs', look: 'zokni', pat: 'rainbow', name: 'Szivárvány térdzokni', cost: 5200, click: 0.6, passive: 0, risk: 6, st: { cute: 8, chill: 4, chaos: 2 }, paint: '#fdf6fa', desc: 'Hat szín, nulla kompromisszum.', notes: [] },
+        { id: 'bakancs', slot: 'shoes', name: 'Fűzős bakancs', cost: 19000, click: 1.5, passive: 0, risk: 8, st: { cute: 6, chaos: 8, chill: 2 }, paint: '#4a4056', desc: 'Vastag talp, dupla fűzés. Határozott, mégis cuki.', notes: [] },
+        { id: 'magasszaru', slot: 'shoes', name: 'Magas szárú tornacipő', cost: 11000, click: 0.9, passive: 0, risk: 4, st: { cute: 6, gamer: 4, chill: 4 }, paint: '#fdf8fd', desc: 'Bokáig érő, fűzős, gumi orrvéddel. Működik hétköznap és con-on is.', notes: [] },
+        // Jelmezek (Cosplay): az egész felsőtest-, alsó- és lábszár-megjelenést felülírják, a felsőt/alsót elfedik. Kiegészítők (nyak, arc) maradnak.
+        { id: 'maid', slot: 'cosplay', name: 'Szobalány-jelmez', cost: 42000, click: 3, passive: 0.4, risk: 12, st: { cute: 18, chaos: 4, chill: 4 }, desc: 'Fekete ruha, fodros kötény, fejpánt. Con-ra és kávézóba is megfelel.', notes: [{ tone: 'good', text: 'A conon valaki megkér, hogy lefényképezhet-e. „Persze, uwu.”' }] },
+        { id: 'sailor', slot: 'cosplay', name: 'Matróz-egyenruha', cost: 36000, click: 2.5, passive: 0.3, risk: 9, st: { cute: 14, chill: 6, code: 2 }, desc: 'Kék matrózgallér, piros masni, plisszírozott szoknya. Iskolai klasszikus.', notes: [{ tone: 'good', text: 'A parkban valaki megkérdezi, melyik animéből van a jelmezed. „Mindegyikből egy kicsit.”' }] },
+        { id: 'magical', slot: 'cosplay', name: 'Varázslólány-szett', cost: 78000, click: 4.5, passive: 0.7, risk: 11, st: { cute: 24, chaos: 6, chill: 4 }, desc: 'Fodros ruha csillag-brossal, nagy masni, csillag hajcsatok. Átváltozás közben ne nézz oda.', notes: [{ tone: 'funny', text: 'Egy kisfiú izgatottan kérdezi: „Te vagy a varázslólány?” Büszkén bólintasz.' }] },
+        { id: 'witch', slot: 'cosplay', name: 'Boszorkány-jelmez', cost: 64000, click: 3.8, passive: 0.5, risk: 9, st: { cute: 14, chaos: 12, chill: 2 }, desc: 'Csúcsos kalap, lila ruha, csíkos harisnya. A seprű külön.', notes: [{ tone: 'funny', text: 'Valaki megkérdezi, hogy a kalap kényelmes-e. Nem, de megéri.' }] },
+        { id: 'onesie', slot: 'cosplay', name: 'Nyuszi onesie', cost: 24000, click: 1.8, passive: 0.6, risk: 4, st: { cute: 20, chill: 18, chaos: -2 }, desc: 'Pasztell, bolyhos, füles kapucnival és bojt-farokkal. Összecsukhatatlanul puha.', notes: [{ tone: 'good', text: 'A postás megáll az ajtóban: „Szép onesie.” Nem tudod, mit válaszolj, de mosolyogsz.' }] }
     ];
 
     // Rejtekhely: csak titkolózás alatt hasznos (a kockázat havi csökkenését növeli)
