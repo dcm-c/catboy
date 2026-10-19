@@ -181,9 +181,11 @@
     var ARMS = {
         idle: [[14.2, -88], [19.8, -70], [18.4, -52.5]],
         wave: [[14.2, -88], [32.5, -83], [31.8, -107]],
-        hips: [[14.2, -88], [28.5, -71], [14.6, -57]]
+        hips: [[14.2, -88], [28.5, -71], [14.6, -57]],
+        sit: [[14.2, -88], [21.5, -73], [12, -59]],
+        phone: [[14.2, -88], [25, -77], [10.5, -81]]
     };
-    var HAND_AT = { idle: [18.1, -49.4, 0], wave: [31.8, -110.4, 180], hips: [13, -56, -78] };
+    var HAND_AT = { idle: [18.1, -49.4, 0], wave: [31.8, -110.4, 180], hips: [13, -56, -78], sit: [12, -56.4, 20], phone: [10.4, -84.4, 188] };
     var LEG_T = [[6.6, -53], [6.9, -28], [6.3, -7]]; // jobb láb középvonala: csípő, térd, boka
 
     // =========================================================
@@ -475,6 +477,23 @@
         return s;
     }
     function topDetails(u, kind) {
+        return topDetails0(u, kind) + softFolds(kind);
+    }
+    // finom ráncok és varrások: hónalj-redők, szegély-hullám, nyakvarrás (a jelmezek saját részletet kapnak)
+    function softFolds(kind) {
+        var def = TOPDEF[kind];
+        if (!kind || !def || COS_TOP[kind]) return '';
+        var col = topFill(kind), fd = shade(col, -0.3), s = '';
+        [1, -1].forEach(function (sg) {
+            s += L('M' + (sg * 9.6) + ' -86 C' + (sg * 7.4) + ' -83.6 ' + (sg * 6.8) + ' -80.4 ' + (sg * 7.6) + ' -77', fd, 0.7, 'opacity=".32"');
+            s += L('M' + (sg * 7.6) + ' -70 C' + (sg * 5.6) + ' -67.6 ' + (sg * 5.4) + ' -64.6 ' + (sg * 6.4) + ' -62', fd, 0.6, 'opacity=".24"');
+        });
+        s += L('M-8.4 ' + (def.y1 + 3.2) + ' C-4 ' + (def.y1 + 1.6) + ' 4 ' + (def.y1 + 4.6) + ' 8.4 ' + (def.y1 + 2.4), fd, 0.7, 'opacity=".3"');
+        if (kind === 'tee' || kind === 'crop') s += L('M-6.8 -94 C-3 -90.6 3 -90.6 6.8 -94', fd, 0.9, 'opacity=".38"') + L('M-6 -92.4 C-3 -89.6 3 -89.6 6 -92.4', tint(col, 0.5), 0.5, 'opacity=".6"');
+        if (kind !== 'kabat') s += L('M0 -76 C-.4 -72 .4 -68 0 -64', fd, 0.5, 'opacity=".16"');
+        return s;
+    }
+    function topDetails0(u, kind) {
         if (!kind) return '';
         var col = topFill(kind), s = '';
         if (COS_TOP[kind]) return cosTop(u, kind, col);
@@ -584,6 +603,7 @@
         // bal kar: üres járat (hand mirrored)
         var s = mirror(arm(u, idleQ, 1, 'idle', topKind, c, false));
         s += arm(u, mainQ, 1, pose, topKind, c, true);
+        if (pose === 'phone') s += G(P('M-3.6 -6 L3.6 -6 L3.6 5.4 L-3.6 5.4Z', '#4a4060', 'stroke="#2f2638" stroke-width=".9" stroke-linejoin="round"') + P('M-2.6 -4.6 L2.6 -4.6 L2.6 3.2 L-2.6 3.2Z', '#bfe3f8') + L('M-1.6 -2.6 L1.6 -2.6 M-1.6 -.6 L1 -.6', '#fff', 0.6) + CI(0, 4.4, .45, '#c9c4d8'), 'translate(4.6 -84.6) rotate(-6)');
         if (pose === 'wave') s += L('M39.4 -120 Q42.6 -114.6 39.4 -109', INK, 1, 'opacity=".55"') + L('M43.4 -123 Q47.4 -114.6 43.4 -106', INK, 1, 'opacity=".35"');
         return s;
     }
@@ -752,7 +772,19 @@
         if (style === 'hosszu') d = 'M-28 -124 C-30 -150 -16 -160 0 -160 C16 -160 30 -150 28 -124 C30.4 -108 31.6 -92 30 -74 C28.4 -69 22 -67.4 15 -69 L-15 -69 C-22 -67.4 -28.4 -69 -30 -74 C-31.6 -92 -30.4 -108 -28 -124Z';
         else if (style === 'rovid') d = 'M-26.6 -124 C-28.4 -149 -14 -159 0 -159 C14 -159 28.4 -149 26.6 -124 C27 -116 25 -110 22.6 -107 C14 -106 -14 -106 -22.6 -107 C-25 -110 -27 -116 -26.6 -124Z';
         else d = 'M-28 -124 C-30 -150 -16 -160 0 -160 C16 -160 30 -150 28 -124 C29.6 -112 28.6 -102 24.4 -96.6 C14 -94 -14 -94 -24.4 -96.6 C-28.6 -102 -29.6 -112 -28 -124Z';
-        return P(d, fill, 'stroke="' + edge + '" stroke-width="1.2" stroke-linejoin="round"');
+        var base = fill.charAt(0) === '#' ? fill : '#f4a3b8', dk = shade(base, -0.2), out = P(d, fill, 'stroke="' + edge + '" stroke-width="1.2" stroke-linejoin="round"');
+        // mélységet adó réteg: sötétebb alsó tincsek + hajvég-pödrés
+        if (style === 'hosszu') {
+            out += P('M-23 -100 C-24 -88 -24 -80 -22 -73 L-12 -72 C-14 -82 -15 -92 -15 -104Z', dk, 'opacity=".2"') + P('M23 -100 C24 -88 24 -80 22 -73 L12 -72 C14 -82 15 -92 15 -104Z', dk, 'opacity=".2"');
+            out += L('M-9 -96 C-9.6 -86 -9 -78 -7 -71', dk, 0.8, 'opacity=".35"') + L('M9 -96 C9.6 -86 9 -78 7 -71', dk, 0.8, 'opacity=".35"') + L('M0 -92 L0 -70', dk, 0.7, 'opacity=".25"');
+            out += L('M-28.6 -76 C-31 -72.6 -29 -69.6 -25 -70.4', edge, 1.1) + L('M28.6 -76 C31 -72.6 29 -69.6 25 -70.4', edge, 1.1);
+        } else if (style === 'bob') {
+            out += P('M-24 -112 C-25 -104 -24 -99 -21 -96 L-13 -95.6 C-15 -101 -15.6 -108 -15 -114Z', dk, 'opacity=".2"') + P('M24 -112 C25 -104 24 -99 21 -96 L13 -95.6 C15 -101 15.6 -108 15 -114Z', dk, 'opacity=".2"');
+            out += L('M-28.4 -102 C-31 -98.6 -28.6 -95.6 -24.6 -96.6', edge, 1.1) + L('M28.4 -102 C31 -98.6 28.6 -95.6 24.6 -96.6', edge, 1.1);
+        } else {
+            out += L('M-14 -150 C-20 -140 -23 -128 -22.6 -112', dk, 0.8, 'opacity=".3"') + L('M14 -150 C20 -140 23 -128 22.6 -112', dk, 0.8, 'opacity=".3"');
+        }
+        return out;
     }
     function hairFront(u, style, fill, edge, c) {
         var s = '';
@@ -779,8 +811,13 @@
             var sc = shade(fill.charAt(0) === '#' ? fill : '#f4a3b8', -0.16);
             s += L('M6 -150 C9 -143 11 -139 12.4 -135', sc, 0.8, 'opacity=".5"') + L('M-8 -151 C-11 -145 -14.6 -139.6 -17 -134', sc, 0.8, 'opacity=".5"') + L('M-1.4 -152 C-1 -145 -1.2 -138 -1.4 -132', sc, 0.8, 'opacity=".4"');
         }
-        // fény-sáv a feje tetején
+        // fény-sáv a feje tetején + kettős csillanás és szálak
         s += P('M-17 -149 C-9 -154 6 -154.4 14 -150 C6 -150.6 -8 -150.4 -17 -149Z', '#fff', 'opacity=".38"');
+        var hb = fill.charAt(0) === '#' ? fill : '#f4a3b8';
+        s += L('M-20 -142.6 C-13 -149 -3 -150.6 6 -149.4', tint(hb, 0.6), 1.3, 'opacity=".5"') + L('M9 -149.2 C13 -148.2 16.6 -146 19 -142.8', tint(hb, 0.6), 0.9, 'opacity=".4"');
+        s += L('M-12 -141 C-13.4 -137.4 -15.4 -135 -18.6 -133.4', shade(hb, -0.22), 0.7, 'opacity=".45"') + L('M11 -142 C12.6 -138.4 14.4 -136 17.6 -134.4', shade(hb, -0.22), 0.7, 'opacity=".45"');
+        // elszabadult tincs
+        s += L('M4 -157 C6 -162 11 -162.6 12.6 -159.6', edge, 0.9, 'opacity=".8"');
         return s;
     }
     function earSkin(c, style) {
@@ -933,14 +970,35 @@
     // =========================================================
     // ARC: szem, száj, pír, smink
     // =========================================================
+    var EYEST = 'kerek';
     function eyeOpen(c, mood) {
         var s = '', ec = c.eye;
+        if (EYEST === 'macska') {
+            // keskenyebb, a külső sarkában felfelé húzott, függőleges pupilla
+            s += P('M-5.6 .6 C-5 -5.2 2.4 -7.4 6.4 -2 C7 1 5.6 5.6 0 6.6 C-4.2 6 -5.6 3.4 -5.6 .6Z', '#ffffff');
+            s += P('M-4.8 .6 C-4.4 -4.4 2 -6.2 5.6 -1.8 C6 1 4.8 4.8 0 5.8 C-3.6 5.2 -4.8 3 -4.8 .6Z', ec);
+            s += P('M-4.4 -1.4 C-3 -5 2 -5.6 5.2 -2 C2 -3.4 -1.6 -3.2 -4.4 -1.4Z', shade(ec, -0.45), 'opacity=".5"');
+            s += EL(0.2, 0.6, 1.5, 4.4, '#2b2133');
+            s += CI(-1.8, -2.4, 1.5, '#fff') + CI(2.2, 3, .7, '#fff', 'opacity=".9"');
+            return s;
+        }
+        if (EYEST === 'almos') {
+            // nagy, magas ovális szem, alul fényes sáv
+            s += EL(0, 0.2, 5.5, 7.4, '#ffffff');
+            s += EL(0, 0.8, 4.8, 6.9, ec);
+            s += P('M-4.8 .8 A4.8 6.9 0 0 1 4.8 .8 Q0 -2.6 -4.8 .8Z', shade(ec, -0.45), 'opacity=".5"');
+            s += P('M-3.8 4.2 A4.8 6.9 0 0 0 3.8 4.2 Q0 2 -3.8 4.2Z', tint(ec, 0.55), 'opacity=".6"');
+            s += EL(0, 1.4, 2.2, 3.8, '#2b2133');
+            s += CI(-1.7, -2.8, 1.7, '#fff') + CI(1.9, 3.4, .8, '#fff', 'opacity=".9"');
+            return s;
+        }
         s += EL(0, 0, 5.9, 6.7, '#ffffff');
         s += EL(0, 0.4, 5.1, 6.3, ec);
         s += P('M-5.1 .4 A5.1 6.3 0 0 1 5.1 .4 Q0 -2.2 -5.1 .4Z', shade(ec, -0.45), 'opacity=".5"');
         s += P('M-4 3.6 A5.1 6.3 0 0 0 4 3.6 Q0 1.8 -4 3.6Z', tint(ec, 0.5), 'opacity=".55"');
-        s += EL(0, 1.2, 2.4, 3.6, '#2b2133');
+        s += EL(0, 1.2, EYEST === 'csillogo' ? 2.9 : 2.4, EYEST === 'csillogo' ? 4.1 : 3.6, '#2b2133');
         s += CI(-1.8, -2.5, 1.9, '#fff') + CI(2, 3, .9, '#fff', 'opacity=".9"');
+        if (EYEST === 'csillogo') s += sparkle(2.6, -3.4, 1.1, '#fff', 'opacity=".95"') + CI(-3, 2.6, .55, '#fff', 'opacity=".85"') + CI(0.4, 4.4, .45, '#fff', 'opacity=".8"');
         return s;
     }
     function shadowLayer(c) {
@@ -1009,10 +1067,19 @@
             if (mk('lashes')) s += lashLayer(c, mood).replace(/0/g, function (m) { return m; });
             return G(s, 'translate(' + (side * 10.4) + ' -121)' + (side < 0 ? ' scale(-1 1)' : ''));
         }
-        s += eyeOpen(c, mood);
+        if (mood === 'sleep') {
+            s += L('M-5.8 -.8 C-3.6 3.6 3.8 3.6 6 -.8', INK, 1.9) + L('M6 -.8 L7.4 .4', INK, 1.4) + L('M-3 2.4 L-3.6 4 M0 3 L0 4.8 M3 2.4 L3.6 4', INK, 0.6, 'opacity=".7"');
+            if (mk('shadow')) s += shadowLayer(c);
+            return G(s, 'translate(' + (side * 10.4) + ' -121)' + (side < 0 ? ' scale(-1 1)' : ''));
+        }
+        if (mood === 'surprised') s += G(eyeOpen(c, mood), 'scale(1.13)');
+        else if (mood === 'shy') s += G(eyeOpen(c, mood), 'translate(-.9 1.6) scale(.9)');
+        else s += eyeOpen(c, mood);
+        if (mood === 'sad') s += P('M-4.6 3.6 A5.1 6.3 0 0 0 4.6 3.6 Q0 2 -4.6 3.6Z', '#cdeefd', 'opacity=".85"') + CI(2.2, -3.4, 1.1, '#fff', 'opacity=".95"');
         s += shadowLayer(c);
         s += linerLayer(c, mood);
         s += lashLayer(c, mood);
+        if (mood === 'sleepy') s += P('M-7.4 -9 L7.4 -9 L7.8 -.6 C3.6 1.4 -3.6 1.4 -7.8 -.6Z', c.skin) + L('M-6.4 -.6 C-3.4 1.6 3.4 1.6 6.6 -.6', INK, 1.7) + L('M6.6 -.6 L8 -1.6', INK, 1.3);
         return G(s, 'translate(' + (side * 10.4) + ' -121)' + (side < 0 ? ' scale(-1 1)' : ''));
     }
     function brows(mood, hairD) {
@@ -1022,6 +1089,14 @@
             s += L('M5.4 -131 C8.4 -132.8 12.4 -134.4 14.6 -135.8', hairD, 1.4) + L('M-5.4 -131 C-8.4 -132.8 -12.4 -134.4 -14.6 -135.8', hairD, 1.4);
         } else if (mood === 'proud') {
             s += L('M5.6 -132 C8.4 -134.4 12 -134.8 14.6 -133.4', hairD, 1.4) + L('M-5.6 -131 C-8.4 -132.2 -12 -132.4 -14.6 -131.2', hairD, 1.4);
+        } else if (mood === 'sad') {
+            s += L('M5.4 -134.4 C8.4 -134 12 -131.8 14.6 -129.6', hairD, 1.4) + L('M-5.4 -134.4 C-8.4 -134 -12 -131.8 -14.6 -129.6', hairD, 1.4);
+        } else if (mood === 'surprised') {
+            s += L('M5.6 -137.6 C8.4 -139.6 12 -139.6 14.6 -137.4', hairD, 1.4) + L('M-5.6 -137.6 C-8.4 -139.6 -12 -139.6 -14.6 -137.4', hairD, 1.4);
+        } else if (mood === 'shy') {
+            s += L('M5.6 -133.4 C8.4 -135 12 -134.2 14.6 -132', hairD, 1.4) + L('M-5.6 -133.4 C-8.4 -135 -12 -134.2 -14.6 -132', hairD, 1.4);
+        } else if (mood === 'sleepy' || mood === 'sleep') {
+            s += L('M5.6 -130.6 C8.4 -131.8 12 -131.6 14.6 -130.4', hairD, 1.3) + L('M-5.6 -130.6 C-8.4 -131.8 -12 -131.6 -14.6 -130.4', hairD, 1.3);
         } else {
             s += L('M5.6 -132 C8.4 -133.8 12 -133.8 14.6 -132.4', hairD, 1.4) + L('M-5.6 -132 C-8.4 -133.8 -12 -133.8 -14.6 -132.4', hairD, 1.4);
         }
@@ -1032,7 +1107,17 @@
         var lc = lipColor(), st = m ? m.style : null;
         var s = '', y = -108;
         var dark = '#9a3f52';
-        if (mood === 'happy') {
+        if (mood === 'sad') {
+            s += L('M-3.4 2 Q0 -1.6 3.4 2', m ? lc : '#b4566a', 1.4);
+        } else if (mood === 'shy') {
+            s += L('M-3.4 .6 Q-1.7 -.8 0 .6 Q1.7 2 3.4 .6', m ? lc : '#b4566a', 1.3);
+        } else if (mood === 'surprised') {
+            s += EL(0, 1.4, 2.3, 3, dark, 'stroke="' + (m ? lc : '#b4566a') + '" stroke-width="1"') + EL(0, 2.6, 1.3, .9, '#f48a9a');
+        } else if (mood === 'sleepy') {
+            s += L('M-2.4 1 L2.4 1', m ? lc : '#b4566a', 1.2);
+        } else if (mood === 'sleep') {
+            s += EL(0.4, 1.4, 1.3, 1.6, dark, 'stroke="' + (m ? lc : '#b4566a') + '" stroke-width=".8"');
+        } else if (mood === 'happy') {
             s += P('M-4.6 -.8 C-3.2 5.6 3.2 5.6 4.6 -.8 C2.4 -1.6 -2.4 -1.6 -4.6 -.8Z', dark, 'stroke="' + INK + '" stroke-width=".9" stroke-linejoin="round"');
             s += P('M-2.4 3.2 C-1 1.8 1 1.8 2.4 3.2 C1.2 4.6 -1.2 4.6 -2.4 3.2Z', '#f48a9a');
             s += P('M-3.6 -.6 C-1.6 -1.2 1.6 -1.2 3.6 -.6 L3.2 .8 C1.6 .4 -1.6 .4 -3.2 .8Z', '#fff');
@@ -1054,11 +1139,13 @@
         }
         return G(s, 'translate(0 ' + y + ')');
     }
+    var CUR_MOOD = 'neutral';
     function blushLayer(u, c) {
         var m = mk('blush');
         var col = m ? mkColor('blush', '#ff8aa8') : '#ff8aa8';
         var st = m ? m.style : null, s = '';
         var o = m ? 0.55 : 0.28;
+        if (CUR_MOOD === 'shy') o = m ? 0.75 : 0.62;
         [1, -1].forEach(function (sg) {
             var x = sg * 15.2, y = -111;
             if (st === 'pi_anime') {
@@ -1071,6 +1158,7 @@
             } else {
                 s += EL(x, y, 4.4, 2.5, col, 'opacity="' + o + '"');
             }
+            if (CUR_MOOD === 'shy' && st !== 'pi_anime') for (var h = 0; h < 3; h++) s += L('M' + n1(x - 2.6 + h * 2.2) + ' ' + n1(y + 1.5) + ' L' + n1(x - 1.4 + h * 2.2) + ' ' + n1(y - 1.5), tint(col, 0.45), 0.7, 'opacity=".85"');
         });
         return s;
     }
@@ -1098,11 +1186,19 @@
         // áll-árnyék, orr
         s += P('M-17 -105 C-12 -100 12 -100 17 -105 C12 -98.6 -12 -98.6 -17 -105Z', c.skinD, 'opacity=".28"');
         s += L('M-1 -113.2 Q0 -112 1.2 -113.2', c.skinDD, 0.8, 'opacity=".75"');
+        CUR_MOOD = mood;
         s += blushLayer(u, c);
         s += decoLayer(c);
-        s += eye(1, mood, c) + eye(-1, mood, c);
+        var eyes = eye(1, mood, c) + eye(-1, mood, c);
+        s += (mood === 'sleep' || mood === 'happy') ? eyes : '<g class="av-eyes">' + eyes + '</g>';
         s += brows(mood, c.hairD);
         s += mouth(mood, c);
+        if (mood === 'sad') [1, -1].forEach(function (sg) {
+            s += P('M' + (sg * 12.2) + ' -113.6 C' + (sg * 11.2) + ' -110.4 ' + (sg * 10.6) + ' -108.8 ' + (sg * 12.2) + ' -107.8 C' + (sg * 13.8) + ' -108.8 ' + (sg * 13.2) + ' -110.4 ' + (sg * 12.2) + ' -113.6Z', '#bfe6fb', 'stroke="#78bde6" stroke-width=".6" stroke-linejoin="round"') + L('M' + (sg * 12.2) + ' -115 L' + (sg * 12.2) + ' -113.4', '#bfe6fb', 1.2);
+        });
+        if (mood === 'sleep') [[27.4, -143, 1], [32, -150.6, 1.3], [37.4, -159, 1.6]].forEach(function (z, i) {
+            s += G(L('M-2 -2 L2 -2 L-2 2 L2 2', '#7f9fe0', 0.9 + i * 0.15), 'translate(' + z[0] + ' ' + z[1] + ') scale(' + z[2] + ')');
+        });
         if (mood === 'worried') s += P('M22 -138 C20.4 -134.6 19.6 -132.6 21.6 -131.4 C23.6 -132.6 23.4 -134.8 22 -138Z', '#bfe6fb', 'stroke="#78bde6" stroke-width=".7" stroke-linejoin="round"');
         return s;
     }
@@ -1116,6 +1212,7 @@
         var eq = o.outfit || {};
         var mood = o.mood || 'neutral';
         var pose = o.pose || (mood === 'happy' ? 'wave' : 'idle');
+        if (!ARMS[pose]) pose = 'idle';
         var skin = colorOf(D.SKINS, o.skin, '#efc09d');
         var hairId = o.hairColor;
         var hairC = colorOf(D.HAIR_COLORS, hairId, '#f4a3b8');
@@ -1128,6 +1225,7 @@
             eye: EYES[hairId] || '#7a6a9a'
         };
         K = {};
+        EYEST = (o.eyes === 'macska' || o.eyes === 'almos' || o.eyes === 'csillogo') ? o.eyes : 'kerek';
         PT = {}; PD = ''; PDONE = {};
         var kind = {};
         var pats = (o.patterns && typeof o.patterns === 'object') ? o.patterns : null;
@@ -1166,18 +1264,19 @@
         out.push(defs(u, col).replace(/LIPOM/g, u + '-lipom'));
         out.push(EL(0, 0.4, 23, 3.2, 'rgba(59,45,74,.16)'));
         out.push(backBehind(u, kind.back));
-        out.push(hairBack(u, style, hairFill, edge));
+        out.push('<g class="av-hair">' + hairBack(u, style, hairFill, edge) + '</g>');
 
         // lábak, lábszár-viselet, cipő
-        out.push(legsBase(col));
-        out.push(legWear(u, kind.legs, col));
-        out.push(shoes(u, kind.shoes || ''));
+        var legBlock = legsBase(col) + legWear(u, kind.legs, col) + shoes(u, kind.shoes || '');
+        // ülve a lábak összerövidülnek (előre nyúló comb és lábszár, szemből nézve)
+        out.push(pose === 'sit' ? G(legBlock, 'translate(0 -52) scale(1 .5) translate(0 52)') : legBlock);
 
         // nyak + törzs (bőr), alsó ruha
         out.push(SH('M-4.8 -101 L4.8 -101 L4.8 -94 L-4.8 -94Z', col.skin, 1.2));
         out.push(SH(torsoShape(-94.6, -50, 0, { neckW: 5, neckDip: 1.4, sag: 0.8 }), col.skin, 1.2));
         out.push(P('M-4.8 -99 C-3 -95.4 3 -95.4 4.8 -99 L4.8 -94 L-4.8 -94Z', col.skinDD, 'opacity=".22"'));
-        out.push(bottomWear(u, kind.bottom || 'jeans'));
+        var bw = bottomWear(u, kind.bottom || 'jeans');
+        out.push(pose === 'sit' && /^(rovid|jogger|jeans|c_onesie)$/.test(kind.bottom || 'jeans') ? G(bw, 'translate(0 -52) scale(1 .5) translate(0 52)') : bw);
         out.push(P('M-1.4 -78 Q0 -77 1.4 -78', 'none', 'stroke="' + col.skinDD + '" stroke-width=".7" stroke-linecap="round" opacity=".6"'));
 
         // felső

@@ -31,7 +31,7 @@
     var timers = [];
     var loopId = null, saveId = null;
     var lastTs = 0;
-    var draft = { name: '', hairStyle: 'bob', hairColor: 'rozsa', skin: 's2' };
+    var draft = { name: '', hairStyle: 'bob', hairColor: 'rozsa', skin: 's2', eyeStyle: 'kerek' };
 
     // ---------- Segédek ----------
     function $(id) { return document.getElementById(id); }
@@ -108,8 +108,15 @@
     // KARAKTERKÉSZÍTŐ
     // =========================================================
     function buildCreator() {
-        var hs = $('el-hs'), hc = $('el-hc'), sk = $('el-sk');
-        clear(hs); clear(hc); clear(sk);
+        var hs = $('el-hs'), hc = $('el-hc'), sk = $('el-sk'), es = $('el-es');
+        clear(hs); clear(hc); clear(sk); clear(es);
+        D.EYE_STYLES.forEach(function (h) {
+            var b = el('button', 'el-choice', h.label);
+            b.type = 'button';
+            b.setAttribute('aria-pressed', String(draft.eyeStyle === h.id));
+            b.addEventListener('click', function () { draft.eyeStyle = h.id; buildCreator(); });
+            es.appendChild(b);
+        });
         D.HAIR_STYLES.forEach(function (h) {
             var b = el('button', 'el-choice', h.label);
             b.type = 'button';
@@ -137,7 +144,7 @@
             b.addEventListener('click', function () { draft.skin = h.id; buildCreator(); });
             sk.appendChild(b);
         });
-        $('el-preview').innerHTML = A.portrait({ skin: draft.skin, hairStyle: draft.hairStyle, hairColor: draft.hairColor, outfit: {}, mood: 'happy', uid: 'cr' });
+        $('el-preview').innerHTML = A.portrait({ skin: draft.skin, hairStyle: draft.hairStyle, hairColor: draft.hairColor, eyes: draft.eyeStyle, outfit: {}, mood: 'neutral', uid: 'cr' });
     }
 
     function showIntro() {
@@ -352,7 +359,7 @@
         var sig = stageView + JSON.stringify(v);
         if (!force && sig === lastSceneSig) return;
         lastSceneSig = sig;
-        $('el-scene').innerHTML = stageView === 'face' ? A.facecam(v) : (stageView === 'close' ? A.closeup(v) : A.room(v));
+        $('el-scene').innerHTML = stageView === 'face' ? A.facecam(v) : (stageView === 'close' ? A.closeup(v) : A.room(Object.assign({ fx: true }, v)));
         var vb = $('el-view');
         clear(vb);
         vb.appendChild(icon(stageView === 'room' ? 'eye' : (stageView === 'close' ? 'face' : 'house')));
@@ -1503,7 +1510,7 @@
         m.setAttribute('aria-modal', 'true');
         m.setAttribute('aria-labelledby', 'el-modal-title');
         var art = el('div', 'el-modal-art');
-        art.innerHTML = A.scene(v.art, Object.assign(currentView(), { uid: 'ev' }));
+        art.innerHTML = A.scene(v.art, Object.assign(currentView(), { uid: 'ev', fx: true, emood: v.mood || undefined }));
         m.appendChild(art);
         var body = el('div', 'el-modal-body');
         if (v.kicker) body.appendChild(el('div', 'el-kicker', v.kicker));

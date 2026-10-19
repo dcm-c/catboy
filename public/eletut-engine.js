@@ -45,6 +45,7 @@
             hairStyle: find(D.HAIR_STYLES, opts.hairStyle) ? opts.hairStyle : 'bob',
             hairColor: find(D.HAIR_COLORS, opts.hairColor) ? opts.hairColor : 'rozsa',
             skin: find(D.SKINS, opts.skin) ? opts.skin : 's2',
+            eyeStyle: find(D.EYE_STYLES, opts.eyeStyle) ? opts.eyeStyle : 'kerek',
 
             month: 0, sec: 0,
             conf: 0, money: 3000, energy: 100,
@@ -982,9 +983,11 @@
         return {
             id: ev.id, title: s.event.title, text: s.event.text, art: s.event.art,
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
+            mood: typeof ev.mood === 'function' ? ev.mood(s, c) : (ev.mood || ''),
             choices: ev.choices.map(function (ch, i) {
-                var okReq = !ch.req || ch.req(s, c);
-                var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || ''), check: null };
+                var enNeed = E.energyNeed(ch), okEn = s.energy >= enNeed;
+                var okReq = (!ch.req || ch.req(s, c)) && okEn;
+                var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (!okEn ? 'Kell hozzá ' + enNeed + ' energia' : (ch.reqText || '')), check: null };
                 var need = E.confNeed(ch);
                 if (need && !ch.req) out.check = { need: need, have: Math.floor(s.conf), ok: s.conf >= need };
                 return out;
@@ -993,6 +996,13 @@
     };
 
     // A választás tippjéből kiolvasott önbizalom-küszöb ("Legalább 150 önbizalom kell", "250+ önbizalom esetén ...")
+    // A tippből kiolvasott energiaköltség ("−30 energia"): ennyi energia nélkül a választás nem érhető el
+    E.energyNeed = function (ch) {
+        if (ch.energyNeed !== undefined) return ch.energyNeed;
+        var m = /[−-]\s*(\d+)\s*energia/.exec(ch.tip || '');
+        return m ? parseInt(m[1], 10) : 0;
+    };
+
     E.confNeed = function (ch) {
         if (ch.need !== undefined) return ch.need;
         var m = /(\d+)\+?\s*önbizalom/.exec(ch.tip || '');
@@ -1006,6 +1016,7 @@
         if (!ch) return false;
         var c = E.ctx(s);
         if (ch.req && !ch.req(s, c)) return false;
+        if (s.energy < E.energyNeed(ch)) return false;
         var res = ch.do(s, E.api(s), c);
         s.event.result = String(res || '');
         s.event.link = ch.link || null;
@@ -1143,7 +1154,7 @@
         var raw;
         try { raw = JSON.parse(text); } catch (e) { return null; }
         if (!raw || typeof raw !== 'object' || raw.v !== 1) return null;
-        var s = E.newState({ name: raw.name, hairStyle: raw.hairStyle, hairColor: raw.hairColor, skin: raw.skin });
+        var s = E.newState({ name: raw.name, hairStyle: raw.hairStyle, hairColor: raw.hairColor, skin: raw.skin, eyeStyle: raw.eyeStyle });
         var numeric = ['month', 'sec', 'conf', 'money', 'energy', 'risk', 'comm', 'comp', 'jobMonths', 'debtMonths', 'allowanceCut', 'saleUntil', 'brokenUntil', 'rentBump', 'lastCon', 'speed'];
         numeric.forEach(function (k) { s[k] = num(raw[k], s[k]); });
         ['out', 'hiding', 'student', 'paused'].forEach(function (k) { s[k] = !!raw[k]; });

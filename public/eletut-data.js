@@ -26,6 +26,12 @@
         { id: 'bob', label: 'Bob' },
         { id: 'hosszu', label: 'Hosszú' }
     ];
+    D.EYE_STYLES = [
+        { id: 'kerek', label: 'Kerek' },
+        { id: 'macska', label: 'Macska' },
+        { id: 'almos', label: 'Álmos' },
+        { id: 'csillogo', label: 'Csillogó' }
+    ];
     D.HAIR_COLORS = [
         { id: 'rozsa', label: 'Rózsaszín', color: '#f4a3b8' },
         { id: 'kek', label: 'Égkék', color: '#5bcefa' },

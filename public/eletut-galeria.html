@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Életút grafikai galéria | MFSZ</title>
+    <style>
+        :root { --bg: #fff7fb; --ink: #3b2d4a; --card: #ffffff; --line: #ead7e6; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #241d2e; --ink: #f1e8f7; --card: #2f2640; --line: #4a3d5c; } }
+        body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+        main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+        h1 { margin: 8px 0 4px; }
+        h2 { margin: 28px 0 8px; border-bottom: 2px solid var(--line); padding-bottom: 4px; font-size: 1.15rem; }
+        p.note { margin: 0 0 8px; opacity: .8; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--w, 120px), 1fr)); gap: 8px; }
+        .cell { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 6px; text-align: center; font-size: .72rem; overflow: hidden; }
+        .cell svg { width: 100%; height: auto; display: block; border-radius: 6px; }
+        .cell span { display: block; margin-top: 4px; word-break: break-word; }
+        nav a { margin-right: 10px; color: inherit; }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Életút grafikai galéria</h1>
+        <p class="note">Minden tárgy, póz, hangulat, minta és jelenet egy helyen – szemrevételezéshez és regressziókereséshez. Nem része a játéknak.</p>
+        <nav id="nav"></nav>
+        <div id="out"></div>
+    </main>
+    <script src="eletut-data.js"></script>
+    <script src="eletut-events.js"></script>
+    <script src="eletut-engine.js"></script>
+    <script src="eletut-assets.js"></script>
+    <script src="eletut-char.js"></script>
+    <script src="eletut-art.js"></script>
+    <script src="eletut-galeria.js"></script>
+</body>
+
+</html>

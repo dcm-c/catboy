@@ -118,10 +118,6 @@
 @keyframes el-twinkle { 50% { opacity: .35; } }
 .el-stage .steam { animation: el-steam 3s ease-in-out infinite; }
 @keyframes el-steam { 50% { transform: translateY(-3px); opacity: .4; } }
-.el-stage .av-body { animation: el-bob 3.2s ease-in-out infinite; }
-@keyframes el-bob { 50% { transform: translateY(-1.6px); } }
-.el-stage .av-eyes { animation: el-blink 5s infinite; transform-box: fill-box; transform-origin: center; }
-@keyframes el-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
 .el-stage .cat { animation: el-bob2 4s ease-in-out infinite; }
 @keyframes el-bob2 { 50% { transform: translateY(-1.5px); } }
 
@@ -430,3 +426,53 @@
 .el-social-tx { display: grid; gap: 8px; }
 .el-social-tx p { margin: 0; color: var(--el-ink); line-height: 1.5; }
 @media (max-width: 520px) { .el-social-result { grid-template-columns: 1fr; } }
+
+/* Finom mozgások: az alvó karakter "z"-i lebegnek (csak ha a rendszer nem kért csökkentett mozgást) */
+@keyframes el-zzz { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+@media (prefers-reduced-motion: no-preference) { .zzz { animation: el-zzz 2.6s ease-in-out infinite; } }
+
+/* Élő karakter: lassú légzés, pislogás, enyhén lengő haj, lebegő hangulatjelek (csak a színtéren, nem a bélyegképeken) */
+@keyframes el-breath { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.006, 1.014); } }
+@keyframes el-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+@keyframes el-sway { 0%, 100% { transform: rotate(-.7deg); } 50% { transform: rotate(.7deg); } }
+@keyframes el-fx { 0% { opacity: 0; transform: translateY(5px) scale(.7); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px) scale(1.1); } }
+@media (prefers-reduced-motion: no-preference) {
+    .av-body { transform-origin: 0 0; animation: el-breath 4.2s ease-in-out infinite; }
+    .av-eyes { transform-box: fill-box; transform-origin: center; animation: el-blink 5.5s infinite; }
+    .av-hair { transform-origin: 0 -110px; animation: el-sway 6s ease-in-out infinite; }
+    .fx-bit { animation: el-fx 2.8s ease-out infinite; }
+}
+
+/* Szoba-életjelek: lengő függöny és növény, sodródó felhő, lélegző kedvenc, lávalámpa, monitorfény, porszemek */
+@keyframes el-curtain { 0%, 100% { transform: skewX(-1.2deg); } 50% { transform: skewX(1.2deg); } }
+@keyframes el-cloud { from { transform: translateX(-5px); } to { transform: translateX(9px); } }
+@keyframes el-plant { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+@keyframes el-pet { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.025, 1.045); } }
+@keyframes el-blob { 0%, 100% { transform: translateY(2px); } 50% { transform: translateY(-5px); } }
+@keyframes el-scr { 0%, 100% { opacity: .9; } 50% { opacity: 1; } }
+@keyframes el-mote { 0% { opacity: 0; transform: translate(0, 4px); } 20% { opacity: .85; } 100% { opacity: 0; transform: translate(7px, -22px); } }
+@media (prefers-reduced-motion: no-preference) {
+    .curtain { transform-box: fill-box; transform-origin: 50% 0; animation: el-curtain 7s ease-in-out infinite; }
+    .curtain.cr { animation-delay: -3.2s; }
+    .cloud { animation: el-cloud 16s ease-in-out infinite alternate; }
+    .cloud.cl2 { animation-duration: 21s; animation-delay: -6s; }
+    .an { transform-box: fill-box; }
+    .an-sway { transform-origin: 50% 100%; animation: el-plant 5.5s ease-in-out infinite alternate; }
+    .an-breath { transform-origin: 50% 100%; animation: el-pet 3.8s ease-in-out infinite; }
+    .blob { animation: el-blob 5s ease-in-out infinite; }
+    .blob.b2 { animation-duration: 6.4s; animation-delay: -2s; }
+    .scr { animation: el-scr 4.5s ease-in-out infinite; }
+    .mote { animation: el-mote 9s ease-out infinite; }
+
+    /* felület: felugró ablak, gombok, sávok */
+    .el-overlay { animation: el-fade .18s ease; }
+    .el-modal { animation: el-modal-in .24s cubic-bezier(.2, .9, .3, 1.2); }
+    .el-bar > i { transition: width .5s ease; }
+    .el-act.main:not(:disabled) { animation: el-invite 3.6s ease-in-out infinite; }
+    .el-tab, .el-item, .el-choice, .el-btn { transition: background-color .15s ease, transform .12s ease, border-color .15s ease; }
+    .el-item:hover, .el-btn:hover { transform: translateY(-1px); }
+    .el-item:active, .el-btn:active, .el-choice:active { transform: scale(.98); }
+}
+@keyframes el-fade { from { opacity: 0; } }
+@keyframes el-modal-in { from { opacity: 0; transform: translateY(12px) scale(.97); } }
+@keyframes el-invite { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 169, 184, 0); } 50% { box-shadow: 0 0 0 5px rgba(245, 169, 184, .28); } }
