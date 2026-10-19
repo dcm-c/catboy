@@ -985,8 +985,9 @@
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
             mood: typeof ev.mood === 'function' ? ev.mood(s, c) : (ev.mood || ''),
             choices: ev.choices.map(function (ch, i) {
-                var okReq = !ch.req || ch.req(s, c);
-                var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (ch.reqText || ''), check: null };
+                var enNeed = E.energyNeed(ch), okEn = s.energy >= enNeed;
+                var okReq = (!ch.req || ch.req(s, c)) && okEn;
+                var out = { index: i, label: typeof ch.label === 'function' ? ch.label(s, c) : ch.label, tip: ch.tip || '', enabled: okReq, reqText: okReq ? '' : (!okEn ? 'Kell hozzá ' + enNeed + ' energia' : (ch.reqText || '')), check: null };
                 var need = E.confNeed(ch);
                 if (need && !ch.req) out.check = { need: need, have: Math.floor(s.conf), ok: s.conf >= need };
                 return out;
@@ -995,6 +996,13 @@
     };
 
     // A választás tippjéből kiolvasott önbizalom-küszöb ("Legalább 150 önbizalom kell", "250+ önbizalom esetén ...")
+    // A tippből kiolvasott energiaköltség ("−30 energia"): ennyi energia nélkül a választás nem érhető el
+    E.energyNeed = function (ch) {
+        if (ch.energyNeed !== undefined) return ch.energyNeed;
+        var m = /[−-]\s*(\d+)\s*energia/.exec(ch.tip || '');
+        return m ? parseInt(m[1], 10) : 0;
+    };
+
     E.confNeed = function (ch) {
         if (ch.need !== undefined) return ch.need;
         var m = /(\d+)\+?\s*önbizalom/.exec(ch.tip || '');
@@ -1008,6 +1016,7 @@
         if (!ch) return false;
         var c = E.ctx(s);
         if (ch.req && !ch.req(s, c)) return false;
+        if (s.energy < E.energyNeed(ch)) return false;
         var res = ch.do(s, E.api(s), c);
         s.event.result = String(res || '');
         s.event.link = ch.link || null;

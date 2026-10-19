@@ -210,3 +210,55 @@ test('a rajzok pillanatkép-hash-e nem változott', () => {
     const diff = Object.keys(Object.assign({}, old, snap)).filter(k => old[k] !== snap[k]);
     assert.deepEqual(diff, [], 'megváltozott rajzok: ' + diff.slice(0, 12).join(', ') + (diff.length > 12 ? ' … (+' + (diff.length - 12) + ')' : '') + ' – ha szándékos: UPDATE_SNAPSHOTS=1');
 });
+
+test('az energiát igénylő választás (pl. közös játékest) energia nélkül nem érhető el', () => {
+    const ev = global.MFSZ.events.find('r_gamenight');
+    const s = E.newState({}); s.flags.discord = true; s.comp = 3; s.month = 40;
+    s.energy = 10;
+    assert.equal(ev.when(s), false, 'kevés energiával fel sem ajánlja');
+    s.energy = 60;
+    assert.equal(ev.when(s), true);
+    s.event = { id: 'r_gamenight', title: 't', text: 'x', art: 'discord', result: null };
+    s.energy = 20;
+    const v = E.eventView(s);
+    assert.equal(v.choices[0].enabled, false);
+    assert.match(v.choices[0].reqText, /30 energia/);
+    assert.equal(E.choose(s, 0), false, 'a motor sem engedi');
+    assert.equal(s.energy, 20);
+    s.energy = 30;
+    assert.equal(E.eventView(s).choices[0].enabled, true);
+    assert.equal(E.choose(s, 0), true);
+});
+
+// ---- szoba-elrendezés: semmi sem lóg, semmi sem fedi egymást ----
+test('a szoba tárgyai minden lakásban és felszereltséggel külön helyen állnak (nincs átfedés)', () => {
+    const hits = [];
+    const housings = ['szulo', 'kolesz', 'szoba', 'garzon', 'lakas'];
+    const allDecor = { poszter: 1, zaszlo: 1, ledfeny: 1, agytakaro: 1, novenyek: 1, tukor: 1, polc: 1, lava: 1, dobozok: 1 };
+    const packs = [{}, { gear: 'kbd', drink: 'matcha', buddy: 'blahaj' }, { gear: 'konzol', drink: 'monster', buddy: 'army' }, { gear: 'arch', drink: 'monster', buddy: 'sun' }];
+    const hit = (a, b) => a.x0 < b.x1 - 0.01 && b.x0 < a.x1 - 0.01 && a.y0 < b.y1 - 0.01 && b.y0 < a.y1 - 0.01;
+    for (const h of housings) for (let comp = 0; comp <= 6; comp++) for (const pack of packs) for (const flags of [{}, { studying: true, working: true }, { sleeping: true }]) {
+        const v = Object.assign({}, BASE, { housing: h, comp, decor: allDecor, pack, pets: { cica: true }, outfit: {}, scale: 1 }, flags);
+        const boxes = A.roomBoxes(v);
+        const groups = {};
+        boxes.forEach(b => { (groups[b.group] = groups[b.group] || []).push(b); });
+        // csoportonként páronként: nem érhetnek egymásba
+        for (const g of ['wall', 'floor', 'bed', 'chair']) for (let i = 0; i < (groups[g] || []).length; i++) for (let j = i + 1; j < groups[g].length; j++) {
+            const a = groups[g][i], b = groups[g][j];
+            if (g === 'floor' && (a.id === 'asztal' || b.id === 'asztal') && ['tukor'].includes(a.id === 'asztal' ? b.id : a.id)) { if (!hit(a, b)) continue; }
+            if (hit(a, b)) hits.push(h + '/c' + comp + ' ' + g + ': ' + a.id + ' × ' + b.id);
+        }
+        // asztallap: a kellékek sora nem érhet a toronyhoz/mikrofonhoz és a lávalámpához, és az elemek nem érhetnek egymásba
+        const front = (groups.deskfront || []), blocks = (groups['deskfront-block'] || []).concat((groups.desktop || []).filter(b => b.id === 'lava'));
+        for (let i = 0; i < front.length; i++) {
+            blocks.forEach(b => { if (hit(front[i], b)) hits.push(h + '/c' + comp + ' asztal: ' + front[i].id + ' × ' + b.id); });
+            for (let j = i + 1; j < front.length; j++) if (hit(front[i], front[j])) hits.push(h + '/c' + comp + ' asztal: ' + front[i].id + ' × ' + front[j].id);
+            if (front[i].x0 < 8 || front[i].x1 > 160) hits.push(h + '/c' + comp + ' asztal: ' + front[i].id + ' lelóg az asztalról');
+        }
+        // a gép és a lámpa az asztallapon belül van
+        (groups.desktop || []).forEach(b => { if (b.x0 < 8 - 0.01 || b.x1 > 160 + 0.01) hits.push(h + '/c' + comp + ' asztal: ' + b.id + ' kilóg az asztalból'); });
+        const lava = (groups.desktop || []).find(b => b.id === 'lava'), comp0 = (groups.desktop || []).find(b => b.id === 'computer');
+        if (lava && comp0 && hit(lava, comp0)) hits.push(h + '/c' + comp + ' asztal: lava × gép');
+    }
+    assert.deepEqual([...new Set(hits)].slice(0, 20), [], 'átfedő tárgyak');
+});

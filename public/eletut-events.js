@@ -574,7 +574,7 @@
         },
         {
             id: 'r_gamenight', art: 'discord', weight: 2, once: false, cooldown: 10, minAge: 16,
-            when: function (s) { return s.flags.discord && s.comp >= 3; },
+            when: function (s) { return s.flags.discord && s.comp >= 3 && s.energy >= 30; },
             title: 'Közös játékest',
             text: function (s, c) { return 'A szerveren közös játékestet szerveznek. ' + c.az(c.pc) + ' gond nélkül futtatja, és egész este nevettek. Hajnalban jössz rá, hogy nem is vetted észre az időt.'; },
             choices: [

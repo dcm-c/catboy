@@ -77,7 +77,7 @@
         { month: 2 }, { month: 5, mood: 'happy' }, { month: 8, mood: 'sad' }, { month: 11, housing: 'lakas' },
         { month: 2, sleeping: true }, { month: 5, pose: 'sit', studying: true }, { month: 8, housing: 'garzon', mood: 'sleepy' }, { month: 11, housing: 'lakas', sleeping: true }
     ].forEach(function (v, i) {
-        cell(g, A.room(Object.assign({}, BASE, { outfit: { top: 'tee', bottom: 'jeans' }, comp: 'laptop', decor: {}, pets: {}, scale: 1, uid: 'gr' + i }, v)), JSON.stringify(v));
+        cell(g, A.room(Object.assign({}, BASE, { outfit: { top: 'tee', bottom: 'jeans' }, comp: 2, decor: {}, pets: {}, scale: 1, uid: 'gr' + i }, v)), JSON.stringify(v));
     });
 
     g = section('Esemény-jelenetek', 260);
