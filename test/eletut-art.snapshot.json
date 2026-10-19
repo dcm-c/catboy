@@ -104,7 +104,7 @@
  "beauty:di_csillag": "50df2c03cc85",
  "beauty:di_sebtapasz": "531070d76cd2",
  "beauty:di_csillamszem": "3c288ab9548f",
- "scene:room": "337736fa57e0",
+ "scene:room": "a6b09a4cc6d0",
  "scene:phone": "4eb0ea6c9709",
  "scene:shop": "e0413383e434",
  "scene:family": "6de5d6d9da80",
@@ -121,8 +121,8 @@
  "scene:friends": "cee7bff8de2c",
  "scene:street": "6aedc18ddcaf",
  "scene:bills": "74a5211417fd",
- "room:0": "3e45757274ec",
- "room:1": "38c9320957a3",
- "room:2": "75fb1539b4eb",
- "room:3": "54923067eca7"
+ "room:0": "abc1a24d1c65",
+ "room:1": "021e8c0acd30",
+ "room:2": "cd3b635cfac2",
+ "room:3": "69a6e2d1b9c3"
 }
