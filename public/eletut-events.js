@@ -639,7 +639,8 @@
             text: 'A saját lakásodban végre rendezhetsz egy bulit. A szerveren páran már jeleztek, hogy szívesen eljönnének.',
             choices: [
                 { label: 'Meghívod a szerver tagjait', tip: '20 000 Ft', req: function (s) { return s.money >= 20000 && s.flags.discord; }, reqText: 'Kell hozzá 20 000 Ft és Discord-tagság', do: function (s, A) { A.money(-20000); A.comm(12); A.conf(60); return 'Tizenöten zsúfolódtok össze, és hajnalig nevettek. Valaki hozott egy tortát, a tetején kis macskafülekkel.'; } },
-                { label: 'Csak a legjobb barátaid', tip: '5 000 Ft', req: function (s) { return s.money >= 5000; }, reqText: 'Kell hozzá 5 000 Ft', do: function (s, A) { A.money(-5000); A.conf(30); A.comm(2); return 'Egy intim este pár baráttal. Mindenki marad, és hajnalig beszélgettek.'; } }
+                { label: 'Csak a legjobb barátaid', tip: '5 000 Ft', req: function (s) { return s.money >= 5000; }, reqText: 'Kell hozzá 5 000 Ft', do: function (s, A) { A.money(-5000); A.conf(30); A.comm(2); return 'Egy intim este pár baráttal. Mindenki marad, és hajnalig beszélgettek.'; } },
+                { label: 'Csak egy csendes tea az új otthonban', tip: 'ingyen', do: function (s, A) { A.conf(12); return 'Nincs buli, nincs tömeg, csak te, egy bögre tea és az első saját estéd. Pont ennyi kellett.'; } }
             ]
         },
         {

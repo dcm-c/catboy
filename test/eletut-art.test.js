@@ -92,3 +92,59 @@ test('mentésbetöltés: csak a valódi Discord-link marad meg az eseményben', 
     back = E.deserialize(E.serialize(s));
     assert.equal(back.event.link.href, D.DISCORD_URL);
 });
+
+test('minták és feliratok: minden minta minden megengedett helyen hibátlan, a jelmezek felülírják a ruhát', () => {
+    for (const p of D.PATTERNS) for (const slot of p.slots) {
+        const out = { top: 'feliratos', bottom: 'szoknya', legs: 'combzokni' };
+        const svg = C.avatar({ outfit: out, patterns: { [slot]: { id: p.id, color: '#3b2d4a' } }, uid: 'p' });
+        check(svg, `minta ${p.id}/${slot}`);
+        if (!p.kind) assert.ok(svg.includes('-pt-' + slot), `${p.id}: a ${slot} helyen nincs minta`);
+    }
+    // a felirat szövege a rajzban van, és biztonságosan kerül bele
+    const t = C.avatar({ outfit: { top: 'feliratos' }, patterns: { top: { id: 'sl_arch', color: null } }, uid: 'q' });
+    assert.ok(t.includes('>ARCH BTW</text>'));
+    // alapértelmezett minta (patterns nélkül): a csíkos combzokni csíkos
+    assert.ok(C.avatar({ outfit: { legs: 'csikoscomb' }, uid: 'r' }).includes('-pt-legs'));
+    // a "patterns: {}" kifejezetten egyszínű
+    assert.ok(!C.avatar({ outfit: { legs: 'csikoscomb' }, patterns: {}, uid: 'r' }).includes('-pt-legs'));
+    // érvénytelen minta vagy hely nem kerül a rajzba
+    assert.ok(!C.avatar({ outfit: { top: 'polo' }, patterns: { top: { id: 'nincs', color: 'x' } }, uid: 's' }).includes('-pt-'));
+    assert.ok(!C.avatar({ outfit: { shoes: 'platform' }, patterns: { shoes: { id: 'stripe', color: null } }, uid: 's' }).includes('-pt-'));
+    // nyomtatott grafika csak a felirat-pólón (tee) jelenik meg
+    assert.ok(!C.avatar({ outfit: { top: 'polo' }, patterns: { top: { id: 'g_cat', color: null } }, uid: 's' }).includes('NaN'));
+    // jelmezek
+    for (const it of D.ITEMS.filter(x => x.slot === 'cosplay')) {
+        const a = C.avatar({ outfit: { cosplay: it.id, top: 'pulcsi', bottom: 'jogger', legs: 'zokni', shoes: 'csizma' }, mood: 'happy', uid: 'c' });
+        check(a, 'jelmez ' + it.id);
+        assert.equal(a, C.avatar({ outfit: { cosplay: it.id }, mood: 'happy', uid: 'c' }), it.id + ': a viselt ruha nem takarhat a jelmezen');
+        check(C.avatar({ outfit: { cosplay: it.id, hair: 'parokni' }, uid: 'w' }), 'jelmez + paróka ' + it.id);
+        check(A.thumb('cosplay', it.id, { skin: 's2' }), 'jelmez-miniatűr ' + it.id);
+    }
+});
+
+test('minta-választás: csak a megengedett, tárolódik, mentésen át megmarad', () => {
+    const s = E.newState({ name: 'T' });
+    assert.equal(E.setPat(s, 'feliratos', 'dots').ok, false, 'meg nem vett tárgyra nem lehet');
+    s.items.feliratos = true; s.items.polo = true; s.items.platform = true; s.items.csikoscomb = true;
+    assert.equal(E.patOf(s, 'feliratos').id, 'sl_nyau', 'alapminta');
+    assert.ok(E.setPat(s, 'feliratos', 'sl_uwu').ok);
+    assert.equal(E.patOf(s, 'feliratos').id, 'sl_uwu');
+    assert.equal(E.setPat(s, 'polo', 'sl_uwu').ok, false, 'felirat csak a feliratos pólón');
+    assert.equal(E.setPat(s, 'platform', 'stripe').ok, false, 'cipő nem mintázható');
+    assert.equal(E.setPat(s, 'csikoscomb', 'g_cat').ok, false, 'combzokni nem kaphat nyomtatott grafikát');
+    assert.ok(E.setPat(s, 'csikoscomb', null).ok);
+    assert.equal(E.patOf(s, 'csikoscomb'), null, 'kifejezetten egyszínű');
+    assert.ok(E.setPat(s, 'csikoscomb', 'dots').ok && E.setPatColor(s, 'csikoscomb', 'piros').ok);
+    assert.equal(E.patOf(s, 'csikoscomb').color, '#e8607a');
+    assert.equal(E.setPatColor(s, 'csikoscomb', 'nincsilyen').ok, false);
+    s.equipped.top = 'feliratos'; s.equipped.legs = 'csikoscomb';
+    const pats = E.outfitPats(s);
+    assert.equal(pats.top.id, 'sl_uwu'); assert.equal(pats.legs.id, 'dots');
+    const r = E.deserialize(E.serialize(s));
+    assert.equal(E.patOf(r, 'csikoscomb').id, 'dots');
+    assert.equal(E.patOf(r, 'feliratos').id, 'sl_uwu');
+    // rongyolt mentés nem dönti el
+    const bad = JSON.parse(E.serialize(s)); bad.pats = { feliratos: 'x', csikoscomb: { p: 5, a: {} } };
+    const rb = E.deserialize(JSON.stringify(bad));
+    assert.ok(rb && E.patOf(rb, 'feliratos') !== undefined);
+});

@@ -421,7 +421,7 @@
     function chip(text, cls) { return el('span', 'el-chip' + (cls ? ' ' + cls : ''), text); }
     function itemCard(opts) {
         var c = el('div', 'el-item' + (opts.owned ? ' owned' : '') + (opts.worn ? ' worn' : '') + (opts.thumb ? ' has-thumb' : ''));
-        if (opts.thumb) { var tw = el('div', 'el-thumbbox'); tw.appendChild(opts.thumb); c.appendChild(tw); }
+        if (opts.thumb) { var tw = el('div', 'el-thumbbox' + (opts.thumbTall ? ' tall' : '')); tw.appendChild(opts.thumb); c.appendChild(tw); }
         c.appendChild(el('h4', '', opts.title));
         if (opts.desc) c.appendChild(el('p', '', opts.desc));
         if (opts.chips && opts.chips.length) {
@@ -481,11 +481,11 @@
 
     // --- Miniatűrök ---
     var thumbCache = {};
-    function thumbEl(slot, id, color) {
-        var key = [slot, id, color || '', S.skin, S.hairStyle, S.hairColor].join('|');
+    function thumbEl(slot, id, color, pat) {
+        var key = [slot, id, color || '', pat === undefined ? '' : (pat ? pat.id + (pat.color || '') : 'plain'), S.skin, S.hairStyle, S.hairColor].join('|');
         var url = thumbCache[key];
         if (!url) {
-            var svg = A.thumb(slot, id, { color: color, skin: S.skin, hairStyle: S.hairStyle, hairColor: S.hairColor });
+            var svg = A.thumb(slot, id, { color: color, pat: pat, skin: S.skin, hairStyle: S.hairStyle, hairColor: S.hairColor });
             try { url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })); }
             catch (e) { url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
             thumbCache[key] = url;
@@ -583,8 +583,13 @@
             }), { cost: price });
             else btn = actionBtn(worn ? (slot2.wear ? 'Viselem ✓ (levesz)' : 'Kéznél van ✓ (félreteszem)') : (slot2.wear ? 'Felveszem' : 'Kéznél tartom'), act(function () { E.equip(S, slot2.id, worn ? null : it.id); }), { cls: worn ? 'alt' : 'blue' });
             var extra = null;
-            if (owned && it.paint) extra = swatchRow(it);
-            g2.appendChild(itemCard({ title: it.name, desc: it.desc, owned: owned, worn: worn, chips: chips, btn: btn, extra: extra, thumb: thumbEl(slot2.id, it.id, owned ? E.paintOf(S, it.id) : null) }));
+            var canPat = D.patternsFor(it).length > 0;
+            if (owned && (it.paint || canPat)) {
+                extra = el('div', 'el-paint-stack');
+                if (it.paint) extra.appendChild(swatchRow(it));
+                if (canPat) extra.appendChild(patternRow(it));
+            }
+            g2.appendChild(itemCard({ title: it.name, desc: it.desc, owned: owned, worn: worn, chips: chips, btn: btn, extra: extra, thumb: thumbEl(slot2.id, it.id, owned ? E.paintOf(S, it.id) : null, owned && canPat ? E.patOf(S, it.id) : undefined), thumbTall: slot2.id === 'cosplay' }));
         });
         p.appendChild(g2);
 
@@ -637,6 +642,48 @@
     }
     var hideOpen = false;
     var combosOpen = false;
+
+    // Mintaválasztó: legördülő lista + a minta színe (a rögzített színű minták nem festhetők)
+    function patternRow(it) {
+        var wrap = el('div', 'el-paint');
+        var cap = el('span', 'el-paint-cap');
+        cap.appendChild(icon('sparkle'));
+        cap.appendChild(document.createTextNode(' Minta'));
+        wrap.appendChild(cap);
+        var cur = E.patOf(S, it.id);
+        var sel = el('select', 'el-select');
+        sel.setAttribute('aria-label', it.name + ' mintája');
+        var o0 = el('option', '', 'Egyszínű'); o0.value = ''; sel.appendChild(o0);
+        D.patternsFor(it).forEach(function (p) {
+            var o = el('option', '', p.label); o.value = p.id;
+            if (cur && cur.id === p.id) o.selected = true;
+            sel.appendChild(o);
+        });
+        sel.addEventListener('change', act(function () { reportResult(E.setPat(S, it.id, sel.value || null)); }));
+        wrap.appendChild(sel);
+        var spec = cur && D.find(D.PATTERNS, cur.id);
+        if (spec && !spec.fixed) {
+            var cap2 = el('span', 'el-paint-cap');
+            cap2.appendChild(icon('palette'));
+            cap2.appendChild(document.createTextNode(spec.kind === 'text' ? ' Felirat színe' : ' Minta színe'));
+            wrap.appendChild(cap2);
+            var row = el('div', 'el-swatches');
+            var st = S.pats && S.pats[it.id];
+            var curA = st && st.a ? st.a : null;
+            [{ id: null, label: 'Alap', color: it.pat2 || '#f4a3b8' }].concat(D.PALETTE).forEach(function (c) {
+                var b = el('button', 'el-sw' + (c.id === null ? ' base' : ''));
+                b.type = 'button';
+                b.style.background = c.color;
+                b.setAttribute('aria-label', it.name + ' mintaszíne: ' + c.label);
+                b.title = c.label;
+                b.setAttribute('aria-pressed', String((curA || null) === c.id));
+                b.addEventListener('click', act(function () { reportResult(E.setPatColor(S, it.id, c.id)); }));
+                row.appendChild(b);
+            });
+            wrap.appendChild(row);
+        }
+        return wrap;
+    }
 
     // Színválasztó: az alapszín + a paletta
     function swatchRow(it) {
