@@ -166,6 +166,7 @@
         ['#f7cfa6', '#fdecd8'], // ősz
         ['#cfd9ec', '#eef2fa']  // tél
     ];
+    var DAY = 96; // a nappal-éjszaka ciklus hossza másodpercben (CSS-animáció, az óra a fázist adja)
     function seasonOf(monthIdx) {
         var m = (D.START_CALENDAR_MONTH + monthIdx) % 12;
         if (m >= 2 && m <= 4) return 0;
@@ -381,20 +382,50 @@
         var hill = ['#bfe8b8', '#9fdc9a', '#e9b878', '#fbfbff'][si], hill2 = ['#a7dca4', '#86cc86', '#d9a060', '#e6eefa'][si];
         out.push('<clipPath id="rm-wclip"><rect x="' + wx + '" y="' + wy + '" width="' + ww + '" height="' + wh + '" rx="2"/></clipPath>');
         var view = '';
+        var fx = !!v.fx, ph = fx ? (Number(v.clock) || 0) : 0;
+        function adl(period, off) { return 'animation-delay:-' + (((ph + (off || 0)) % period + period) % period).toFixed(2) + 's'; }
         view += ell(wx + ww * 0.3, wy + wh * 0.38, 20, 8, 'rgba(255,255,255,.88)', 'stroke="none" class="cloud"') + ell(wx + ww * 0.45, wy + wh * 0.34, 15, 7, 'rgba(255,255,255,.88)', 'stroke="none" class="cloud cl2"');
-        view += circ(wx + ww * 0.8, wy + 22, 9, si === 3 ? '#f4f1ff' : '#ffe9a6', 'opacity=".95" stroke="none"');
+        var sunC = circ(wx + ww * 0.8, wy + 22, 9, si === 3 ? '#f4f1ff' : '#ffe9a6', 'opacity=".95" stroke="none"');
+        view += fx ? '<g class="sunmove" style="' + adl(DAY) + '">' + sunC + '</g>' : sunC;
+        if (fx) {
+            // alkony és éjszaka: sötétkék fátyol, csillagok és hold (a nappal-éjszaka ciklust a CSS vezérli, a fázist az óra adja)
+            view += rect(wx, wy, ww, wh, '#f59a6a', 'class="dusk" opacity="0" stroke="none" style="' + adl(DAY) + '"');
+            view += rect(wx, wy, ww, wh, '#1c2250', 'class="nightsky" opacity="0" stroke="none" style="' + adl(DAY) + '"');
+            var stars = '';
+            for (var sti = 0; sti < 12; sti++) {
+                stars += circ(wx + 6 + ((sti * 41 + 13) % (ww - 12)), wy + 6 + ((sti * 29 + 7) % Math.round(wh * 0.56)), sti % 3 === 0 ? 1.3 : 0.9, '#fffbe6', 'class="twinkle" stroke="none" style="animation-delay:' + (sti * 0.37).toFixed(2) + 's"');
+            }
+            view += '<g class="stars" opacity="0" style="' + adl(DAY) + '">' + stars + '</g>';
+            view += '<g class="moonmove" opacity="0" style="' + adl(DAY) + '">' + circ(wx + ww * 0.28, wy + 24, 8, '#f6f0d8', 'stroke="none"') + circ(wx + ww * 0.28 + 3.4, wy + 21.6, 7.2, '#1c2250', 'opacity=".9" stroke="none"') + '</g>';
+        }
         view += path('M' + wx + ' ' + (wy + wh * 0.82) + ' Q' + (wx + ww * 0.3) + ' ' + (wy + wh * 0.66) + ' ' + (wx + ww * 0.62) + ' ' + (wy + wh * 0.8) + ' T' + (wx + ww) + ' ' + (wy + wh * 0.74) + ' V' + (wy + wh) + ' H' + wx + 'Z', hill2, 'stroke="none"');
         view += path('M' + wx + ' ' + (wy + wh * 0.9) + ' Q' + (wx + ww * 0.4) + ' ' + (wy + wh * 0.78) + ' ' + (wx + ww * 0.8) + ' ' + (wy + wh * 0.9) + ' T' + (wx + ww) + ' ' + (wy + wh * 0.88) + ' V' + (wy + wh) + ' H' + wx + 'Z', hill, 'stroke="none"');
         view += prop(si >= 2 ? 'pine' : 'tree', wx + ww * (big ? 0.3 : 0.22), wy + wh * 0.93, big ? 46 : 34, { noShadow: true });
         if (si === 2) view += prop('tree', wx + ww * 0.7, wy + wh * 0.97, big ? 34 : 26, { noShadow: true, flip: true });
-        if (si === 3) for (var sf = 0; sf < 9; sf++) view += circ(wx + 8 + ((sf * 37) % (ww - 14)), wy + 8 + ((sf * 23) % (wh * 0.62)), 1.4, '#ffffff', 'opacity=".9" stroke="none" class="twinkle" style="animation-delay:' + (sf * 0.3) + 's"');
+        if (si === 3 && !fx) for (var sf = 0; sf < 9; sf++) view += circ(wx + 8 + ((sf * 37) % (ww - 14)), wy + 8 + ((sf * 23) % (wh * 0.62)), 1.4, '#ffffff', 'opacity=".9" stroke="none" class="twinkle" style="animation-delay:' + (sf * 0.3) + 's"');
+        if (fx) {
+            // évszaki részecskék: tavasszal szirmok, nyáron pollen, ősszel levelek, télen hó; a hullás ütemét a CSS adja
+            var pn = si === 3 ? 16 : (si === 2 ? 8 : (si === 0 ? 8 : 7));
+            for (var pi = 0; pi < pn; pi++) {
+                var px0 = wx + 4 + ((pi * 53 + 11) % (ww - 8)), dur = (si === 3 ? 6 + (pi % 4) : (si === 1 ? 11 + (pi % 4) * 2 : 8 + (pi % 5))), dx = (pi % 2 ? 1 : -1) * (6 + (pi * 7) % 14);
+                if (si === 1) dx = (pi % 2 ? 1 : -1) * (3 + (pi % 4));
+                var pst = 'style="--dx:' + dx + 'px;--dur:' + dur + 's;animation-delay:-' + ((pi * 1.7 + ph) % dur).toFixed(2) + 's"';
+                var cls = 'class="fall' + (si === 1 ? ' rise' : '') + '" ';
+                if (si === 0) view += ell(px0, wy - 4, 2.1, 1.2, pi % 2 ? '#f7b8cc' : '#fde3ec', cls + pst + ' stroke="none"');
+                else if (si === 1) view += circ(px0, wy + wh * 0.86, 1.1, '#fff3b0', cls + pst + ' stroke="none"');
+                else if (si === 2) view += path('M' + px0 + ' ' + (wy - 4) + ' q2.4 -1.6 4.6 0 q-2.4 2.8 -4.6 0z', ['#e08a3c', '#c9602e', '#e9b84a'][pi % 3], cls + pst + ' stroke="none"');
+                else view += circ(px0, wy - 4, pi % 3 === 0 ? 1.7 : 1.2, '#ffffff', cls + pst + ' stroke="none"');
+            }
+            // alkalmi madár: lassan átrepül az ablakon (a ciklus nagy részében rejtve)
+            view += '<g class="bird" style="--bw:' + (ww + 24) + 'px;' + adl(34, 9) + '" opacity="0"><g transform="translate(' + (wx - 12) + ' ' + (wy + wh * 0.3).toFixed(1) + ')"><path class="wing" d="M-4 0 Q-2 -3.4 0 0 Q2 -3.4 4 0" fill="none" stroke="#5a4a72" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></g></g>';
+        }
         out.push('<g clip-path="url(#rm-wclip)">' + view + '</g>');
         // az ablakon beeső fény: a padlóra vetülő, négy részre osztott világos folt (az évszak színében)
         var lc = ['#fffbe0', '#fff6c8', '#ffe2b8', '#eaf3ff'][si];
         var lx0 = wx - 6, lx1 = wx + ww + 6;
         [[0, 0.5], [0.5, 1]].forEach(function (r) {
             var a0 = lx0 + (lx1 - lx0) * r[0] + 3, a1 = lx0 + (lx1 - lx0) * r[1] - 3;
-            out.push(path('M' + n1(a0) + ' ' + (WB + 3) + ' L' + n1(a1) + ' ' + (WB + 3) + ' L' + n1(a1 - 52) + ' ' + (WB + 80) + ' L' + n1(a0 - 52) + ' ' + (WB + 80) + 'Z', lc, 'opacity=".26" stroke="none"'));
+            out.push(path('M' + n1(a0) + ' ' + (WB + 3) + ' L' + n1(a1) + ' ' + (WB + 3) + ' L' + n1(a1 - 52) + ' ' + (WB + 80) + ' L' + n1(a0 - 52) + ' ' + (WB + 80) + 'Z', lc, 'opacity=".26" stroke="none"' + (fx ? ' class="shaft" style="' + adl(DAY) + '"' : '')));
         });
         out.push(rect(wx + ww / 2 - 1.5, wy, 3, wh, '#ffffff', 'stroke="#c9b8d8" stroke-width=".6"'));
         if (!big) out.push(rect(wx, wy + wh / 2 - 1.5, ww, 3, '#ffffff', 'stroke="#c9b8d8" stroke-width=".6"'));
@@ -547,6 +578,9 @@
                 box('capa' + i, 'floor', c[0] - c[2] / 2, c[1] - 0.9 * c[2], c[0] + c[2] / 2, c[1]);
             });
         }
+
+        // esti hangulat: a szoba a nappal-éjszaka ciklussal együtt halványan elsötétül (a karakter és a kellékek felett nem, csak a szobán)
+        if (fx) out.push('<rect class="veil" x="0" y="0" width="400" height="300" fill="#2a2766" opacity="0" pointer-events="none" style="' + adl(DAY) + '"/>');
 
         // karakter: alszik az ágyban, tanul ülve egy puffon, vagy áll a padlón (mindig árnyékkal)
         var sc = (v.scale || 1) * 0.86;

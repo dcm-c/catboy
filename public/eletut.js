@@ -359,7 +359,7 @@
         var sig = stageView + JSON.stringify(v);
         if (!force && sig === lastSceneSig) return;
         lastSceneSig = sig;
-        $('el-scene').innerHTML = stageView === 'face' ? A.facecam(v) : (stageView === 'close' ? A.closeup(v) : A.room(Object.assign({ fx: true }, v)));
+        $('el-scene').innerHTML = stageView === 'face' ? A.facecam(v) : (stageView === 'close' ? A.closeup(v) : A.room(Object.assign({ fx: true, clock: Date.now() / 1000 }, v)));
         var vb = $('el-view');
         clear(vb);
         vb.appendChild(icon(stageView === 'room' ? 'eye' : (stageView === 'close' ? 'face' : 'house')));

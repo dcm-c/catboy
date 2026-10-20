@@ -306,3 +306,31 @@ test('a szoba tárgyai minden lakásban és felszereltséggel külön helyen ál
     }
     assert.deepEqual([...new Set(hits)].slice(0, 20), [], 'átfedő tárgyak');
 });
+
+test('katonai ruhák: terepminta, taktikai mellény, cargo, barett, dögcédula és a terepruha-bónusz', () => {
+    const a = C.avatar({ outfit: { top: 'taktikai', bottom: 'cargo', hair: 'barett', neck: 'dogtag', shoes: 'bakancs' }, patterns: { bottom: { id: 'camo', color: null } }, uid: 'm' });
+    assert.ok(!a.includes('NaN') && !a.includes('undefined'));
+    assert.ok(a.includes('-pt-bottom'), 'a cargo terepmintás');
+    for (const id of ['taktikai', 'terepolo', 'cargo', 'barett', 'dogtag']) assert.ok(D.find(D.ITEMS, id), id + ' létezik');
+    // ülve is jó (a cargo a rövidülő nadrágok közé tartozik)
+    assert.ok(!C.avatar({ outfit: { bottom: 'cargo' }, pose: 'sit', uid: 'm' }).includes('NaN'));
+    // két terepmintás darab: terepruha-bónusz
+    const s = E.newState({ name: 'T' }); s.money = 1e7;
+    for (const id of ['terepolo', 'cargo']) { assert.ok(E.buyItem(s, id).ok, id); E.equip(s, D.find(D.ITEMS, id).slot, id); }
+    const syn = E.lookBonuses(s).synergies.find(x => x.syn.id === 'terep');
+    assert.ok(syn && syn.active, 'terepruha aktív');
+    // szett-kombó: mellény + cargo + barett
+    const t = E.newState({ name: 'U' }); t.money = 1e7;
+    for (const id of ['taktikai', 'cargo', 'barett']) { assert.ok(E.buyItem(t, id).ok, id); E.equip(t, D.find(D.ITEMS, id).slot, id); }
+    assert.ok(E.comboActive(D.find(D.COMBOS, 'taktszett'), E.activeIds(t)), 'taktikai szett aktív');
+});
+
+test('az ablak nappal-éjszaka ciklusa csak az élő (fx) nézetben van, a statikus rajz változatlan', () => {
+    const base = { housing: 'lakas', decor: {}, month: 3 };
+    const still = A.room(base), live = A.room(Object.assign({ fx: true, clock: 50 }, base));
+    assert.ok(!still.includes('nightsky') && !still.includes('class="fall'));
+    for (const c of ['nightsky', 'moonmove', 'sunmove', 'veil', 'fall', 'bird']) assert.ok(live.includes('class="' + c) || live.includes(c + '"'), c);
+    assert.ok(!live.includes('NaN'));
+    // ugyanaz az óra ugyanazt a fázist adja
+    assert.equal(A.room(Object.assign({ fx: true, clock: 50 }, base)), live);
+});

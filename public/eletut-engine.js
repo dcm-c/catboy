@@ -384,6 +384,7 @@
                 case 'f_puha': return !!topPat && topPat.id === 'sl_puha' && vis.bottom === 'jogger';
                 case 'f_404': return !!topPat && topPat.id === 'sl_404' && /^(kbd|konzol|arch)$/.test(eq.gear || '');
                 case 'f_femboy': return !!topPat && topPat.id === 'sl_femboy' && (vis.shoes === 'platform' || vis.legs === 'combzokni');
+                case 'terep': return worn.filter(function (it) { var q = E.patOf(s, it.id); return q && q.id === 'camo'; }).length >= 2;
                 case 'zaszlo': return !!s.decor && !!s.decor.zaszlo && worn.some(function (it) { var q = E.patOf(s, it.id); return q && /^(trans|rainbow|g_rainbow)$/.test(q.id); });
             }
             return false;

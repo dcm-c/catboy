@@ -72,6 +72,10 @@
         if (id === 'hearts') return [10, 10, heart(2.6, 2.8, 1.2, ac) + heart(7.6, 7.8, 1.2, ac)];
         if (id === 'stars') return [10, 10, star(2.6, 2.6, 1.7, ac) + star(7.6, 7.6, 1.7, ac)];
         if (id === 'checker') return [8, 8, '<rect width="4" height="4" fill="' + ac + '"/><rect x="4" y="4" width="4" height="4" fill="' + ac + '"/>'];
+        if (id === 'camo') {
+            var dk = shade(ac, -0.42), lt = tint(ac, 0.25);
+            return [16, 16, '<ellipse cx="4" cy="4.4" rx="3.6" ry="2.4" fill="' + ac + '"/><ellipse cx="11.6" cy="3" rx="2.8" ry="1.8" fill="' + dk + '"/><ellipse cx="12" cy="11" rx="3.8" ry="2.5" fill="' + ac + '"/><ellipse cx="3.6" cy="12" rx="2.6" ry="1.8" fill="' + dk + '"/><ellipse cx="8" cy="8.2" rx="1.9" ry="1.2" fill="' + lt + '" opacity=".7"/>'];
+        }
         if (id === 'trans') {
             ['#7fd0f5', '#f5a9b8', '#ffffff', '#f5a9b8', '#7fd0f5'].forEach(function (c, k) { o += '<rect y="' + (k * 3) + '" width="6" height="3.05" fill="' + c + '"/>'; });
             return [6, 15, o];
@@ -400,7 +404,7 @@
         return '';
     }
     function pantsLegs(u, kind, c) {
-        var col = K.bottom || (kind === 'rovid' ? '#a9cdee' : (kind === 'jeans' ? '#7ea8d8' : (kind === 'c_onesie' ? '#f7d5e2' : '#c7b0f0'))), s = '', out = '', fill = '', ov = '', pf = patFill(u, 'bottom', col);
+        var col = K.bottom || (kind === 'rovid' ? '#a9cdee' : (kind === 'jeans' ? '#7ea8d8' : (kind === 'c_onesie' ? '#f7d5e2' : (kind === 'cargo' ? '#7d8a5a' : '#c7b0f0')))), s = '', out = '', fill = '', ov = '', pf = patFill(u, 'bottom', col);
         [1, -1].forEach(function (sg) {
             var seg = kind === 'rovid'
                 ? { q: [[sg * 6.7, -57], [sg * 7, -49], [sg * 6.9, -40.5]], w: 11.4 }
@@ -410,7 +414,14 @@
         });
         s += out + fill + ov;
         [1, -1].forEach(function (sg) {
-            if (kind === 'jogger' || kind === 'jeans' || kind === 'c_onesie') {
+            if (kind === 'cargo') {
+                var px = sg * 8.6 - 3.4, pd = shade(col, -0.16);
+                s += RC(px, -45, 6.8, 9.6, pf ? tint(col, 0.05) : pd, 'rx=".8" stroke="' + ol(col) + '" stroke-width=".7"');
+                if (pf) s += RC(px, -45, 6.8, 9.6, pf, 'rx=".8"') + RC(px, -45, 6.8, 9.6, 'none', 'rx=".8" stroke="' + ol(col) + '" stroke-width=".7"');
+                s += RC(px - .2, -45.2, 7.2, 3, shade(col, -0.3), 'rx=".6" stroke="' + ol(col) + '" stroke-width=".5"') + CI(px + 3.4, -42.4, .6, '#d9c27a');
+                s += RC(sg * 6.4 - 5.6, -13, 11.2, 4.2, shade(col, -0.12), 'rx="1.6" stroke="' + ol(col) + '" stroke-width=".9"');
+                s += L('M' + n1(sg * 6.8 - 2.4) + ' -11.6 L' + n1(sg * 6.8 + 2.4) + ' -11.6', shade(col, -0.4), .6, 'opacity=".5"');
+            } else if (kind === 'jogger' || kind === 'jeans' || kind === 'c_onesie') {
                 s += RC(sg * 6.4 - 5.6, -13, 11.2, 4.2, tint(col, 0.2), 'rx="1.6" stroke="' + ol(col) + '" stroke-width=".9"');
                 s += L('M' + n1(sg * 6.2 + 3.4) + ' -52 L' + n1(sg * 6.5 + 3.4) + ' -14', shade(col, -0.2), 0.7, 'opacity=".4"');
             } else {
@@ -427,7 +438,7 @@
     }
     function bottomWear(u, kind) {
         if (!kind) return '';
-        if (kind === 'rovid' || kind === 'jogger' || kind === 'jeans' || kind === 'c_onesie') return pantsLegs(u, kind);
+        if (kind === 'rovid' || kind === 'jogger' || kind === 'jeans' || kind === 'c_onesie' || kind === 'cargo') return pantsLegs(u, kind);
         return skirt(u, kind);
     }
     function defaultUnder(c) { // alsó ruha nélkül: egyszerű fehérnemű-szerű rövidnadrág, hogy ne legyen "meztelen"
@@ -446,6 +457,7 @@
         crop: { y1: -75, pad: 0.8, sleeve: 0.36, sw: 8.6 },
         bluz: { y1: -56, pad: 1.8, sleeve: 0.62, sw: 10.6 },
         kabat: { y1: -42, pad: 3.0, sleeve: 1, sw: 9.2 },
+        taktikai: { y1: -52, pad: 1.6, sleeve: 0.40, sw: 8.8 },
         // jelmez-felsők
         c_maid: { y1: -60, pad: 1.2, sleeve: 0.3, sw: 9.6 },
         c_sailor: { y1: -62, pad: 1.0, sleeve: 0.42, sw: 8.8 },
@@ -455,7 +467,7 @@
     };
     var COS_TOP = { c_maid: '#35283f', c_sailor: '#fdf8fd', c_magical: '#fdeaf2', c_witch: '#6b4fa0', c_onesie: '#f7d5e2' };
     var CUFFS = { c_maid: '#fdfbfe', c_sailor: '#3b4a78', c_magical: '#f4a3b8', c_witch: '#f5d78a', c_onesie: '#fdfbfe' };
-    function topFill(kind) { return K.top || COS_TOP[kind] || ({ tee: '#b9c0da', polo: '#f6b5c5', pulcsi: '#8fd3f4', crop: '#ffc2d1', bluz: '#fdf8fd', kabat: '#cdb7f0' }[kind] || '#f6b5c5'); }
+    function topFill(kind) { return K.top || COS_TOP[kind] || ({ tee: '#b9c0da', polo: '#f6b5c5', pulcsi: '#8fd3f4', crop: '#ffc2d1', bluz: '#fdf8fd', kabat: '#cdb7f0', taktikai: '#7d8a5a' }[kind] || '#f6b5c5'); }
 
     function topBase(u, kind) {
         if (!kind) return '';
@@ -526,6 +538,26 @@
             s += CI(0, -72, 1.1, '#f5d78a', 'stroke="' + ol('#f5d78a') + '" stroke-width=".5"') + CI(0, -62, 1.1, '#f5d78a', 'stroke="' + ol('#f5d78a') + '" stroke-width=".5"');
             s += SH('M-12.4 -67.6 L12.4 -67.6 L12.8 -63 L-12.8 -63Z', shade(col, -0.16), 1) + RC(-2, -68, 4, 5.4, '#f5d78a', 'rx=".8" stroke="' + ol('#f5d78a') + '" stroke-width=".6"');
             s += SH('M-15.4 -90 C-14 -94 -9 -95 -6.6 -94 L-8 -90Z', shade(col, -0.05), 0.9) + SH('M15.4 -90 C14 -94 9 -95 6.6 -94 L8 -90Z', shade(col, -0.05), 0.9);
+        } else if (kind === 'taktikai') {
+            var vd = shade(col, -0.2), vl = tint(col, 0.22), bk = '#3b3a34';
+            // alsó póló gallérja + mellény két fele
+            s += P('M-6.2 -94.4 C-3 -90.4 3 -90.4 6.2 -94.4 L6.4 -92 C3 -87.4 -3 -87.4 -6.4 -92Z', '#4b4a44', 'stroke="' + ol('#4b4a44') + '" stroke-width=".8" stroke-linejoin="round"');
+            s += SH('M-6.4 -93.8 L-1.4 -78 L-1.4 -53.4 L-12.6 -53.4 L-13.2 -83 L-12 -90Z', vl, 1.1) + SH('M6.4 -93.8 L1.4 -78 L1.4 -53.4 L12.6 -53.4 L13.2 -83 L12 -90Z', vl, 1.1);
+            s += L('M0 -86 L0 -53.4', bk, 1, 'opacity=".75"');
+            // vállpántok
+            s += SH('M-12 -90 L-6.8 -94.2 L-5 -91.4 L-11.4 -86Z', vd, .8) + SH('M12 -90 L6.8 -94.2 L5 -91.4 L11.4 -86Z', vd, .8);
+            // mellzsebek fedéllel
+            [-1, 1].forEach(function (sg) {
+                var x0 = sg > 0 ? 2.6 : -11.4;
+                s += RC(x0, -78.4, 8.8, 7.2, vd, 'rx=".8" stroke="' + ol(col) + '" stroke-width=".7"');
+                s += RC(x0, -78.4, 8.8, 2.6, shade(col, -0.3), 'rx=".6"');
+                s += CI(x0 + 4.4, -75.2, .7, '#d9c27a', 'stroke="' + ol('#d9c27a') + '" stroke-width=".3"');
+                s += RC(x0 - .2, -69.2, 9.2, 8.8, vd, 'rx=".8" stroke="' + ol(col) + '" stroke-width=".7"');
+                s += RC(x0 - .2, -69.2, 9.2, 3, shade(col, -0.3), 'rx=".6"') + L('M' + n1(x0 + 1.4) + ' -63.8 L' + n1(x0 + 7.6) + ' -63.8', shade(col, -0.45), .6, 'opacity=".5"');
+            });
+            // MOLLE-szalag és csatok
+            s += L('M-12.6 -57 L12.6 -57', bk, 1.3, 'opacity=".55"') + RC(-1.8, -59.2, 3.6, 4.4, '#8a8a82', 'rx=".7" stroke="' + ol('#8a8a82') + '" stroke-width=".5"') + RC(-.9, -58.2, 1.8, 2.4, 'none', 'stroke="#55554f" stroke-width=".5"');
+            s += RC(-12.2, -84.6, 2.4, 1.8, bk, 'rx=".4"') + RC(9.8, -84.6, 2.4, 1.8, bk, 'rx=".4"');
         }
         return s + topPrint(u, kind, col);
     }
@@ -853,6 +885,13 @@
                 [1, -1].forEach(function (sg) { s += SH('M' + (sg * 25) + ' -129 C' + (sg * 31) + ' -131 ' + (sg * 31) + ' -113 ' + (sg * 25) + ' -114Z', '#3b2d4a', 1) + P('M' + (sg * 26.4) + ' -126 C' + (sg * 29) + ' -126 ' + (sg * 29) + ' -118 ' + (sg * 26.4) + ' -117.4Z', '#f4a3b8'); });
                 s += L('M-27.6 -112 C-27 -102 -20 -100 -12 -101.4', '#3b2d4a', 1.4) + CI(-11.4, -101.4, 1.8, '#f4a3b8', 'stroke="#3b2d4a" stroke-width=".8"');
             }
+        } else if (kind === 'barett') {
+            var bc2 = col;
+            s += SH('M-25 -137 C-27 -151 -14 -160 4 -158 C18 -157 27 -150 25 -138 C16 -143 -12 -145 -25 -137Z', bc2, 1.2);
+            s += P('M-22 -141 C-14 -145 10 -146 22 -141', 'none', 'stroke="' + shade(bc2, -0.3) + '" stroke-width="1.2" stroke-linecap="round" opacity=".6"');
+            s += P('M-12 -154 C-6 -157 2 -157.4 8 -156', 'none', 'stroke="' + tint(bc2, 0.35) + '" stroke-width="1.2" stroke-linecap="round" opacity=".6"');
+            s += SH('M7 -160 L10 -163 L12 -159.4Z', shade(bc2, -0.18), .8);
+            s += SH('M-5 -150 L-1 -146.4 L3 -150 L-1 -153.6Z', '#d9c27a', .7) + star(-1, -150, 1.6, '#fdf2c0');
         } else if (kind === 'virag') {
             var cols = ['#f4a3b8', '#9fd6f5', '#fdf6a8', '#fdf8fd', '#c7b0f0'];
             var leaf = '#7cc78e';
@@ -890,6 +929,12 @@
         } else if (kind === 'nyakmasni') {
             s += SH('M0 -93.6 C-3 -97 -8.6 -96.6 -8.6 -93.4 C-8.6 -90.4 -3 -90.4 0 -93.6Z', col) + SH('M0 -93.6 C3 -97 8.6 -96.6 8.6 -93.4 C8.6 -90.4 3 -90.4 0 -93.6Z', col);
             s += SH('M-1.8 -95 L1.8 -95 L1.6 -91.8 L-1.6 -91.8Z', shade(col, -0.1), 0.9);
+        } else if (kind === 'dogtag') {
+            var mt = '#c9ced6';
+            s += L('M-5.6 -95.4 L-1.4 -78.6 M5.6 -95.4 L1.4 -78.6', '#9aa0aa', .9);
+            [[-1.2, -77.2, -6], [1.4, -74.6, 7]].forEach(function (g) {
+                s += G(RC(-2.6, -3.4, 5.2, 7, mt, 'rx="2" stroke="' + ol(mt) + '" stroke-width=".7"') + L('M-1.2 -1.2 L1.2 -1.2 M-1.2 .6 L1.2 .6', '#7d838d', .5) + CI(0, -2.4, .4, '#7d838d'), 'translate(' + g[0] + ' ' + g[1] + ') rotate(' + g[2] + ')');
+            });
         } else if (kind === 'medal') {
             s += L('M-5.4 -95.4 L0 -80.4 L5.4 -95.4', '#c7b0f0', 1.2);
             s += star(0, -79.4, 3.6, '#f7d26a', 'stroke="' + ol('#f7d26a') + '" stroke-width=".9" stroke-linejoin="round"') + CI(-.6, -80, .6, '#fff', 'opacity=".9"');
@@ -1276,7 +1321,7 @@
         out.push(SH(torsoShape(-94.6, -50, 0, { neckW: 5, neckDip: 1.4, sag: 0.8 }), col.skin, 1.2));
         out.push(P('M-4.8 -99 C-3 -95.4 3 -95.4 4.8 -99 L4.8 -94 L-4.8 -94Z', col.skinDD, 'opacity=".22"'));
         var bw = bottomWear(u, kind.bottom || 'jeans');
-        out.push(pose === 'sit' && /^(rovid|jogger|jeans|c_onesie)$/.test(kind.bottom || 'jeans') ? G(bw, 'translate(0 -52) scale(1 .5) translate(0 52)') : bw);
+        out.push(pose === 'sit' && /^(rovid|jogger|jeans|c_onesie|cargo)$/.test(kind.bottom || 'jeans') ? G(bw, 'translate(0 -52) scale(1 .5) translate(0 52)') : bw);
         out.push(P('M-1.4 -78 Q0 -77 1.4 -78', 'none', 'stroke="' + col.skinDD + '" stroke-width=".7" stroke-linecap="round" opacity=".6"'));
 
         // felső
