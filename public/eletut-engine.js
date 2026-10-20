@@ -304,15 +304,6 @@
         var c = find(D.PALETTE, s.colors && s.colors[id]);
         return c ? c.color : it.paint;
     };
-    E.setColor = function (s, id, paletteId) {
-        var it = find(D.ITEMS, id);
-        if (!it || !it.paint) return { ok: false, reason: 'Ez a tárgy nem festhető' };
-        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
-        if (paletteId === null || paletteId === undefined) { delete s.colors[id]; return { ok: true }; }
-        if (!find(D.PALETTE, paletteId)) return { ok: false, reason: 'Ismeretlen szín' };
-        s.colors[id] = paletteId;
-        return { ok: true };
-    };
     // Minta: s.pats[id] = { p: mintaId | null (egyszínű), a: paletteId | null (alap: a tárgy "pat2" színe) }
     // Visszaadja a tárgy aktuális mintáját: { id, color } vagy null (egyszínű)
     E.patOf = function (s, id) {
@@ -324,24 +315,88 @@
         var ac = st && st.a ? find(D.PALETTE, st.a) : null;
         return { id: pid, color: ac ? ac.color : (it.pat2 || null) };
     };
-    E.setPat = function (s, id, patId) {
+    // A ruha kinézete a vásárláskor dől el, utána nem módosítható (különben bármikor átszínezhető lenne, ingyen).
+    // opts: { color: paletteId | null (alap), pat: mintaId | null (egyszínű), patColor: paletteId | null (alap) }
+    // Visszaadja a normalizált választást, vagy hibát. Nem módosítja az állapotot.
+    E.lookChoice = function (s, id, opts) {
         var it = find(D.ITEMS, id);
         if (!it) return { ok: false, reason: 'Ismeretlen tárgy' };
-        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
         var allowed = D.patternsFor(it);
-        if (!allowed.length) return { ok: false, reason: 'Ez a tárgy nem mintázható' };
-        if (patId !== null && !allowed.some(function (p) { return p.id === patId; })) return { ok: false, reason: 'Ez a minta ide nem illik' };
-        s.pats[id] = Object.assign({}, s.pats[id], { p: patId });
-        return { ok: true };
+        var out = { ok: true, color: null, pat: it.pat && allowed.some(function (p) { return p.id === it.pat; }) ? it.pat : null, patColor: null };
+        if (!opts) return out; // nincs külön választás: az alap kinézet
+        if (opts.color !== undefined && opts.color !== null) {
+            if (!it.paint) return { ok: false, reason: 'Ez a tárgy nem festhető' };
+            if (!find(D.PALETTE, opts.color)) return { ok: false, reason: 'Ismeretlen szín' };
+            out.color = opts.color;
+        }
+        if (opts.pat !== undefined) {
+            if (opts.pat !== null && !allowed.some(function (p) { return p.id === opts.pat; })) return { ok: false, reason: 'Ez a minta ide nem illik' };
+            out.pat = opts.pat;
+        }
+        if (opts.patColor !== undefined && opts.patColor !== null) {
+            if (!find(D.PALETTE, opts.patColor)) return { ok: false, reason: 'Ismeretlen szín' };
+            var spec = out.pat && find(D.PATTERNS, out.pat);
+            if (!spec || spec.fixed) return { ok: false, reason: 'Ennek a mintának nem választható a színe' };
+            out.patColor = opts.patColor;
+        }
+        return out;
     };
-    E.setPatColor = function (s, id, paletteId) {
+    // A tárgy színének paletta-azonosítója (a választott, vagy az alapszínnel egyező paletta-szín), különben null
+    E.colorIdOf = function (s, id) {
         var it = find(D.ITEMS, id);
-        if (!it || !D.patternsFor(it).length) return { ok: false, reason: 'Ez a tárgy nem mintázható' };
-        if (!s.items[id]) return { ok: false, reason: 'Ez még nem a tiéd' };
-        if (paletteId !== null && !find(D.PALETTE, paletteId)) return { ok: false, reason: 'Ismeretlen szín' };
-        s.pats[id] = Object.assign({}, s.pats[id], { a: paletteId });
-        return { ok: true };
+        if (!it || !it.paint) return null;
+        if (s.colors && s.colors[id] && find(D.PALETTE, s.colors[id])) return s.colors[id];
+        var hex = String(it.paint).toLowerCase(), hit = null;
+        D.PALETTE.forEach(function (c) { if (c.color.toLowerCase() === hex) hit = c.id; });
+        return hit;
     };
+    // Szín-, minta- és felirat-bónuszok a viselt (látható) ruhákra
+    E.lookBonuses = function (s) {
+        var worn = E.visibleOutfit(s).map(function (id) { return find(D.ITEMS, id); }).filter(Boolean);
+        var total = {}, risk = 0, parts = [], syn = [];
+        function addSt(st) { for (var k in st) total[k] = (total[k] || 0) + st[k]; }
+        var hexes = {};
+        worn.forEach(function (it) {
+            var part = { id: it.id, name: it.name, color: null, pat: null };
+            var cid = E.colorIdOf(s, it.id);
+            if (cid && D.COLOR_STAT[cid]) { part.color = { id: cid, stat: D.COLOR_STAT[cid] }; addSt(D.COLOR_STAT[cid]); }
+            var p = E.patOf(s, it.id);
+            if (p && D.PATTERN_STAT[p.id]) { part.pat = { id: p.id, stat: D.PATTERN_STAT[p.id] }; addSt(D.PATTERN_STAT[p.id]); }
+            if (p && D.PATTERN_RISK[p.id]) risk += D.PATTERN_RISK[p.id];
+            if (part.color || part.pat) parts.push(part);
+            if (it.paint && /^(top|bottom|legs|shoes|neck)$/.test(it.slot)) { var hx = E.paintOf(s, it.id).toLowerCase(); hexes[hx] = (hexes[hx] || 0) + 1; }
+        });
+        var eq = s.equipped || {}, vis = {};
+        worn.forEach(function (it) { vis[it.slot] = it.id; });
+        var topPat = vis.top && E.patOf(s, vis.top);
+        function active(id) {
+            switch (id) {
+                case 'monokrom': return Object.keys(hexes).some(function (h) { return hexes[h] >= 3; });
+                case 'szinminta': {
+                    if (!topPat) return false;
+                    var spec = find(D.PATTERNS, topPat.id);
+                    if (!spec || spec.fixed || !topPat.color) return false;
+                    var ph = String(topPat.color).toLowerCase();
+                    return worn.some(function (it) { return it.slot !== 'top' && it.paint && /^(bottom|legs|shoes|neck|hair)$/.test(it.slot) && String(E.paintOf(s, it.id)).toLowerCase() === ph; });
+                }
+                case 'f_arch': return !!topPat && topPat.id === 'sl_arch' && eq.gear === 'arch';
+                case 'f_cica': return !!topPat && /^(sl_nyau|sl_uwu|sl_cutie)$/.test(topPat.id) && (vis.hair === 'macskaful' || vis.hair === 'headset');
+                case 'f_puha': return !!topPat && topPat.id === 'sl_puha' && vis.bottom === 'jogger';
+                case 'f_404': return !!topPat && topPat.id === 'sl_404' && /^(kbd|konzol|arch)$/.test(eq.gear || '');
+                case 'f_femboy': return !!topPat && topPat.id === 'sl_femboy' && (vis.shoes === 'platform' || vis.legs === 'combzokni');
+                case 'terep': return worn.filter(function (it) { var q = E.patOf(s, it.id); return q && q.id === 'camo'; }).length >= 2;
+                case 'zaszlo': return !!s.decor && !!s.decor.zaszlo && worn.some(function (it) { var q = E.patOf(s, it.id); return q && /^(trans|rainbow|g_rainbow)$/.test(q.id); });
+            }
+            return false;
+        }
+        D.LOOK_SYNERGIES.forEach(function (sy) {
+            var on = active(sy.id);
+            syn.push({ syn: sy, active: on });
+            if (on) addSt(sy.bonus);
+        });
+        return { total: total, risk: risk, parts: parts, synergies: syn };
+    };
+
     // Az avatárnak átadandó minták (hely szerint), csak a viselt mintázható tárgyakra
     E.outfitPats = function (s) {
         var out = {};
@@ -393,6 +448,8 @@
         var filled = D.SLOTS.filter(function (sl) { return s.equipped[sl.id]; }).length;
         var full = filled === D.SLOTS.length;
         if (full) addTo(bonus, D.FULL_SET_BONUS);
+        var lb = E.lookBonuses(s);
+        addTo(bonus, lb.total);
         var lkAp = E.lookApplied(s);
         var fullLook = D.FULL_LOOK_SLOTS.every(function (sl) { return !!lkAp[sl]; });
         if (fullLook) addTo(bonus, D.FULL_LOOK_BONUS);
@@ -400,7 +457,7 @@
         D.STATS.forEach(function (st) { total[st.id] = Math.max(0, base[st.id] + bonus[st.id]); score += total[st.id]; });
         var rank = D.RANKS[0], rankIndex = 0;
         D.RANKS.forEach(function (r, i) { if (score >= r.min) { rank = r; rankIndex = i; } });
-        return { base: base, bonus: bonus, total: total, combos: combos, filled: filled, full: full, fullLook: fullLook, score: score, rank: rank, rankIndex: rankIndex };
+        return { base: base, bonus: bonus, total: total, looks: lb, combos: combos, filled: filled, full: full, fullLook: fullLook, score: score, rank: rank, rankIndex: rankIndex };
     };
 
     E.derive = function (s) {
@@ -433,7 +490,7 @@
 
         var d = {
             secret: secret, w: w, housing: housing, comp: comp, broken: broken, job: job,
-            eqRisk: eqRisk + st.chaos * 0.1,
+            eqRisk: eqRisk + E.lookBonuses(s).risk + st.chaos * 0.1,
             stat: st, perks: perks,
             clickConf: (1 + stepClick + perks.click + eqClick * w + lvl('smink') * 0.5 + lvl('varras') * 0.3 + decClick) * (1 + st.cute * 0.006) + st.chaos * 0.02,
             passiveConf: stepPassive + eqPassive * w + online + decPassive + lvl('rajz') * 0.3 + lvl('angol') * 0.2 + s.comm * 0.02 + st.gamer * 0.05 + perks.passive,
@@ -631,14 +688,19 @@
     function fail(reason) { return { ok: false, reason: reason }; }
     function ok() { return { ok: true }; }
 
-    E.buyItem = function (s, id) {
+    // opts: a vásárláskor választott kinézet ({ color, pat, patColor }); utólag nem módosítható
+    E.buyItem = function (s, id, opts) {
         var it = find(D.ITEMS, id);
         if (!it) return fail('Ismeretlen tárgy');
         if (s.items[id]) return fail('Ez már a tiéd');
+        var look = E.lookChoice(s, id, opts);
+        if (!look.ok) return fail(look.reason);
         var cost = E.price(s, it.cost);
         if (s.money < cost) return fail('Nincs elég pénzed');
         spend(s, cost);
         s.items[id] = true;
+        if (look.color) s.colors[id] = look.color;
+        if (opts && (opts.pat !== undefined || opts.patColor !== undefined)) s.pats[id] = { p: look.pat, a: look.patColor };
         if (!s.equipped[it.slot]) s.equipped[it.slot] = id;
         if (E.isSecret(s)) s.risk = clamp(s.risk + it.risk * 0.5, 0, 100);
         E.log(s, 'Megvetted: ' + it.name + '.');

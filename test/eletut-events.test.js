@@ -132,17 +132,20 @@ test('kombók és statok: viselés, rejtőzködés, színválasztás', () => {
     h.hiding = true;
     const hidden = E.stats(h).score;
     assert.ok(hidden < open && hidden > 0, 'rejtőzéskor csak a viselt rész esik ki');
-    // színek
-    s.items.polo = true;
-    assert.equal(E.paintOf(s, 'polo'), D.find(D.ITEMS, 'polo').paint);
-    assert.ok(E.setColor(s, 'polo', 'menta').ok);
-    assert.equal(E.paintOf(s, 'polo'), D.find(D.PALETTE, 'menta').color);
-    assert.ok(!E.setColor(s, 'polo', 'nincsilyen').ok);
-    assert.ok(!E.setColor(s, 'szemuveg', 'menta').ok, 'nem festhető tárgy');
-    assert.ok(E.setColor(s, 'polo', null).ok);
-    assert.equal(E.paintOf(s, 'polo'), D.find(D.ITEMS, 'polo').paint);
-    // mentés/betöltés megőrzi a színt
-    E.setColor(s, 'polo', 'rozsa');
-    const back = E.deserialize(E.serialize(s));
-    assert.equal(back.colors.polo, 'rozsa');
+    // színek: a vásárláskor dől el, utána nem módosítható
+    const t = E.newState({ name: 'Sz' }); t.money = 1e6;
+    assert.ok(!E.buyItem(t, 'polo', { color: 'nincsilyen' }).ok, 'ismeretlen szín');
+    assert.ok(!E.buyItem(t, 'szemuveg', { color: 'menta' }).ok, 'nem festhető tárgy');
+    assert.equal(t.money, 1e6, 'hibás választásnál nem von le pénzt');
+    assert.ok(!t.items.polo && !t.items.szemuveg);
+    assert.ok(E.buyItem(t, 'polo', { color: 'menta' }).ok);
+    assert.equal(E.paintOf(t, 'polo'), D.find(D.PALETTE, 'menta').color);
+    assert.ok(!E.buyItem(t, 'polo', { color: 'rozsa' }).ok, 'másodszor nem vehető meg, így át sem színezhető');
+    assert.equal(E.paintOf(t, 'polo'), D.find(D.PALETTE, 'menta').color);
+    assert.equal(typeof E.setColor, 'undefined', 'nincs utólagos átszínezés');
+    assert.equal(typeof E.setPat, 'undefined');
+    assert.equal(typeof E.setPatColor, 'undefined');
+    assert.equal(E.paintOf(E.newState({}), 'polo'), D.find(D.ITEMS, 'polo').paint);
+    const back = E.deserialize(E.serialize(t));
+    assert.equal(back.colors.polo, 'menta');
 });
