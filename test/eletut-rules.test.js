@@ -296,3 +296,73 @@ test('mentés: hibás vagy rosszindulatú bemenet nem töri meg a játékot', ()
     assert.equal(evil.ending, null);
     assert.ok(Number.isFinite(evil.conf) && Number.isFinite(evil.money));
 });
+
+test('az energia felső határa változó: állandó és ideiglenes módosítók, lejárat, mentés', () => {
+    const s = E.newState({ name: 'En' });
+    assert.equal(E.maxEnergy(s), D.ENERGY_BASE, 'alapérték');
+    s.decor.agytakaro = true;
+    assert.ok(E.maxEnergy(s) >= D.ENERGY_BASE + D.find(D.DECOR, 'agytakaro').en, 'a kellék állandó bónusza');
+    assert.ok(E.energyInfo(s).parts.some((p) => p.perm && p.en === D.find(D.DECOR, 'agytakaro').en));
+    const base = E.maxEnergy(s);
+    E.addMod(s, { id: 't1', label: 'Teszt', en: 20, months: 2 });
+    assert.equal(E.maxEnergy(s), base + 20, 'ideiglenes bónusz');
+    assert.ok(E.derive(s).energyMax === base + 20 && E.derive(s).energyParts.some((p) => p.temp && p.left === 2));
+    // a tick a megnövelt határig tölt
+    s.energy = base; s.paused = false; E.tick(s, 1);
+    assert.ok(s.energy > base - 0.01);
+    s.energy = base + 20;
+    // hónapváltáskor a lejárt módosító eltűnik, az energia a határra csökken
+    E.endMonth(s); assert.equal(E.maxEnergy(s), base + 20, '1 hónap még hátra');
+    E.endMonth(s);
+    assert.equal(E.maxEnergy(s), base, 'lejárt');
+    assert.ok(s.energy <= base, 'az energia a határhoz igazodik');
+    // ugyanazzal az azonosítóval a módosító frissül, nem halmozódik
+    E.addMod(s, { id: 't2', label: 'A', en: 5 }); E.addMod(s, { id: 't2', label: 'A', en: 5 });
+    assert.equal(E.maxEnergy(s), base + 5);
+    // negatív módosító sem viheti a határt a minimum alá
+    E.addMod(s, { id: 't3', label: 'B', en: -500 });
+    assert.equal(E.maxEnergy(s), D.ENERGY_MIN);
+    // a felső határ fölé nem lehet tölteni
+    const q = E.newState({ name: 'Q' }); q.energy = 100;
+    E.api(q).energy(50); assert.equal(q.energy, E.maxEnergy(q));
+    // mentés
+    const back = E.deserialize(E.serialize(s));
+    assert.equal(E.maxEnergy(back), E.maxEnergy(s));
+    assert.ok(back.mods.some((m) => m.id === 't2'));
+});
+
+test('számítógépes játékok: ingyenes és fizetős, energia, havi korlát, jártasság és ideiglenes stat', () => {
+    const s = E.newState({ name: 'J' }); s.money = 1e6;
+    const free = D.GAMES.filter((g) => g.cost === 0), paid = D.GAMES.filter((g) => g.cost > 0);
+    assert.ok(free.length >= 3 && paid.length >= 4);
+    assert.equal(E.buyGame(s, free[0].id).ok, false, 'az ingyenes már a tiéd');
+    assert.equal(E.buyGame(s, 'retroplat').ok, false, 'laptop kell hozzá');
+    s.comp = 1;
+    const m0 = s.money;
+    assert.ok(E.buyGame(s, 'retroplat').ok); assert.ok(s.money < m0);
+    assert.equal(E.buyGame(s, 'retroplat').ok, false, 'dupla vásárlás');
+    // játék: energia, önbizalom, ideiglenes módosító
+    const e0 = s.energy, c0 = s.conf;
+    const r = E.playGame(s, 'retroplat');
+    assert.ok(r.ok && s.energy < e0 && s.conf > c0);
+    assert.ok(E.activeMods(s).some((m) => m.id === 'g_retroplat'), 'ideiglenes hatás');
+    assert.ok(E.stats(s).bonus.gamer >= 4, 'az ideiglenes stat bónuszként számít');
+    assert.equal(E.playGame(s, 'retroplat').ok, false, 'havonta egyszer');
+    // jártasság: 3 játék után 1. szint, állandó stat
+    for (let i = 0; i < 3; i++) { s.month++; s.energy = E.maxEnergy(s); E.playGame(s, 'retroplat'); }
+    assert.equal(E.gameLevel(s, 'retroplat'), 1);
+    assert.ok(E.gameStats(s).gamer >= 2);
+    assert.ok(E.stats(s).base.gamer >= 2, 'a jártasság az alap statba kerül');
+    // energia nélkül nem megy
+    s.month++; s.energy = 0; assert.equal(E.canPlay(s, 'retroplat').ok, false);
+    // az ingyenes játék azonnal játszható
+    const f = E.newState({ name: 'F' });
+    assert.ok(E.playGame(f, 'pixelkert').ok);
+    assert.ok(E.activeMods(f).some((m) => m.en > 0), 'a kikapcsolódás ideiglenesen növeli az energia-határt');
+    // Discord-függő játék
+    const d = E.newState({ name: 'D' }); d.comp = 3; d.money = 1e6; E.buyGame(d, 'arena');
+    assert.equal(E.canPlay(d, 'arena').ok, false); d.flags.discord = true; assert.ok(E.canPlay(d, 'arena').ok);
+    // mentés
+    const back = E.deserialize(E.serialize(s));
+    assert.equal(E.gameLevel(back, 'retroplat'), E.gameLevel(s, 'retroplat'));
+});

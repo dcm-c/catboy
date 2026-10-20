@@ -261,6 +261,32 @@
             statEls[d[0]] = { box: box, v: v, sub: sub, fill: fill, last: {} };
         });
     }
+    // Energia-módosítók: lenyitható lista (állandó és ideiglenes tételek, a hátralévő hónapokkal)
+    function energyDetails(d) {
+        var box = statEls.energy.box, key = JSON.stringify(d.energyParts) + '|' + d.energyMax + '|' + f1(d.regen);
+        if (statEls.energy.last.det === key) return;
+        statEls.energy.last.det = key;
+        var det = box.querySelector('details');
+        var wasOpen = det && det.open;
+        if (det) det.remove();
+        det = el('details', 'el-en-det');
+        if (wasOpen) det.open = true;
+        var perm = d.energyParts.filter(function (x) { return !x.temp; }), temp = d.energyParts.filter(function (x) { return x.temp; });
+        det.appendChild(el('summary', '', 'Energia-határ: ' + d.energyMax + (temp.length ? ' · ' + temp.length + ' ideiglenes' : '')));
+        function row(x) {
+            var r = el('div', 'el-en-row' + (x.en < 0 || x.regen < 0 ? ' neg' : ''));
+            var bits = [];
+            if (x.en) bits.push((x.en > 0 ? '+' : '−') + Math.abs(x.en));
+            if (x.regen) bits.push((x.regen > 0 ? '+' : '−') + f1(Math.abs(x.regen)) + '/mp');
+            r.appendChild(el('span', '', x.label + (x.temp ? ' (' + x.left + ' hó)' : '')));
+            r.appendChild(el('b', '', bits.join(' · ') || ' '));
+            return r;
+        }
+        det.appendChild(el('div', 'el-en-cap', 'Állandó'));
+        perm.forEach(function (x) { det.appendChild(row(x)); });
+        if (temp.length) { det.appendChild(el('div', 'el-en-cap', 'Ideiglenes')); temp.forEach(function (x) { det.appendChild(row(x)); }); }
+        box.appendChild(det);
+    }
     function setText(node, text, cache, key) {
         if (cache[key] !== text) { cache[key] = text; node.textContent = text; }
     }
@@ -283,9 +309,10 @@
         setText(c.money.v, fF(money), c.money.last, 'v');
         c.money.v.style.color = money < 0 ? 'var(--el-minus)' : '';
         setText(c.money.sub, 'havi ' + fS(d.net) + ' Ft', c.money.last, 's');
-        setText(c.energy.v, Math.floor(S.energy) + '/100', c.energy.last, 'v');
-        c.energy.fill.style.width = S.energy.toFixed(1) + '%';
+        setText(c.energy.v, Math.floor(S.energy) + '/' + d.energyMax, c.energy.last, 'v');
+        c.energy.fill.style.width = Math.min(100, S.energy / d.energyMax * 100).toFixed(1) + '%';
         setText(c.energy.sub, '+' + f1(d.regen) + '/mp', c.energy.last, 's');
+        energyDetails(d);
         setText(c.comm.v, grp(S.comm), c.comm.last, 'v');
         setText(c.comm.sub, S.flags.discord ? 'Discord tag' : 'még nem vagy a Discordon', c.comm.last, 's');
         c.risk.box.hidden = !d.secret;
@@ -590,7 +617,7 @@
             else btn = actionBtn(worn ? (slot2.wear ? 'Viselem ✓ (levesz)' : 'Kéznél van ✓ (félreteszem)') : (slot2.wear ? 'Felveszem' : 'Kéznél tartom'), act(function () { E.equip(S, slot2.id, worn ? null : it.id); }), { cls: worn ? 'alt' : 'blue' });
             var extra = null;
             var canPat = D.patternsFor(it).length > 0;
-            if (owned && (it.paint || canPat)) extra = lookNote(it);
+            if (owned && (it.paint || canPat)) extra = variantBox(it, price);
             else if (!owned && (it.paint || canPat)) extra = el('div', 'el-note', 'A szín' + (canPat ? ' és a minta' : '') + ' vásárláskor választható, utána már nem módosítható.');
             g2.appendChild(itemCard({ title: it.name, desc: it.desc, owned: owned, worn: worn, chips: chips, btn: btn, extra: extra, thumb: thumbEl(slot2.id, it.id, owned ? E.paintOf(S, it.id) : null, owned && canPat ? E.patOf(S, it.id) : undefined), thumbTall: slot2.id === 'cosplay' }));
         });
@@ -657,6 +684,41 @@
         if (reportResult(r) && it.notes && it.notes.length) { var n = pick(it.notes); toast(n.text, n.tone === 'bad' ? 'bad' : n.tone === 'funny' ? 'funny' : 'good'); }
         return r;
     }
+    function varLabel(it, v) {
+        var parts = [];
+        if (it.paint) {
+            var cid = v.c;
+            if (!cid) D.PALETTE.forEach(function (q) { if (q.color.toLowerCase() === String(it.paint).toLowerCase()) cid = q.id; });
+            parts.push(cid ? colorLabel(cid) : 'alap');
+        }
+        if (D.patternsFor(it).length) parts.push(v.p ? D.find(D.PATTERNS, v.p).label : 'egyszínű');
+        return parts.join(' · ');
+    }
+    function varHex(it, v) { var c = v.c && D.find(D.PALETTE, v.c); return c ? c.color : it.paint; }
+    // A megvett kinézet(ek): a viselt változat zárolt kinézete + váltás a megvettek között + új változat vásárlása
+    function variantBox(it, price) {
+        var box = el('div', 'el-vbox');
+        box.appendChild(lookNote(it));
+        var list = E.variantsOf(S, it.id), cur = E.currentVariant(S, it.id);
+        if (list.length > 1) {
+            var cap = el('div', 'el-paint-cap'); cap.appendChild(icon('palette')); cap.appendChild(document.createTextNode(' Megvett változatok (' + list.length + ')'));
+            box.appendChild(cap);
+            var row = el('div', 'el-vars');
+            list.forEach(function (v, i) {
+                var b = el('button', 'el-var');
+                b.type = 'button';
+                b.setAttribute('aria-pressed', String(i === cur));
+                var dot = el('i', 'el-var-dot'); dot.style.background = varHex(it, v) || '#ddd'; b.appendChild(dot);
+                b.appendChild(el('span', '', varLabel(it, v)));
+                b.addEventListener('click', act(function () { reportResult(E.wearVariant(S, it.id, i)); }));
+                row.appendChild(b);
+            });
+            box.appendChild(row);
+        }
+        var nb = actionBtn('Új változat vásárlása · ' + fF(price), function () { openBuyDialog(it); }, { cls: 'alt', cost: price });
+        box.appendChild(nb);
+        return box;
+    }
     // A megvett ruha zárolt kinézete + az abból járó bónusz
     function lookNote(it) {
         var box = el('div', 'el-lockedlook');
@@ -697,9 +759,10 @@
         var m = el('div', 'el-modal el-buy');
         m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'el-buy-title');
         var body = el('div', 'el-modal-body');
-        var h = el('h2', '', 'Milyen legyen? · ' + it.name); h.id = 'el-buy-title';
+        var isNew = !!S.items[it.id];
+        var h = el('h2', '', (isNew ? 'Új változat · ' : 'Milyen legyen? · ') + it.name); h.id = 'el-buy-title';
         body.appendChild(h);
-        body.appendChild(el('p', 'el-note', 'A szín és a minta csak most választható: a megvett ruha kinézete utólag nem módosítható. A választás bónuszt is ad, ha viseled.'));
+        body.appendChild(el('p', 'el-note', isNew ? 'Új változatot csak új vásárlással szerezhetsz: ugyanabból a ruhából többféle szín, minta és felirat is lehet a szekrényedben, és közöttük váltogathatsz. A megvett változat kinézete nem módosítható.' : 'A szín és a minta csak most választható: a megvett ruha kinézete utólag nem módosítható. A választás bónuszt is ad, ha viseled. Később új változatot is vehetsz belőle.'));
         var grid = el('div', 'el-buy-grid');
         var prevBox = el('div', 'el-buy-prev');
         var ctrl = el('div', 'el-buy-ctrl');
@@ -733,7 +796,14 @@
             tb.appendChild(thumbEl(it.slot, it.id, hexOf(), patObj()));
             prevBox.appendChild(tb);
         }
+        function dupCheck() {
+            var dup = E.hasVariant(S, it.id, { color: choice.color, pat: allowed.length ? choice.pat : undefined, patColor: choice.patColor || undefined });
+            var broke = S.money < price;
+            ok.disabled = dup || broke;
+            ok.textContent = dup ? 'Ez a változat már megvan' : (broke ? 'Nincs elég pénzed · ' + fF(price) : (isNew ? 'Megveszem az új változatot · ' : 'Megveszem · ') + fF(price));
+        }
         function summary() {
+            dupCheck();
             clear(sum);
             // szimuláció: mi változik, ha ezt a kinézetet megveszed és fel is veszed
             var sim = E.deserialize(E.serialize(S));
@@ -874,15 +944,19 @@
         var c = D.find(list, colorId) || list[0];
         return c ? c.color : null;
     }
+    // A megvett színek (váltani köztük lehet); új színt csak vásárlással lehet szerezni
     function lookSwatches(b) {
         var wrap = el('div', 'el-paint');
         var cap = el('span', 'el-paint-cap');
         cap.appendChild(icon('palette'));
-        cap.appendChild(document.createTextNode(' Szín'));
+        var own = E.beautyColorsOf(S, b.id);
+        cap.appendChild(document.createTextNode(' Megvett színek (' + own.length + ')'));
         wrap.appendChild(cap);
         var row = el('div', 'el-swatches');
-        var cur = S.look[b.slot] && S.look[b.slot].id === b.id ? (S.look[b.slot].color || (D.LOOK_COLORS[b.slot][0] || {}).id) : null;
-        (D.LOOK_COLORS[b.slot] || []).forEach(function (c) {
+        var cur = S.look[b.slot] && S.look[b.slot].id === b.id ? S.look[b.slot].color : null;
+        own.forEach(function (cid) {
+            var c = D.find(D.LOOK_COLORS[b.slot] || [], cid);
+            if (!c) return;
             var sw = el('button', 'el-sw');
             sw.type = 'button';
             sw.style.background = c.color;
@@ -890,13 +964,78 @@
             sw.title = c.label;
             sw.setAttribute('aria-pressed', String(cur === c.id));
             sw.addEventListener('click', act(function () {
-                if (!S.look[b.slot] || S.look[b.slot].id !== b.id) E.applyBeauty(S, b.slot, b.id);
-                reportResult(E.setLookColor(S, b.slot, c.id));
+                E.applyBeauty(S, b.slot, b.id, c.id);
             }));
             row.appendChild(sw);
         });
         wrap.appendChild(row);
+        var price = E.beautyPrice(S, b.cost);
+        var all = (D.LOOK_COLORS[b.slot] || []).length;
+        if (own.length < all) wrap.appendChild(actionBtn('Új szín vásárlása · ' + fF(price), function () { openBeautyDialog(b); }, { cls: 'alt', cost: price }));
         return wrap;
+    }
+    // Smink-vásárlási ablak: a szín itt dől el (utólag csak a megvett színek között lehet váltani)
+    function openBeautyDialog(b) {
+        var host = $('el-modal-host');
+        if (buyDlg || host.firstChild || S.event) return;
+        var list = D.LOOK_COLORS[b.slot] || [];
+        var own = E.beautyColorsOf(S, b.id);
+        var free = list.filter(function (c) { return own.indexOf(c.id) < 0; });
+        var choice = { color: (free[0] || list[0]).id };
+        var isNew = !!S.beauty[b.id];
+        buyDlg = { wasPaused: S.paused, prevFocus: document.activeElement };
+        S.paused = true; updateSpeed();
+        var price = E.beautyPrice(S, b.cost);
+        var ov = el('div', 'el-overlay');
+        var m = el('div', 'el-modal el-buy');
+        m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'el-buy-title');
+        var body = el('div', 'el-modal-body');
+        var h = el('h2', '', (isNew ? 'Új szín · ' : 'Milyen színű legyen? · ') + b.name); h.id = 'el-buy-title';
+        body.appendChild(h);
+        body.appendChild(el('p', 'el-note', 'A szín vásárláskor dől el: a megvett színek között utólag váltogathatsz, de újat csak új vásárlással szerezhetsz.' + (isNew ? ' Már megvan: ' + own.map(function (c) { var x = D.find(list, c); return x ? x.label : ''; }).join(', ') + '.' : '')));
+        var grid = el('div', 'el-buy-grid');
+        var prevBox = el('div', 'el-buy-prev'), ctrl = el('div', 'el-buy-ctrl');
+        grid.appendChild(prevBox); grid.appendChild(ctrl);
+        body.appendChild(grid);
+        var btns = el('div', 'el-buy-btns');
+        var cancel = el('button', 'el-btn alt', 'Mégse'); cancel.type = 'button';
+        cancel.addEventListener('click', function () { closeBuyDialog(true); });
+        var ok = el('button', 'el-btn', ''); ok.type = 'button';
+        ok.addEventListener('click', function () {
+            var c = choice.color;
+            closeBuyDialog(true);
+            act(function () { reportResult(E.buyBeauty(S, b.id, { color: c }), null); })();
+        });
+        btns.appendChild(cancel); btns.appendChild(ok);
+        body.appendChild(btns);
+        m.appendChild(body); ov.appendChild(m); host.appendChild(ov);
+        function render() {
+            clear(prevBox); clear(ctrl);
+            var tb = el('div', 'el-thumbbox');
+            tb.appendChild(beautyThumbEl(b, lookColorHex(b.slot, choice.color)));
+            prevBox.appendChild(tb);
+            var cap = el('div', 'el-paint-cap'); cap.appendChild(icon('palette')); cap.appendChild(document.createTextNode(' Szín: ' + (D.find(list, choice.color) || {}).label));
+            ctrl.appendChild(cap);
+            var row = el('div', 'el-swatches');
+            list.forEach(function (c) {
+                var sw = el('button', 'el-sw' + (own.indexOf(c.id) >= 0 ? ' owned' : ''));
+                sw.type = 'button'; sw.style.background = c.color;
+                var have = own.indexOf(c.id) >= 0;
+                sw.title = c.label + (have ? ' · már megvan' : '');
+                sw.setAttribute('aria-label', 'Szín: ' + sw.title);
+                sw.setAttribute('aria-pressed', String(choice.color === c.id));
+                sw.addEventListener('click', function () { choice.color = c.id; render(); });
+                row.appendChild(sw);
+            });
+            ctrl.appendChild(row);
+            var have2 = own.indexOf(choice.color) >= 0, broke = S.money < price;
+            ok.disabled = have2 || broke;
+            ok.textContent = have2 ? 'Ez a szín már megvan' : (broke ? 'Nincs elég pénzed · ' + fF(price) : 'Megveszem · ' + fF(price));
+        }
+        render();
+        ov.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeBuyDialog(true); });
+        ov.addEventListener('click', function (e) { if (e.target === ov) closeBuyDialog(true); });
+        (m.querySelector('.el-sw[aria-pressed="true"]') || ok).focus({ preventScroll: true });
     }
     function pBeauty(p) {
         var secret = E.isSecret(S);
@@ -942,7 +1081,7 @@
             var cur = S.look[b.slot];
             var on = !!(cur && cur.id === b.id);
             var locked = b.skill && lvl < b.skill;
-            var colorHex = b.tone ? lookColorHex(b.slot, on ? cur.color : null) : null;
+            var colorHex = b.tone ? lookColorHex(b.slot, on ? cur.color : (owned ? E.beautyColorsOf(S, b.id)[0] : null)) : null;
             var chips = [];
             if (b.click) chips.push(['+' + f1(b.click) + ' kattintás', 'plus']);
             if (secret && b.risk) chips.push(['Titok +' + b.risk, 'minus']);
@@ -952,9 +1091,10 @@
             var btn;
             if (!owned) {
                 if (locked) btn = el('div', 'el-note', 'Zárolva: Smink és stílus ' + b.skill + '. szint kell hozzá (Tanulás fül).');
+                else if (b.tone) btn = actionBtn('Kiválasztom a színt és megveszem · ' + fF(price), function () { openBeautyDialog(b); }, { cost: price });
                 else btn = actionBtn('Megveszem · ' + fF(price), act(function () { reportResult(E.buyBeauty(S, b.id)); }), { cost: price });
             } else btn = actionBtn(on ? 'Fent van ✓ (lemosom)' : 'Felhordom', act(function () { E.applyBeauty(S, b.slot, on ? null : b.id); }), { cls: on ? 'alt' : 'blue' });
-            g.appendChild(itemCard({ title: b.name, desc: b.desc, owned: owned, worn: on, chips: chips, btn: btn, extra: owned && b.tone ? lookSwatches(b) : null, thumb: beautyThumbEl(b, colorHex) }));
+            g.appendChild(itemCard({ title: b.name, desc: b.desc, owned: owned, worn: on, chips: chips, btn: btn, note: !owned && b.tone && !locked ? 'A szín vásárláskor választható; utólag csak a megvett színek között válthatsz.' : null, extra: owned && b.tone ? lookSwatches(b) : null, thumb: beautyThumbEl(b, colorHex) }));
         });
         p.appendChild(g);
     }
@@ -1139,6 +1279,57 @@
     }
 
     // --- Gép ---
+    // --- Játékok (Gép fül) ---
+    function gamesSection(p, d) {
+        p.appendChild(sectionTitle('Játékok'));
+        p.appendChild(el('div', 'el-note', 'Néhány játék ingyenes, a többit meg kell venni, és erősebb gép kell hozzájuk. Havonta egyszer játszhatsz egy-egy játékkal: energiába kerül, de ideiglenes bónuszt ad (stat, energia-határ), a rendszeres játékkal pedig jártasságot szerzel, ami állandó statot jelent.'));
+        var g = el('div', 'el-grid');
+        D.GAMES.forEach(function (gm) {
+            var owned = E.gameOwned(S, gm.id), plays = E.gamePlays(S, gm.id), lv = E.gameLevel(S, gm.id);
+            var chips = [[gm.cost === 0 ? 'Ingyenes' : 'Megvásárolható', gm.cost === 0 ? 'plus' : ''], ['−' + gm.energy + ' energia', 'minus']];
+            if (gm.minComp > 0) chips.push(['Gép: ' + D.COMPUTERS[gm.minComp].name, S.comp >= gm.minComp ? 'plus' : 'minus']);
+            if (gm.needsDiscord) chips.push(['Discord kell', S.flags.discord ? 'plus' : 'minus']);
+            var perLevel = statChips(gm.st).map(function (c) { return [c[0] + ' / szint', c[1]]; });
+            perLevel.forEach(function (c) { chips.push(c); });
+            var card = itemCard({ title: gm.name, desc: gm.desc, owned: owned, chips: chips });
+            var tmp = [];
+            if (gm.temp) {
+                var bits = [];
+                if (gm.temp.en) bits.push('energia-határ ' + (gm.temp.en > 0 ? '+' : '−') + Math.abs(gm.temp.en));
+                if (gm.temp.regen) bits.push('regeneráció +' + f1(gm.temp.regen) + '/mp');
+                var sc = statText(gm.temp.st); if (sc) bits.push(sc);
+                tmp.push('Játék után ' + gm.temp.months + ' hónapig: ' + gm.temp.label + (bits.length ? ' (' + bits.join(', ') + ')' : ''));
+            }
+            card.appendChild(el('div', 'el-note', tmp.join(' ')));
+            if (owned) {
+                var nextAt = D.GAME_LEVELS[lv];
+                var prog = el('div', 'el-note');
+                prog.appendChild(icon('star'));
+                prog.appendChild(document.createTextNode(' Jártasság: ' + lv + '/' + D.GAME_LEVELS.length + ' · ' + plays + ' játék' + (nextAt ? ' (következő szint: ' + nextAt + ')' : ' (maximum)')));
+                card.appendChild(prog);
+            }
+            var price = E.price(S, gm.cost);
+            if (!owned) {
+                var b0 = actionBtn('Megveszem · ' + fF(price), act(function () { reportResult(E.buyGame(S, gm.id), 'Megvetted: ' + gm.name + '.'); }), { cost: price });
+                if (S.comp < gm.minComp) { b0.disabled = true; b0.title = 'Jobb gép kell hozzá'; }
+                card.appendChild(b0);
+            } else {
+                var can = E.canPlay(S, gm.id);
+                var b1 = actionBtn('Játszom · −' + gm.energy + ' energia', act(function () {
+                    var r = E.playGame(S, gm.id);
+                    if (reportResult(r)) {
+                        toast(r.text + ' (+' + grp(r.conf) + ' önbizalom)', 'good');
+                        if (r.levelUp) toast(gm.name + ': ' + r.level + '. szintű jártasság! Állandó stat-bónusz.', 'funny');
+                        happyUntil = performance.now() + 4000;
+                    }
+                }));
+                if (!can.ok) { b1.disabled = true; card.appendChild(b1); card.appendChild(el('div', 'el-note', can.reason + '.')); }
+                else card.appendChild(b1);
+            }
+            g.appendChild(card);
+        });
+        p.appendChild(g);
+    }
     function pComputer(p) {
         var d = E.derive(S);
         var c = D.COMPUTERS[S.comp];
@@ -1170,6 +1361,7 @@
             n.appendChild(actionBtn('Megveszem · ' + fF(next.cost), act(function () { reportResult(E.buyComputer(S), 'Új gép: ' + next.name + '!'); }), { cost: next.cost }));
             p.appendChild(n);
         } else p.appendChild(el('div', 'el-note', 'Ennél jobb gép már nincs. Ez a csúcs.'));
+        gamesSection(p, d);
         p.appendChild(sectionTitle('Fejlődési út'));
         var list = el('div', 'el-chips');
         D.COMPUTERS.forEach(function (x, i) { list.appendChild(chip((i <= S.comp ? '✓ ' : '') + x.name, i <= S.comp ? 'plus' : '')); });

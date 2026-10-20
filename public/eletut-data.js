@@ -203,11 +203,11 @@
         { id: 'kbd', slot: 'gear', name: 'Rózsaszín mechanikus billentyűzet', cost: 25000, click: 0.5, passive: 0.4, risk: 3, st: { code: 12, gamer: 10, cute: 6, chaos: 6 }, desc: 'Kék switchek, hallható a szomszéd szobában is.', notes: [] },
         { id: 'konzol', slot: 'gear', name: 'Retro kézikonzol', cost: 15000, click: 0, passive: 0.3, risk: 1, st: { gamer: 16, chill: 8 }, desc: 'Zsebben hordható nosztalgia. A pixelek megnyugtatnak.', notes: [] },
         { id: 'arch', slot: 'gear', name: 'Arch Linux pendrive', cost: 2000, click: 0, passive: 0.2, risk: 1, st: { code: 18, chaos: 10 }, desc: '„I use Arch btw.” A terminálból konfigurálod a stílusodat is.', notes: [] },
-        { id: 'matcha', slot: 'drink', name: 'Matcha latte', cost: 1500, click: 0, passive: 0.1, risk: 0, st: { chill: 14, cute: 6, chaos: -4 }, desc: 'Zöld, habos, tiszteletreméltó.', notes: [] },
-        { id: 'monster', slot: 'drink', name: 'Ultra White Monster', cost: 600, click: 0.3, passive: 0, risk: 1, st: { gamer: 8, code: 6, chaos: 14, chill: -8 }, desc: 'A szent elixír. A hajnali 3-as voice chat alapértelmezett üzemanyaga.', notes: [] },
-        { id: 'sun', slot: 'buddy', name: 'Cica-sün plüss', cost: 5000, click: 0, passive: 0.2, risk: 0, st: { cute: 12, chill: 8 }, desc: 'Nem cica, nem sün, mégis mindkettő.', notes: [] },
-        { id: 'blahaj', slot: 'buddy', name: 'Plüss cápa', cost: 13000, click: 0, passive: 0.4, risk: 0, st: { cute: 10, chill: 18 }, desc: 'A szoba főadminisztrátora. Mindig kéznél van, ha ölelés kell.', notes: [] },
-        { id: 'army', slot: 'buddy', name: 'Plüss cápa-hadsereg', cost: 45000, click: 0, passive: 1, risk: 0, st: { cute: 16, chill: 30, chaos: 10 }, desc: 'Öt cápa, egy cél: távol tartani a külvilág toxicitását.', notes: [] },
+        { id: 'matcha', en: 6, slot: 'drink', name: 'Matcha latte', cost: 1500, click: 0, passive: 0.1, risk: 0, st: { chill: 14, cute: 6, chaos: -4 }, desc: 'Zöld, habos, tiszteletreméltó.', notes: [] },
+        { id: 'monster', en: 10, slot: 'drink', name: 'Ultra White Monster', cost: 600, click: 0.3, passive: 0, risk: 1, st: { gamer: 8, code: 6, chaos: 14, chill: -8 }, desc: 'A szent elixír. A hajnali 3-as voice chat alapértelmezett üzemanyaga.', notes: [] },
+        { id: 'sun', en: 3, slot: 'buddy', name: 'Cica-sün plüss', cost: 5000, click: 0, passive: 0.2, risk: 0, st: { cute: 12, chill: 8 }, desc: 'Nem cica, nem sün, mégis mindkettő.', notes: [] },
+        { id: 'blahaj', en: 6, slot: 'buddy', name: 'Plüss cápa', cost: 13000, click: 0, passive: 0.4, risk: 0, st: { cute: 10, chill: 18 }, desc: 'A szoba főadminisztrátora. Mindig kéznél van, ha ölelés kell.', notes: [] },
+        { id: 'army', en: 10, slot: 'buddy', name: 'Plüss cápa-hadsereg', cost: 45000, click: 0, passive: 1, risk: 0, st: { cute: 16, chill: 30, chaos: 10 }, desc: 'Öt cápa, egy cél: távol tartani a külvilág toxicitását.', notes: [] },
         // Új ruhák: a "look" mondja meg, melyik rajzot használják; a "pat"/"pat2" az alapminta és a minta színe; a "prints" azt jelenti, hogy feliratot és nyomtatott mintát is kaphat.
         { id: 'feliratos', slot: 'top', look: 'tee', prints: true, pat: 'sl_nyau', pat2: '#f4a3b8', name: 'Feliratos póló', cost: 2800, click: 0.3, passive: 0, risk: 5, st: { cute: 6, chaos: 3, code: 2 }, paint: '#fdf8fd', desc: 'Egy mondat a mellkasodon. A feliratot és a színeket vásárláskor te választod.', notes: [{ tone: 'funny', text: 'Valaki hangosan felolvassa a pólód feliratát a buszon. Megköszönöd.' }] },
         { id: 'tengeresz', slot: 'top', look: 'tee', pat: 'stripe', pat2: '#7f9fe0', name: 'Csíkos tengerész-póló', cost: 4200, click: 0.4, passive: 0, risk: 3, st: { cute: 7, chill: 5 }, paint: '#fdf8fd', desc: 'Klasszikus csík, tengerparti hangulat. A minta és a színek vásárláskor választhatók.', notes: [] },
@@ -242,15 +242,15 @@
         { id: 'poszter', name: 'Posztererek a falon', cost: 4000, passive: 0.1, st: { cute: 4, gamer: 2 }, desc: 'Kedvenc animék és zenekarok.' },
         { id: 'zaszlo', name: 'Pasztell zászló', cost: 6000, passive: 0.15, st: { cute: 4, chaos: 2 }, desc: 'Egy kis büszkeség a falon.' },
         { id: 'ledfeny', name: 'LED fényfüzér', cost: 9000, passive: 0.3, st: { cute: 10, chill: 8 }, desc: 'Hangulatos esték.' },
-        { id: 'agytakaro', name: 'Puha plédek és párnák', cost: 11000, passive: 0.2, regen: 0.2, st: { chill: 12, cute: 4 }, desc: 'A legjobb pihenőfészek.' },
-        { id: 'novenyek', name: 'Szobanövények', cost: 15000, passive: 0.3, st: { chill: 10, cute: 4 }, desc: 'Élő zöld a szobában.' },
+        { id: 'agytakaro', en: 8, name: 'Puha plédek és párnák', cost: 11000, passive: 0.2, regen: 0.2, st: { chill: 12, cute: 4 }, desc: 'A legjobb pihenőfészek.' },
+        { id: 'novenyek', en: 4, name: 'Szobanövények', cost: 15000, passive: 0.3, st: { chill: 10, cute: 4 }, desc: 'Élő zöld a szobában.' },
         { id: 'tukor', name: 'Teljes alakos tükör', cost: 18000, click: 1, st: { cute: 8 }, desc: 'Végre látod magad tetőtől talpig.' },
         { id: 'polc', name: 'Gyűjtői polc (figurák)', cost: 26000, passive: 0.5, st: { cute: 6, gamer: 6 }, desc: 'Kis figurák, nagy szeretet.' },
-        { id: 'lava', name: 'Lávalámpa', cost: 4500, passive: 0.2, st: { chill: 14, cute: 6 }, desc: 'Buborékol és nem kér semmit. A legjobb szobatárs.' },
-        { id: 'dobozok', name: 'Doboz-torony', cost: 3000, passive: 0, st: { chaos: 16, gamer: 4, chill: -4 }, desc: 'Üres energiaitalos dobozok instabil piramisa a sarokban.' }
+        { id: 'lava', en: 3, name: 'Lávalámpa', cost: 4500, passive: 0.2, st: { chill: 14, cute: 6 }, desc: 'Buborékol és nem kér semmit. A legjobb szobatárs.' },
+        { id: 'dobozok', en: -5, name: 'Doboz-torony', cost: 3000, passive: 0, st: { chaos: 16, gamer: 4, chill: -4 }, desc: 'Üres energiaitalos dobozok instabil piramisa a sarokban.' }
     ];
     D.PETS = [
-        { id: 'cica', name: 'Cica', cost: 25000, passive: 0.6, regen: 0.3, st: { cute: 12, chill: 8 }, desc: 'Örökbefogadott cica. A billentyűzeten alszik.', needsHome: ['szoba', 'garzon', 'lakas'] }
+        { id: 'cica', en: 5, name: 'Cica', cost: 25000, passive: 0.6, regen: 0.3, st: { cute: 12, chill: 8 }, desc: 'Örökbefogadott cica. A billentyűzeten alszik.', needsHome: ['szoba', 'garzon', 'lakas'] }
     ];
 
     // ---------- Kombók ----------
@@ -494,6 +494,27 @@
     ];
 
     // ---------- Számítógépek ----------
+
+    // ---------- Energia ----------
+    // Az energia felső határa nem fix: alapérték + állandó módosítók (lakhatás, kellékek, szokások, lépések) + ideiglenes módosítók (események, játékok).
+    D.ENERGY_BASE = 100; D.ENERGY_MIN = 50; D.ENERGY_CAP = 260;
+
+    // ---------- Számítógépes játékok (Gép fül) ----------
+    // cost 0: ingyenes. minComp: legalább ekkora gép kell. energy: egy játékmenet ára (havonta egyszer játszható).
+    // st: a játékban szerzett jártasság állandó stat-bónusza SZINTENKÉNT (3 / 8 / 16 játék után lép szintet). temp: a játék utáni ideiglenes hatás.
+    D.GAME_LEVELS = [3, 8, 16];
+    D.GAMES = [
+        { id: 'cicaklikk', name: 'Cica-klikker', cost: 0, minComp: 0, energy: 5, conf: 12, st: { cute: 1 }, temp: { label: 'Cicás jókedv', st: { cute: 2 }, months: 1 }, desc: 'Ingyenes böngészős játék. Kattintasz, a cica boldog. Ennyi.', text: 'Egy óra csendes kattintgatás. A cica a képernyőn dorombol.' },
+        { id: 'sakk', name: 'Sakk Online', cost: 0, minComp: 0, energy: 10, conf: 10, skill: { prog: 1.5 }, st: { code: 1 }, temp: { label: 'Éles fej', st: { code: 3 }, months: 1 }, desc: 'Ingyenes. Gyors partik ismeretlenekkel, logika és türelem.', text: 'Három gyors parti, és az utolsó végre a tiéd.' },
+        { id: 'pixelkert', name: 'Pixel Kert', cost: 0, minComp: 0, energy: 8, conf: 14, st: { chill: 2 }, temp: { label: 'Kikapcsolódás', en: 6, st: { chill: 3 }, months: 2 }, desc: 'Ingyenes, lassú farmolós játék. Nincs pontszám, csak répák.', text: 'Elültetsz, megöntözöl, learatod. Lassan kitisztul a fejed.' },
+        { id: 'retroplat', name: 'Retro Platformer', cost: 6000, minComp: 1, energy: 14, conf: 25, st: { gamer: 2, chaos: 1 }, temp: { label: 'Pályaszint-láz', st: { gamer: 4 }, months: 1 }, desc: 'Pixelgrafika, kegyetlen ugrások és tökéletes zene.', text: 'Negyvenedikre sikerül az utolsó ugrás. Győzelmi tánc a székben.' },
+        { id: 'ritmus', name: 'Ritmus-Rajongó', cost: 9000, minComp: 1, energy: 16, conf: 28, st: { gamer: 1, cute: 2 }, temp: { label: 'Ritmusban vagy', regen: 0.15, st: { cute: 3 }, months: 2 }, desc: 'Zenére nyomkodod a nyilakat. A kezed gyorsabb, mint a gondolatod.', text: 'Full combo a kedvenc számodon. A kezed még mindig táncol.' },
+        { id: 'divat', name: 'Divat Stúdió', cost: 15000, minComp: 1, energy: 12, conf: 30, skill: { smink: 2 }, st: { cute: 2, chill: 1 }, temp: { label: 'Stílusláz', st: { cute: 4 }, months: 1 }, desc: 'Öltöztess babákat, tervezz kollekciót. Tényleg tanulsz belőle.', text: 'Egy komplett őszi kollekciót raksz össze. Pont ilyet kéne venni.' },
+        { id: 'kodakademia', name: 'Kód Akadémia', cost: 12000, minComp: 2, energy: 18, conf: 20, skill: { prog: 3 }, st: { code: 2 }, temp: { label: 'Flow állapot', st: { code: 4 }, months: 1 }, desc: 'Játékos programozás-oktató: minden szint egy kis feladvány.', text: 'Megvan a feladvány megoldása. A logikai kapuk a helyükre kattannak.' },
+        { id: 'horror', name: 'Éjféli Horror', cost: 8000, minComp: 2, energy: 14, conf: 22, st: { chaos: 2 }, temp: { label: 'Álmatlan éjszaka', en: -8, st: { chaos: 3 }, months: 1 }, desc: 'Sötét szoba, fejhallgató. Utána nem alszol.', text: 'Háromszor megugrasz. Utána sokáig nézed az ajtót.' },
+        { id: 'arena', name: 'Aréna Online', cost: 24000, minComp: 3, energy: 24, conf: 40, comm: 2, st: { gamer: 3, chaos: 1 }, temp: { label: 'Rangsor-láz', en: -6, st: { gamer: 5 }, months: 1 }, needsDiscord: true, desc: 'Csapatos online lövölde. A közösség is itt tanul meg a nevedre.', text: 'A csapat veled nyer. A chatben mindenki a te nevedet ismételgeti.' }
+    ];
+
     D.COMPUTERS = [
         { id: 'csaladi', name: 'Családi gép a nappaliban', cost: 0, study: 0, online: 0, upkeep: 0, desc: 'Mindenki látja, mit csinálsz rajta.' },
         { id: 'laptop', name: 'Használt laptop', cost: 60000, study: 0.5, online: 0.3, upkeep: 0, desc: 'Lassú, de a tiéd. Végre privát.' },
@@ -556,16 +577,16 @@ D.STREAM_PER_COMM = 20;
     D.STEPS = [
         { id: 'tukor1', name: 'Zárt ajtó mögött felpróbálsz valamit', cost: 20, click: 0.5, minAge: 0, text: 'Zárt ajtó mögött felpróbálsz valamit, és jól érzed magad benne.' },
         { id: 'alnev', name: 'Álneves fiókot nyitsz', cost: 60, passive: 0.1, minAge: 15, text: 'Létrehozol egy álneves fiókot. Elsőként követsz pár hasonló embert.' },
-        { id: 'barat', name: 'Elmondod egy jó barátodnak', cost: 150, passive: 0.3, comm: 2, minAge: 16, text: 'Elmondod egy jó barátodnak. Csak annyit mond: „Ennyi? Tudtam.”' },
+        { id: 'barat', en: 3, name: 'Elmondod egy jó barátodnak', cost: 150, passive: 0.3, comm: 2, minAge: 16, text: 'Elmondod egy jó barátodnak. Csak annyit mond: „Ennyi? Tudtam.”' },
         { id: 'kirakat', name: 'Beállsz egy ruhabolt kirakata elé', cost: 350, click: 1, minAge: 16, text: 'Egy ruhabolt kirakata előtt megállsz, és hosszan nézed, mit vennél. Nem fordulsz el.' },
         { id: 'foto', name: 'Feltöltesz egy fotót (arc nélkül)', cost: 800, passive: 1, minAge: 16, text: 'Feltöltöd az első fotódat arc nélkül. Kedvelések gyűlnek, a szíved ugrál.' },
         { id: 'utca', name: 'Kimész úgy az utcára', cost: 1800, click: 2, minAge: 17, risk: 4, text: 'Kimész az utcára úgy, ahogy valójában szeretnél. Senki nem szól semmit.' },
-        { id: 'nev', name: 'Felvállalod a neved az interneten', cost: 4000, passive: 4, minAge: 17, text: 'A saját neveddel jelentkezel be. A visszajelzések kedvesek.' },
+        { id: 'nev', en: 4, name: 'Felvállalod a neved az interneten', cost: 4000, passive: 4, minAge: 17, text: 'A saját neveddel jelentkezel be. A visszajelzések kedvesek.' },
         { id: 'jelmez', name: 'Jelmezben mész egy találkozóra', cost: 9000, click: 5, minAge: 18, text: 'Jelmezben érkezel egy találkozóra. Mindenki tapsol, ahogy belépsz.' },
-        { id: 'szinpad', name: 'Kiállsz egy színpadra', cost: 20000, passive: 12, minAge: 20, text: 'Kiállsz egy kis színpadra, és elmondod, ki vagy. A közönség tapsol.' },
-        { id: 'munka', name: 'Nyíltan vállalod a munkahelyen', cost: 45000, passive: 25, minAge: 20, text: 'A munkahelyeden is önmagad vagy. A csapat elfogad.' },
-        { id: 'mentor', name: 'Másoknak segítesz', cost: 100000, passive: 60, minAge: 21, text: 'Egy kezdőnek tanácsot adsz. Észreveszed, mennyit fejlődtél.' },
-        { id: 'ongam', name: 'Teljesen önmagad vagy', cost: 220000, click: 20, passive: 120, minAge: 22, text: 'Nem játszol szerepet. Nem rejtegetsz semmit. Egyszerűen te vagy.' }
+        { id: 'szinpad', en: 5, name: 'Kiállsz egy színpadra', cost: 20000, passive: 12, minAge: 20, text: 'Kiállsz egy kis színpadra, és elmondod, ki vagy. A közönség tapsol.' },
+        { id: 'munka', en: 6, name: 'Nyíltan vállalod a munkahelyen', cost: 45000, passive: 25, minAge: 20, text: 'A munkahelyeden is önmagad vagy. A csapat elfogad.' },
+        { id: 'mentor', en: 6, name: 'Másoknak segítesz', cost: 100000, passive: 60, minAge: 21, text: 'Egy kezdőnek tanácsot adsz. Észreveszed, mennyit fejlődtél.' },
+        { id: 'ongam', en: 10, name: 'Teljesen önmagad vagy', cost: 220000, click: 20, passive: 120, minAge: 22, text: 'Nem játszol szerepet. Nem rejtegetsz semmit. Egyszerűen te vagy.' }
     ];
 
     // ---------- Kaszinó (csak 18 éves kortól, játékpénzzel) ----------

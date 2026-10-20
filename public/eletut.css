@@ -519,3 +519,17 @@
     .bird .wing { transform-box: fill-box; transform-origin: 50% 100%; animation: el-flap .42s ease-in-out infinite; }
 }
 @media (prefers-reduced-motion: reduce) { .fall, .bird { display: none; } }
+
+/* Energia-módosítók, ruha-változatok */
+.el-en-det { font-size: .8rem; margin-top: 2px; }
+.el-en-det summary { cursor: pointer; color: var(--el-soft, #6b5b80); font-weight: 600; }
+.el-en-row { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+.el-en-row b { color: var(--el-plus, #2f8f5b); font-weight: 700; white-space: nowrap; }
+.el-en-row.neg b { color: var(--el-minus, #c0364a); }
+.el-en-cap { margin-top: 4px; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; opacity: .7; font-weight: 700; }
+.el-vbox { display: grid; gap: 6px; margin-top: 6px; }
+.el-vars { display: flex; flex-wrap: wrap; gap: 6px; }
+.el-var { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 2px solid var(--pink, #f5a9b8); background: transparent; color: inherit; font: inherit; font-size: .8rem; cursor: pointer; }
+.el-var[aria-pressed="true"] { background: var(--pink, #f5a9b8); color: #3a2f45; font-weight: 700; }
+.el-var-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid rgba(58, 47, 69, .5); flex: none; }
+.el-sw.owned { outline: 2px dashed rgba(58, 47, 69, .35); outline-offset: 2px; }

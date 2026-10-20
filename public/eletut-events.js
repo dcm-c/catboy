@@ -51,11 +51,11 @@
     // Közös válasz a szülőknek való elmondásra
     function tellParents(s, A, c) {
         if (s.conf >= 250) {
-            A.setOut(true); A.parents('accepting'); A.conf(80); A.flag('toldParents');
+            A.setOut(true); A.parents('accepting'); A.mod({ id: 'e_elfogadas', label: 'Elfogadó család', en: 10 }); A.conf(80); A.flag('toldParents');
             A.log('Elmondtad a szüleidnek. Anya megölelt, apa hosszan hallgatott, majd annyit mondott: „Mi mindig melletted állunk.”');
             return 'Remeg a hangod, de végigmondod. Anya megölel, apa pedig hosszan hallgat, majd csendesen annyit mond: „Mi mindig melletted állunk.” Hirtelen könnyebb lesz minden.';
         }
-        A.setOut(true); A.parents('tense'); A.cutAllowance(2); A.conf(-10); A.flag('toldParents');
+        A.setOut(true); A.parents('tense'); A.mod({ id: 'e_feszult', label: 'Feszült otthon', en: -8, months: 4 }); A.cutAllowance(2); A.conf(-10); A.flag('toldParents');
         A.log('Elmondtad a szüleidnek. Nehéz beszélgetés volt, de kimondtad.');
         return 'Nehezen találod a szavakat, és a beszélgetés kínos hallgatásba fullad. Nem lesz belőle veszekedés, de a hangulat feszült marad. Legalább már nem kell titkolóznod.';
     }
@@ -167,7 +167,7 @@
             text: 'A szomszéd néni lánya a strandon fagylaltozót vezet, és kisegítőt keres. Az első saját pénzed lehetne, és még a nyár is jobb lenne vele.',
             choices: [
                 { label: 'Elvállalod', tip: 'Fagylaltos: 55 000 Ft/hó (fél állás)', do: function (s, A) { A.job('fagyi'); A.conf(20); A.log('Elkezdtél dolgozni a strandon.'); return 'Az első napon háromszor elrontod a gombócot, de a főnök mosolyogva azt mondja, hogy mindenki így kezdi. A munka a „Munka” fülön módosítható.'; } },
-                { label: 'Inkább pihensz', do: function (s, A) { A.energy(100); A.conf(5); return 'Pihensz. Néha az is szükséges.'; } }
+                { label: 'Inkább pihensz', do: function (s, A) { A.energy(100); A.mod({ id: 'e_pihenes', label: 'Kipihent', en: 8, months: 2 }); A.conf(5); return 'Pihensz. Néha az is szükséges.'; } }
             ]
         },
         {
@@ -230,7 +230,7 @@
             title: 'Érettségi',
             text: function (s, c) { return 'Az érettségi hetében ' + (s.comp === 0 ? 'a családi gépen' : c.az(c.pc) + ' előtt') + ' tanulsz éjszakánként. A fejed tele van tételekkel, és közben a jövőd is ott lebeg a háttérben.'; },
             choices: [
-                { label: 'Éjjel-nappal tanulsz', tip: '−60 energia', do: function (s, A) { A.energy(-60); A.skill('angol', 40); A.conf(20); return 'Kimerült vagy, de jól sikerül. A nagyi még egy kis zsebpénzt is küld jutalmul.'; } },
+                { label: 'Éjjel-nappal tanulsz', tip: '−60 energia', do: function (s, A) { A.energy(-60); A.mod({ id: 'e_kialvatlan', label: 'Kialvatlan', en: -15, months: 2 }); A.skill('angol', 40); A.conf(20); return 'Kimerült vagy, de jól sikerül. A nagyi még egy kis zsebpénzt is küld jutalmul.'; } },
                 { label: 'Lazán veszed', do: function (s, A) { A.conf(10); A.energy(30); return 'Annyira nem aggódsz, és minden jól alakul. Kicsit szerencse, kicsit rutin.'; } }
             ]
         },
@@ -334,7 +334,7 @@
             choices: [
                 { label: 'Egyetemre mész', tip: 'Ösztöndíj + kollégium, csak részmunka', do: function (s, A) { A.student(true); A.conf(30); A.log('Felvettek az egyetemre.'); return 'Felvettek! Az ösztöndíj szerény, de a kollégium és a sok új ismerős mind megéri. Hallgatóként gyorsabban tanulsz.'; } },
                 { label: 'Munkát vállalsz', tip: 'Teljes állás is vállalható', do: function (s, A) { A.flag('workPath'); A.conf(40); return 'Úgy döntesz, hogy a saját lábadra állsz. A teljes állás sokat hoz, de a tanulásra kevesebb időd marad.'; } },
-                { label: 'Szünetet tartasz', do: function (s, A) { A.conf(80); A.comm(3); A.energy(100); return 'Egy évig csak magaddal foglalkozol. Utazol, olvasol, és tanulsz arról, hogy ki vagy.'; } }
+                { label: 'Szünetet tartasz', do: function (s, A) { A.conf(80); A.comm(3); A.energy(100); A.mod({ id: 'e_szunet', label: 'Egy év önmagadra', en: 15 }); return 'Egy évig csak magaddal foglalkozol. Utazol, olvasol, és tanulsz arról, hogy ki vagy.'; } }
             ]
         },
         {
@@ -445,7 +445,7 @@
             choices: [
                 { label: 'Hazaköltözöl', tip: 'A tartozást a szüleid rendezik', do: function (s, A) { if (s.money < 0) A.money(-s.money); A.moveHome(); A.conf(-30); A.log('Kénytelen voltál hazaköltözni.'); return 'Összepakolsz, és hazamész. Anya egy szót sem szól, csak megfőzi a kedvenc ételedet. Nem győzelem, de nem is katasztrófa.'; } },
                 { label: 'Segítséget kérsz a barátaidtól', tip: 'Legalább 20 közösségi pont kell', req: function (s) { return s.comm >= 20; }, reqText: 'Legalább 20 közösségi pont kell', do: function (s, A) { A.money(Math.max(120000, -s.money + 40000)); A.conf(-10); A.comm(2); return 'A szerveren megírod az igazat. Csak pár órába telik, és már gyűlik is a pénz. „Majd egyszer te is segítesz valakinek.”'; } },
-                { label: 'Éjszakai munkát vállalsz', tip: '+60 000 Ft, de kimerítő', do: function (s, A) { A.money(60000); A.energy(-80); A.conf(-10); return 'Három hétig éjjel dolgozol. Kimerült vagy, de a tartozás csökken.'; } }
+                { label: 'Éjszakai munkát vállalsz', tip: '+60 000 Ft, de kimerítő', do: function (s, A) { A.money(60000); A.energy(-80); A.mod({ id: 'e_ejszaka', label: 'Éjszakai munka utóhatása', en: -12, regen: -0.2, months: 3 }); A.conf(-10); return 'Három hétig éjjel dolgozol. Kimerült vagy, de a tartozás csökken.'; } }
             ]
         },
 
@@ -578,7 +578,7 @@
             title: 'Közös játékest',
             text: function (s, c) { return 'A szerveren közös játékestet szerveznek. ' + c.az(c.pc) + ' gond nélkül futtatja, és egész este nevettek. Hajnalban jössz rá, hogy nem is vetted észre az időt.'; },
             choices: [
-                { label: 'Végigjátszod az éjszakát', tip: '−30 energia', do: function (s, A) { A.energy(-30); A.comm(6); A.conf(30); return 'Fáradtan, de boldogan fekszel le. Ezek az esték különleges emlékek.'; } },
+                { label: 'Végigjátszod az éjszakát', tip: '−30 energia', do: function (s, A) { A.energy(-30); A.mod({ id: 'e_jatekest', label: 'Fáradt, de boldog', en: -6, st: { gamer: 3 }, months: 1 }); A.comm(6); A.conf(30); return 'Fáradtan, de boldogan fekszel le. Ezek az esték különleges emlékek.'; } },
                 { label: 'Fél órát maradsz', do: function (s, A) { A.comm(2); A.conf(10); return 'Fél óra játék, aztán lefekszel. A többiek holnap is itt lesznek.'; } }
             ]
         },
@@ -687,7 +687,7 @@
             id: 'r_flu', mood: 'sleepy', art: 'room', weight: 1, once: false, cooldown: 14, minAge: 14,
             title: 'Megfáztál',
             text: 'Reggel torokfájással ébredsz. Egész nap takaró alatt fekszel, és a laptopon sorozatot nézel.',
-            choices: [{ label: 'Pihensz', do: function (s, A) { A.energy(-50); A.conf(-3); return 'Két napig nem megy semmi. Utána újra rendben leszel.'; } }]
+            choices: [{ label: 'Pihensz', do: function (s, A) { A.energy(-50); A.mod({ id: 'e_beteg', label: 'Lábadozás', en: -10, months: 1 }); A.conf(-3); return 'Két napig nem megy semmi. Utána újra rendben leszel.'; } }]
         },
         {
             id: 'r_cringe', mood: 'shy', art: 'phone', weight: 1, once: false, cooldown: 12, minAge: 15,
