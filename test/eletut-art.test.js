@@ -122,31 +122,75 @@ test('minták és feliratok: minden minta minden megengedett helyen hibátlan, a
     }
 });
 
-test('minta-választás: csak a megengedett, tárolódik, mentésen át megmarad', () => {
-    const s = E.newState({ name: 'T' });
-    assert.equal(E.setPat(s, 'feliratos', 'dots').ok, false, 'meg nem vett tárgyra nem lehet');
-    s.items.feliratos = true; s.items.polo = true; s.items.platform = true; s.items.csikoscomb = true;
-    assert.equal(E.patOf(s, 'feliratos').id, 'sl_nyau', 'alapminta');
-    assert.ok(E.setPat(s, 'feliratos', 'sl_uwu').ok);
+test('minta-választás vásárláskor: csak a megengedett, tárolódik, utólag nem módosítható', () => {
+    const s = E.newState({ name: 'T' }); s.money = 1e7;
+    assert.equal(E.buyItem(s, 'polo', { pat: 'sl_uwu' }).ok, false, 'felirat csak a feliratos pólón');
+    assert.equal(E.buyItem(s, 'platform', { pat: 'stripe' }).ok, false, 'cipő nem mintázható');
+    assert.equal(E.buyItem(s, 'csikoscomb', { pat: 'g_cat' }).ok, false, 'combzokni nem kaphat nyomtatott grafikát');
+    assert.equal(E.buyItem(s, 'csikoscomb', { pat: 'dots', patColor: 'nincsilyen' }).ok, false);
+    assert.equal(E.buyItem(s, 'feliratos', { pat: 'rainbow', patColor: 'piros' }).ok, false, 'rögzített színű minta színe nem választható');
+    assert.equal(s.money, 1e7, 'hibás választásnál nem von le pénzt');
+    assert.ok(!s.items.feliratos && !s.items.csikoscomb);
+    // alapminta választás nélkül
+    const d = E.newState({ name: 'D' }); d.money = 1e7;
+    assert.ok(E.buyItem(d, 'feliratos').ok);
+    assert.equal(E.patOf(d, 'feliratos').id, 'sl_nyau', 'alapminta');
+    // választott minta
+    assert.ok(E.buyItem(s, 'feliratos', { pat: 'sl_uwu' }).ok);
     assert.equal(E.patOf(s, 'feliratos').id, 'sl_uwu');
-    assert.equal(E.setPat(s, 'polo', 'sl_uwu').ok, false, 'felirat csak a feliratos pólón');
-    assert.equal(E.setPat(s, 'platform', 'stripe').ok, false, 'cipő nem mintázható');
-    assert.equal(E.setPat(s, 'csikoscomb', 'g_cat').ok, false, 'combzokni nem kaphat nyomtatott grafikát');
-    assert.ok(E.setPat(s, 'csikoscomb', null).ok);
+    assert.ok(E.buyItem(s, 'csikoscomb', { pat: null }).ok);
     assert.equal(E.patOf(s, 'csikoscomb'), null, 'kifejezetten egyszínű');
-    assert.ok(E.setPat(s, 'csikoscomb', 'dots').ok && E.setPatColor(s, 'csikoscomb', 'piros').ok);
-    assert.equal(E.patOf(s, 'csikoscomb').color, '#e8607a');
-    assert.equal(E.setPatColor(s, 'csikoscomb', 'nincsilyen').ok, false);
-    s.equipped.top = 'feliratos'; s.equipped.legs = 'csikoscomb';
+    assert.ok(E.buyItem(s, 'szivarvanyzokni', { pat: 'dots', patColor: 'piros' }).ok);
+    assert.equal(E.patOf(s, 'szivarvanyzokni').id, 'dots');
+    assert.equal(E.patOf(s, 'szivarvanyzokni').color, '#e8607a');
+    s.equipped.top = 'feliratos'; s.equipped.legs = 'szivarvanyzokni';
     const pats = E.outfitPats(s);
     assert.equal(pats.top.id, 'sl_uwu'); assert.equal(pats.legs.id, 'dots');
     const r = E.deserialize(E.serialize(s));
-    assert.equal(E.patOf(r, 'csikoscomb').id, 'dots');
+    assert.equal(E.patOf(r, 'szivarvanyzokni').id, 'dots');
     assert.equal(E.patOf(r, 'feliratos').id, 'sl_uwu');
     // rongyolt mentés nem dönti el
     const bad = JSON.parse(E.serialize(s)); bad.pats = { feliratos: 'x', csikoscomb: { p: 5, a: {} } };
     const rb = E.deserialize(JSON.stringify(bad));
     assert.ok(rb && E.patOf(rb, 'feliratos') !== undefined);
+});
+
+test('szín-, minta- és felirat-bónuszok a viselt ruhákból', () => {
+    const base = E.newState({ name: 'B' }); base.money = 1e7;
+    const none = E.stats(base).total;
+    // szín: a rózsa +2 cukiság viselve, de csak ha fel is van véve
+    const a = E.newState({ name: 'A' }); a.money = 1e7;
+    assert.ok(E.buyItem(a, 'polo', { color: 'rozsa' }).ok);
+    const ids = E.stats(a);
+    assert.equal(ids.looks.parts.length >= 1, true);
+    a.equipped = {};
+    assert.equal(E.lookBonuses(a).total.cute || 0, 0, 'nem viselt darab nem számít');
+    a.equipped.top = 'polo';
+    assert.ok((E.lookBonuses(a).total.cute || 0) >= 2);
+    // különböző színválasztás különböző bónusz
+    const b = E.newState({ name: 'B2' }); b.money = 1e7;
+    E.buyItem(b, 'polo', { color: 'piros' }); b.equipped.top = 'polo';
+    assert.ok((E.lookBonuses(b).total.chaos || 0) >= 2 && !(E.lookBonuses(b).total.cute));
+    // felirat-párosítás: ARCH BTW + Arch gép
+    const c = E.newState({ name: 'C' }); c.money = 1e7;
+    E.buyItem(c, 'feliratos', { pat: 'sl_arch' }); c.equipped.top = 'feliratos';
+    const code0 = E.lookBonuses(c).total.code || 0;
+    E.buyItem(c, 'arch'); c.equipped.gear = 'arch';
+    const lb = E.lookBonuses(c);
+    assert.ok(lb.synergies.find(x => x.syn.id === 'f_arch').active, 'felirat + Arch gép párosítás');
+    assert.ok((lb.total.code || 0) >= code0 + 6);
+    // monokróm szett: 3 azonos színű darab
+    const m = E.newState({ name: 'M' }); m.money = 1e7;
+    E.buyItem(m, 'polo', { color: 'menta' }); E.buyItem(m, 'jogger', { color: 'menta' }); E.buyItem(m, 'zokni', { color: 'menta' });
+    m.equipped.top = 'polo'; m.equipped.bottom = 'jogger'; m.equipped.legs = 'zokni';
+    assert.ok(E.lookBonuses(m).synergies.find(x => x.syn.id === 'monokrom').active, 'monokróm');
+    // titkolózás: a feltűnő felirat kockázatot jelent, rejtőzéskor nem látszik
+    const t = E.newState({ name: 'T' }); t.money = 1e7;
+    E.buyItem(t, 'feliratos', { pat: 'sl_femboy' }); t.equipped.top = 'feliratos';
+    assert.ok(E.lookBonuses(t).risk >= 4);
+    t.hiding = true;
+    if (E.isSecret(t)) { assert.equal(E.lookBonuses(t).risk, 0, 'elrejtve nincs kockázat'); }
+    assert.ok(none.cute === 0);
 });
 
 // ---- hangulatok, pózok, szemformák, szoba-állapotok ----

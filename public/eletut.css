@@ -476,3 +476,18 @@
 @keyframes el-fade { from { opacity: 0; } }
 @keyframes el-modal-in { from { opacity: 0; transform: translateY(12px) scale(.97); } }
 @keyframes el-invite { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 169, 184, 0); } 50% { box-shadow: 0 0 0 5px rgba(245, 169, 184, .28); } }
+
+/* ---------- Vásárlási ablak: szín- és mintaválasztás ---------- */
+.el-buy { width: min(560px, 100%); }
+.el-buy-grid { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: start; }
+.el-buy-prev { display: grid; place-items: center; background: var(--el-surface); border: 2px solid var(--el-line); border-radius: 16px; padding: 8px; }
+.el-buy-prev .el-thumbbox { height: 120px; width: 100%; }
+.el-buy-prev .el-thumbbox.tall { height: 170px; }
+.el-buy-ctrl { display: grid; gap: 6px; min-width: 0; }
+.el-buy-sum { display: grid; gap: 6px; padding: 8px 10px; border-radius: 12px; background: var(--el-surface); border: 2px dashed var(--el-line); }
+.el-buy-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.el-note.good { color: var(--el-plus); font-weight: 700; }
+.el-note.bad { color: var(--el-minus); font-weight: 700; }
+.el-lockedlook { display: grid; gap: 4px; }
+.el-lockedlook .ico { vertical-align: -2px; }
+@media (max-width: 520px) { .el-buy-grid { grid-template-columns: 1fr; } .el-buy-prev .el-thumbbox { height: 110px; } }

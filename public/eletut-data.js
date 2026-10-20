@@ -78,7 +78,7 @@
     ];
     D.STAT_MAX = 100; // a sáv teljes kitöltéséhez
 
-    // Színválasztó: a "paint" mezővel rendelkező tárgyak színe átállítható
+    // Színválasztó: a "paint" mezővel rendelkező tárgyak színe vásárláskor választható
     D.PALETTE = [
         { id: 'rozsa', label: 'Rózsa', color: '#f4a3b8' },
         { id: 'barack', label: 'Barack', color: '#ffc9a6' },
@@ -115,6 +115,34 @@
         { id: 'sl_arch', label: 'Felirat: ARCH BTW', slots: ['top'], kind: 'text', text: 'ARCH BTW' },
         { id: 'sl_404', label: 'Felirat: 404 BOY', slots: ['top'], kind: 'text', text: '404 BOY' },
         { id: 'sl_puha', label: 'Felirat: PUHA', slots: ['top'], kind: 'text', text: 'PUHA' }
+    ];
+    // ---------- Szín- és mintabónuszok ----------
+    // A ruha színe és mintája a VÁSÁRLÁSKOR dől el (utána nem módosítható), és a viselt darabok bónuszt adnak.
+    // Színenként (tárgyanként egyszer, csak viselve): milyen statot ad a szín
+    D.COLOR_STAT = {
+        rozsa: { cute: 2 }, barack: { cute: 1, chill: 1 }, citrom: { gamer: 2 }, menta: { chill: 2 },
+        ego: { code: 2 }, indigo: { code: 1, chill: 1 }, levendula: { cute: 1, chaos: 1 },
+        feher: { chill: 1, cute: 1 }, piros: { chaos: 2 }, fekete: { chaos: 1, code: 1 }
+    };
+    // Mintánként / felirat-nyomatként; a "risk" csak titkolózás közben számít (a feltűnő darabok könnyebben lebuknak)
+    D.PATTERN_STAT = {
+        stripe: { cute: 1, chill: 1 }, dots: { cute: 2 }, plaid: { gamer: 2 }, hearts: { cute: 3 }, stars: { cute: 2, chill: 1 },
+        checker: { chaos: 2 }, trans: { cute: 3, chill: 1 }, rainbow: { cute: 2, chaos: 1 },
+        g_heart: { cute: 3 }, g_cat: { cute: 2, gamer: 1 }, g_star: { cute: 2 }, g_rainbow: { cute: 2, chill: 1 }, g_bolt: { chaos: 3 },
+        sl_nyau: { cute: 3 }, sl_uwu: { cute: 2, chill: 1 }, sl_cutie: { cute: 3 }, sl_femboy: { cute: 2, chaos: 2 },
+        sl_arch: { code: 4 }, sl_404: { code: 2, chaos: 2 }, sl_puha: { chill: 3 }
+    };
+    D.PATTERN_RISK = { trans: 2, rainbow: 2, g_rainbow: 2, sl_femboy: 4, sl_404: 1 };
+    // Párosítások: a darabok színe/mintája/felirata együtt még többet ér (a feltételt az engine E.lookBonuses ellenőrzi)
+    D.LOOK_SYNERGIES = [
+        { id: 'monokrom', name: 'Monokróm szett', hint: 'Legalább 3 viselt ruhadarab pontosan ugyanolyan színű', text: 'Egységes, nyugodt összkép.', bonus: { cute: 4, chill: 4 } },
+        { id: 'szinminta', name: 'Színre hangolt minta', hint: 'A felső mintájának színe egyezik egy másik viselt darab színével', text: 'Minden a helyén van.', bonus: { cute: 4 } },
+        { id: 'f_arch', name: 'Hiszel a feliratban', hint: 'ARCH BTW felirat + Arch Linux gép a kezed ügyében', text: 'A felirat nem hazudik.', bonus: { code: 6 } },
+        { id: 'f_cica', name: 'Cicás felirat', hint: 'NYAU / UwU / CUTIE felirat + macskafül vagy headset', text: 'A feliratot a fülek is erősítik.', bonus: { cute: 6 } },
+        { id: 'f_puha', name: 'Puha és kényelmes', hint: 'PUHA felirat + jogger', text: 'Ez már a pihenés öltözéke.', bonus: { chill: 6 } },
+        { id: 'f_404', name: 'Programozói humor', hint: '404 BOY felirat + billentyűzet, konzol vagy Arch gép', text: 'Nincs találat, csak stílus.', bonus: { code: 3, chaos: 3 } },
+        { id: 'f_femboy', name: 'Büszke kiállás', hint: 'FEMBOY felirat + platform cipő vagy combzokni', text: 'Aki látja, tudja.', bonus: { cute: 4, chaos: 3 } },
+        { id: 'zaszlo', name: 'Zászló-hűség', hint: 'Zászló-csíkos vagy szivárványos darab + Pasztell zászló a szobában', text: 'Lobog a zászló a falon és rajtad is.', bonus: { cute: 5 } }
     ];
     // Mely mintákat kaphatja ez a tárgy (üres tömb: nem mintázható)
     D.patternsFor = function (item) {
@@ -176,8 +204,8 @@
         { id: 'blahaj', slot: 'buddy', name: 'Plüss cápa', cost: 13000, click: 0, passive: 0.4, risk: 0, st: { cute: 10, chill: 18 }, desc: 'A szoba főadminisztrátora. Mindig kéznél van, ha ölelés kell.', notes: [] },
         { id: 'army', slot: 'buddy', name: 'Plüss cápa-hadsereg', cost: 45000, click: 0, passive: 1, risk: 0, st: { cute: 16, chill: 30, chaos: 10 }, desc: 'Öt cápa, egy cél: távol tartani a külvilág toxicitását.', notes: [] },
         // Új ruhák: a "look" mondja meg, melyik rajzot használják; a "pat"/"pat2" az alapminta és a minta színe; a "prints" azt jelenti, hogy feliratot és nyomtatott mintát is kaphat.
-        { id: 'feliratos', slot: 'top', look: 'tee', prints: true, pat: 'sl_nyau', pat2: '#f4a3b8', name: 'Feliratos póló', cost: 2800, click: 0.3, passive: 0, risk: 5, st: { cute: 6, chaos: 3, code: 2 }, paint: '#fdf8fd', desc: 'Egy mondat a mellkasodon. A minta és a felirat átállítható.', notes: [{ tone: 'funny', text: 'Valaki hangosan felolvassa a pólód feliratát a buszon. Megköszönöd.' }] },
-        { id: 'tengeresz', slot: 'top', look: 'tee', pat: 'stripe', pat2: '#7f9fe0', name: 'Csíkos tengerész-póló', cost: 4200, click: 0.4, passive: 0, risk: 3, st: { cute: 7, chill: 5 }, paint: '#fdf8fd', desc: 'Klasszikus csík, tengerparti hangulat. Egyszínűre és mintásra is átállítható.', notes: [] },
+        { id: 'feliratos', slot: 'top', look: 'tee', prints: true, pat: 'sl_nyau', pat2: '#f4a3b8', name: 'Feliratos póló', cost: 2800, click: 0.3, passive: 0, risk: 5, st: { cute: 6, chaos: 3, code: 2 }, paint: '#fdf8fd', desc: 'Egy mondat a mellkasodon. A feliratot és a színeket vásárláskor te választod.', notes: [{ tone: 'funny', text: 'Valaki hangosan felolvassa a pólód feliratát a buszon. Megköszönöd.' }] },
+        { id: 'tengeresz', slot: 'top', look: 'tee', pat: 'stripe', pat2: '#7f9fe0', name: 'Csíkos tengerész-póló', cost: 4200, click: 0.4, passive: 0, risk: 3, st: { cute: 7, chill: 5 }, paint: '#fdf8fd', desc: 'Klasszikus csík, tengerparti hangulat. A minta és a színek vásárláskor választhatók.', notes: [] },
         { id: 'csikoscomb', slot: 'legs', look: 'combzokni', pat: 'stripe', pat2: '#f4a3b8', name: 'Csíkos combzokni', cost: 9800, click: 1.4, passive: 0, risk: 9, st: { cute: 12, code: 6, chaos: 3 }, paint: '#fdf6fa', desc: 'Az ikonikus csíkos darab. A csík és az alapszín külön állítható.', notes: [{ tone: 'good', text: 'Egy lány az utcán odaszól: „Az a csíkos combzokni mennyire jó!”' }] },
         { id: 'szivarvanyzokni', slot: 'legs', look: 'zokni', pat: 'rainbow', name: 'Szivárvány térdzokni', cost: 5200, click: 0.6, passive: 0, risk: 6, st: { cute: 8, chill: 4, chaos: 2 }, paint: '#fdf6fa', desc: 'Hat szín, nulla kompromisszum.', notes: [] },
         { id: 'bakancs', slot: 'shoes', name: 'Fűzős bakancs', cost: 19000, click: 1.5, passive: 0, risk: 8, st: { cute: 6, chaos: 8, chill: 2 }, paint: '#4a4056', desc: 'Vastag talp, dupla fűzés. Határozott, mégis cuki.', notes: [] },
