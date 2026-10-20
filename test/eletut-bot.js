@@ -70,6 +70,12 @@ function shop(s, policy) {
         D.DECOR.forEach((x) => { if (!s.decor[x.id] && s.money > E.price(s, x.cost) + reserve) E.buyDecor(s, x.id); });
         if (!s.pets.cica && policy.pet && s.money > 40000 + reserve) E.buyPet(s, 'cica');
     }
+    // játékok: megveszi, ami belefér, és havonta játszik, ha van energia (extra ruhaváltozat is)
+    D.GAMES.forEach((g) => {
+        if (!E.gameOwned(s, g.id) && s.comp >= g.minComp && s.money > E.price(s, g.cost) + reserve * 2) E.buyGame(s, g.id);
+        if (E.canPlay(s, g.id).ok && s.energy > g.energy + 20) E.playGame(s, g.id);
+    });
+    if (s.items.polo && s.money > 80000) E.buyItem(s, 'polo', { color: D.PALETTE[(s.month % D.PALETTE.length)].id, pat: 'stripe', patColor: D.PALETTE[(s.month * 3) % D.PALETTE.length].id });
     // rejtőzés
     if (E.isSecret(s) && policy.hide) {
         if (s.risk > 60 && !s.hiding) E.toggleHiding(s);

@@ -16,7 +16,7 @@ const { runBot, POLICIES } = require('./eletut-bot.js');
 function checkSane(s) {
     for (const k of ['conf', 'money', 'energy', 'risk', 'comm', 'sec']) assert.ok(Number.isFinite(s[k]), k + ' nem szám');
     assert.ok(s.conf >= 0, 'negatív önbizalom');
-    assert.ok(s.energy >= 0 && s.energy <= 100);
+    assert.ok(s.energy >= 0 && s.energy <= E.maxEnergy(s) + 1e-6, "az energia a változó felső határon belül van");
     assert.ok(s.risk >= 0 && s.risk <= 100);
 }
 

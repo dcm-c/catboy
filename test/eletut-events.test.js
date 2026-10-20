@@ -140,7 +140,16 @@ test('kombók és statok: viselés, rejtőzködés, színválasztás', () => {
     assert.ok(!t.items.polo && !t.items.szemuveg);
     assert.ok(E.buyItem(t, 'polo', { color: 'menta' }).ok);
     assert.equal(E.paintOf(t, 'polo'), D.find(D.PALETTE, 'menta').color);
-    assert.ok(!E.buyItem(t, 'polo', { color: 'rozsa' }).ok, 'másodszor nem vehető meg, így át sem színezhető');
+    assert.ok(!E.buyItem(t, 'polo', { color: 'menta' }).ok, 'ugyanaz a változat másodszor nem vehető meg');
+    assert.equal(E.variantsOf(t, 'polo').length, 1);
+    const m1 = t.money;
+    assert.ok(E.buyItem(t, 'polo', { color: 'rozsa' }).ok, 'más szín = új változat, új vásárlás');
+    assert.ok(t.money < m1);
+    assert.equal(E.variantsOf(t, 'polo').length, 2);
+    assert.equal(E.paintOf(t, 'polo'), D.find(D.PALETTE, 'rozsa').color, 'az új változat kerül viselésre');
+    assert.ok(E.wearVariant(t, 'polo', 0).ok);
+    assert.equal(E.paintOf(t, 'polo'), D.find(D.PALETTE, 'menta').color, 'a megvettek között lehet váltani');
+    assert.equal(E.currentVariant(t, 'polo'), 0);
     assert.equal(E.paintOf(t, 'polo'), D.find(D.PALETTE, 'menta').color);
     assert.equal(typeof E.setColor, 'undefined', 'nincs utólagos átszínezés');
     assert.equal(typeof E.setPat, 'undefined');
