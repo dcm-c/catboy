@@ -1093,7 +1093,7 @@
         // ÚJ VÉLETLEN ESEMÉNYEK (helyszínekkel és véletlen kimenetellel)
         // =====================================================
         {
-            id: 'r_park_dog', art: 'park', mood: 'surprised', weight: 2, once: false, cooldown: 10, minAge: 14,
+            id: 'r_park_dog', art: 'park', prop: 'dog', mood: 'surprised', weight: 2, once: false, cooldown: 10, minAge: 14,
             title: 'Kóbor kutya a parkban',
             text: 'A parkban egy kutya megáll, és rád néz. A nyakörve félig szétkopott, és láthatóan éhes.',
             choices: [
@@ -1107,7 +1107,7 @@
             ]
         },
         {
-            id: 'r_library_book', art: 'library', mood: 'shy', weight: 2, once: false, cooldown: 12, minAge: 14,
+            id: 'r_library_book', art: 'library', prop: 'book', mood: 'shy', weight: 2, once: false, cooldown: 12, minAge: 14,
             title: 'Könyv a könyvtárban',
             text: 'A könyvtár egyik sarkában egy különös könyvet találsz: tele rajzokkal, ruhakészítéssel, öltéstechnikákkal. A lapok szélén régi jegyzetek.',
             choices: [
@@ -1116,7 +1116,7 @@
             ]
         },
         {
-            id: 'r_train_lost', art: 'train', mood: 'surprised', weight: 2, once: false, cooldown: 14, minAge: 15,
+            id: 'r_train_lost', art: 'train', prop: 'wallet', mood: 'surprised', weight: 2, once: false, cooldown: 14, minAge: 15,
             title: 'Elveszett pénztárca a vonaton',
             text: 'A vonat ülésén egy pénztárcát találsz. Benne készpénz és egy diákigazolvány.',
             choices: [

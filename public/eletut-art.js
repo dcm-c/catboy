@@ -693,6 +693,25 @@
         var n = NPC[key];
         return figure(x, y, Object.assign({}, n, { uid: 'n' + (uid || key), mood: mood || 'neutral', pose: 'idle' }), scale);
     }
+    // Az esemény tárgya (o.prop): kis kellék a jelenetben, hogy a kép az eseményt mutassa
+    function propScene(o, scene) {
+        var k = o && o.prop;
+        if (!k) return '';
+        var s = '';
+        if (k === 'dog') {
+            var x = 356, y = 234;
+            s += '<g class="an an-breath">' + gshadow(x, y, 22, 0.14) +
+                path('M' + (x + 17) + ' ' + (y - 18) + ' q12 -8 7 -22', 'none', 'stroke="#c28f55" stroke-width="5" stroke-linecap="round"') +
+                ell(x, y - 14, 20, 11, '#d9a86c') + rect(x - 14, y - 9, 6, 9, '#c28f55', 'rx="2"') + rect(x + 8, y - 9, 6, 9, '#c28f55', 'rx="2"') +
+                circ(x - 20, y - 26, 10, '#d9a86c') + path('M' + (x - 27) + ' ' + (y - 33) + ' q-7 7 -3 15 q6 -2 7 -9Z', '#a9743e') +
+                ell(x - 28, y - 22, 5.5, 4, '#f1d5a8') + circ(x - 31, y - 23, 1.7, '#4a3562', 'stroke="none"') + circ(x - 22, y - 28, 1.5, '#4a3562', 'stroke="none"') + '</g>';
+        } else if (k === 'wallet') {
+            s += rect(312, 148, 34, 22, '#8a5a4a', 'rx="4"') + rect(312, 148, 34, 7, '#a9745f', 'rx="3" stroke="none"') + circ(340, 160, 2.4, '#ffe08a', 'stroke="none"') + prop('banknote', 330, 150, 20, { noShadow: true });
+        } else if (k === 'book') {
+            s += prop('books', 150, 232, 30, { shadow: 0.12 });
+        }
+        return s;
+    }
     function guestFigure(o, x, y, scale, mood) {
         var p = o && o.guest ? D.find(D.PEOPLE, o.guest) : null;
         if (!p) return '';
@@ -884,7 +903,8 @@
             // tetőterasz: itt áll a karakter
             s += flat(0, 196, 400, 44, '#3a2c58') + rect(60, 190, 280, 8, '#6a5a98', 'rx="2"');
             s += rect(66, 160, 4, 30, '#6a5a98') + rect(330, 160, 4, 30, '#6a5a98') + rect(64, 158, 272, 4, '#6a5a98', 'rx="2"');
-            s += figure(200, 194, Object.assign({}, o, { mood: 'proud' }), 0.8);
+            if (o && o.guest) { s += guestFigure(o, 150, 194, 0.8, 'happy'); s += figure(246, 194, Object.assign({}, o, { mood: 'proud' }), 0.8); }
+            else s += figure(200, 194, Object.assign({}, o, { mood: 'proud' }), 0.8);
             return s;
         },
 
@@ -935,6 +955,7 @@
             s += path('M0 232 Q120 208 230 236 L260 240 L0 240Z', '#e8dcc4', 'stroke="none"');
             s += guestFigure(o, 170, 230, 0.82, 'happy');
             s += figure(236, 230, Object.assign({}, o, { mood: 'happy' }), 0.82);
+            s += propScene(o, 'park');
             return s;
         },
         library: function (o) {
@@ -951,6 +972,7 @@
             s += deskSet(250, 150, 130, 220) + prop('books', 280, 150, 30, { noShadow: true }) + prop('bulb', 350, 150, 26, { noShadow: true }) + prop('laptop', 318, 150, 32, { noShadow: true });
             s += guestFigure(o, 130, 228, 0.82, 'happy');
             s += figure(210, 228, Object.assign({}, o, { mood: 'happy' }), 0.82);
+            s += propScene(o, 'library');
             return s;
         },
         train: function (o) {
@@ -961,6 +983,7 @@
             s += line('M0 24 H400', '#d9d2e6', 4) + [60, 140, 220, 300].map(function (x) { return line('M' + x + ' 24 v22 M' + (x - 6) + ' 46 h12', '#d9d2e6', 2.4); }).join('');
             s += guestFigure(o, 130, 230, 0.82, 'happy');
             s += figure(240, 230, Object.assign({}, o, { mood: 'happy', pose: 'phone' }), 0.82);
+            s += propScene(o, 'train');
             return s;
         },
         rooftop: function (o) {
@@ -1002,9 +1025,10 @@
             var s = outdoorSet('#8d9cc0', '#b7bfd8', '#6f6f86', { curb: true });
             s += prop('house', 40, 178, 78, { noShadow: true }) + prop('dept', 140, 178, 112, { noShadow: true }) + prop('store', 330, 178, 84, { noShadow: true });
             for (var i = 0; i < 42; i++) s += line('M' + (6 + (i * 37) % 392) + ' ' + (10 + (i * 53) % 200) + ' l-5 14', '#e6efff', 1.1, 'opacity=".7" class="rainl" style="animation-delay:-' + ((i % 7) * 0.12).toFixed(2) + 's"');
-            s += guestFigure(o, 120, 224, 0.8, 'happy');
-            s += figure(240, 224, Object.assign({}, o, { mood: 'happy' }), 0.8);
-            s += path('M170 78 Q240 28 310 78 Q240 66 170 78Z', '#f5a9b8', 'stroke="#ffffff" stroke-width="2"') + line('M240 78 V150', '#6a5a98', 2.4);
+            // az esernyő a figurák mögött van, a nyele a kettejük között, így nem megy át az arcokon
+            s += line('M212 74 V200', '#6a5a98', 2.6) + path('M96 78 Q212 14 328 78 Q212 64 96 78Z', '#f5a9b8', 'stroke="#ffffff" stroke-width="2"');
+            s += guestFigure(o, 170, 226, 0.8, 'happy');
+            s += figure(256, 226, Object.assign({}, o, { mood: 'happy' }), 0.8);
             return s;
         },
         contest: function (o) {
@@ -1014,8 +1038,8 @@
             s += path('M150 0 L110 190 L290 190 L250 0Z', 'rgba(255,240,200,.28)', 'stroke="none"');
             s += rect(60, 36, 280, 26, '#ffffff', 'rx="8" stroke="#f5a9b8" stroke-width="2.4"') + rect(80, 45, 150, 7, '#f5a9b8', 'rx="3.5" stroke="none"') + prop('trophy', 310, 54, 28, { noShadow: true });
             s += rect(40, 188, 320, 10, '#6a4a98', 'rx="3"');
-            s += npc('c1', 50, 236, 0.5, '1') + npc('c3', 140, 238, 0.5, '3') + npc('c2', 260, 238, 0.5, '2') + npc('c5', 350, 236, 0.5, '5');
-            s += guestFigure(o, 130, 190, 0.7, 'happy');
+            s += npc('c1', 34, 228, 0.5, '1') + npc('c3', 96, 230, 0.5, '3') + npc('c2', 312, 230, 0.5, '2') + npc('c5', 368, 228, 0.5, '5');
+            s += guestFigure(o, 140, 190, 0.7, 'happy');
             s += figure(240, 190, Object.assign({}, o, { mood: 'proud', pose: 'wave' }), 0.78);
             return s;
         },
@@ -1035,7 +1059,7 @@
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
         var fn = SCENES[id] || SCENES.room;
-        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, fx: v.fx, uid: 'sc' + id, guest: v.guest });
+        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, fx: v.fx, uid: 'sc' + id, guest: v.guest, prop: v.prop });
         if (id === 'room') return body;
         return '<svg class="eletut-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illusztráció">' + propDefs() + body + '</svg>';
     };

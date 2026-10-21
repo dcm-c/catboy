@@ -1347,6 +1347,7 @@
         var c = E.ctx(s);
         return {
             id: ev.id, title: s.event.title, text: s.event.text, art: s.event.art,
+            prop: ev.prop || '',
             guest: ev.reach || (typeof ev.guest === 'function' ? ev.guest(s, c) : ev.guest) || '',
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
             mood: typeof ev.mood === 'function' ? ev.mood(s, c) : (ev.mood || ''),
