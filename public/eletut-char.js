@@ -13,7 +13,7 @@
 // Minden függvény tiszta szöveget ad (SVG-markup), ezért Node-ban is tesztelhető.
 //
 // Opciók: { skin, hairStyle, hairColor, outfit:{slot:itemId}, colors:{slot:hex}, makeup:{hely:{style,color}},
-//           mood:'neutral|happy|worried|proud', pose:'idle|wave|hips', uid }
+//           mood:'neutral|happy|worried|proud', pose:'idle|wave|hips|sit|phone|cheer|think|hold|point|shrug', uid }
 // Rétegsorrend: hátsó tárgyak és haj, lábak, cipő, alsó ruha, nyak+törzs, felső, karok és ujjak, nyakdíszek, fej, smink,
 //               elülső haj, kiegészítők.
 // =========================================================
@@ -187,9 +187,17 @@
         wave: [[14.2, -88], [32.5, -83], [31.8, -107]],
         hips: [[14.2, -88], [28.5, -71], [14.6, -57]],
         sit: [[14.2, -88], [21.5, -73], [12, -59]],
-        phone: [[14.2, -88], [25, -77], [10.5, -81]]
+        phone: [[14.2, -88], [25, -77], [10.5, -81]],
+        cheer: [[14.2, -88], [34, -93], [38.5, -117]],
+        think: [[14.2, -88], [22, -83], [7.5, -97]],
+        hold: [[14.2, -88], [21, -73], [5.6, -66]],
+        point: [[14.2, -88], [29, -88], [42, -86]],
+        shrug: [[14.2, -88], [28, -76], [30, -92]]
     };
-    var HAND_AT = { idle: [18.1, -49.4, 0], wave: [31.8, -110.4, 180], hips: [13, -56, -78], sit: [12, -56.4, 20], phone: [10.4, -84.4, 188] };
+    // a bal kar is a póz szerint mozog (a többi póznál üresen lóg)
+    var ARMS_L = { cheer: 'cheer', hold: 'hold', shrug: 'shrug' };
+    var HAND_AT = { idle: [18.1, -49.4, 0], wave: [31.8, -110.4, 180], hips: [13, -56, -78], sit: [12, -56.4, 20], phone: [10.4, -84.4, 188],
+        cheer: [38.6, -119.6, 180], think: [7.3, -99.4, 205], hold: [5.4, -63.4, 100], point: [44.4, -86, -90], shrug: [30.4, -94.4, 170] };
     var LEG_T = [[6.6, -53], [6.9, -28], [6.3, -7]]; // jobb láb középvonala: csípő, térd, boka
 
     // =========================================================
@@ -613,14 +621,14 @@
         }
         return s;
     }
-    function arm(u, q, sg, pose, topKind, c, isMain) {
+    function arm(u, q, sg, pose, topKind, c, isMain, handKey) {
         var s = '';
         var tw = 6.2;
         var q2 = q;
         // bőr-kar (hosszabb: a ruhaujj csak részben takarja)
         s += tube(qd(q2), tw, c.skin);
         // kéz
-        var h = isMain ? HAND_AT[pose] : HAND_AT.idle;
+        var h = HAND_AT[handKey || (isMain ? pose : 'idle')];
         s += handShape(h[0], h[1], h[2], c, isMain ? pose : 'idle', 1);
         if (topKind && TOPDEF[topKind]) {
             var d = TOPDEF[topKind];
@@ -633,7 +641,9 @@
         var idleQ = ARMS.idle;
         var leftIdle = idleQ.map(function (p) { return [-p[0], p[1]]; });
         // bal kar: üres járat (hand mirrored)
-        var s = mirror(arm(u, idleQ, 1, 'idle', topKind, c, false));
+        var lk = ARMS_L[pose];
+        var s = lk ? mirror(arm(u, ARMS[lk], 1, 'idle', topKind, c, false, lk))
+            : mirror(arm(u, idleQ, 1, 'idle', topKind, c, false));
         s += arm(u, mainQ, 1, pose, topKind, c, true);
         if (pose === 'phone') s += G(P('M-3.6 -6 L3.6 -6 L3.6 5.4 L-3.6 5.4Z', '#4a4060', 'stroke="#2f2638" stroke-width=".9" stroke-linejoin="round"') + P('M-2.6 -4.6 L2.6 -4.6 L2.6 3.2 L-2.6 3.2Z', '#bfe3f8') + L('M-1.6 -2.6 L1.6 -2.6 M-1.6 -.6 L1 -.6', '#fff', 0.6) + CI(0, 4.4, .45, '#c9c4d8'), 'translate(4.6 -84.6) rotate(-6)');
         if (pose === 'wave') s += L('M39.4 -120 Q42.6 -114.6 39.4 -109', INK, 1, 'opacity=".55"') + L('M43.4 -123 Q47.4 -114.6 43.4 -106', INK, 1, 'opacity=".35"');

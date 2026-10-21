@@ -1056,8 +1056,15 @@
     function star8(x, y) { return path('M' + x + ' ' + (y - 8) + ' l2.4 5.4 5.6 .8 -4 4 1 5.6 -5 -2.8 -5 2.8 1 -5.6 -4 -4 5.6 -.8z', '#ffe08a', 'opacity=".9"'); }
     A.SCENES = Object.keys(SCENES);
 
+    // Az eseménykép-rendező (eletut-stage.js) ugyanezeket a rajzolókat használja
+    A.kit = {
+        rect: rect, circ: circ, ell: ell, path: path, line: line, flat: flat, gshadow: gshadow, prop: prop, figure: figure, npc: npc, NPC: NPC,
+        guestFigure: guestFigure, shade: shade, mix: mix, n1: n1, star8: star8, bunting: bunting, deskSet: deskSet, iconProp: iconProp
+    };
+
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
+        if (v && v.shot && M.stage) return M.stage.render(v.shot, v);
         var fn = SCENES[id] || SCENES.room;
         var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, fx: v.fx, uid: 'sc' + id, guest: v.guest, prop: v.prop });
         if (id === 'room') return body;
