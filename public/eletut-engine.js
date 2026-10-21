@@ -1345,8 +1345,14 @@
         var ev = M.events.find(s.event.id);
         if (!ev) return null;
         var c = E.ctx(s);
+        var shot = null;
+        if (M.stage && M.stage.shots && M.stage.shots[ev.id]) {
+            var sp = M.stage.shots[ev.id];
+            try { sp = typeof sp === 'function' ? sp(s, c) : sp; } catch (e) { sp = null; }
+            if (sp) shot = Object.assign({ key: ev.id }, sp);
+        }
         return {
-            id: ev.id, title: s.event.title, text: s.event.text, art: s.event.art,
+            id: ev.id, shot: shot, title: s.event.title, text: s.event.text, art: s.event.art,
             prop: ev.prop || '',
             guest: ev.reach || (typeof ev.guest === 'function' ? ev.guest(s, c) : ev.guest) || '',
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',

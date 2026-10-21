@@ -558,3 +558,40 @@
 .el-gift { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--el-line, rgba(0,0,0,.15)); display: grid; gap: 8px; }
 .el-gift-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .el-tab { position: relative; }
+
+/* Eseményképek (eletut-stage.js): élő részletek. Csak akkor mozognak, ha a rendszer nem kért csökkentett mozgást. */
+@keyframes stg-fall { 0% { transform: translate(0, 0); opacity: 0; } 8% { opacity: .95; } 85% { opacity: .9; } 100% { transform: translate(var(--dx, 8px), 250px) rotate(280deg); opacity: 0; } }
+@keyframes stg-rise { 0% { transform: translate(0, 0); opacity: 0; } 25% { opacity: .85; } 100% { transform: translate(var(--dx, 3px), -36px); opacity: 0; } }
+@keyframes stg-drift { from { transform: translateX(-9px); } to { transform: translateX(11px); } }
+@keyframes stg-fly { 0%, 100% { transform: translate(0, 0); opacity: .2; } 25% { transform: translate(9px, -7px); opacity: 1; } 55% { transform: translate(-5px, -15px); opacity: .5; } 80% { transform: translate(7px, -4px); opacity: 1; } }
+@keyframes stg-twk { 0%, 100% { opacity: .15; transform: scale(.5) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(45deg); } }
+@keyframes stg-flame { 0%, 100% { transform: scale(1, 1); } 40% { transform: scale(.88, 1.12) rotate(-3deg); } 70% { transform: scale(1.08, .92) rotate(3deg); } }
+@keyframes stg-wag { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
+@keyframes stg-wave { 0%, 100% { transform: translateX(-7px); } 50% { transform: translateX(7px); } }
+@keyframes stg-scroll { from { transform: translateX(0); } to { transform: translateX(-70px); } }
+@keyframes stg-shaft { 0%, 100% { opacity: 1; } 50% { opacity: .72; } }
+@keyframes stg-pop { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes stg-flash { 0% { opacity: 0; } 12% { opacity: .75; } 100% { opacity: 0; } }
+@keyframes stg-bokeh { 0%, 100% { opacity: .1; transform: translateY(0); } 50% { opacity: .3; transform: translateY(-5px); } }
+@keyframes stg-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes stg-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes stg-pulse { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+    .stg-scene .stg-fall { animation: stg-fall 7s linear infinite; }
+    .stg-scene .stg-rise { animation: stg-rise 3.2s ease-out infinite; }
+    .stg-scene .stg-drift { animation: stg-drift 11s ease-in-out infinite alternate; }
+    .stg-scene .stg-fly { animation: stg-fly 5s ease-in-out infinite; }
+    .stg-scene .stg-twk { transform-box: fill-box; transform-origin: center; animation: stg-twk 2.6s ease-in-out infinite; }
+    .stg-scene .stg-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: stg-flame .9s ease-in-out infinite; }
+    .stg-scene .stg-wag { transform-box: fill-box; transform-origin: 0 100%; animation: stg-wag .7s ease-in-out infinite; }
+    .stg-scene .stg-wave { animation: stg-wave 4s ease-in-out infinite; }
+    .stg-scene .stg-scroll { animation: stg-scroll 2.4s linear infinite; }
+    .stg-scene .stg-curtain { transform-box: fill-box; transform-origin: 50% 0; animation: el-curtain 6s ease-in-out infinite; }
+    .stg-scene .stg-shaft { animation: stg-shaft 7s ease-in-out infinite; }
+    .stg-scene .stg-pop { transform-box: fill-box; transform-origin: 15% 100%; animation: stg-pop .55s cubic-bezier(.3, 1.4, .5, 1) both; }
+    .stg-scene .stg-flash { animation: stg-flash 1.2s ease-out 1 both; }
+    .stg-scene .stg-bokeh { animation: stg-bokeh 5s ease-in-out infinite; }
+    .stg-scene .stg-bob { animation: stg-bob 2.6s ease-in-out infinite; }
+    .stg-scene .stg-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: stg-sway 3.4s ease-in-out infinite; }
+    .stg-scene .stg-pulse { animation: stg-pulse 2.4s ease-in-out infinite; }
+}
