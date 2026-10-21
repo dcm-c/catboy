@@ -200,7 +200,7 @@ function endingFor(patch) {
     return s.ending.id;
 }
 test('befejezések: mindegyik elérhető és a feltétel szerint választódik', () => {
-    assert.equal(endingFor((s) => { s.comm = 300; }), 'legenda');
+    assert.equal(endingFor((s) => { s.comm = 500; }), 'legenda');
     assert.equal(endingFor((s) => { s.job = 'senior'; s.skills = { prog: 5, angol: 3 }; s.comp = 3; }), 'karrier');
     assert.equal(endingFor((s) => { s.skills = { rajz: 5, varras: 4, stream: 0 }; }), 'alkoto');
     assert.equal(endingFor((s) => { s.flags.partner = true; s.housing = 'lakas'; s.parents = 'accepting'; }), 'otthon');
@@ -271,7 +271,7 @@ test('események: minden esemény szövege és minden választása hibátlanul l
 });
 
 test('minden esemény art-azonosítója ismert jelenet', () => {
-    const known = new Set(['room', 'phone', 'shop', 'family', 'work', 'school', 'discord', 'con', 'casino', 'moving', 'office', 'stage', 'sunset', 'cafe', 'friends', 'street', 'bills']);
+    const known = new Set(['room', 'phone', 'shop', 'family', 'work', 'school', 'discord', 'con', 'casino', 'moving', 'office', 'stage', 'sunset', 'cafe', 'friends', 'street', 'bills', 'park', 'library', 'train', 'rooftop', 'beach', 'kitchen', 'rain', 'contest']);
     const bad = Ev.EVENTS.filter((e) => !known.has(e.art)).map((e) => e.id + ':' + e.art);
     assert.deepEqual(bad, []);
     Ev.ENDINGS.forEach((en) => assert.ok(known.has(en.art), en.id));
@@ -365,4 +365,70 @@ test('számítógépes játékok: ingyenes és fizetős, energia, havi korlát, 
     // mentés
     const back = E.deserialize(E.serialize(s));
     assert.equal(E.gameLevel(back, 'retroplat'), E.gameLevel(s, 'retroplat'));
+});
+
+test('csalás-felismerés: a pecsét észreveszi a kézzel átírt mentést és állapotot; a 0,5× sebesség érvényes', () => {
+    const s = E.newState({ name: 'Cs' }); E.seal(s);
+    assert.ok(E.sealOk(s));
+    s.money += 1e6;
+    assert.equal(E.sealOk(s), false, 'a konzolból átírt pénz kiderül');
+    E.seal(s);
+    assert.ok(E.sealOk(s));
+    // normál mentés-betöltés: nincs gyanú
+    const back = E.deserialize(E.serialize(s));
+    assert.ok(back && !back.cheat && E.sealOk(back));
+    // átírt mentés: gyanús
+    const raw = JSON.parse(E.serialize(s)); raw.money = 99999999;
+    const bad = E.deserialize(JSON.stringify(raw));
+    assert.ok(bad && bad.cheat === true, 'átírt mentés');
+    const raw2 = JSON.parse(E.serialize(s)); raw2.items = { kabat: true };
+    assert.ok(E.deserialize(JSON.stringify(raw2)).cheat, 'kézzel hozzáadott ruha is kiderül');
+    // régi mentés pecsét nélkül: elfogadjuk
+    const old = JSON.parse(E.serialize(s)); delete old.seal; old.money = 12345;
+    assert.ok(!E.deserialize(JSON.stringify(old)).cheat);
+    // a játék közbeni változás (tick, vásárlás) nem számít csalásnak, ha pecsételünk
+    s.paused = false; E.tick(s, 1); E.seal(s); assert.ok(E.sealOk(s));
+    // 0,5× sebesség
+    const h = E.newState({ name: 'H' }); h.speed = 0.5; h.energy = 10; h.paused = false;
+    const a = E.derive(h).regen; E.tick(h, 1);
+    assert.ok(Math.abs((h.energy - 10) - a * 0.5) < 1e-6, 'fél sebességgel telik az idő');
+    assert.equal(E.deserialize(E.serialize(h)).speed, 0.5);
+});
+
+test('játék-gépkövetelmények: minimum és ajánlott gép, akadozás az ajánlott alatt', () => {
+    D.GAMES.forEach((g) => { assert.ok(g.rec >= g.minComp, g.id + ': az ajánlott gép nem gyengébb a minimumnál'); assert.ok(D.COMPUTERS[g.rec], g.id); });
+    D.COMPUTERS.forEach((c) => assert.ok(c.spec, c.id + ' specifikáció'));
+    const s = E.newState({ name: 'G' }); s.money = 1e6; s.comp = 1; s.energy = 100;
+    const g = D.find(D.GAMES, 'retroplat'); // min: laptop, ajánlott: irodai PC
+    assert.ok(E.buyGame(s, 'retroplat').ok);
+    assert.ok(E.gameLag(s, g) && E.gameCost(s, g) > g.energy);
+    const e0 = s.energy, r = E.playGame(s, 'retroplat');
+    assert.ok(r.ok && r.lag && e0 - s.energy === E.gameCost(s, g) && /akadozik/.test(r.text));
+    const t = E.newState({ name: 'H' }); t.money = 1e6; t.comp = 2; t.energy = 100; E.buyGame(t, 'retroplat');
+    assert.ok(!E.gameLag(t, g)); const r2 = E.playGame(t, 'retroplat');
+    assert.ok(!r2.lag && 100 - t.energy === g.energy && r2.conf > r.conf, 'jó gépen nincs akadozás');
+});
+
+test('a stat-értékek a nagyobb állások bérét és a műszakot erősebben befolyásolják; néhány állás statot kér', () => {
+    const s = E.newState({ name: 'J' }); s.skills.prog = 5; s.skills.angol = 3; s.comp = 3; s.month = 12 * 9; // 23 éves
+    assert.equal(E.canHire(s, 'senior').ok, false);
+    assert.match(E.canHire(s, 'senior').reason, /Kód stat/);
+    s.job = 'senior';
+    const base = E.derive(s).income.job;
+    s.job = null;
+    s.decor.ledfeny = true; s.items.arch = true; s.equipped.gear = 'arch';
+    assert.ok(E.stats(s).total.code >= 18);
+    // több Kód stat → nagyobb fizetés
+    s.mods = [{ id: 't', label: 't', st: { code: 40 } }];
+    s.job = 'senior';
+    const hi = E.derive(s);
+    s.job = null;
+    assert.ok(hi.income.job > base, 'a Kód stat emeli a bért');
+    assert.ok(hi.jobBonus.pct > 0 && hi.jobBonus.parts.some((p) => p.stat === 'code'));
+    assert.ok(hi.workClick > D.find(D.JOBS, 'senior').click);
+    assert.equal(E.canHire(s, 'senior').ok, true, 'elég Kód stattal felvesznek');
+    // a nagyobb állás érzékenyebb, mint egy kisebb
+    const w = D.find(D.JOBS, 'senior').sw.code, f = D.find(D.JOBS, 'fagyi').sw;
+    assert.ok(w > (f.code || 0));
+    D.JOBS.forEach((j) => assert.ok(j.sw && Object.keys(j.sw).every((k) => D.find(D.STATS, k)), j.id + ' stat-súlyok'));
 });

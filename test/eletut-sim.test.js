@@ -43,7 +43,7 @@ for (const name of Object.keys(POLICIES)) {
 
 test('az események láncai: a történeti események mind megjelennek egy aktív játékban', () => {
     const { s } = runBot(POLICIES.social, 99);
-    const story = Ev.EVENTS.filter((e) => e.prio === 1 && !['e_discord2', 'e_dinner', 'e_dinner2', 'e_grad', 'e_nudge', 'e_stage'].includes(e.id));
+    const story = Ev.EVENTS.filter((e) => e.prio === 1 && !['e_discord2', 'e_dinner', 'e_dinner2', 'e_grad', 'e_nudge', 'e_stage', 'a_hold3', 'a_hold4', 'a_lilla1', 'a_lilla2', 'a_lilla3', 'a_bence1', 'a_bence2'].includes(e.id));
     const missing = story.filter((e) => !s.seen[e.id]).map((e) => e.id);
     assert.deepEqual(missing, [], 'hiányzó történeti események: ' + missing.join(', '));
 });

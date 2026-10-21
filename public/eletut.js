@@ -73,6 +73,76 @@
     }
     function wipe() { try { localStorage.removeItem(D.SAVE_KEY); } catch (e) { /* */ } }
 
+    // ---------- Mentés fájlba / fájlból ----------
+    function exportSave() {
+        if (!S) return;
+        var pkg = { app: 'pasztell-eletut', v: 1, name: S.name, age: E.ageYears(S), exported: new Date().toISOString(), data: E.serialize(S) };
+        try {
+            var blob = new Blob([JSON.stringify(pkg)], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'pasztell-eletut-' + String(S.name).replace(/[^\w\-]+/g, '_') + '-' + E.ageYears(S) + 'ev.json';
+            document.body.appendChild(a); a.click();
+            later(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+            toast('Letöltve: a mentésed fájlba került. Később betöltheted ugyanitt (nyíl fel gomb).', 'good');
+        } catch (e) { toast('A letöltés nem sikerült ebben a böngészőben.', 'bad'); }
+    }
+    function importSave(file) {
+        if (!file) return;
+        var r = new FileReader();
+        r.onerror = function () { toast('A fájlt nem lehetett beolvasni.', 'bad'); };
+        r.onload = function () {
+            var pkg = null;
+            try { pkg = JSON.parse(String(r.result)); } catch (e) { /* */ }
+            var text = pkg && pkg.app === 'pasztell-eletut' && typeof pkg.data === 'string' ? pkg.data : null;
+            var st = text ? E.deserialize(text) : null;
+            if (!st) { toast('Ez nem Pasztell Életút mentés.', 'bad'); return; }
+            if (st.cheat) { caught('import'); return; }
+            if (S && !window.confirm('A fájlban ' + st.name + ' (' + E.ageYears(st) + ' éves) története van. Betöltöd? A mostani állás elvész.')) return;
+            S = st; S.paused = true; E.seal(S); save();
+            lastMonth = -1; lastSceneSig = ''; panelNote = null; tab = 'szekreny'; casinoView = null; freezeMoney = null; casinoBusy = false;
+            enterGame();
+            toast('Betöltve: ' + st.name + ' (szünetel, indítsd el, ha kész vagy).', 'good');
+        };
+        r.readAsText(file);
+    }
+
+    // ---------- Csalás-felismerés ----------
+    var CHEAT_LINES = [
+        ['A Pasztell Pénzügyi Felügyelet értesítése', 'A számládon hirtelen megjelent egy összeg, aminek nincs fedezete, nincs számlája és nincs szégyenérzete. A karaktered mostantól nem szerepel a nyilvántartásban.'],
+        ['Blahaj nyomozó jelentése', 'A plüss cápa-hadsereg szimatolt egyet, és egyetlen pillantásból látta, hogy átírtad a mentést. A mentésed a cápák gyomrába került. Nem vagyunk büszkék rá, de ez a szabály.'],
+        ['Discord moderátori döntés', 'A karaktered kitiltásra került a szerverről csalásért. A fellebbezést elutasítottuk. Küldünk viszont egy matcha latte-t vigaszul.'],
+        ['Hivatalos közlemény az Univerzumtól', 'Az önbizalmat nem lehet beírni, csak kiérdemelni. A rendszer gyanús mozgást észlelt, ezért az életutadat visszavonták. Kezdheted elölről, ezúttal fair módon.'],
+        ['Szülői értesítés', 'Anya megtalálta a böngészőelőzményed, és a fejlesztői konzolt is. Az egész életutat visszavonták. „Kisfiam, ez nem így megy.”'],
+        ['Rendszerüzenet: 418', 'Teáskanna vagyok, és a számok nem csaphatók be. A karaktered törölve. Kérsz egy kamilla-teát?']
+    ];
+    function caught(why) {
+        stopLoop();
+        var line = CHEAT_LINES[Math.floor(Math.random() * CHEAT_LINES.length)];
+        var host = $('el-modal-host');
+        clear(host);
+        var ov = el('div', 'el-overlay');
+        var m = el('div', 'el-modal el-cheat');
+        m.setAttribute('role', 'alertdialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'el-cheat-title');
+        var body = el('div', 'el-modal-body');
+        var h = el('h2', '', 'Csalást észleltünk!'); h.id = 'el-cheat-title';
+        body.appendChild(h);
+        body.appendChild(el('p', 'el-note', why === 'import' ? 'A betöltött fájl tartalmát valaki átírta.' : 'A játékállás számai olyan módon változtak meg, ahogy a játékban nem szoktak.'));
+        body.appendChild(el('h3', '', line[0]));
+        body.appendChild(el('p', '', line[1]));
+        var b = el('button', 'el-btn', 'Értem, kezdem elölről'); b.type = 'button';
+        b.addEventListener('click', function () { clear(host); wipe(); S = null; showIntro(); });
+        body.appendChild(b);
+        m.appendChild(body); ov.appendChild(m); host.appendChild(ov);
+        wipe(); // már most törlődik, a lap újratöltése sem menti meg
+        b.focus({ preventScroll: true });
+    }
+    // A játék saját műveletei (kattintás, billentyű, érintés) után 12 másodpercig nem vizsgálunk: időzített
+    // animációk (kaszinó, értesítések) is módosíthatják a számokat. Tévedésből soha ne töröljünk valódi játékot.
+    var uiDirtyUntil = 0;
+    function markDirty() { uiDirtyUntil = performance.now() + 12000; }
+    ['click', 'keydown', 'pointerdown', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, markDirty, true); });
+
     // ---------- Értesítések ----------
     function toast(text, tone) {
         var host = $('el-toasts');
@@ -92,6 +162,9 @@
                 if (f.type === 'person') {
                     var pe = D.find(D.PEOPLE, f.id);
                     toast('Új ismerős: ' + (pe ? pe.name : '') + ' (Barátok fül)', 'good');
+                } else if (f.type === 'miss') {
+                    var pm = D.find(D.PEOPLE, f.id);
+                    toast('Rég beszéltél ' + (pm ? pm.name : 'valakivel') + ' (' + f.months + ' hónapja). Keresd meg a Barátok fülön!', 'funny');
                 } else if (f.type === 'skill') {
                     var sk = D.find(D.SKILLS, f.id);
                     toast((sk ? sk.name : 'Képesség') + ': ' + f.level + '. szint!', 'good');
@@ -153,6 +226,7 @@
         show('el-game', false); show('el-end', false); show('el-intro', true);
         var saved = load();
         var r = $('el-resume');
+        if (saved && saved.cheat) { r.hidden = true; buildCreator(); caught('save'); return; }
         if (saved) {
             r.hidden = false;
             r.textContent = 'Folytatom: ' + saved.name + ', ' + E.ageYears(saved) + ' évesen';
@@ -163,6 +237,7 @@
     function startNew() {
         draft.name = $('el-name').value;
         S = E.newState(draft);
+        E.seal(S);
         S.paused = false;
         E.showEvent(S, Ev.find('ch1'));
         lastMonth = -1; lastSceneSig = ''; panelNote = null; tab = 'szekreny'; casinoView = null; freezeMoney = null; casinoBusy = false;
@@ -173,6 +248,7 @@
     function resume() {
         var saved = load();
         if (!saved) { showIntro(); return; }
+        if (saved.cheat) { S = null; caught('save'); return; }
         S = saved;
         lastMonth = -1; lastSceneSig = ''; panelNote = null; tab = 'szekreny'; casinoView = null; freezeMoney = null; casinoBusy = false;
         enterGame();
@@ -201,7 +277,7 @@
         var sp = $('el-speed');
         clear(sp);
         speedBtns = [];
-        [['pause', 0, 'Szünet'], ['1', 1, '1× sebesség'], ['2', 2, '2× sebesség'], ['4', 4, '4× sebesség']].forEach(function (d) {
+        [['pause', 0, 'Szünet'], ['0,5', 0.5, '0,5× sebesség (lassú)'], ['1', 1, '1× sebesség'], ['2', 2, '2× sebesség'], ['4', 4, '4× sebesség']].forEach(function (d) {
             var b = el('button');
             b.type = 'button';
             b.setAttribute('aria-label', d[2]);
@@ -215,12 +291,15 @@
             sp.appendChild(b);
             speedBtns.push({ b: b, v: d[1] });
         });
-        var sv = $('el-menu-save'), nw = $('el-menu-new');
-        clear(sv); clear(nw);
-        sv.appendChild(icon('save')); nw.appendChild(icon('trash'));
+        var sv = $('el-menu-save'), nw = $('el-menu-new'), ex = $('el-menu-export'), im = $('el-menu-import');
+        clear(sv); clear(nw); clear(ex); clear(im);
+        sv.appendChild(icon('save')); nw.appendChild(icon('trash')); ex.appendChild(icon('download')); im.appendChild(icon('upload'));
         if (!sv.dataset.bound) {
             sv.dataset.bound = '1';
-            sv.addEventListener('click', function () { save(); toast('Elmentve.', 'good'); });
+            sv.addEventListener('click', function () { save(); toast('Elmentve a böngészőbe.', 'good'); });
+            ex.addEventListener('click', exportSave);
+            im.addEventListener('click', function () { $('el-import-file').click(); });
+            $('el-import-file').addEventListener('change', function (e) { importSave(e.target.files && e.target.files[0]); e.target.value = ''; });
             nw.addEventListener('click', function () {
                 if (window.confirm('Biztosan új életútba kezdesz? A mostani mentés elvész.')) { wipe(); S = null; showIntro(); }
             });
@@ -356,6 +435,7 @@
         // fülek: a kaszinó 18 évesen jelenik meg
         var needCasino = age >= D.CASINO_MIN_AGE;
         if (needCasino !== !!tabsHasCasino) buildTabs();
+        updateTabBadges();
         refreshAfford();
         refreshLive();
         void age;
@@ -413,13 +493,14 @@
     ];
     function selectTab(id) {
         var wasBeauty = tab === 'smink';
-        tab = id; panelNote = null; casinoView = null; socialNote = null;
+        tab = id; panelNote = null; casinoView = null; socialNote = null; giftFor = null; giftPick = null;
         if (id === 'smink' && stageView !== 'face') { prevStage = stageView; stageView = 'face'; renderScene(true); }
         else if (wasBeauty && id !== 'smink' && stageView === 'face') { stageView = prevStage || 'room'; renderScene(true); }
         buildTabs(); renderPanel();
     }
     var prevStage = 'room';
     var socialNote = null;
+    var giftFor = null, giftPick = null;
     function buildTabs() {
         var host = $('el-tabs');
         clear(host);
@@ -437,12 +518,25 @@
                 b.setAttribute('aria-selected', String(tab === t[0]));
                 b.appendChild(icon(t[1]));
                 b.appendChild(el('span', '', t[2]));
+                b.dataset.tab = t[0];
                 b.addEventListener('click', function () { selectTab(t[0]); var pn = $('el-panel'); if (pn && window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) pn.scrollIntoView({ block: 'nearest' }); });
                 row.appendChild(b);
             });
             box.appendChild(row);
             host.appendChild(box);
         });
+    }
+
+    // Piros pont a Barátok fülön, ha valakivel rég nem beszéltél
+    function updateTabBadges() {
+        var host = $('el-tabs');
+        if (!host) return;
+        var n = E.neglected(S).length;
+        var b = host.querySelector('.el-tab[data-tab="baratok"]');
+        if (!b) return;
+        var d = b.querySelector('.dot');
+        if (n && !d) { d = el('i', 'dot'); d.setAttribute('aria-hidden', 'true'); b.appendChild(d); b.title = 'Rég nem beszéltél valakivel'; }
+        else if (!n && d) { b.removeChild(d); b.removeAttribute('title'); }
     }
 
     function renderAll() {
@@ -485,6 +579,7 @@
         };
     }
     function afterAction() {
+        E.seal(S);
         drainEvents();
         toastAchievements(E.checkAchievements(S));
         save();
@@ -1227,9 +1322,63 @@
                     acts.appendChild(row);
                 });
                 card.appendChild(acts);
+                card.appendChild(giftBox(pe));
             }
             p.appendChild(card);
         });
+    }
+    // Ajándékozás: a saját tárgyad odaadod; mindenki mást szeret
+    function giftBox(pe) {
+        var wrap = el('div', 'el-gift');
+        var tz = D.GIFT_TASTE[pe.id];
+        if (!tz) return wrap;
+        var owned = Object.keys(S.items).filter(function (id) { return D.find(D.ITEMS, id); });
+        var open = giftFor === pe.id;
+        var head = el('div', 'el-social-row');
+        var b = el('button', 'el-btn' + (open ? '' : ' alt'));
+        b.type = 'button';
+        b.textContent = open ? 'Mégse' : 'Ajándékot adok';
+        b.addEventListener('click', function () { giftFor = open ? null : pe.id; giftPick = null; renderPanel(); });
+        head.appendChild(b);
+        var info = el('div', 'el-social-info');
+        info.appendChild(el('span', 'el-note', pe.name + ' szereti: ' + tz.likes + '.'));
+        var at = S.social.giftAt && S.social.giftAt[pe.id];
+        if (at !== undefined && S.month - at < D.GIFT_CD) info.appendChild(el('span', 'el-note warn', 'Nemrég ajándékoztál (még ' + (D.GIFT_CD - (S.month - at)) + ' hónapig).'));
+        head.appendChild(info);
+        wrap.appendChild(head);
+        if (!open) return wrap;
+        if (!owned.length) { wrap.appendChild(el('div', 'el-note warn', 'Még nincs egyetlen tárgyad sem, amit odaadhatnál. Vásárolj a Szekrény fülön.')); return wrap; }
+        var grid = el('div', 'el-gift-list');
+        owned.forEach(function (id) {
+            var it = D.find(D.ITEMS, id);
+            var gb = el('button', 'el-choice');
+            gb.type = 'button';
+            gb.textContent = it.name;
+            gb.setAttribute('aria-pressed', String(giftPick === id));
+            gb.addEventListener('click', function () { giftPick = id; renderPanel(); });
+            grid.appendChild(gb);
+        });
+        wrap.appendChild(grid);
+        if (giftPick && S.items[giftPick]) {
+            var it2 = D.find(D.ITEMS, giftPick);
+            var can = E.canGift(S, pe.id, giftPick);
+            var ok = el('button', 'el-btn' + (can.ok ? ' blue' : ' alt'));
+            ok.type = 'button';
+            ok.textContent = 'Odaadom: ' + it2.name;
+            ok.disabled = !can.ok;
+            ok.addEventListener('click', act(function () {
+                var r = E.giveGift(S, pe.id, giftPick);
+                if (!r.ok) { reportResult(r); return; }
+                socialNote = { who: pe.id, tone: r.tone, text: r.text, bond: r.bond, conf: 0 };
+                giftFor = null; giftPick = null;
+                happyUntil = performance.now() + 2600;
+                toast(pe.name + ': ' + (r.tone === 'great' ? 'imádja az ajándékot!' : r.tone === 'ok' ? 'örül az ajándéknak.' : 'megköszöni az ajándékot.'), r.tone === 'meh' ? '' : 'good');
+            }));
+            wrap.appendChild(ok);
+            wrap.appendChild(el('div', 'el-note', 'A tárgy végleg az övé lesz, nálad megszűnik. Ha viselted, lekerül rólad.'));
+            if (!can.ok) wrap.appendChild(el('div', 'el-note warn', can.reason));
+        }
+        return wrap;
     }
     function unlockHint(pe) {
         var u = pe.unlock || {};
@@ -1286,8 +1435,9 @@
         var g = el('div', 'el-grid');
         D.GAMES.forEach(function (gm) {
             var owned = E.gameOwned(S, gm.id), plays = E.gamePlays(S, gm.id), lv = E.gameLevel(S, gm.id);
-            var chips = [[gm.cost === 0 ? 'Ingyenes' : 'Megvásárolható', gm.cost === 0 ? 'plus' : ''], ['−' + gm.energy + ' energia', 'minus']];
-            if (gm.minComp > 0) chips.push(['Gép: ' + D.COMPUTERS[gm.minComp].name, S.comp >= gm.minComp ? 'plus' : 'minus']);
+            var chips = [[gm.cost === 0 ? 'Ingyenes' : 'Megvásárolható', gm.cost === 0 ? 'plus' : ''], ['−' + E.gameCost(S, gm) + ' energia', 'minus']];
+            chips.push(['Minimum: ' + D.COMPUTERS[gm.minComp].name, S.comp >= gm.minComp ? 'plus' : 'minus']);
+            if (gm.rec > gm.minComp) chips.push(['Ajánlott: ' + D.COMPUTERS[gm.rec].name, S.comp >= gm.rec ? 'plus' : 'minus']);
             if (gm.needsDiscord) chips.push(['Discord kell', S.flags.discord ? 'plus' : 'minus']);
             var perLevel = statChips(gm.st).map(function (c) { return [c[0] + ' / szint', c[1]]; });
             perLevel.forEach(function (c) { chips.push(c); });
@@ -1315,7 +1465,9 @@
                 card.appendChild(b0);
             } else {
                 var can = E.canPlay(S, gm.id);
-                var b1 = actionBtn('Játszom · −' + gm.energy + ' energia', act(function () {
+                var lagging = E.gameLag(S, gm);
+                if (lagging) card.appendChild(el('div', 'el-note bad', 'Az ajánlott gép (' + D.COMPUTERS[gm.rec].name + ') alatt akadozik: +40% energia, kevesebb önbizalom.'));
+                var b1 = actionBtn('Játszom · −' + E.gameCost(S, gm) + ' energia', act(function () {
                     var r = E.playGame(S, gm.id);
                     if (reportResult(r)) {
                         toast(r.text + ' (+' + grp(r.conf) + ' önbizalom)', 'good');
@@ -1336,6 +1488,7 @@
         var cur = el('div', 'el-item owned');
         cur.appendChild(el('h4', '', 'A géped: ' + c.name));
         cur.appendChild(el('p', '', c.desc));
+        if (c.spec) cur.appendChild(el('div', 'el-note', 'Specifikáció: ' + c.spec));
         var cs = el('div', 'el-chips');
         cs.appendChild(chip('tanulás +' + f1(c.study), 'plus'));
         cs.appendChild(chip('online önbizalom +' + f1(c.online * (S.flags.discord ? 1 : 0.4)) + '/mp', 'plus'));
@@ -1411,6 +1564,7 @@
             cs.appendChild(chip(d.job.hours === 'full' ? 'teljes munkaidő' : 'részmunkaidő', ''));
             cs.appendChild(chip(S.jobMonths + ' hónapja', ''));
             top.appendChild(cs);
+            if (d.jobBonus && d.jobBonus.parts.length) top.appendChild(el('div', 'el-note', 'Stat-bónusz a bérre és a műszakra: +' + d.jobBonus.pct + '% (' + d.jobBonus.parts.map(function (x) { return D.find(D.STATS, x.stat).label + ' ' + x.value + ' → +' + f1(x.pct) + '%'; }).join(', ') + ').'));
             top.appendChild(actionBtn('Felmondok', act(function () { if (window.confirm('Biztosan felmondasz?')) reportResult(E.quit(S)); }), { cls: 'alt' }));
         }
         p.appendChild(top);
@@ -1423,8 +1577,12 @@
             Object.keys(j.needs || {}).forEach(function (k) { need.push(D.find(D.SKILLS, k).name + ' ' + j.needs[k] + '.'); });
             if (j.comp) need.push(D.COMPUTERS[j.comp].name);
             if (j.comm) need.push('Közösség ' + j.comm);
+            Object.keys(j.needsStat || {}).forEach(function (k) { need.push(D.find(D.STATS, k).label + ' stat ' + j.needsStat[k]); });
             if (j.minAge) need.push(j.minAge + '+ év');
             if (need.length) chips.push(['Kell: ' + need.join(', '), '']);
+            var jb = E.jobBonus(S, j);
+            Object.keys(j.sw || {}).forEach(function (k) { chips.push([D.find(D.STATS, k).label + ' +' + f1(j.sw[k] * 100) + '%/pont', 'stat ' + STAT_TONE[k]]); });
+            if (jb.pct) chips.push(['most: +' + jb.pct + '% bér', 'plus']);
             var cur = S.job === j.id;
             g.appendChild(itemCard({
                 title: j.name, desc: j.desc, owned: cur, worn: cur, chips: chips, note: can.ok || cur ? '' : can.reason,
@@ -1836,7 +1994,7 @@
         m.setAttribute('aria-modal', 'true');
         m.setAttribute('aria-labelledby', 'el-modal-title');
         var art = el('div', 'el-modal-art');
-        art.innerHTML = A.scene(v.art, Object.assign(currentView(), { uid: 'ev', fx: true, emood: v.mood || undefined }));
+        art.innerHTML = A.scene(v.art, Object.assign(currentView(), { uid: 'ev', fx: true, emood: v.mood || undefined, guest: v.guest || undefined }));
         m.appendChild(art);
         var body = el('div', 'el-modal-body');
         if (v.kicker) body.appendChild(el('div', 'el-kicker', v.kicker));
@@ -1963,6 +2121,12 @@
 
     function frame() {
         if (!S) return;
+        var now = performance.now();
+        if (now > uiDirtyUntil && !E.sealOk(S)) { caught('console'); return; }
+        frameBody();
+        if (S) E.seal(S); // a keret végén: az eredmények, események is bekerülnek a pecsétbe
+    }
+    function frameBody() {
         var now = performance.now();
         var dt = (now - lastTs) / 1000;
         lastTs = now;
