@@ -56,6 +56,8 @@
         x: '<path d="M5 5l14 14M19 5L5 19"/>',
         arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
         gift: '<rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 14h18M12 9c-3 0-5-1-5-3s3-3 5 0c2-3 5-2 5 0s-2 3-5 3z"/>',
+        download: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+        upload: '<path d="M12 21V9M7 14l5-5 5 5M4 4h16"/>',
         save: '<path d="M5 3h12l4 4v14H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/>',
         trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>',
         game: '<rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.6" cy="14" r="1" fill="currentColor"/>',
@@ -177,12 +179,19 @@
 
     // asztali monitor (a képernyő a "scr" osztályt kapja: a CSS ettől villan)
     function monitorShape(x, y, w, h, glow, tag) {
-        var s = '';
+        var s = '', cid = 'ms' + Math.round(x) + '_' + Math.round(y);
         s += rect(x, y, w, h, '#4a4060', 'rx="4"');
         s += rect(x + 3, y + 3, w - 6, h - 6, glow, 'rx="2" class="scr" stroke="none"');
-        s += rect(x + 8, y + 9, (w - 16) * 0.55, 4, 'rgba(255,255,255,.8)', 'rx="2" stroke="none"');
-        s += rect(x + w - 8 - (w - 16) * 0.4, y + 17, (w - 16) * 0.4, 4, 'rgba(245,169,184,.95)', 'rx="2" stroke="none"');
-        if (h > 30) s += rect(x + 8, y + 25, (w - 16) * 0.65, 4, 'rgba(255,255,255,.65)', 'rx="2" stroke="none"');
+        // a képernyő tartalma: "gépelődő" sorok, villogó kurzor és lassan lefutó fénycsík (CSS-animáció, a képernyőre vágva)
+        s += '<clipPath id="' + cid + '"><rect x="' + (x + 3) + '" y="' + (y + 3) + '" width="' + (w - 6) + '" height="' + (h - 6) + '" rx="2"/></clipPath><g clip-path="url(#' + cid + ')">';
+        s += rect(x + 8, y + 9, (w - 16) * 0.55, 4, 'rgba(255,255,255,.8)', 'rx="2" stroke="none" class="ty" style="animation-delay:-.4s"');
+        s += rect(x + w - 8 - (w - 16) * 0.4, y + 17, (w - 16) * 0.4, 4, 'rgba(245,169,184,.95)', 'rx="2" stroke="none" class="ty tyr" style="animation-delay:-2.1s"');
+        if (h > 30) {
+            s += rect(x + 8, y + 25, (w - 16) * 0.65, 4, 'rgba(255,255,255,.65)', 'rx="2" stroke="none" class="ty" style="animation-delay:-3.3s"');
+            s += rect(x + 8 + (w - 16) * 0.65 + 2, y + 25, 2.4, 4, 'rgba(255,255,255,.95)', 'stroke="none" class="cur"');
+        }
+        s += rect(x + 3, y + 3, w - 6, 5, 'rgba(255,255,255,.22)', 'stroke="none" class="scan" style="--sh:' + Math.round(h - 12) + 'px"');
+        s += '</g>';
         s += rect(x + w / 2 - 3, y + h, 6, 7, '#5a4e72');
         s += rect(x + w / 2 - 11, y + h + 6, 22, 3.4, '#5a4e72', 'rx="1.7"');
         return '<g' + (tag ? ' class="' + tag + '"' : '') + '>' + s + '</g>';
@@ -471,7 +480,7 @@
             var bulbN = 0;
             for (var sg2 = 0; sg2 < 4; sg2++) [0.2, 0.5, 0.8].forEach(function (t) {
                 var bxp = sg2 * 100 + 100 * t, byp = 8 + 32 * t * (1 - t);
-                out.push(rect(bxp - 1, byp, 2, 2.6, '#7c6a98', 'stroke="none"') + circ(bxp, byp + 5.6, 3, ['#ffe08a', '#f7a8c4', '#9fd6f5'][bulbN % 3], 'class="twinkle" style="animation-delay:' + (bulbN * 0.2) + 's"'));
+                out.push(rect(bxp - 1, byp, 2, 2.6, '#7c6a98', 'stroke="none"') + circ(bxp, byp + 5.6, 5.4, ['#ffe08a', '#f7a8c4', '#9fd6f5'][bulbN % 3], 'class="led ledg" opacity=".22" stroke="none" style="animation-delay:-' + (bulbN * 0.45).toFixed(2) + 's"') + circ(bxp, byp + 5.6, 3, ['#ffe08a', '#f7a8c4', '#9fd6f5'][bulbN % 3], 'class="led" style="animation-delay:-' + (bulbN * 0.45).toFixed(2) + 's"'));
                 bulbN++;
             });
             box('ledfeny', 'wall', 0, 0, 400, 22);
@@ -684,6 +693,25 @@
         var n = NPC[key];
         return figure(x, y, Object.assign({}, n, { uid: 'n' + (uid || key), mood: mood || 'neutral', pose: 'idle' }), scale);
     }
+    // Az esemény tárgya (o.prop): kis kellék a jelenetben, hogy a kép az eseményt mutassa
+    function propScene(o, scene) {
+        var k = o && o.prop;
+        if (!k) return '';
+        var s = '';
+        if (k === 'dog') {
+            var x = 356, y = 234;
+            s += '<g class="an an-breath">' + gshadow(x, y, 22, 0.14) +
+                path('M' + (x + 17) + ' ' + (y - 18) + ' q12 -8 7 -22', 'none', 'stroke="#c28f55" stroke-width="5" stroke-linecap="round"') +
+                ell(x, y - 14, 20, 11, '#d9a86c') + rect(x - 14, y - 9, 6, 9, '#c28f55', 'rx="2"') + rect(x + 8, y - 9, 6, 9, '#c28f55', 'rx="2"') +
+                circ(x - 20, y - 26, 10, '#d9a86c') + path('M' + (x - 27) + ' ' + (y - 33) + ' q-7 7 -3 15 q6 -2 7 -9Z', '#a9743e') +
+                ell(x - 28, y - 22, 5.5, 4, '#f1d5a8') + circ(x - 31, y - 23, 1.7, '#4a3562', 'stroke="none"') + circ(x - 22, y - 28, 1.5, '#4a3562', 'stroke="none"') + '</g>';
+        } else if (k === 'wallet') {
+            s += rect(312, 148, 34, 22, '#8a5a4a', 'rx="4"') + rect(312, 148, 34, 7, '#a9745f', 'rx="3" stroke="none"') + circ(340, 160, 2.4, '#ffe08a', 'stroke="none"') + prop('banknote', 330, 150, 20, { noShadow: true });
+        } else if (k === 'book') {
+            s += prop('books', 150, 232, 30, { shadow: 0.12 });
+        }
+        return s;
+    }
     function guestFigure(o, x, y, scale, mood) {
         var p = o && o.guest ? D.find(D.PEOPLE, o.guest) : null;
         if (!p) return '';
@@ -875,7 +903,8 @@
             // tetőterasz: itt áll a karakter
             s += flat(0, 196, 400, 44, '#3a2c58') + rect(60, 190, 280, 8, '#6a5a98', 'rx="2"');
             s += rect(66, 160, 4, 30, '#6a5a98') + rect(330, 160, 4, 30, '#6a5a98') + rect(64, 158, 272, 4, '#6a5a98', 'rx="2"');
-            s += figure(200, 194, Object.assign({}, o, { mood: 'proud' }), 0.8);
+            if (o && o.guest) { s += guestFigure(o, 150, 194, 0.8, 'happy'); s += figure(246, 194, Object.assign({}, o, { mood: 'proud' }), 0.8); }
+            else s += figure(200, 194, Object.assign({}, o, { mood: 'proud' }), 0.8);
             return s;
         },
 
@@ -916,6 +945,105 @@
             return s;
         },
 
+        // ----- Új helyszínek -----
+        park: function (o) {
+            var s = outdoorSet('#bfe3f8', '#eaf6f0', '#a9d99f');
+            s += prop('sun', 60, 44, 34, { noShadow: true }) + prop('cloud', 250, 48, 40, { noShadow: true }) + prop('cloud', 330, 74, 28, { noShadow: true });
+            s += prop('tree', 28, 190, 100) + prop('tree', 372, 188, 96) + prop('tree', 110, 180, 60, { noShadow: true });
+            s += ell(300, 205, 52, 12, '#9fd6f5') + ell(296, 203, 38, 6.5, 'rgba(255,255,255,.55)', 'stroke="none"');
+            s += prop('tulip', 150, 214, 22, { noShadow: true }) + prop('tulip', 164, 218, 18, { noShadow: true });
+            s += path('M0 232 Q120 208 230 236 L260 240 L0 240Z', '#e8dcc4', 'stroke="none"');
+            s += guestFigure(o, 170, 230, 0.82, 'happy');
+            s += figure(236, 230, Object.assign({}, o, { mood: 'happy' }), 0.82);
+            s += propScene(o, 'park');
+            return s;
+        },
+        library: function (o) {
+            var s = stageSet('#f1e6d6', '#b98e66');
+            var cols = ['#f5a9b8', '#9fd6f5', '#c3adee', '#ffe08a', '#a8e6c4', '#ffc9a6'];
+            [[14, 24], [150, 24]].forEach(function (sh) {
+                s += rect(sh[0], sh[1], 126, 118, '#c9a272', 'rx="3"');
+                [0, 1, 2].forEach(function (r) {
+                    s += rect(sh[0] + 5, sh[1] + 6 + r * 37, 116, 31, '#a98258', 'stroke="none"');
+                    for (var i = 0; i < 10; i++) s += rect(sh[0] + 8 + i * 11, sh[1] + 10 + r * 37 + (i % 3), 8, 27 - (i % 3), cols[(i + r * 2) % 6], 'rx="1"');
+                });
+            });
+            s += rect(300, 30, 70, 50, '#bfe3f8', 'rx="3" stroke="#ffffff" stroke-width="4"') + line('M335 30 v50', '#ffffff', 3);
+            s += deskSet(250, 150, 130, 220) + prop('books', 280, 150, 30, { noShadow: true }) + prop('bulb', 350, 150, 26, { noShadow: true }) + prop('laptop', 318, 150, 32, { noShadow: true });
+            s += guestFigure(o, 130, 228, 0.82, 'happy');
+            s += figure(210, 228, Object.assign({}, o, { mood: 'happy' }), 0.82);
+            s += propScene(o, 'library');
+            return s;
+        },
+        train: function (o) {
+            var s = stageSet('#e7edf7', '#8e8aa8');
+            [30, 150, 270].forEach(function (x) { s += rect(x, 30, 100, 90, '#bfe3f8', 'rx="6" stroke="#ffffff" stroke-width="4"') + path('M' + x + ' 104 Q' + (x + 30) + ' 88 ' + (x + 60) + ' 102 T' + (x + 100) + ' 98 V120 H' + x + 'Z', '#a9d99f', 'stroke="none"') + prop('cloud', x + 30, 62, 24, { noShadow: true, cls: 'cloud' }); });
+            s += line('M0 60 H400', '#b8aac8', 3, 'opacity=".5"');
+            s += rect(0, 126, 400, 6, '#9a8cb0', 'stroke="none"') + rect(20, 140, 90, 28, '#c3adee', 'rx="8"') + rect(290, 140, 90, 28, '#c3adee', 'rx="8"');
+            s += line('M0 24 H400', '#d9d2e6', 4) + [60, 140, 220, 300].map(function (x) { return line('M' + x + ' 24 v22 M' + (x - 6) + ' 46 h12', '#d9d2e6', 2.4); }).join('');
+            s += guestFigure(o, 130, 230, 0.82, 'happy');
+            s += figure(240, 230, Object.assign({}, o, { mood: 'happy', pose: 'phone' }), 0.82);
+            s += propScene(o, 'train');
+            return s;
+        },
+        rooftop: function (o) {
+            var s = flat(0, 0, 400, 70, '#2b2058') + flat(0, 70, 400, 50, '#44307a') + flat(0, 120, 400, 60, '#6a4a98');
+            s += prop('moon', 330, 44, 34, { noShadow: true });
+            for (var i = 0; i < 24; i++) s += circ(12 + i * 16.5, 12 + (i * 29) % 90, i % 4 === 0 ? 1.6 : 1.1, '#fffbe6', 'opacity=".85" stroke="none" class="twinkle" style="animation-delay:' + (i * 0.27).toFixed(2) + 's"');
+            [[0, 104, 46], [46, 90, 40], [86, 110, 40], [126, 82, 50], [176, 118, 36], [212, 96, 44], [256, 112, 40], [296, 86, 46], [342, 108, 58]].forEach(function (b, k) {
+                s += rect(b[0], b[1] + 30, b[2], 200 - b[1] - 30, '#2a2150', 'stroke="none"');
+                for (var w = 0; w < 4; w++) if ((w + k) % 2) s += rect(b[0] + 6 + (w % 2) * 14, b[1] + 38 + Math.floor(w / 2) * 16, 7, 8, '#ffe08a', 'opacity=".8" stroke="none"');
+            });
+            s += flat(0, 196, 400, 44, '#3a2c58') + rect(40, 190, 320, 8, '#6a5a98', 'rx="2"');
+            s += line('M40 160 Q120 184 200 160 T360 160', '#cfc2e8', 1.4);
+            [0.1, 0.3, 0.5, 0.7, 0.9].forEach(function (u, k) { s += circ(40 + u * 320, 164 + Math.sin(u * 6.28) * 4 + 6, 3.2, ['#ffe08a', '#f7a8c4', '#9fd6f5'][k % 3], 'class="led" style="animation-delay:-' + (k * 0.5) + 's"'); });
+            s += guestFigure(o, 150, 196, 0.8, 'happy');
+            s += figure(246, 196, Object.assign({}, o, { mood: 'proud' }), 0.8);
+            return s;
+        },
+        beach: function (o) {
+            var s = flat(0, 0, 400, 80, '#9fdcf5') + flat(0, 80, 400, 40, '#6fc0ea') + flat(0, 120, 400, 20, '#9fdcf5') + flat(0, 140, 400, 100, '#f3e2b4');
+            s += prop('sun', 330, 40, 40, { noShadow: true }) + prop('cloud', 90, 40, 44, { noShadow: true });
+            s += path('M0 128 Q50 118 100 128 T200 128 T300 128 T400 128 V140 H0Z', 'rgba(255,255,255,.65)', 'stroke="none"');
+            s += line('M300 150 v70', '#b8935e', 3) + path('M262 152 Q300 108 338 152Z', '#f5a9b8', 'stroke="#ffffff" stroke-width="2"') + path('M282 152 Q300 118 318 152', '#ffffff', 'opacity=".5" stroke="none"');
+            s += prop('icecream', 60, 224, 26, { noShadow: true });
+            s += guestFigure(o, 150, 230, 0.82, 'happy');
+            s += figure(226, 230, Object.assign({}, o, { mood: 'happy' }), 0.82);
+            return s;
+        },
+        kitchen: function (o) {
+            var s = stageSet('#fdf0dc', '#d9b98c');
+            s += rect(20, 40, 360, 20, '#e8d2b0', 'rx="3"') + [0, 1, 2, 3, 4].map(function (i) { return rect(30 + i * 70, 44, 56, 12, '#f5c9d4', 'rx="3" stroke="none"'); }).join('');
+            s += rect(14, 140, 372, 14, '#ffffff', 'rx="3"') + rect(14, 154, 372, 66, '#e8d8c4', 'rx="3"') + [0, 1, 2, 3, 4].map(function (i) { return line('M' + (66 + i * 70) + ' 156 v62', '#c9b496', 1.4); }).join('');
+            s += prop('cake', 60, 140, 34, { noShadow: true }) + prop('teacup', 110, 140, 24, { noShadow: true }) + prop('cookie', 150, 140, 20, { noShadow: true }) + prop('plant', 350, 140, 30, { noShadow: true });
+            s += ell(230, 134, 24, 7, '#8a7a9a') + rect(206, 118, 48, 16, '#a89cc0', 'rx="4"') + circ(224, 108, 3, 'rgba(255,255,255,.7)', 'stroke="none" class="mote"') + circ(236, 102, 2.4, 'rgba(255,255,255,.6)', 'stroke="none" class="mote" style="animation-delay:-3s"');
+            s += guestFigure(o, 130, 228, 0.82, 'happy');
+            s += figure(280, 228, Object.assign({}, o, { mood: 'happy' }), 0.82);
+            return s;
+        },
+        rain: function (o) {
+            var s = outdoorSet('#8d9cc0', '#b7bfd8', '#6f6f86', { curb: true });
+            s += prop('house', 40, 178, 78, { noShadow: true }) + prop('dept', 140, 178, 112, { noShadow: true }) + prop('store', 330, 178, 84, { noShadow: true });
+            for (var i = 0; i < 42; i++) s += line('M' + (6 + (i * 37) % 392) + ' ' + (10 + (i * 53) % 200) + ' l-5 14', '#e6efff', 1.1, 'opacity=".7" class="rainl" style="animation-delay:-' + ((i % 7) * 0.12).toFixed(2) + 's"');
+            // az esernyő a figurák mögött van, a nyele a kettejük között, így nem megy át az arcokon
+            s += line('M212 74 V200', '#6a5a98', 2.6) + path('M96 78 Q212 14 328 78 Q212 64 96 78Z', '#f5a9b8', 'stroke="#ffffff" stroke-width="2"');
+            s += guestFigure(o, 170, 226, 0.8, 'happy');
+            s += figure(256, 226, Object.assign({}, o, { mood: 'happy' }), 0.8);
+            return s;
+        },
+        contest: function (o) {
+            var s = stageSet('#2a1740', '#3d2360');
+            s += bunting(8, 11);
+            s += path('M0 0 H70 Q40 120 0 170Z', '#b8456a', 'stroke="none"') + path('M400 0 H330 Q360 120 400 170Z', '#b8456a', 'stroke="none"');
+            s += path('M150 0 L110 190 L290 190 L250 0Z', 'rgba(255,240,200,.28)', 'stroke="none"');
+            s += rect(60, 36, 280, 26, '#ffffff', 'rx="8" stroke="#f5a9b8" stroke-width="2.4"') + rect(80, 45, 150, 7, '#f5a9b8', 'rx="3.5" stroke="none"') + prop('trophy', 310, 54, 28, { noShadow: true });
+            s += rect(40, 188, 320, 10, '#6a4a98', 'rx="3"');
+            s += npc('c1', 34, 228, 0.5, '1') + npc('c3', 96, 230, 0.5, '3') + npc('c2', 312, 230, 0.5, '2') + npc('c5', 368, 228, 0.5, '5');
+            s += guestFigure(o, 140, 190, 0.7, 'happy');
+            s += figure(240, 190, Object.assign({}, o, { mood: 'proud', pose: 'wave' }), 0.78);
+            return s;
+        },
+
         bills: function (o) {
             var s = stageSet('#efe6f2', '#d6c4b0');
             s += deskSet(18, 146, 240, 216);
@@ -931,7 +1059,7 @@
     // o: {skin, hairStyle, hairColor, outfit, mood, scale, ...}  v: teljes szoba-nézet (csak a "room" jelenethez)
     A.scene = function (id, v) {
         var fn = SCENES[id] || SCENES.room;
-        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, fx: v.fx, uid: 'sc' + id, guest: v.guest });
+        var body = fn(id === 'room' ? v : { skin: v.skin, hairStyle: v.hairStyle, hairColor: v.hairColor, eyes: v.eyeStyle, outfit: v.outfit, colors: v.colors, patterns: v.patterns, makeup: v.makeup, mood: v.mood, emood: v.emood, fx: v.fx, uid: 'sc' + id, guest: v.guest, prop: v.prop });
         if (id === 'room') return body;
         return '<svg class="eletut-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illusztráció">' + propDefs() + body + '</svg>';
     };

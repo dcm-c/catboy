@@ -772,6 +772,426 @@
                 { label: 'Újra kipróbálnád', do: function (s, A) { A.urge(10); return 'Belépsz, de óvatosabban. A keretet előre beállítottad.'; } }
             ]
         }
+        ,
+
+        // =====================================================
+        // BARÁTOK KERESNEK MEG: ha rég nem beszéltél valakivel, ő kezdeményez
+        // (reach: kinek az eseménye; a vendég megjelenik a képen)
+        // =====================================================
+        {
+            id: 'f_lilla', reach: 'lilla', art: 'park', mood: 'happy', once: false, cooldown: 7, weight: 6,
+            title: 'Lilla a parkban vár',
+            text: function (s, c) { return 'Lilla hosszú üzenetet küld: „Hé, rég nem láttalak! Hiányzol. Lenne kedved kijönni a parkba? Hozok fagyit.” ' + (engine().monthsSince(s, 'lilla') >= 5 ? 'Az utolsó beszélgetésetek óta tényleg eltelt egy kis idő.' : 'Szerinte már túl régóta nem volt rendes beszélgetés.'); },
+            choices: [
+                { label: 'Kimész, és órákig beszélgettek', tip: '−18 energia', do: function (s, A, c) {
+                    A.energy(-18); A.bond('lilla', 8); A.conf(40); A.comm(2);
+                    var r = A.rand();
+                    if (r < 0.25) { A.conf(30); A.flag('lilla_secret_hint'); return 'Lilla hirtelen elkomolyodik: „Tudom, hogy valamit titkolsz. Nem kell elmondanod, de tudd, hogy mellettem biztonságban vagy.” Hosszú ölelés, aztán nevetve folytatjátok a fagyit.'; }
+                    if (r < 0.5) { A.money(-1200); return 'Lilla elejti a fagyit, ti meg annyit nevettek rajta, hogy egy idegen is csatlakozik. Újabb adag fagyi, amit te fizetsz. Megérte.'; }
+                    return 'A parkban kopogó sétából egy rendes, őszinte beszélgetés lesz. Hazafelé végig mosolyogsz.';
+                } },
+                { label: 'Rövid üzenettel válaszolsz', tip: 'Ingyen', do: function (s, A) { A.bond('lilla', 3); A.conf(8); return 'Küldesz egy hosszú hangüzenetet és három matricát. Lilla visszaír: „Ez is jó, de a legközelebb tényleg találkozzunk!”'; } },
+                { label: 'Későbbre halasztod', do: function (s, A) { A.bond('lilla', -2); A.conf(-5); return 'Valami közbejön. Lilla egy szomorú szmájlit küld, de megérti.'; } }
+            ]
+        },
+        {
+            id: 'f_bence', reach: 'bence', art: 'discord', mood: 'happy', once: false, cooldown: 7, weight: 6, when: function (s) { return !!s.flags.discord; },
+            title: 'Bence játékra hív',
+            text: 'Bence kiírja a szerveren: „Kell még egy fő a rangsoroshoz! Ismerős hang kellene... valaki?” Aztán privátban hozzáteszi: „Te. Gyere, mert hiányzol.”',
+            choices: [
+                { label: 'Végigjátszod az estét vele', tip: '−25 energia', do: function (s, A, c) {
+                    A.energy(-25); A.bond('bence', 8); A.conf(35); A.comm(4);
+                    if (A.rand() < 0.4 + Math.min(0.2, c.d.stat.gamer / 200)) { A.conf(40); A.skill('stream', 8); return 'Három meccs, három győzelem. Bence üvölt a headsetben, a chat meg tapsol. Hajnalban boldogan alszol el.'; }
+                    return 'Legalább négyszer vesztetek hülyeségen, és mégis ez volt az este legjobb része. Bence szerint ez a „baráti gyakorlás”.';
+                } },
+                { label: 'Egy kört beugrasz', tip: '−8 energia', do: function (s, A) { A.energy(-8); A.bond('bence', 4); A.conf(12); return 'Egy gyors kör, pár poén. Bence megköszöni, hogy legalább egy rövid időre beugrottál.'; } },
+                { label: 'Elnézést kérsz, de most nem', do: function (s, A) { A.bond('bence', -2); A.conf(-4); return 'Megírod, hogy fáradt vagy. Bence küld egy „értem” matricát, de érződik, hogy sajnálja.'; } }
+            ]
+        },
+        {
+            id: 'f_nori', reach: 'nori', art: 'kitchen', mood: 'happy', once: false, cooldown: 7, weight: 6, when: function (s) { return s.stats.cons >= 1; },
+            title: 'Nóri jelmezezni hív',
+            text: 'Nóri üzenet helyett egy fotót küld: egy halom anyag, olló és varrógép. Alatta: „Segítség! Sürgősen egy extra pár kéz kell. Jössz? Hoztam süteményt is.”',
+            choices: [
+                { label: 'Átmész és együtt dolgoztok', tip: '−16 energia', do: function (s, A, c) {
+                    A.energy(-16); A.bond('nori', 8); A.conf(30); A.skill('varras', 14);
+                    var r = A.rand();
+                    if (r < 0.3) { A.skill('rajz', 10); A.conf(30); return 'Nóri megmutat egy új technikát, és együtt kitaláltok egy olyan jelmezt, amire a con egyik nagy szereplője is irigy lehetne.'; }
+                    if (r < 0.55) { A.conf(-5); return 'Az olló belehasít a drága anyagba. Pár percig csönd, aztán Nóri elneveti magát: „Majd ezt a részt kihasználjuk mintának!”'; }
+                    return 'Késő estig varrtok és rajzoltok. A végére a konyha tele van cérnával, de a jelmez kész.';
+                } },
+                { label: 'Küldesz ötleteket a chaten', do: function (s, A) { A.bond('nori', 4); A.skill('rajz', 6); A.conf(10); return 'Pár vázlatot rajzolsz, Nóri pedig azonnal megvarrja őket. Szerinte te vagy a háttérzseni.'; } },
+                { label: 'Kihagyod', do: function (s, A) { A.bond('nori', -2); A.conf(-3); return 'Elnézést kérsz a kifogással. Nóri küld egy fonalat tartó emojit.'; } }
+            ]
+        },
+        {
+            id: 'f_kata', reach: 'kata', art: 'office', once: false, cooldown: 7, weight: 6, when: function (s) { return !!s.job; },
+            title: 'Kata ebédelni hív',
+            text: 'Kata a folyosón elkap: „Rég nem ebédeltünk együtt. A sarki pékségben van friss pogácsa. Eljössz?” Közben vet egy pillantást a határidődre is.',
+            choices: [
+                { label: 'Elmész ebédelni', tip: '−10 energia', do: function (s, A, c) {
+                    A.energy(-10); A.bond('kata', 8); A.conf(30); A.comm(2);
+                    if (A.rand() < 0.35) { A.money(8000); A.log('Kata jó szót szólt érted.'); return 'Ebéd közben Kata elmeséli, hogy a főnök dicsérte a munkádat. Egy kis jutalom is lesz belőle: +8 000 Ft.'; }
+                    return 'A pogácsa tényleg friss, a beszélgetés pedig jobb. Hazafelé fejben végigszámolod, mennyi mindenről beszéltetek.';
+                } },
+                { label: 'Kávéra ugrotok', do: function (s, A) { A.bond('kata', 4); A.conf(10); return 'Egy gyors kávé a gépnél. Kata elmosolyodik: „Ez is valami.”'; } },
+                { label: 'Nem érsz rá', do: function (s, A) { A.bond('kata', -2); return 'Kata megértően bólint, de a hangján érződik a csalódás.'; } }
+            ]
+        },
+        {
+            id: 'f_csalad', reach: 'csalad', art: 'family', once: false, cooldown: 8, weight: 6, when: function (s) { return s.parents !== 'unknown'; },
+            title: 'Anya hív',
+            text: 'Anya hívása: „Fiam, rég nem hallottunk felőled. Apa sütött valamit, és mindenki téged keres. Hazajössz hétvégén?”',
+            choices: [
+                { label: 'Hazamész és otthon alszol', tip: '−12 energia', do: function (s, A) {
+                    A.energy(-12); A.bond('csalad', 8); A.conf(40);
+                    if (A.rand() < 0.3) { A.mod({ id: 'f_otthon', label: 'Otthoni nyugalom', regen: 0.01, months: 3 }); return 'Anya a kedvenc ételedet főzi, apa pedig elmeséli, hogy milyen büszke rád. Egy hétig minden kicsit könnyebb.'; }
+                    return 'A hétvége csendes és meleg. Apa még a poénjait is megpróbálja, és időnként még sikerül is.';
+                } },
+                { label: 'Videóhívást szerveztek', do: function (s, A) { A.bond('csalad', 4); A.conf(14); return 'Anya a kamera előtt mutatja a tortát, apa a háttérben integet. Alig tudtok elköszönni.'; } },
+                { label: 'Megígéred, hogy legközelebb', do: function (s, A) { A.bond('csalad', -1); A.conf(-3); return 'Anya felsóhajt: „Jó, jó. De ne feledd, hogy várunk.”'; } }
+            ]
+        },
+        {
+            id: 'f_zsombor', reach: 'zsombor', art: 'rooftop', mood: 'shy', once: false, cooldown: 7, weight: 6,
+            title: 'Zsombor a tetőre hív',
+            text: 'Zsombor egy rövid üzenetet küld: „A tetőn vagyok. Csillagos az ég. Gyere fel, ha ráérsz.” A hangnemből érzed, hogy már hiányzol neki.',
+            choices: [
+                { label: 'Felmész hozzá', tip: '−14 energia', do: function (s, A) {
+                    A.energy(-14); A.bond('zsombor', 8); A.conf(45);
+                    if (A.rand() < 0.3 && !s.flags.partner) { A.bond('zsombor', 4); A.conf(30); return 'Egy takaróba bújtok, és az ég alatt végre kimondjátok, amit eddig csak gondoltatok. Nem lesz belőle semmi hivatalos, de mindketten tudjátok.'; }
+                    return 'Csendben ültök egymás mellett, és csillagokat számoltok. Pár óra után azt érzed, hogy ez a legjobb nap volt hetek óta.';
+                } },
+                { label: 'Hívod videón', do: function (s, A) { A.bond('zsombor', 4); A.conf(15); return 'A kamerán át együtt nézitek az eget. Nem ugyanaz, mint ott lenni, de így is jó.'; } },
+                { label: 'Máskorra', do: function (s, A) { A.bond('zsombor', -2); A.conf(-4); return 'Zsombor azt válaszolja: „Semmi baj.” A szív mélyén tudod, hogy mégis fájt neki.'; } }
+            ]
+        },
+
+        // =====================================================
+        // TÖRTÉNETÍVEK (elágazások jelzőkkel)
+        // =====================================================
+
+        // --- A Holdfény-ív: egy ismeretlen rajzoló ---
+        {
+            id: 'a_hold1', mood: 'surprised', art: 'phone', prio: 1, minAge: 16.6,
+            when: function (s) { return !!s.flags.alias; },
+            title: 'Holdfény',
+            text: 'Az álneves fiókodra üzenet érkezik egy „Holdfény” nevű rajzolótól: „Láttam, hogy ugyanazokat a pasztell dolgokat követed, mint én. Küldök egy rajzot. Nem kell válaszolnod, ha nem akarsz.” A csatolmányban egy fiú rajza: macskafüles, kék hajú, kezében egy bögre.',
+            choices: [
+                { label: 'Válaszolsz és megköszönöd', do: function (s, A) { A.flag('hold_reply'); A.conf(30); A.skill('rajz', 10); A.log('Beszélgetni kezdtél egy Holdfény nevű rajzolóval.'); return 'Hosszan írtok a stílusról, a színekről és a kedvenc rajzolókról. Napokig a rajz van a háttérképed.'; } },
+                { label: 'Csendben megkedveled, de nem válaszolsz', do: function (s, A) { A.flag('hold_silent'); A.conf(10); return 'Elmented a képet, és sokszor megnézed. Minden nap mosolyra fakadsz tőle, de ennél tovább még nem mersz menni.'; } },
+                { label: 'Blokkolod óvatosságból', do: function (s, A) { A.flag('hold_block'); A.risk(-1); A.conf(-6); return 'A biztonság a legfontosabb. Kicsit elszomorít, hogy talán egy jó barátot hagytál ki.'; } }
+            ]
+        },
+        {
+            id: 'a_hold2', art: 'discord', prio: 1, minAge: 18.8,
+            when: function (s) { return !!s.flags.discord && !s.flags.hold_block; },
+            title: 'Egy ismerős stílus',
+            text: function (s) { return s.flags.hold_reply ? 'Holdfény újra ír, ezúttal a Discord-szerveren is: „Úgy tűnik, mégiscsak ugyanabba a közösségbe járunk! Kiadnék egy kis zine-t a con-ra. Közös rajzokkal. Beszállsz?”' : 'A szerveren valaki posztol egy rajzot, amelynek a stílusa pontosan olyan, mint annak a rajzolónak, akinek a képét elmentetted. Rád írnak: „Te vagy az, aki követ az álnevesen? Dobbantsunk egy zine-t a con-ra!”'; },
+            choices: [
+                { label: 'Beszállsz a zine-ba', tip: '−20 energia', do: function (s, A) { A.energy(-20); A.flag('hold_collab'); A.skill('rajz', 25); A.comm(10); A.conf(60); A.log('Közös zine-t kezdtél rajzolni.'); return 'Hetekig küldözgetitek a vázlatokat. A zine címe: „Pasztell hajnal”, a borítón egy macskafüles fiú nevet.'; } },
+                { label: 'Csak egy rajzzal segítesz', do: function (s, A) { A.skill('rajz', 10); A.comm(3); A.conf(20); return 'Küldesz egy kis oldalt, a többit Holdfényre bízod. Nem kevés, de nem is a teljes bizalom.'; } },
+                { label: 'Kihagyod', do: function (s, A) { A.flag('hold_decline'); A.conf(-4); return 'Megköszönöd az ajánlatot, de most nem tudsz. Holdfény azt írja: „Ha meggondolod magad, itt vagyok.”'; } }
+            ]
+        },
+        {
+            id: 'a_hold3', mood: 'happy', art: 'contest', prio: 1, minAge: 21.6,
+            when: function (s) { return !!s.flags.hold_collab; },
+            title: 'A zine premierje',
+            text: 'A con kisebb csarnokában kirakjátok a zine-t. Holdfény végre személyesen is odajön hozzád: nevetve, zavartan, és pont úgy néz ki, mint a rajzain. Mögötte már sorban állnak az érdeklődők.',
+            choices: [
+                { label: 'Ti ketten árusítotok', tip: 'Kockázatos, de jutalmas', do: function (s, A) {
+                    var good = A.rand() < 0.5 + Math.min(0.25, (s.skills.rajz || 0) * 0.07);
+                    A.comm(good ? 40 : 12); A.conf(good ? 160 : 60); A.skill('rajz', 20);
+                    if (good) { A.money(40000); A.flag('hold_hit'); A.log('A közös zine elfogyott.'); return 'Délre elfogy az összes példány. Holdfény sikoltozva ölelget, a jegyzetfüzetbe már a következő zine neve is bekerül. A bevétel: 40 000 Ft.'; }
+                    A.money(8000); return 'A csarnok forró, a forgalom lassú. Csak néhány példány fogy el, viszont minden vevő hosszan elnézi a lapokat. Holdfény megnyugtat: „Ez is csak a kezdet.” +8 000 Ft.';
+                } },
+                { label: 'Átadod a pultot Holdfénynek, te körbejársz', do: function (s, A) { A.comm(10); A.conf(50); A.bond('nori', 3); return 'Holdfény elszánt, te pedig körbejársz, és népszerűsíted a zine-t. A nap végére mindenki ismeri a nevét.'; } }
+            ]
+        },
+        {
+            id: 'a_hold4', art: 'discord', prio: 1, minAge: 23.0,
+            when: function (s) { return !!s.flags.hold_collab; },
+            title: 'Holdfény levele',
+            text: function (s) { return s.flags.hold_hit ? 'Holdfény hosszú levelet küld: „A zine óta nem tudok másról gondolkodni. Lenne kedved a következő évben egy rendes képregényt készíteni?”' : 'Holdfény hosszú levelet küld: „A zine nem lett sikertörténet, de rájöttem, hogy veled rajzolni a kedvenc dolgom. Lenne kedved egy képregényre?”'; },
+            choices: [
+                { label: 'Igen, kezdjük!', tip: '−15 energia', do: function (s, A) { A.energy(-15); A.flag('hold_comic'); A.skill('rajz', 30); A.comm(20); A.conf(120); return 'Kicsit remegő kézzel, de boldogan írod meg a választ. Hetente egyszer videón rajzoltok, és a kép lassan képregény lesz.'; } },
+                { label: 'Barátként maradtok', do: function (s, A) { A.conf(40); A.comm(5); return 'Megegyeztek, hogy időnként rajzoltok egymásnak. A kapcsolat így is értékes.'; } }
+            ]
+        },
+
+        // --- Lilla-ív ---
+        {
+            id: 'a_lilla1', mood: 'shy', art: 'park', prio: 1, minAge: 16.8,
+            when: function (s) { return engine().bond(s, 'lilla') >= 25; },
+            title: 'Lilla kérdez',
+            text: function (s) { return 'A parkban Lilla hirtelen komolyra fordítja a szót: „Észrevettem, hogy az utóbbi időben egyre többet mosolyogsz, és egyre többet tűnsz el.” ' + (s.flags.lilla_secret_hint ? 'Már régebben is sejtette, hogy van valami.' : 'Nem tudod, mit tud, és mit nem.'); },
+            guest: 'lilla',
+            choices: [
+                { label: 'Elmondod neki az igazat', tip: '150 önbizalom', do: function (s, A) {
+                    if (s.conf >= 150) { A.flag('lilla_knows'); A.bond('lilla', 12); A.conf(120); A.risk(-2); A.mod({ id: 'lilla_tamasz', label: 'Lilla mellettem áll', en: 5 }); A.log('Elmondtad Lillának, kivel is vagy.'); return 'Lilla egy pillanatig néz, aztán a nyakadba borul. „Végre. Már azt hittem, sosem mondod el.” Mostantól nem kell magadban cipelned.'; }
+                    A.conf(-20); A.bond('lilla', 2); return 'Nem találod a szavakat, és csak annyit hebegsz, hogy „csak fáradt vagyok”. Lilla végül megvonja a vállát, és témát vált, de látod, hogy csalódott.';
+                } },
+                { label: 'Félig mondod csak', do: function (s, A) { A.flag('lilla_hint'); A.bond('lilla', 5); A.conf(30); return 'Annyit mondasz, hogy szeretsz „bizonyos dolgokat”. Lilla elmosolyodik: „Majd ha készen állsz, elmondod.” Ennél kedvesebben nem is reagálhatott volna.'; } },
+                { label: 'Elbagatellizálod', do: function (s, A) { A.bond('lilla', -3); A.conf(-10); return 'Nevetve lerázod. Lilla elhallgat, és egy kis időre kicsit távolabb ül tőled.'; } }
+            ]
+        },
+        {
+            id: 'a_lilla2', mood: 'happy', art: 'rain', prio: 1, minAge: 19.4,
+            when: function (s) { return !!s.flags.lilla_knows || !!s.flags.lilla_hint; },
+            guest: 'lilla',
+            title: 'Eső és ernyő',
+            text: function (s) { return s.flags.lilla_knows ? 'Esik az eső, Lilla sír a buszmegállóban. Nem a téged érintő titok miatt: a barátjával szakított. Rád néz: „Most te vagy az egyetlen, akinek tényleg elmondhatom.”' : 'Esik az eső, Lilla pedig egyszer csak a küszöbödön áll: bőrig ázva és nagyon szomorúan.'; },
+            choices: [
+                { label: 'Beengeded és megvigasztalod', tip: '−12 energia', do: function (s, A) { A.energy(-12); A.bond('lilla', 10); A.conf(50); A.comm(2); return 'Forró tea, egy meleg takaró és egy hosszú beszélgetés. Késő éjjelig tart, és mire végeztek, Lilla ismét mosolyog.'; } },
+                { label: 'Felhívod, hogy jöjjön egy közös programra', do: function (s, A) { A.bond('lilla', 4); A.conf(15); return 'Elviszed valahová, hogy kicsit kikapcsoljon. A hangulat nem lesz tökéletes, de Lilla hálás.'; } }
+            ]
+        },
+        {
+            id: 'a_lilla3', mood: 'happy', art: 'beach', prio: 1, minAge: 22.8,
+            when: function (s) { return !!s.flags.lilla_knows; },
+            guest: 'lilla',
+            title: 'Lilla meghív',
+            text: 'Lilla azt írja: „Egyetemet végeztem! Megyünk a tengerhez, és téged is hívlak. Légy önmagad, vedd fel azt, amiben a legjobban érzed magad.”',
+            choices: [
+                { label: 'A kedvenc szettedben mész', tip: 'Legalább 2 ruhadarab', req: function (s) { return Object.keys(s.items).length >= 2; }, reqText: 'Legalább 2 ruhadarab kell', do: function (s, A, c) { A.bond('lilla', 12); A.conf(140); A.comm(8); A.log('Lillával a tengernél jártál.'); return 'Felveszed ' + (c.ownedText || 'a legjobb ruháidat') + ', Lilla pedig fényképeket készít. A tengerparton senki nem néz furcsán, és a naplemente egyszerűen gyönyörű.'; } },
+                { label: 'Hétköznapi ruhában mész', do: function (s, A) { A.bond('lilla', 5); A.conf(40); return 'Egy jó nap a vízparton. Lilla egy kicsit sajnálja, hogy nem a saját stílusodat látja, de nem szól semmit.'; } }
+            ]
+        },
+
+        // --- Bence-ív ---
+        {
+            id: 'a_bence1', art: 'discord', mood: 'surprised', prio: 1, minAge: 18.6,
+            when: function (s) { return !!s.flags.discord && engine().bond(s, 'bence') >= 20; },
+            guest: undefined,
+            title: 'Bence szervere bajban',
+            text: 'A szervert egy trollcsapat megtámadta, és Bence kétségbeesve ír: „Spam, sértő képek, mindenki menekül. Segíts!”',
+            choices: [
+                { label: 'Bejelentkezel és segítesz moderálni', tip: '−22 energia', do: function (s, A, c) {
+                    A.energy(-22); A.bond('bence', 10); A.comm(10);
+                    if (A.rand() < 0.45 + Math.min(0.3, c.d.stat.code / 120)) { A.flag('bence_hero'); A.conf(100); A.skill('prog', 12); return 'Pár perc alatt kiszűröd a troll-fiókokat és beállítasz egy szűrőt. A szerver megmenekül, Bence pedig „hősnek” nevez.'; }
+                    A.conf(40); return 'A támadás hosszú, de együtt kitartotok. Hajnalra a szerver tiszta, ti pedig szörnyen fáradtak vagytok.';
+                } },
+                { label: 'Tanácsot adsz, de nem lépsz be', do: function (s, A) { A.bond('bence', 3); A.conf(10); return 'Pár tanácsot küldesz, Bence pedig megoldja. Nem nagy segítség, de megköszöni.'; } },
+                { label: 'Nem avatkozol bele', do: function (s, A) { A.bond('bence', -4); A.conf(-10); return 'Nem szólsz hozzá. A szerver végül túléli, de Bence napokig nem ír.'; } }
+            ]
+        },
+        {
+            id: 'a_bence2', art: 'train', mood: 'happy', prio: 1, minAge: 21.0,
+            when: function (s) { return !!s.flags.discord && engine().bond(s, 'bence') >= 35; },
+            guest: 'bence',
+            title: 'Bence a vonaton',
+            text: 'Bence végre személyesen is megérkezik a városba. A vonatról leszállva ugyanolyan kicsit zavart, mint a hangjából hittétek. „Hé, te vagy az? Hú, tényleg te vagy!”',
+            choices: [
+                { label: 'Elviszed a kedvenc helyeidre', tip: '3 000 Ft', req: function (s) { return s.money >= 3000; }, reqText: 'Kell hozzá 3 000 Ft', do: function (s, A) { A.money(-3000); A.bond('bence', 12); A.conf(70); A.comm(6); A.flag('bence_met'); return 'Megmutatod a turkálót, a kedvenc kávézót és a tetőt. Bence mindenhol fényképez, és azt mondja: „Eddig csak egy hang voltál, most már egy teljes barát.”'; } },
+                { label: 'Egyszerűen leültök a parkban', do: function (s, A) { A.bond('bence', 6); A.conf(30); A.flag('bence_met'); return 'Nincs nagy program, csak ti ketten és a pad. Néha a legjobb az, ha nem kell semmit csinálni.'; } }
+            ]
+        },
+
+        // --- Család-ív: nagymama ---
+        {
+            id: 'a_fam1', mood: 'surprised', art: 'family', prio: 1, minAge: 17.4,
+            when: function (s) { return s.parents !== 'unknown' || s.flags.caught; },
+            title: 'A nagymama látogatása',
+            text: function (s) { return 'A nagymama egy hétre átköltözik hozzátok. Az első nap rátalál egy ruhádra a szobádban, és hosszan nézi. ' + (s.parents === 'accepting' ? 'Anya csak mosolyog, és megkérdezi, hogy segítsen-e valamit mondani.' : 'A konyhában minden elcsendesedik.'); },
+            choices: [
+                { label: 'Őszintén elmondod, miért szereted', tip: '120 önbizalom', do: function (s, A) {
+                    if (s.conf >= 120) { A.flag('nagyi_ok'); A.conf(100); A.mod({ id: 'nagyi', label: 'Nagyi támogatása', en: 5 }); return 'A nagymama elgondolkodik, aztán felnevet: „Az én időmben a nagypapa is hordott sálat, a falu pedig sokáig beszélt róla.” Megsimogatja az arcodat, és ebből egy kedves, titkos szövetség lesz.'; }
+                    A.conf(-15); return 'Elakad a hangod. A nagymama csendben visszateszi a ruhát, és annyit mond: „Gondolkodnom kell ezen.”';
+                } },
+                { label: 'Azt mondod, hogy ez egy jelmez', do: function (s, A) { A.flag('nagyi_kerdez'); A.conf(5); return 'A nagymama bólint, de a szeme még mindig kutat. Biztosan még visszatér rá.'; } }
+            ]
+        },
+        {
+            id: 'a_fam2', mood: 'happy', art: 'kitchen', prio: 1, minAge: 21.0,
+            when: function (s) { return !!s.flags.nagyi_ok; },
+            title: 'Nagyi varrógépe',
+            text: 'A nagymama egy csomagot küld a postán. Benne a régi varrógépe és egy kézzel írt cetli: „Neked, mert szerintem tudsz vele valami szépet csinálni. Ne feledd: a legfontosabb, hogy jól érezd magad a bőrödben.”',
+            choices: [
+                { label: 'Elkezdesz vele dolgozni', tip: '−10 energia', do: function (s, A) { A.energy(-10); A.skill('varras', 40); A.conf(120); A.bond('csalad', 6); A.flag('nagyi_gep'); A.log('Megkaptad a nagymama varrógépét.'); return 'Az első tűzdelés kicsit görbe, de a gép dorombol a kezed alatt. A nagymama egy videohívásban nézi, ahogy dolgozol.'; } },
+                { label: 'Megőrzöd emlékbe', do: function (s, A) { A.conf(60); A.bond('csalad', 3); return 'A gép a szobád polcán áll, és minden alkalommal melegséget érzel, ha ránézel.'; } }
+            ]
+        },
+
+        // =====================================================
+        // CON-ív: döntési lehetőségekkel
+        // =====================================================
+        {
+            id: 'c_budget', art: 'con', prio: 1, minAge: 18.15,
+            when: function (s) { return !!s.flags.discord; },
+            title: 'Con-tervezés',
+            text: 'Mielőtt jegyet vennél a Pasztell Conra, át kell gondolnod a költségvetést. A jegy mellett utazás, étel és esetleg szállás is kell. Hogyan tervezel?',
+            choices: [
+                { label: 'Szigorú keret: csak a jegy', tip: 'Biztonságos, de szerényebb', do: function (s, A) { A.flag('con_budget', 'low'); A.conf(25); return 'Összeírod a kiadásokat: jegy, vonat, szendvics. Semmi extra, de legalább nem lesz váratlan kiadás.'; } },
+                { label: 'Közepes keret + kis ajándék magadnak', do: function (s, A) { A.flag('con_budget', 'mid'); A.conf(30); return 'Beszámolod a vonatot, az ebédet és egy kis zsebpénzt egy emléktárgyra. Úgy érzed, kényelmes és reális terv.'; } },
+                { label: 'Nagyobb keret: szállás és ajándékbolt', tip: '−15 000 Ft előre', req: function (s) { return s.money >= 15000; }, reqText: 'Kell hozzá 15 000 Ft', do: function (s, A) { A.money(-15000); A.flag('con_budget', 'high'); A.conf(40); return 'Lefoglalsz egy kis szobát a közelben, és félreteszel a standokra is. Biztos, hogy emlékezetes lesz.'; } }
+            ]
+        },
+        {
+            id: 'c_pick', art: 'con', prio: 1, minAge: 18.25,
+            when: function (s) { return !!s.flags.con_budget; },
+            title: 'Mit viszel magaddal?',
+            text: 'Az utazás előtt egy nappal Nóri üzen: „A con-on lesz egy közös fotózás és egy kis jelmezverseny. Ha gondolod, jelentkezhetünk együtt.” Közben a hátizsákodat is be kell pakolnod.',
+            guest: 'nori',
+            choices: [
+                { label: 'Jelentkezel a jelmezversenyre', tip: 'Cosplayhez Varrás 1. szint kell', req: function (s) { return lvl(s, 'varras') >= 1; }, reqText: 'Varrás 1. szint kell', do: function (s, A) { A.flag('con_contest'); A.conf(40); A.bond('nori', 5); return 'Összeraktok egy közös szettet. Izgultok, de a lelkesedés nagyobb.'; } },
+                { label: 'A fotózásra jelentkezel', do: function (s, A) { A.flag('con_photo'); A.conf(30); A.bond('nori', 3); return 'Pár vidám fotó, nevetés és bohóckodás. Biztosan lesz belőle egy jó emlék.'; } },
+                { label: 'Csendben megfigyelsz', do: function (s, A) { A.flag('con_watch'); A.conf(10); return 'Neked most az is elég, ha csak nézel és tanulsz. A többiek megértik.'; } }
+            ]
+        },
+        {
+            id: 'c_day', mood: 'happy', art: 'con', prio: 1, minAge: 18.35,
+            when: function (s) { return s.stats.cons >= 1 && !!s.flags.con_budget; },
+            title: 'A con napja',
+            text: function (s) { return 'Reggel van, a csarnok már zsúfolt. A programfüzetben három időpont van bekarikázva: ' + (s.flags.con_contest ? 'a jelmezverseny, ' : '') + 'egy rajzműhely és egy fan-meetup. Szétszórtak a gondolataid, de mindegyik izgalmasnak tűnik.'; },
+            choices: [
+                { label: 'A jelmezverseny', tip: '−20 energia', req: function (s) { return !!s.flags.con_contest; }, reqText: 'Ehhez jelentkezni kellett', do: function (s, A, c) {
+                    A.energy(-20);
+                    var p = 0.35 + Math.min(0.3, lvl(s, 'varras') * 0.08) + Math.min(0.2, s.conf / 6000);
+                    if (A.rand() < p) { A.flag('con_won'); A.conf(260); A.comm(30); A.money(15000); A.log('Díjat nyertél a jelmezversenyen.'); return 'A zsűri hosszan nézi a szettet, és a név felolvasásakor a tiéd hangzik el. A színpadon remeg a lábad, de mosolyogsz. +15 000 Ft és egy kis kupa.'; }
+                    A.conf(90); A.comm(10); return 'Nem nyertek, de a közönség tapsol, és valaki a kijáratnál megállít: „Ez volt a kedvencem!” Ez többet ér egy kupánál.';
+                } },
+                { label: 'A rajzműhely', tip: '−12 energia', do: function (s, A) { A.energy(-12); A.skill('rajz', 25); A.conf(70); A.comm(8); A.bond('nori', 4); return 'Egy profi rajzoló megmutat egy színezési trükköt. A füzeted tele lesz vázlatokkal, és új ismerőst is szerzel.'; } },
+                { label: 'A fan-meetup', tip: '−10 energia', do: function (s, A) { A.energy(-10); A.comm(16); A.conf(60); A.bond('bence', 3); return 'Egy körben ülve beszélgettek a kedvenceitekről. Olyan, mintha mindenki egy nagy család lenne.'; } },
+                { label: 'Inkább pihensz egy kicsit', do: function (s, A) { A.energy(25); A.conf(15); return 'Leülsz a gyümölcsös pult mellé, és nézed az embereket. A pihenés is kell.'; } }
+            ]
+        },
+        {
+            id: 'c_after', art: 'sunset', mood: 'happy', prio: 1, minAge: 18.45,
+            when: function (s) { return s.stats.cons >= 1 && !!s.flags.con_budget; },
+            title: 'Az utolsó óra',
+            text: function (s) { return s.flags.con_won ? 'A kupa a kezedben. Hazafelé a vonaton még mindig nem hiszed el. Nóri ránk hajol: „Ez még csak a kezdet. Jövőre bármit megcsinálhatunk!”' : 'A nap lemenőben, a csarnok kiürül. Nóri mellett ülsz a lépcsőn, és mindketten fáradtak, de boldogok vagytok.'; },
+            guest: 'nori',
+            choices: [
+                { label: 'Megígéritek, hogy jövőre is jöttök', do: function (s, A) { A.flag('con_next'); A.bond('nori', 8); A.conf(80); A.log('Megígértétek: jövőre is con.'); return 'Kézfogással pecsételitek meg. Az út hazafelé hosszú, de a hangulat tökéletes.'; } },
+                { label: 'Megosztod a képeket a szerveren', do: function (s, A) { A.comm(12); A.conf(40); return 'Egy kis poszt, pár kép és sok emoji. A szerveren azonnal jönnek a reakciók.'; } }
+            ]
+        },
+        {
+            id: 'c_year', art: 'con', once: false, cooldown: 11, weight: 4, minAge: 19.2,
+            when: function (s) { return s.stats.cons >= 1 && s.month - s.lastCon >= 10; },
+            title: 'Jön a következő con',
+            text: function (s, c) { return 'Újra itt a Pasztell Con szezonja. ' + (s.flags.con_next ? 'Megígérted Nórinak, hogy eljössz. ' : '') + (c.ownedText ? 'A szekrényedben: ' + c.ownedText + '. ' : '') + 'Mit csinálsz?'; },
+            choices: conChoices(9000, true).concat([])
+        },
+        {
+            id: 'c_year_extra', art: 'contest', once: false, cooldown: 12, weight: 3, minAge: 19.4,
+            when: function (s) { return s.stats.cons >= 2 && lvl(s, 'rajz') >= 2; },
+            title: 'Rajzverseny a conon',
+            text: 'A con szervezői kiírnak egy rajzversenyt: téma a „pasztell éjszaka”. A díj egy tablet és egy kiállítási hely.',
+            choices: [
+                { label: 'Benevezel', tip: '−18 energia', do: function (s, A) {
+                    A.energy(-18); A.skill('rajz', 18);
+                    if (A.rand() < 0.3 + Math.min(0.4, lvl(s, 'rajz') * 0.1)) { A.money(30000); A.conf(180); A.comm(18); A.log('Megnyerted a rajzversenyt.'); return 'A zsűri a te rajzod mellé teszi az első helyezett kártyát. A tablet nem lesz a tiéd, de a pénzjutalom igen: +30 000 Ft.'; }
+                    A.conf(50); return 'Nem a dobogón végzel, de a rajzodat kiteszik a falra, és valaki fotózza. Ez is elismerés.';
+                } },
+                { label: 'Csak nézed', do: function (s, A) { A.conf(10); return 'Nézed a rajzokat, és lelkesen jegyzetelsz. Jövőre talán te is indulsz.'; } }
+            ]
+        },
+
+        // =====================================================
+        // ÚJ VÉLETLEN ESEMÉNYEK (helyszínekkel és véletlen kimenetellel)
+        // =====================================================
+        {
+            id: 'r_park_dog', art: 'park', prop: 'dog', mood: 'surprised', weight: 2, once: false, cooldown: 10, minAge: 14,
+            title: 'Kóbor kutya a parkban',
+            text: 'A parkban egy kutya megáll, és rád néz. A nyakörve félig szétkopott, és láthatóan éhes.',
+            choices: [
+                { label: 'Megetetsz egy kis szendviccsel', tip: 'Ingyen', do: function (s, A) {
+                    A.conf(25);
+                    if (A.rand() < 0.4) { A.flag('kutya_barat'); A.mod({ id: 'kutya_barat', label: 'A kutya barátsága', regen: 0.004, months: 4 }); return 'A kutya egész hazáig követ, és minden nap ott vár a sarkon. Furcsa kis barátság, de működik.'; }
+                    return 'A kutya hálásan eszik, majd odébb szalad. Egész nap mosolyogsz rajta.';
+                } },
+                { label: 'Szólsz a gazdinak', do: function (s, A) { A.conf(15); return 'A kutya gazdája rövid időn belül jelentkezik. Megköszöni, és adott egy kis csomag nyalókát.'; } },
+                { label: 'Továbbmész', do: function (s, A) { return 'Továbbsétálsz, de pár percig még gondolkodsz rajta.'; } }
+            ]
+        },
+        {
+            id: 'r_library_book', art: 'library', prop: 'book', mood: 'shy', weight: 2, once: false, cooldown: 12, minAge: 14,
+            title: 'Könyv a könyvtárban',
+            text: 'A könyvtár egyik sarkában egy különös könyvet találsz: tele rajzokkal, ruhakészítéssel, öltéstechnikákkal. A lapok szélén régi jegyzetek.',
+            choices: [
+                { label: 'Kikölcsönzöd és átlapozod', tip: '−6 energia', do: function (s, A) { A.energy(-6); var r = A.rand(); if (r < 0.4) { A.skill('varras', 18); A.conf(30); return 'A régi jegyzetek között egy nagyon hasznos tipp: hogyan szabj ruhát úgy, hogy a vállnál ne feszüljön. Már alig várod, hogy kipróbáld.'; } if (r < 0.7) { A.skill('rajz', 14); A.conf(20); return 'A rajzok gyönyörűek, és három új árnyékolási technikát tanulsz belőle.'; } A.conf(10); return 'A könyv sokkal unalmasabb, mint gondoltad, de legalább két érdekes képet találsz.'; } },
+                { label: 'Visszateszed', do: function (s, A) { A.conf(2); return 'Visszateszed a helyére, és csendben elhagyod a könyvtárat.'; } }
+            ]
+        },
+        {
+            id: 'r_train_lost', art: 'train', prop: 'wallet', mood: 'surprised', weight: 2, once: false, cooldown: 14, minAge: 15,
+            title: 'Elveszett pénztárca a vonaton',
+            text: 'A vonat ülésén egy pénztárcát találsz. Benne készpénz és egy diákigazolvány.',
+            choices: [
+                { label: 'Visszaviszed a kalauznak', do: function (s, A) {
+                    A.conf(40);
+                    if (A.rand() < 0.5) { A.money(5000); return 'A tulajdonos meghatódik, és átnyújt egy kis jutalmat. +5 000 Ft. A kalauz is elismerően bólint.'; }
+                    return 'A kalauz megköszöni, és biztosít róla, hogy a tulajdonos megkapja. Jó érzés, hogy a helyes dolgot tetted.';
+                } },
+                { label: 'Zsebre teszed', tip: 'Kockázatos', do: function (s, A) {
+                    if (A.rand() < 0.5) { A.money(8000); A.conf(-30); return 'Senki nem veszi észre, de az egész este nyomaszt a lelkiismeret. +8 000 Ft, de a boldogság elillan.'; }
+                    A.conf(-60); return 'A kalauz észreveszi, és a tulajdonos is ott áll. Kínos jelenet, szégyenkezve adod vissza.';
+                } }
+            ]
+        },
+        {
+            id: 'r_roof_night', art: 'rooftop', mood: 'happy', weight: 2, once: false, cooldown: 12, minAge: 16,
+            title: 'Csillagnézés a tetőn',
+            text: 'A szomszéd tetőteraszára feljutni nem nehéz, a kapu nyitva van. Az éjszakai égbolt tiszta, és sok csillag látszik.',
+            choices: [
+                { label: 'Felmész és nézed az eget', tip: '−6 energia', do: function (s, A) { A.energy(-6); var r = A.rand(); A.conf(30); if (r < 0.3) { A.mod({ id: 'csillag', label: 'Csillagos nyugalom', regen: 0.008, months: 3 }); return 'Egy hullócsillagot is látsz. Kívánsz valamit, amit nem árulsz el senkinek. Napokig ennek a nyugalma fűt.'; } return 'Hosszú, csendes éjszaka. A gondolataid is tisztábbak lesznek.'; } },
+                { label: 'Hozol rá egy barátot', tip: '−10 energia', req: function (s) { return engine().bond(s, 'lilla') >= 15 || engine().bond(s, 'bence') >= 15; }, reqText: 'Kell hozzá egy barát', do: function (s, A) { A.energy(-10); var who = engine().bond(s, 'lilla') >= engine().bond(s, 'bence') ? 'lilla' : 'bence'; A.bond(who, 6); A.conf(40); return 'A csillagok alatt őszintébben beszéltek, mint bármikor.'; } },
+                { label: 'Inkább otthon maradsz', do: function (s, A) { return 'Nézed az ablakból az eget, de a tető kissé túl magasnak tűnik.'; } }
+            ]
+        },
+        {
+            id: 'r_beach_day', art: 'beach', mood: 'happy', weight: 2, once: false, cooldown: 14, minAge: 16,
+            when: function (s) { return s.money >= 4000; },
+            title: 'Egy nap a vízparton',
+            text: 'Nyár van, a víz hívogat. Egy osztálykirándulás vagy egy baráti társaság mindig akad, aki velük mennél.',
+            choices: [
+                { label: 'Elmész és strandolsz', tip: '4 000 Ft · −14 energia', req: function (s) { return s.money >= 4000; }, reqText: 'Kell hozzá 4 000 Ft', do: function (s, A) { A.money(-4000); A.energy(-14); A.conf(50); var r = A.rand(); if (r < 0.3) { A.risk(5); A.comm(3); return 'Valaki a parton észreveszi a ruháidat, és megkérdez rólad pár dolgot. Egy nem várt beszélgetés kerekedik belőle, ami végül kedvesen zárul.'; } if (r < 0.6) { A.mod({ id: 'napfeny', label: 'Napfényes kedv', regen: 0.006, months: 3 }); return 'A nap, a víz és a homok csodát tesz. Napokig napbarnított mosollyal jársz.'; } return 'Egy tökéletes strandnap, napolajjal és jégkrémmel.'; } },
+                { label: 'Inkább otthon maradsz', do: function (s, A) { A.conf(-3); return 'A strand helyett a szobában ücsörögsz, és nézed a képeket mások kalandjairól.'; } }
+            ]
+        },
+        {
+            id: 'r_kitchen_fail', art: 'kitchen', weight: 2, once: false, cooldown: 10, minAge: 14,
+            title: 'Főzőkísérlet',
+            text: 'Egy videóban láttál egy látványos pasztell tortát, és úgy döntöttél, hogy megsütöd.',
+            choices: [
+                { label: 'Belevágsz', tip: '2 500 Ft · −10 energia', req: function (s) { return s.money >= 2500; }, reqText: 'Kell hozzá 2 500 Ft', do: function (s, A) {
+                    A.money(-2500); A.energy(-10);
+                    var r = A.rand();
+                    if (r < 0.35) { A.conf(60); A.comm(4); A.skill('rajz', 6); return 'A torta tökéletes lett: lágy rózsaszín, kék csillámokkal. Kiposztolod a képet, és a lájkok özönlenek.'; }
+                    if (r < 0.7) { A.conf(25); return 'Kicsit meg is égett, de a tetején a máz mindent elfed. Ízre egészen jó!'; }
+                    A.conf(-8); A.energy(-6); return 'A torta összeesik, a konyha tiszta liszt. Legalább jót nevetsz rajta.';
+                } },
+                { label: 'Inkább nem sütsz semmit', do: function (s, A) { A.conf(2); return 'Hagyod a tortát a videóban. Majd egyszer.'; } },
+                { label: 'Inkább rendelsz', tip: '4 000 Ft', req: function (s) { return s.money >= 4000; }, reqText: 'Kell hozzá 4 000 Ft', do: function (s, A) { A.money(-4000); A.conf(12); return 'Nem olyan látványos, de legalább nem kell takarítanod.'; } }
+            ]
+        },
+        {
+            id: 'r_rain_umbrella', art: 'rain', mood: 'sad', weight: 2, once: false, cooldown: 10, minAge: 14,
+            title: 'Zuhé hazafelé',
+            text: 'Hazafelé hirtelen eleredt az eső, és nincs nálad esernyő. Egy idegen megáll melletted a buszmegállóban.',
+            choices: [
+                { label: 'Megkérdezed, van-e hely az ernyője alatt', do: function (s, A) { var r = A.rand(); if (r < 0.5) { A.comm(3); A.conf(35); return 'Az idegen elmosolyodik, és hazáig elkísér. Útközben mesél a kedvenc zenekaráról. Egy kis kedvességgel napsütéses lesz a nap.'; } A.conf(10); return 'Az idegen mogorván tolja arrébb az ernyőt. Szerencsére a busz hamar megérkezik.'; } },
+                { label: 'Futsz haza az esőben', tip: '−6 energia', do: function (s, A) { A.energy(-6); A.conf(8); return 'Bőrig ázol, de otthon egy forró fürdő és egy bögre kakaó vár.'; } }
+            ]
+        },
+        {
+            id: 'r_contest_draw', art: 'contest', mood: 'happy', weight: 2, once: false, cooldown: 12, minAge: 15,
+            when: function (s) { return lvl(s, 'rajz') >= 1; },
+            title: 'Online rajzverseny',
+            text: 'A kedvenc oldalad rajzversenyt hirdet. A téma: „Pasztell hangulat”. A díj egy digitális rajzcsomag és némi pénz.',
+            choices: [
+                { label: 'Benevezel', tip: '−12 energia', do: function (s, A) {
+                    A.energy(-12); A.skill('rajz', 14);
+                    var p = 0.25 + Math.min(0.5, lvl(s, 'rajz') * 0.1);
+                    if (A.rand() < p) { A.money(12000); A.conf(110); A.comm(8); return 'A rajzod bekerül a legjobb három közé! A jutalom: +12 000 Ft és egy rakás új követő.'; }
+                    A.conf(30); return 'Nem nyersz, de a kommentekben sok kedves szó. Megtanultál valamit.';
+                } },
+                { label: 'Inkább csak szavazol', do: function (s, A) { A.conf(5); return 'Pár kedvenc rajzra szavazol, aztán megy tovább a nap.'; } }
+            ]
+        }
+
     ];
 
     Ev.find = function (id) {
@@ -828,7 +1248,7 @@
     Ev.ENDINGS = [
         {
             id: 'legenda', title: 'A Legenda', art: 'stage',
-            score: function (s) { return s.comm / 200; },
+            score: function (s) { return s.comm / 320; },
             text: function (s, c) { return TEXT_COMMON(s, c) + ' A szerveren a születésnapodra külön csatornát nyitnak, a témája: „F a femboy-korszaknak”. Százak írnak üzenetet, és mindegyikben ugyanaz van: hogy mennyit segítettél. A ruháid, a gépeid, a lakásod mind csak díszletek. A valódi hagyatékod a közösség, amit építettél.'; }
         },
         {

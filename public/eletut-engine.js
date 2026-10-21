@@ -271,6 +271,9 @@
         });
         return out;
     };
+    // Ajánlott gép alatt akadozik a játék: több energiát visz, kevesebb önbizalmat ad
+    E.gameLag = function (s, g) { return g.rec !== undefined && s.comp < g.rec; };
+    E.gameCost = function (s, g) { return E.gameLag(s, g) ? Math.round(g.energy * 1.4) : g.energy; };
     E.canPlay = function (s, id) {
         var g = find(D.GAMES, id);
         if (!g) return fail('Ismeretlen játék');
@@ -280,7 +283,7 @@
         if (g.needsDiscord && !s.flags.discord) return fail('Discord-közösség kell hozzá');
         var gs = s.games[id];
         if (gs && gs.last === s.month) return fail('Ebben a hónapban már játszottál vele');
-        if (s.energy < g.energy) return fail('Kevés az energiád (' + g.energy + ' kell)');
+        if (s.energy < E.gameCost(s, g)) return fail('Kevés az energiád (' + E.gameCost(s, g) + ' kell)');
         return ok();
     };
     E.buyGame = function (s, id) {
@@ -301,16 +304,73 @@
         var g = find(D.GAMES, id), d = E.derive(s);
         var gs = s.games[id] = s.games[id] || { own: true, plays: 0, last: -1 };
         var lv0 = E.gameLevel(s, id);
-        s.energy = clamp(s.energy - g.energy, 0, E.maxEnergy(s));
+        var lag = E.gameLag(s, g);
+        s.energy = clamp(s.energy - E.gameCost(s, g), 0, E.maxEnergy(s));
         gs.plays++; gs.last = s.month;
-        var conf = Math.round(g.conf * Math.max(1, d.clickConf * 0.5));
+        var conf = Math.round(g.conf * Math.max(1, d.clickConf * 0.5) * (lag ? 0.6 : 1));
         s.conf += conf;
         if (g.comm) s.comm += g.comm;
         if (g.skill) for (var k in g.skill) addSkillProgress(s, k, g.skill[k]);
         if (g.temp) E.addMod(s, { id: 'g_' + g.id, label: g.temp.label, en: g.temp.en, regen: g.temp.regen, st: g.temp.st, months: g.temp.months });
         var lv = E.gameLevel(s, id);
         E.log(s, 'Játszottál: ' + g.name + '.');
-        return { ok: true, text: g.text, conf: conf, level: lv, levelUp: lv > lv0, temp: g.temp || null };
+        return { ok: true, text: lag ? g.text + ' (A gép viszont akadozik, a végére kifáradsz.)' : g.text, conf: conf, level: lv, levelUp: lv > lv0, temp: g.temp || null, lag: lag };
+    };
+
+    // ---------------------------------------------------------
+    // Barátok: rég nem látott ismerősök, ajándékozás
+    // ---------------------------------------------------------
+    E.monthsSince = function (s, who) {
+        var last = s.social.last[who];
+        return last === undefined ? 0 : s.month - last;
+    };
+    // Akikkel már régen nem beszéltél (a kötelék hamarosan kopik): [{ id, months }]
+    E.neglected = function (s) {
+        var out = [];
+        D.PEOPLE.forEach(function (p) {
+            if (!E.personUnlocked(s, p.id) || !(s.social.known && s.social.known[p.id])) return;
+            var m = E.monthsSince(s, p.id);
+            if (m >= D.SOCIAL_DECAY_AFTER - 1) out.push({ id: p.id, months: m });
+        });
+        return out;
+    };
+    // Az ajándék hatása: { tone: great|ok|meh, score }
+    E.giftTone = function (s, who, itemId) {
+        var tz = D.GIFT_TASTE[who], it = find(D.ITEMS, itemId);
+        if (!tz || !it) return { tone: 'meh', score: 0 };
+        var score = 0;
+        for (var k in tz.st) score += tz.st[k] * ((it.st && it.st[k]) || 0) / 12;
+        if (tz.slots.indexOf(it.slot) >= 0) score += 0.9;
+        return { tone: score >= 1.6 ? 'great' : (score >= 0.7 ? 'ok' : 'meh'), score: Math.round(score * 100) / 100 };
+    };
+    E.canGift = function (s, who, itemId) {
+        var p = find(D.PEOPLE, who), it = find(D.ITEMS, itemId);
+        if (!p || !D.GIFT_TASTE[who]) return fail('Ismeretlen');
+        if (!E.personUnlocked(s, who) || !(s.social.known && s.social.known[who])) return fail('Még nem ismered');
+        if (!it || !s.items[itemId]) return fail('Ez nincs meg neked');
+        var at = s.social.giftAt && s.social.giftAt[who];
+        if (at !== undefined && s.month - at < D.GIFT_CD) return fail('Nemrég ajándékoztál (még ' + (D.GIFT_CD - (s.month - at)) + ' hónapig)');
+        return ok();
+    };
+    E.giveGift = function (s, who, itemId) {
+        var r = E.canGift(s, who, itemId);
+        if (!r.ok) return r;
+        var p = find(D.PEOPLE, who), it = find(D.ITEMS, itemId), tz = D.GIFT_TASTE[who];
+        var gt = E.giftTone(s, who, itemId);
+        var mult = gt.tone === 'great' ? 1.8 : (gt.tone === 'ok' ? 1.1 : 0.5);
+        var gain = Math.round((2 + Math.min(5, it.cost / 30000)) * mult * 10) / 10;
+        // a tárgy az övé lesz: nálad megszűnik (a változatai is)
+        delete s.items[itemId]; delete s.colors[itemId]; delete s.pats[itemId]; delete s.vars[itemId];
+        Object.keys(s.equipped).forEach(function (sl) { if (s.equipped[sl] === itemId) delete s.equipped[sl]; });
+        s.social.bond[who] = clamp(E.bond(s, who) + gain, 0, 100);
+        s.social.last[who] = s.month;
+        s.social.giftAt = s.social.giftAt || {};
+        s.social.giftAt[who] = s.month;
+        s.flags['gift_' + who] = itemId;
+        s.flags.gifts = (s.flags.gifts || 0) + 1;
+        s.conf += Math.round(10 + it.cost / 2000);
+        E.log(s, 'Ajándék: ' + it.name + ' → ' + p.name + '.');
+        return { ok: true, tone: gt.tone, text: tz[gt.tone], bond: gain, who: who, item: it.name };
     };
 
     // ---------------------------------------------------------
@@ -677,7 +737,11 @@
         }
         if (!broken && s.comp >= 4 && lvl('stream') >= 1) inc.stream = lvl('stream') * (D.STREAM_BASE + s.comm * D.STREAM_PER_COMM);
         var codeMul = 1 + d.stat.code * 0.004;
-        inc.job = Math.round(inc.job * codeMul * (1 + perks.pay));
+        // Az állás bérét és a műszak-kattintást a stat-értékek is befolyásolják (a nagyobb állásoknál erősebben)
+        var jb = E.jobBonus(s, job, st);
+        d.jobBonus = jb;
+        if (job) d.workClick = Math.round(job.click * jb.mul);
+        inc.job = Math.round(inc.job * jb.mul * (1 + perks.pay));
         inc.freelance = Math.round(inc.freelance * codeMul);
         inc.total = inc.allowance + inc.job + inc.scholarship + inc.freelance + inc.stream;
 
@@ -1035,6 +1099,20 @@
     // ---------------------------------------------------------
     // Munka, lakás
     // ---------------------------------------------------------
+    // A stat-értékek hatása egy állásra: { mul, parts: [{stat, value, pct}] }
+    E.jobBonus = function (s, job, tot) {
+        var out = { mul: 1, parts: [] };
+        if (!job || !job.sw) return out;
+        tot = tot || E.stats(s).total;
+        var sum = 0;
+        for (var k in job.sw) {
+            var pct = (tot[k] || 0) * job.sw[k];
+            if (pct > 0) { sum += pct; out.parts.push({ stat: k, value: tot[k] || 0, pct: Math.round(pct * 1000) / 10 }); }
+        }
+        out.mul = 1 + Math.min(0.9, sum);
+        out.pct = Math.round((out.mul - 1) * 100);
+        return out;
+    };
     E.canHire = function (s, id) {
         var j = find(D.JOBS, id);
         if (!j) return fail('Ismeretlen állás');
@@ -1046,6 +1124,10 @@
         var needs = j.needs || {};
         for (var k in needs) {
             if ((s.skills[k] || 0) < needs[k]) return fail(find(D.SKILLS, k).name + ' ' + needs[k] + '. szint');
+        }
+        if (j.needsStat) {
+            var tot = E.stats(s).total;
+            for (var q in j.needsStat) if ((tot[q] || 0) < j.needsStat[q]) return fail(find(D.STATS, q).label + ' stat ' + j.needsStat[q] + ' kell (most ' + (tot[q] || 0) + ')');
         }
         return ok();
     };
@@ -1238,8 +1320,14 @@
             ev = EVS[i];
             if (ev.prio === 1 && !ev.trigger && E.eligible(s, ev, c)) return ev;
         }
+        // a barát, akivel rég nem beszéltél, maga keres meg
+        var reach = EVS.filter(function (e) { return e.reach && E.eligible(s, e, c) && E.monthsSince(s, e.reach) >= 3 && s.social.known && s.social.known[e.reach]; });
+        if (reach.length && rng() < 0.6) {
+            reach.sort(function (a, b) { return E.monthsSince(s, b.reach) - E.monthsSince(s, a.reach); });
+            return reach[0];
+        }
         if (rng() < RANDOM_EVENT_CHANCE) {
-            var pool = EVS.filter(function (e) { return !e.prio && !e.trigger && E.eligible(s, e, c); });
+            var pool = EVS.filter(function (e) { return !e.prio && !e.trigger && !e.reach && E.eligible(s, e, c); });
             if (pool.length) return pickWeighted(pool, function (e) { return e.weight || 1; });
         }
         return null;
@@ -1259,6 +1347,8 @@
         var c = E.ctx(s);
         return {
             id: ev.id, title: s.event.title, text: s.event.text, art: s.event.art,
+            prop: ev.prop || '',
+            guest: ev.reach || (typeof ev.guest === 'function' ? ev.guest(s, c) : ev.guest) || '',
             result: s.event.result, link: s.event.link, chapter: !!ev.chapter, kicker: ev.kicker || '',
             mood: typeof ev.mood === 'function' ? ev.mood(s, c) : (ev.mood || ''),
             choices: ev.choices.map(function (ch, i) {
@@ -1357,6 +1447,12 @@
                 var floor = p.id === 'csalad' ? 10 : 0;
                 s.social.bond[p.id] = Math.max(floor, b - D.SOCIAL_DECAY * (p.id === 'zsombor' && s.flags.partner ? 0.5 : 1));
             }
+            // emlékeztető: rég nem beszéltetek (3 hónapja, majd háromhavonta újra)
+            var gone = s.month - last;
+            if (gone >= D.SOCIAL_DECAY_AFTER - 1 && (gone - (D.SOCIAL_DECAY_AFTER - 1)) % 3 === 0) {
+                s.flagsNew = (s.flagsNew || []).concat([{ type: 'miss', id: p.id, months: gone }]);
+                E.log(s, 'Rég beszéltél ' + p.name + ' nevű ismerősöddel (' + gone + ' hónapja).');
+            }
         });
 
         if (s.allowanceCut > 0) s.allowanceCut--;
@@ -1420,11 +1516,33 @@
     };
 
     // ---------------------------------------------------------
+    // Csalás-felismerés: a fontos mezőkből "pecsét" készül; ha mentésbe vagy a konzolba nyúlnak, nem egyezik.
+    // (Böngészős játék: ez nem védelem, csak jó móka. Aki akar, kijátssza. De a játék észreveszi, ha ügyetlenül csinálják.)
+    // ---------------------------------------------------------
+    function fnv(str) {
+        var h = 2166136261;
+        for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+        return h.toString(36);
+    }
+    function sumVals(o) { var n = 0; if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { n += Number(o[k]) || 0; }); return n; }
+    E.sealOf = function (x) {
+        var keys = function (o) { return o && typeof o === 'object' ? Object.keys(o).length : 0; };
+        var parts = [Math.round(Number(x.money) || 0), Math.round(Number(x.conf) || 0), Math.round(Number(x.comm) || 0), Math.round(Number(x.energy) || 0),
+            Number(x.month) || 0, Number(x.comp) || 0, keys(x.items), keys(x.beauty), keys(x.decor), keys(x.steps), Math.round(sumVals(x.skills)), keys(x.ach), keys(x.games)];
+        return fnv('pasztell|' + parts.join('|') + '|életút');
+    };
+    E.seal = function (s) { s.seal = E.sealOf(s); };
+    E.sealOk = function (s) { return !s.seal || s.seal === E.sealOf(s); };
+    // Betöltés után: igaz, ha a mentést kézzel módosították
+    E.isTampered = function (s) { return !!s.cheat; };
+
+    // ---------------------------------------------------------
     // Mentés / betöltés
     // ---------------------------------------------------------
     E.serialize = function (s) {
         var copy = {};
-        for (var k in s) if (k !== 'flagsNew') copy[k] = s[k];
+        for (var k in s) if (k !== 'flagsNew' && k !== 'cheat') copy[k] = s[k];
+        copy.seal = E.sealOf(s);
         return JSON.stringify(copy);
     };
 
@@ -1432,6 +1550,7 @@
         var raw;
         try { raw = JSON.parse(text); } catch (e) { return null; }
         if (!raw || typeof raw !== 'object' || raw.v !== 1) return null;
+        var tampered = typeof raw.seal === 'string' && raw.seal !== E.sealOf(raw);
         var s = E.newState({ name: raw.name, hairStyle: raw.hairStyle, hairColor: raw.hairColor, skin: raw.skin, eyeStyle: raw.eyeStyle });
         var numeric = ['month', 'sec', 'conf', 'money', 'energy', 'risk', 'comm', 'comp', 'jobMonths', 'debtMonths', 'allowanceCut', 'saleUntil', 'brokenUntil', 'rentBump', 'lastCon', 'speed'];
         numeric.forEach(function (k) { s[k] = num(raw[k], s[k]); });
@@ -1442,7 +1561,7 @@
         if (Array.isArray(raw.mods)) s.mods = raw.mods.filter(function (m) { return m && typeof m.id === 'string'; }).slice(-40).map(function (m) { var o = { id: m.id, label: String(m.label || m.id).slice(0, 40) }; if (num(m.en, 0)) o.en = num(m.en, 0); if (num(m.regen, 0)) o.regen = num(m.regen, 0); if (m.st && typeof m.st === 'object') { o.st = {}; for (var k in m.st) if (find(D.STATS, k)) o.st[k] = num(m.st[k], 0); } if (m.until !== undefined && m.until !== null) o.until = num(m.until, 0); return o; });
         if (raw.gamble && typeof raw.gamble === 'object') s.gamble = Object.assign(s.gamble, raw.gamble);
         if (raw.social && typeof raw.social === 'object') {
-            ['bond', 'last', 'cd', 'known'].forEach(function (k) {
+            ['bond', 'last', 'cd', 'known', 'giftAt'].forEach(function (k) {
                 if (raw.social[k] && typeof raw.social[k] === 'object' && !Array.isArray(raw.social[k])) s.social[k] = Object.assign({}, raw.social[k]);
             });
         }
@@ -1473,7 +1592,7 @@
         });
         s.month = clamp(Math.floor(s.month), 0, D.MONTHS);
         s.comp = clamp(Math.floor(s.comp), 0, D.COMPUTERS.length - 1);
-        s.speed = [1, 2, 4].indexOf(s.speed) >= 0 ? s.speed : 1;
+        s.speed = [0.5, 1, 2, 4].indexOf(s.speed) >= 0 ? s.speed : 1;
         s.parents = ['unknown', 'accepting', 'tense'].indexOf(raw.parents) >= 0 ? raw.parents : 'unknown';
         s.housing = find(D.HOUSING, raw.housing) ? raw.housing : 'szulo';
         s.job = find(D.JOBS, raw.job) ? raw.job : null;
@@ -1485,6 +1604,7 @@
         if (raw.ending && typeof raw.ending === 'object' && M.events.ENDINGS.some(function (e) { return e.id === raw.ending.id; })) s.ending = { id: raw.ending.id, score: num(raw.ending.score, 0), at: num(raw.ending.at, D.MONTHS) };
         Object.keys(s.games).forEach(function (k) { var g = s.games[k]; if (!find(D.GAMES, k) || !g || typeof g !== 'object') { delete s.games[k]; return; } s.games[k] = { own: !!g.own, plays: Math.max(0, Math.floor(num(g.plays, 0))), last: num(g.last, -1) }; });
         E.clampEnergy(s);
+        if (tampered) s.cheat = true; else E.seal(s);
         s.paused = true; // betöltéskor szünetel, hogy ne érjen meglepetés
         return s;
     };

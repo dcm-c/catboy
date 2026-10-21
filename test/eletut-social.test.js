@@ -255,3 +255,116 @@ test('eredmények: barátok, smink és pár', () => {
     s.skills.smink = 3; assert.ok(ok('kozmetikus'));
     const ids = Ev.ACHIEVEMENTS.map((a) => a.id); assert.equal(new Set(ids).size, ids.length);
 });
+
+// ---------- Rég nem látott barátok, ajándékozás, történetívek ----------
+function withFriends(s) {
+    s.social.known = {}; D.PEOPLE.forEach((p) => { s.social.known[p.id] = true; s.social.last[p.id] = s.month; s.social.bond[p.id] = 40; });
+    s.flags.discord = true; s.stats.cons = 2; s.job = 'webjr';
+    return s;
+}
+
+test('emlékeztető: a rég elhanyagolt ismerősről jelzés érkezik, és a lista is mutatja', () => {
+    const s = withFriends(fresh());
+    s.month = 20;
+    s.social.last.lilla = 17; // 3 hónapja
+    assert.ok(E.neglected(s).some((x) => x.id === 'lilla'));
+    s.flagsNew = [];
+    E.endMonth(s);
+    assert.ok((s.flagsNew || []).some((f) => f.type === 'miss' && f.id === 'lilla'), 'nincs emlékeztető');
+    s.social.last.lilla = s.month; // újra beszéltetek
+    assert.ok(!E.neglected(s).some((x) => x.id === 'lilla'));
+});
+
+test('barát-kezdeményezés: a rég nem látott barát maga keresi meg a játékost, és a kapcsolat javul', () => {
+    const s = fresh(); s.month = 60; withFriends(s);
+    s.social.last.lilla = 40;
+    s.lastSeen = {};
+    Ev.EVENTS.filter((e) => e.prio).forEach((e) => { s.seen[e.id] = true; });
+    const evs = Ev.EVENTS.filter((e) => e.reach);
+    assert.ok(evs.length >= 6);
+    E.setRng(() => 0.1);
+    const ev = E.pickEvent(s);
+    assert.ok(ev && ev.reach === 'lilla', 'Lilla eseménye jön: ' + (ev && ev.id));
+    E.showEvent(s, ev);
+    assert.equal(E.eventView(s).guest, 'lilla');
+    const before = E.bond(s, 'lilla');
+    assert.ok(E.choose(s, 0));
+    assert.ok(E.bond(s, 'lilla') > before, 'a kötelék nőtt');
+    assert.equal(E.monthsSince(s, 'lilla'), 0);
+    // minden barát eseményének minden választása lefut
+    evs.forEach((e) => {
+        e.choices.forEach((_, i) => {
+            const t = withFriends(fresh()); t.month = 50; t.energy = 100; t.conf = 500; t.parents = 'accepting';
+            E.showEvent(t, e);
+            assert.ok(E.choose(t, i), e.id + '/' + i);
+        });
+    });
+});
+
+test('ajándékozás: ízlés szerinti hatás, a tárgy elfogy, hűtési idő', () => {
+    const s = withFriends(fresh());
+    s.month = 10;
+    const cute = D.ITEMS.find((i) => i.st && i.st.cute >= 10 && ['hair', 'neck', 'top'].includes(i.slot));
+    assert.ok(cute);
+    s.items[cute.id] = true; s.equipped[cute.slot] = cute.id;
+    assert.equal(E.giftTone(s, 'lilla', cute.id).tone === 'meh', false, 'Lilla szereti a cuki dolgokat');
+    const b0 = E.bond(s, 'lilla');
+    const r = E.giveGift(s, 'lilla', cute.id);
+    assert.ok(r.ok && r.text.length > 20 && r.bond > 0);
+    assert.ok(E.bond(s, 'lilla') > b0);
+    assert.ok(!s.items[cute.id] && !s.equipped[cute.slot], 'a tárgy elfogyott és lekerült');
+    const other = D.ITEMS.find((i) => i.id !== cute.id);
+    s.items[other.id] = true;
+    assert.equal(E.canGift(s, 'lilla', other.id).ok, false, 'hűtési idő');
+    assert.equal(E.canGift(s, 'bence', other.id).ok, true);
+    s.month += D.GIFT_CD;
+    assert.equal(E.canGift(s, 'lilla', other.id).ok, true);
+    assert.equal(E.giveGift(s, 'lilla', 'nincsilyen').ok, false);
+    // mentés körút megőrzi a hűtési időt
+    const copy = E.deserialize(E.serialize(s));
+    assert.equal(copy.social.giftAt.lilla, 10);
+    // minden barátnak van ízlése
+    D.PEOPLE.forEach((p) => { const z = D.GIFT_TASTE[p.id]; assert.ok(z && z.great && z.ok && z.meh && z.likes, p.id); });
+});
+
+test('történetívek: a jelzők alapján elérhetők és végigjátszhatók', () => {
+    const arcs = ['a_hold3', 'a_hold4', 'a_lilla1', 'a_lilla2', 'a_lilla3', 'a_bence1', 'a_bence2', 'a_fam2'];
+    arcs.forEach((id) => {
+        const ev = Ev.find(id);
+        assert.ok(ev, id);
+        for (let i = 0; i < ev.choices.length; i++) {
+            const s = withFriends(fresh());
+            s.month = 140; s.conf = 800; s.energy = 100; s.parents = 'accepting';
+            s.items.polo = true; s.items.hajcsat = true;
+            Object.assign(s.flags, { alias: true, hold_collab: true, hold_hit: true, lilla_knows: true, nagyi_ok: true });
+            assert.ok(E.eligible(s, ev, E.ctx(s)), id + ' nem elérhető jó állapotban');
+            E.showEvent(s, ev);
+            assert.ok(E.choose(s, i), id + '/' + i);
+        }
+    });
+});
+
+test('con-ív: tervezés → felkészülés → a nap → hazaút, mindegyik döntéssel', () => {
+    ['c_budget', 'c_pick', 'c_day', 'c_after', 'c_year', 'c_year_extra'].forEach((id) => {
+        const ev = Ev.find(id);
+        assert.ok(ev && ev.choices.length >= 2, id);
+        ev.choices.forEach((ch, i) => {
+            const s = withFriends(fresh());
+            s.month = 100; s.conf = 800; s.energy = 100; s.stats.cons = 3; s.lastCon = 80; s.skills.varras = 2; s.skills.rajz = 3; s.items.polo = true; s.items.hajcsat = true;
+            Object.assign(s.flags, { con_budget: 'mid', con_contest: true });
+            E.showEvent(s, ev);
+            assert.ok(E.eventView(s).choices[i].enabled || ch.req, id + '/' + i);
+            if (E.eventView(s).choices[i].enabled) assert.ok(E.choose(s, i));
+        });
+    });
+    // a véletlen kimenetel mindkét ága előfordul a jelmezversenyen
+    const day = Ev.find('c_day');
+    const results = new Set();
+    for (let k = 0; k < 40; k++) {
+        const s = withFriends(fresh()); s.month = 100; s.conf = 800; s.energy = 100; s.skills.varras = 1; s.flags.con_contest = true; s.flags.con_budget = 'low';
+        E.setRng(mulberry32(k + 1));
+        E.showEvent(s, day); E.choose(s, 0);
+        results.add(!!s.flags.con_won);
+    }
+    assert.equal(results.size, 2, 'a jelmezverseny kimenetele véletlen');
+});
