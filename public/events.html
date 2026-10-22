@@ -4,51 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="uwu.js"></script>
     <script src="theme.js"></script>
     <title>Események | MFSZ</title>
 
     <!-- Bootstrap CSS beemelése (hogy illeszkedjen a keretrendszerhez) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700&display=swap" rel="stylesheet" />
     <!-- A TE eredeti stíluslapod -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="themes.css">
 
-    <!-- Egy-két apró, egyedi kiegészítés a kártyákhoz és a pride szöveghez -->
-    <style>
-        body {
-            /* Finom világos átmenet, ha a style.css nem írja felül */
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-            min-height: 100vh;
-        }
-
-        .pride-text {
-            background: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-        }
-
-        .event-icon {
-            font-size: 2.2rem;
-            line-height: 1;
-        }
-
-        .card {
-            transition: transform 0.2s ease-in-out;
-            background-color: rgba(255, 255, 255, 0.85);
-            /* Kicsit áttetsző, hogy látszódjon az átmenet */
-            backdrop-filter: blur(5px);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-        }
-    </style>
 </head>
 
 <body class="text-dark">
@@ -77,6 +47,34 @@
         <!-- IRL Események -->
         <h3 class="border-bottom pb-2 mb-4 text-center">Megmozdulások <span class="text-warning">IRL</span></h3>
         <div class="row g-4 mb-5">
+
+            <!-- Legány találkozó (2026. március 15.) -->
+            <div class="col-12">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title d-flex align-items-center flex-wrap mb-3" style="color: #732982;">
+                            <span class="event-icon me-3">🏳️‍⚧️</span> Legány találkozó: március 15., Bem tér
+                            <span class="badge bg-success ms-md-3 fs-6">megtörtént</span>
+                        </h4>
+                        <p class="card-text">
+                            2026. március 15-én a Magyar Femboy Szakszervezet „Legány találkozó” néven tartott
+                            megemlékezést és pikniket a Bem téren, hazafias divatbemutatóval. A <strong>444</strong>
+                            élő tudósítása szerint ez volt az egyetlen LMBTQ-esemény aznap, amelyet a rendőrség nem
+                            tiltott be; a szervezők szerint azért, mert nem tudták, mit jelent a „legány”. A kb. húsz
+                            fős, békés pikniket a 444 beszámolója szerint egy provokatőr zavarta meg. A cikk szerint az
+                            egész „csak félig vicces”: a résztvevők a nemzeti jelképeket kicsit kifordítva azt kérték,
+                            hogy őket is a nemzet részeként ismerjék el, hiszen a femboyok is magyarok.
+                        </p>
+                        <p class="card-text mb-0">
+                            <a href="https://444.hu/2026/03/15/az-utolso-erodemonstracio-a-valasztasok-elott-nemzeti-unnep-percrol-percre"
+                                target="_blank" rel="noopener noreferrer" class="btn-444">
+                                <span class="btn-444-mark">444</span> Beszámoló a 444-en (9:57-es bejegyzés)
+                                <span aria-hidden="true">↗</span>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Túra -->
             <div class="col-md-6">
@@ -163,16 +161,23 @@
                 </div>
             </div>
 
-            <!-- Minigames -->
+            <!-- Minigames: a "csak Discord gaming esték vannak" állítás kihúzva -->
             <div class="col-md-6">
                 <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <h4 class="card-title text-primary d-flex align-items-center mb-3">
-                            <span class="event-icon me-3">🎮</span> Minigame Estek
-                        </h4>
-                        <p class="card-text">
-                            Ahol a barátságok véget érnek! Rendszeres <em>Among Us</em>, <em>Goose Goose Duck (GGD)</em>
-                            és <em>Gartic Phone</em> partik. Gyere és derítsd ki ki a sus!
+                    <div class="card-body d-flex flex-column">
+                        <span class="lie-stamp">Ez aljas hazugság…</span>
+                        <div class="struck">
+                            <h4 class="card-title text-primary d-flex align-items-center mb-3">
+                                <span class="event-icon me-3">🎮</span> Discord Gaming Estek
+                            </h4>
+                            <p class="card-text mb-0">
+                                Ahol a barátságok véget érnek! Rendszeres <em>Among Us</em>, <em>Goose Goose Duck
+                                    (GGD)</em> és <em>Gartic Phone</em> partik. Gyere és derítsd ki ki a sus!
+                            </p>
+                        </div>
+                        <p class="card-text small text-muted mt-3 mb-0">
+                            (A közösség nem csak játszik: lásd fent, a Legány találkozót. A minigame-estek viszont
+                            tényleg vannak, csak nem ez az egyetlen dolgunk.)
                         </p>
                     </div>
                 </div>
@@ -222,7 +227,7 @@
     </div>
 
     <!-- Bootstrap JS beemelése -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- A TE eredeti script fájlod -->
     <script src="script.js"></script>

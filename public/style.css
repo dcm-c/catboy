@@ -650,6 +650,58 @@ footer {
     border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+/* Lábléc: lapos sáv, vékony pasztell csíkkal a tetején (nem kártya) */
+.site-footer {
+    position: relative;
+    padding: 1.1rem 0 1rem;
+}
+
+.site-footer::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #5bcefa, #f5a9b8, #ffffff, #f5a9b8, #5bcefa);
+}
+
+.site-footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem 1.5rem;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .2rem 1.1rem;
+}
+
+.footer-links a + a::before {
+    content: '·';
+    margin-right: 1.1rem;
+    color: var(--pink);
+    font-weight: 900;
+}
+
+.footer-credit {
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .site-footer-row {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-links {
+        justify-content: center;
+    }
+}
+
 /* --- MODAL NAVIGÁCIÓS NYILAK --- */
 .modal-nav-btn {
     position: absolute;
@@ -1394,4 +1446,315 @@ footer {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* =========================================================
+   KÁRTYÁK: minden kártya színes, lekerekített szegélyt kap
+   (a buzi mód a saját, mozgó szivárványkeretét továbbra is felülírja)
+   ========================================================= */
+:root {
+    --card-fill: #ffffff;
+    --card-fill-soft: #fdf9fc;
+    --card-edge: linear-gradient(135deg, #f5a9b8, #5bcefa 38%, #c9a7ff 70%, #f5a9b8);
+    --uwu-fill: #ffffff;
+}
+
+.custom-card.custom-card,
+.card.card,
+.review-card.review-card,
+.event-card-modern.event-card-modern,
+.highlight-box.highlight-box {
+    border: 3px solid transparent !important;
+    border-radius: 20px;
+    background:
+        linear-gradient(var(--card-fill), var(--card-fill)) padding-box,
+        var(--card-edge) border-box !important;
+}
+
+.review-card.review-card {
+    background:
+        linear-gradient(var(--card-fill-soft), var(--card-fill-soft)) padding-box,
+        var(--card-edge) border-box !important;
+    border-radius: 16px;
+}
+
+.highlight-box.highlight-box {
+    background:
+        linear-gradient(135deg, rgba(245, 169, 184, 0.12), rgba(91, 206, 250, 0.12)) padding-box,
+        var(--card-edge) border-box !important;
+}
+
+/* Nem minden kártya egyforma: a színátmenetes szegély kétféle palettával váltakozik, a többi kártya
+   egyszínű, szaggatott vagy oldalsávos keretet kap (a GYIK-elemek és a vélemények csak a palettát váltogatják). */
+:is(.row > :nth-child(5n+2) > *, .custom-card:nth-child(5n+2), .review-card:nth-child(5n+2)) {
+    --card-edge: linear-gradient(135deg, #5bcefa, #9be3c2 40%, #ffe29a 72%, #5bcefa);
+}
+
+:is(.row > :nth-child(5n+3) > *, .review-card:nth-child(5n+3)) {
+    --card-edge: linear-gradient(135deg, #c9a7ff, #f5a9b8 45%, #ffcba4 75%, #c9a7ff);
+}
+
+:is(.row > :nth-child(5n+4) > *, .review-card:nth-child(5n+4)) {
+    --card-edge: linear-gradient(135deg, #ffcba4, #f5a9b8 38%, #5bcefa 72%, #ffcba4);
+}
+
+/* 3. kártya: egyszínű kék, lágy kék árnyékkal */
+:is(.row > :nth-child(5n+3) > :is(.card, .custom-card, .event-card-modern),
+    .custom-card:nth-child(5n+3)):not(.accordion-item, .review-card, .highlight-box, .slop-banner) {
+    border: 3px solid #5bcefa !important;
+    border-radius: 26px;
+    background: var(--card-fill) !important;
+    box-shadow: 0 8px 22px rgba(91, 206, 250, .22);
+}
+
+/* 4. kártya: szaggatott rózsaszín keret, kisebb lekerekítéssel */
+:is(.row > :nth-child(5n+4) > :is(.card, .custom-card, .event-card-modern),
+    .custom-card:nth-child(5n+4)):not(.accordion-item, .review-card, .highlight-box, .slop-banner) {
+    border: 3px dashed #f5a9b8 !important;
+    border-radius: 14px;
+    background: var(--card-fill) !important;
+}
+
+/* 5. kártya: vastag lila oldalsáv, vékony halvány keret */
+:is(.row > :nth-child(5n) > :is(.card, .custom-card, .event-card-modern),
+    .custom-card:nth-child(5n)):not(.accordion-item, .review-card, .highlight-box, .slop-banner) {
+    border: 2px solid rgba(201, 167, 255, .45) !important;
+    border-left: 10px solid #c9a7ff !important;
+    border-radius: 12px;
+    background: var(--card-fill) !important;
+}
+
+/* A kártyákon belüli, szegély nélküli "kártya-szerű" dobozok maradjanak laposak */
+.accordion-item.custom-card.custom-card {
+    overflow: hidden;
+}
+
+/* =========================================================
+   UwU gomb (lábléc): kerek, színes szegélyű, minden témában
+   ========================================================= */
+#btn-uwu-mode.btn-uwu {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    color: var(--dark);
+    background:
+        linear-gradient(var(--uwu-fill), var(--uwu-fill)) padding-box,
+        var(--pride-grad) border-box;
+    background-size: auto, 200% 100%;
+    padding: .2rem .9rem;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+#btn-uwu-mode.btn-uwu:hover,
+#btn-uwu-mode.btn-uwu:focus-visible {
+    transform: translateY(-1px) scale(1.04);
+    box-shadow: 0 4px 14px rgba(245, 169, 184, .55);
+}
+
+#btn-uwu-mode.btn-uwu[aria-pressed="true"] {
+    box-shadow: 0 0 0 3px rgba(245, 169, 184, .45);
+}
+
+/* =========================================================
+   Adatkezelési kapu (űrlapok): csak az elolvasás után lehet küldeni
+   ========================================================= */
+.privacy-gate {
+    border: 2px dashed var(--pink);
+    border-radius: 16px;
+    padding: .85rem 1rem;
+    margin-bottom: 1rem;
+    background: rgba(245, 169, 184, .08);
+}
+
+.privacy-gate.is-read {
+    border-style: solid;
+    border-color: #5bc99a;
+    background: rgba(91, 201, 154, .1);
+}
+
+.privacy-gate .btn-read-privacy {
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.privacy-modal-body {
+    max-height: 55vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.privacy-modal-body h3 {
+    font-size: 1.1rem;
+}
+
+.privacy-scroll-hint {
+    font-size: .85rem;
+}
+
+/* =========================================================
+   AI-slop jelzések
+   ========================================================= */
+.slop-footer {
+    margin: .8rem auto 0;
+    width: fit-content;
+    max-width: 100%;
+    padding: .15rem .9rem;
+    border-radius: 999px;
+    background: rgba(245, 169, 184, .16);
+    color: var(--dark);
+    font-size: .8rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* =========================================================
+   444-es stílusú gomb (Programok oldal)
+   ========================================================= */
+/* 444-es megjelenésű gomb: fekete, vastag, szögletes-szerkesztőségi hatású, kemény eltolt árnyékkal */
+.btn-444 {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    align-self: flex-start;
+    padding: .5rem .9rem;
+    background: #000;
+    color: #fff !important;
+    font-weight: 800;
+    letter-spacing: .01em;
+    text-decoration: none;
+    border: 2px solid #000;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 var(--pink);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.btn-444:hover,
+.btn-444:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--blue);
+}
+
+.btn-444-mark {
+    background: #fff;
+    color: #000;
+    font-weight: 900;
+    padding: 0 .4rem;
+    border-radius: 3px;
+    letter-spacing: -.02em;
+}
+
+[data-bs-theme="dark"] .btn-444 {
+    background: #fff;
+    color: #000 !important;
+    border-color: #fff;
+}
+
+[data-bs-theme="dark"] .btn-444-mark {
+    background: #000;
+    color: #fff;
+}
+
+
+/* Életút: nagy "AI slop" figyelmeztetés a játék felett */
+.slop-banner {
+    max-width: 900px;
+    margin: 0 auto 1.8rem;
+    padding: 1.2rem 1.4rem 1.3rem;
+    border: 4px solid transparent;
+    border-radius: 22px;
+    background:
+        linear-gradient(var(--card-fill), var(--card-fill)) padding-box,
+        repeating-linear-gradient(135deg, #ffd23f 0 16px, #1b1b1b 16px 32px) border-box;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .12);
+}
+
+.slop-banner-badge {
+    display: inline-block;
+    padding: .15rem .9rem;
+    margin-bottom: .5rem;
+    border-radius: 999px;
+    background: #1b1b1b;
+    color: #ffd23f;
+    font-weight: 900;
+    letter-spacing: .12em;
+    font-size: .9rem;
+}
+
+.slop-banner-title {
+    margin: 0 0 .5rem;
+    font-weight: 900;
+    font-size: clamp(1.7rem, 5.5vw, 3rem);
+    line-height: 1.1;
+    color: var(--dark);
+}
+
+.slop-banner-text {
+    color: var(--dark);
+    opacity: .85;
+    font-size: 1.05rem;
+}
+
+/* =========================================================
+   Közös oldalelemek (eddig oldalanként külön <style>-ban ismétlődtek)
+   ========================================================= */
+.pride-text {
+    background: linear-gradient(to right, #e40303, #ff8c00, #ffed00, #008026, #24408e, #732982);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.event-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.card.card:hover {
+    transform: translateY(-5px);
+}
+
+.card.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.flag-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.flag-img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    border: 3px solid transparent;
+    background: var(--card-edge) border-box;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.highlight-box {
+    border-left: 0;
+}
+
+/* "Ez aljas hazugság" bélyeg és kihúzott szöveg (Programok oldal) */
+.lie-stamp {
+    display: inline-block;
+    align-self: flex-start;
+    margin: 0 0 .6rem 0;
+    padding: .15rem .8rem;
+    border: 3px solid #d62839;
+    border-radius: 10px;
+    color: #d62839;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: .02em;
+    transform: rotate(-2deg);
+    background: rgba(214, 40, 57, 0.08);
+}
+
+.struck,
+.struck * {
+    text-decoration: line-through;
+    text-decoration-color: #d62839;
+    text-decoration-thickness: 3px;
+    opacity: .7;
 }

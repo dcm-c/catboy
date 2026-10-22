@@ -619,27 +619,50 @@ function showNextImage() {
 
 
 // --- 8. EGYÉB KOMPONENSEK ÉS VICCES FUNKCIÓK (Easter Eggek) ---
+// A menü és a lábléc egyszerre (párhuzamosan) töltődik. A legutóbb kapott változatot a munkamenet-tárhely őrzi,
+// így a következő oldalon a menü azonnal ott van (nincs bevillanás), a háttérben érkező friss példány pedig
+// csak akkor írja át, ha tényleg változott.
+const COMPONENT_CACHE_PREFIX = 'mfsz-comp:';
+
+function readComponentCache(file) {
+    try { return sessionStorage.getItem(COMPONENT_CACHE_PREFIX + file); } catch (e) { return null; }
+}
+
+function writeComponentCache(file, html) {
+    try { sessionStorage.setItem(COMPONENT_CACHE_PREFIX + file, html); } catch (e) { /* privát mód: nem baj */ }
+}
+
+async function loadComponent(placeholderId, file, afterInject) {
+    const placeholder = document.getElementById(placeholderId);
+    if (!placeholder) return;
+    let current = readComponentCache(file);
+    if (current !== null) {
+        placeholder.innerHTML = current;
+        afterInject();
+    }
+    try {
+        const response = await fetch(file);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const fresh = await response.text();
+        if (fresh !== current) {
+            placeholder.innerHTML = fresh;
+            writeComponentCache(file, fresh);
+            afterInject();
+        }
+    } catch (error) { console.error(`${file} betöltési hiba:`, error); }
+}
+
 async function loadComponents() {
-    const navPlaceholder = document.getElementById('navbar-placeholder');
-    if (navPlaceholder) {
-        try {
-            const response = await fetch('navbar.html');
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            navPlaceholder.innerHTML = await response.text();
+    await Promise.all([
+        loadComponent('navbar-placeholder', 'navbar.html', () => {
             setActiveLink();
             // A témaváltó gomb a navbarral érkezik, a felirata most frissíthető
             if (window.MFSZTheme) window.MFSZTheme.sync();
-        } catch (error) { console.error('Menü hiba:', error); }
-    }
-
-    const footerPlaceholder = document.getElementById('footer-placeholder');
-    if (footerPlaceholder) {
-        try {
-            const response = await fetch('footer.html');
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            footerPlaceholder.innerHTML = await response.text();
-        } catch (error) { console.error('Footer hiba:', error); }
-    }
+        }),
+        loadComponent('footer-placeholder', 'footer.html', () => {
+            if (window.MFSZTheme) window.MFSZTheme.sync();
+        })
+    ]);
 }
 
 // Az útvonal és a menü hivatkozásának összevetése ".html" és záró perjel nélkül, mert a
@@ -664,7 +687,7 @@ async function initFunnyReviews() {
     const track = document.getElementById('reviews-track');
     if (!track) return;
     try {
-        const selectedFile = `data/reviews${Math.floor(Math.random() * 3)}.json`;
+        const selectedFile = `data/reviews${Math.floor(Math.random() * 5)}.json`;
         const response = await fetch(selectedFile);
         if (!response.ok) throw new Error(`Hiba: ${response.statusText}`);
         const reviewsPool = await response.json();

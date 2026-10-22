@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="uwu.js"></script>
     <script src="theme.js"></script>
 
     <title>Magyar Femboy Szakszervezet | A legnagyobb hazai közösség 🎀</title>
@@ -33,10 +34,12 @@
 
     <meta name="theme-color" content="#f5a9b8">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700" rel="stylesheet" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link href="https://fonts.bunny.net/css?family=quicksand:400,600,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="themes.css">
 </head>
@@ -160,110 +163,241 @@
                 <h2 class="fw-bold">Gyakran Ismételt Kérdések (GYIK) ❓</h2>
                 <p class="text-muted">Minden fontos válasz egy helyen, amit a Szakszervezetről tudni érdemes.</p>
             </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="faq-tools mb-4" data-no-uwu>
+                        <label for="faq-search" class="visually-hidden">Keresés a kérdések között</label>
+                        <input type="search" id="faq-search" class="form-control rounded-pill" autocomplete="off"
+                            placeholder="🔎 Keress a kérdések között (pl. unban, korhatár, Minecraft)">
+                        <div id="faq-empty" class="text-center text-muted mt-3 d-none">Erre nem találtunk választ. Írj nekünk lent az űrlapon!</div>
+                    </div>
+                </div>
+            </div>
 
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <div class="accordion custom-accordion" id="faqAccordion">
 
-                        <div class="accordion-item custom-card mb-3 border-0">
-                            <h2 class="accordion-header" id="faqHeadingOne">
-                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseOne"
-                                    aria-expanded="false" aria-controls="faqCollapseOne">
-                                    Mi az a Magyar Femboy Szakszervezet (MFSZ)?
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Mi az az MFSZ, és tényleg szakszervezet? Az MFSZ egy barátságos, elfogadó közösség (safe space) a magyar femboyoknak, a transzneműeknek, az LMBTQ+ közösség tagjainak, a támogatóknak és mindenkinek, aki kíváncsi. A neve poén: nem munkavállalói érdekképviselet, a lényeg a közös játék, a beszélgetés és a programok, drámák nélkül. A közösség a Discord-szerveren és a subredditen él." id="faq-mi">
+                            <h3 class="accordion-header" id="faqHeading1">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse1"
+                                    aria-expanded="false" aria-controls="faqCollapse1" data-no-uwu>
+                                    Mi az az MFSZ, és tényleg szakszervezet?
                                 </button>
-                            </h2>
-                            <div id="faqCollapseOne" class="accordion-collapse collapse" aria-labelledby="faqHeadingOne"
+                            </h3>
+                            <div id="faqCollapse1" class="accordion-collapse collapse" aria-labelledby="faqHeading1"
                                 data-bs-parent="#faqAccordion">
                                 <div class="accordion-body text-muted">
-                                    Az MFSZ egy barátságos, elfogadó és biztonságos közösség (safe space) a magyar
-                                    femboyok,
-                                    transzneműek, az LMBTQ+ közösség tagjai és minden kedves támogató és érdeklődő
-                                    számára.
-                                    Célunk, hogy egy vidám, drámáktól mentes helyet biztosítsunk a beszélgetéshez, közös
-                                    játékokhoz és programokhoz.
+                                    Az MFSZ egy barátságos, elfogadó közösség (safe space) a magyar femboyoknak, a transzneműeknek, az LMBTQ+ közösség tagjainak, a támogatóknak és mindenkinek, aki kíváncsi. A neve poén: nem munkavállalói érdekképviselet, a lényeg a közös játék, a beszélgetés és a programok, drámák nélkül. A közösség a Discord-szerveren és a subredditen él.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="accordion-item custom-card mb-3 border-0">
-                            <h2 class="accordion-header" id="faqHeadingTwo">
-                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseTwo"
-                                    aria-expanded="false" aria-controls="faqCollapseTwo">
-                                    Ki csatlakozhat a közösséghez? Van korhatár?
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Mi az a femboy, és kell femboynak lennem a csatlakozáshoz? A femboy egy önmeghatározó stílus és szubkultúra: nőiesnek tartott esztétika (szoknyák, pasztell színek, combfixek) vagy viselkedés, merev nemi szabályok nélkül. Nem kell femboynak lenned, és senki nem vizsgáztat: a címkét mindenki maga használja vagy nem. A részletes magyarázatot a Mi az a femboy? oldalon találod." id="faq-femboy">
+                            <h3 class="accordion-header" id="faqHeading2">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse2"
+                                    aria-expanded="false" aria-controls="faqCollapse2" data-no-uwu>
+                                    Mi az a femboy, és kell femboynak lennem a csatlakozáshoz?
                                 </button>
-                            </h2>
-                            <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo"
+                            </h3>
+                            <div id="faqCollapse2" class="accordion-collapse collapse" aria-labelledby="faqHeading2"
                                 data-bs-parent="#faqAccordion">
                                 <div class="accordion-body text-muted">
-                                    Bárki csatlakozhat, aki tiszteletben tartja a szabályzatunkat és a többi tagot! A
-                                    Discord szerverünkre való belépéshez a betöltött 15. életév a minimum követelmény. A
-                                    felnőtt (18+) tartalmú szobákhoz egy külön, szigorú igazolási folyamat szükséges,
-                                    így a
-                                    fiatalabbak is teljesen biztonságban böngészhetnek a főbb csatornákon.
+                                    A femboy egy önmeghatározó stílus és szubkultúra: nőiesnek tartott esztétika (szoknyák, pasztell színek, combfixek) vagy viselkedés, merev nemi szabályok nélkül. <strong>Nem</strong> kell femboynak lenned, és senki nem vizsgáztat: a címkét mindenki maga használja vagy nem. A részletes magyarázatot a <a href="fogalom.html">Mi az a femboy?</a> oldalon találod.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="accordion-item custom-card mb-3 border-0">
-                            <h2 class="accordion-header" id="faqHeadingThree">
-                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseThree"
-                                    aria-expanded="false" aria-controls="faqCollapseThree">
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Hogyan tudok csatlakozni? Lépj be a Discord-szerverre , olvasd el a Szabályzatot , és mutatkozz be, ha van kedved. Nem kötelező: sokan hónapokig csak olvasnak, és az is teljesen rendben van. Ha inkább csendben nézelődnél, a subreddit is nyitva áll." id="faq-csatlakozas">
+                            <h3 class="accordion-header" id="faqHeading3">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse3"
+                                    aria-expanded="false" aria-controls="faqCollapse3" data-no-uwu>
+                                    Hogyan tudok csatlakozni?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse3" class="accordion-collapse collapse" aria-labelledby="faqHeading3"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Lépj be a <a href="https://discord.gg/ArqcMnGnsu" target="_blank" rel="noopener">Discord-szerverre</a>, olvasd el a <a href="rules.html">Szabályzatot</a>, és mutatkozz be, ha van kedved. Nem kötelező: sokan hónapokig csak olvasnak, és az is teljesen rendben van. Ha inkább csendben nézelődnél, a <a href="https://reddit.com/r/MagyarFemboyCommunity" target="_blank" rel="noopener">subreddit</a> is nyitva áll.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Van korhatár? Igen. A Discord-szerverre a betöltött 15. életévtől lehet belépni. A felnőtt (18+) tartalmú szobákhoz külön, szigorú igazolási folyamat kell, így a fiatalabbak biztonságban böngészhetnek a főbb csatornákon." id="faq-korhatar">
+                            <h3 class="accordion-header" id="faqHeading4">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse4"
+                                    aria-expanded="false" aria-controls="faqCollapse4" data-no-uwu>
+                                    Van korhatár?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse4" class="accordion-collapse collapse" aria-labelledby="faqHeading4"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Igen. A Discord-szerverre a betöltött 15. életévtől lehet belépni. A felnőtt (18+) tartalmú szobákhoz külön, szigorú igazolási folyamat kell, így a fiatalabbak biztonságban böngészhetnek a főbb csatornákon.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Mi a legfontosabb szabály? Légy kedves. A homofóbia és a transzfóbia tilos, a szerveren megosztott üzenetek és privát képek lementése és továbbadása is. A teljes lista és a következmények a Szabályzat oldalon vannak." id="faq-szabaly">
+                            <h3 class="accordion-header" id="faqHeading5">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse5"
+                                    aria-expanded="false" aria-controls="faqCollapse5" data-no-uwu>
+                                    Mi a legfontosabb szabály?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse5" class="accordion-collapse collapse" aria-labelledby="faqHeading5"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Légy kedves. A homofóbia és a transzfóbia tilos, a szerveren megosztott üzenetek és privát képek lementése és továbbadása is. A teljes lista és a következmények a <a href="rules.html">Szabályzat</a> oldalon vannak.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Kitiltottak. Van még esély? Van: a Szabályzat oldal alján található egy Unban-kérelem ív. Őszintén írd meg, mi történt és mit tanultál belőle. Fontos: az adatkezelési tájékoztatót el kell olvasnod a beküldés előtt, és ha másodszor is kitiltanak, az már végleges." id="faq-unban">
+                            <h3 class="accordion-header" id="faqHeading6">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse6"
+                                    aria-expanded="false" aria-controls="faqCollapse6" data-no-uwu>
+                                    Kitiltottak. Van még esély?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse6" class="accordion-collapse collapse" aria-labelledby="faqHeading6"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Van: a <a href="rules.html#unbanCollapse">Szabályzat</a> oldal alján található egy Unban-kérelem ív. Őszintén írd meg, mi történt és mit tanultál belőle. Fontos: az adatkezelési tájékoztatót el kell olvasnod a beküldés előtt, és ha másodszor is kitiltanak, az már végleges.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Tényleg vannak élő találkozók és programok? Igen. Online például minigame-estek (Among Us, Goose Goose Duck, Gartic Phone) és közös játékok, élőben pedig évi több túra (Fűérintés), MondoCon-látogatások utána baros összejövetellel, urbex és spontán nyári programok. A március 15-i Legány találkozóról a 444 is írt. A teljes lista a Programok oldalon van, a friss időpontok a Discordon." id="faq-talalkozo">
+                            <h3 class="accordion-header" id="faqHeading7">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse7"
+                                    aria-expanded="false" aria-controls="faqCollapse7" data-no-uwu>
                                     Tényleg vannak élő találkozók és programok?
                                 </button>
-                            </h2>
-                            <div id="faqCollapseThree" class="accordion-collapse collapse"
-                                aria-labelledby="faqHeadingThree" data-bs-parent="#faqAccordion">
+                            </h3>
+                            <div id="faqCollapse7" class="accordion-collapse collapse" aria-labelledby="faqHeading7"
+                                data-bs-parent="#faqAccordion">
                                 <div class="accordion-body text-muted">
-                                    Igen! Rendszeresen szervezünk online programokat (például péntek esti Discord Voice
-                                    esteket, közös Minecraftozást) és élő találkozókat is, mint például a havi budapesti
-                                    kávézások vagy a közös MondoCon látogatások. A pontos részleteket mindig megtalálod
-                                    a
-                                    Programnaptár oldalon vagy a Discordon.
+                                    Igen. Online például minigame-estek (Among Us, Goose Goose Duck, Gartic Phone) és közös játékok, élőben pedig évi több túra (Fűérintés), MondoCon-látogatások utána baros összejövetellel, urbex és spontán nyári programok. A március 15-i <em>Legány találkozóról</em> a 444 is írt. A teljes lista a <a href="events.html">Programok</a> oldalon van, a friss időpontok a Discordon.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="accordion-item custom-card mb-3 border-0">
-                            <h2 class="accordion-header" id="faqHeadingFour">
-                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseFour"
-                                    aria-expanded="false" aria-controls="faqCollapseFour">
-                                    Mi az a "Premium" gomb a menüben? Fizetős a tagság?
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Működik a Minecraft-szerver? Jelenleg nem: a szerver üzemen kívül van, és megmentőre vár. Ha értesz a szerverekhez, és van kedved segíteni, szólj a Discordon, mindenki nagyon hálás lesz." id="faq-minecraft">
+                            <h3 class="accordion-header" id="faqHeading8">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse8"
+                                    aria-expanded="false" aria-controls="faqCollapse8" data-no-uwu>
+                                    Működik a Minecraft-szerver?
                                 </button>
-                            </h2>
-                            <div id="faqCollapseFour" class="accordion-collapse collapse"
-                                aria-labelledby="faqHeadingFour" data-bs-parent="#faqAccordion">
+                            </h3>
+                            <div id="faqCollapse8" class="accordion-collapse collapse" aria-labelledby="faqHeading8"
+                                data-bs-parent="#faqAccordion">
                                 <div class="accordion-body text-muted">
-                                    Nem, a közösségünkhöz való csatlakozás és a tagság mindenki számára teljesen
-                                    ingyenes! A
-                                    menüben található Premium gomb csupán egy vicces meglepetés (Easter Egg) – kattints
-                                    rá
-                                    bátran, nem fogja elkérni a bankkártyádat, de egy jó táncra számíthatsz!
+                                    Jelenleg nem: a szerver üzemen kívül van, és megmentőre vár. Ha értesz a szerverekhez, és van kedved segíteni, szólj a Discordon, mindenki nagyon hálás lesz.
                                 </div>
                             </div>
                         </div>
 
-                        <div class="accordion-item custom-card mb-3 border-0">
-                            <h2 class="accordion-header" id="faqHeadingFive">
-                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseFive"
-                                    aria-expanded="false" aria-controls="faqCollapseFive">
-                                    Mennyire biztonságosak a megosztott képek és adatok?
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Fizetős a tagság? Mi az a Premium gomb? Nem, a csatlakozás és a tagság mindenkinek ingyenes. A menüben található Premium gomb csak vicc (Easter Egg): kattints bátran, nem kéri el a bankkártyádat, de egy jó táncra számíthatsz." id="faq-fizetos">
+                            <h3 class="accordion-header" id="faqHeading9">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse9"
+                                    aria-expanded="false" aria-controls="faqCollapse9" data-no-uwu>
+                                    Fizetős a tagság? Mi az a Premium gomb?
                                 </button>
-                            </h2>
-                            <div id="faqCollapseFive" class="accordion-collapse collapse"
-                                aria-labelledby="faqHeadingFive" data-bs-parent="#faqAccordion">
+                            </h3>
+                            <div id="faqCollapse9" class="accordion-collapse collapse" aria-labelledby="faqHeading9"
+                                data-bs-parent="#faqAccordion">
                                 <div class="accordion-body text-muted">
-                                    A tagjaink védelme a legfontosabb számunkra. A házirendünk szigorúan tiltja a
-                                    szerveren
-                                    megosztott üzenetek screenshotolását vagy mások privát képeinek lementését. Ha
-                                    bármilyen
-                                    visszaélést tapasztalsz, a moderátori csapat azonnal intézkedik. Mindig figyelj
-                                    arra,
-                                    hogy nagyon érzékeny személyes adatokat ne ossz meg nyilvánosan!
+                                    Nem, a csatlakozás és a tagság mindenkinek ingyenes. A menüben található Premium gomb csak vicc (Easter Egg): kattints bátran, nem kéri el a bankkártyádat, de egy jó táncra számíthatsz.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Mi történik az adataimmal, és mennyire biztonságosak a képek? Az oldal nem használ saját sütiket, és nem épít profilt rólad. Az űrlapon megadott adatokat csak a válaszadáshoz kezeljük, a részleteket az Adatkezelési tájékoztató tartalmazza. A szerveren tilos mások üzeneteit és privát képeit lementeni; visszaélés esetén a moderátorok azonnal intézkednek. Érzékeny személyes adatokat soha ne oszd meg nyilvánosan." id="faq-adat">
+                            <h3 class="accordion-header" id="faqHeading10">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse10"
+                                    aria-expanded="false" aria-controls="faqCollapse10" data-no-uwu>
+                                    Mi történik az adataimmal, és mennyire biztonságosak a képek?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse10" class="accordion-collapse collapse" aria-labelledby="faqHeading10"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Az oldal nem használ saját sütiket, és nem épít profilt rólad. Az űrlapon megadott adatokat csak a válaszadáshoz kezeljük, a részleteket az <a href="privacy.html">Adatkezelési tájékoztató</a> tartalmazza. A szerveren tilos mások üzeneteit és privát képeit lementeni; visszaélés esetén a moderátorok azonnal intézkednek. Érzékeny személyes adatokat soha ne oszd meg nyilvánosan.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Visszaélést tapasztaltam. Kinek szóljak? A Discordon a moderátoroknak és adminisztrátoroknak, vagy az oldal alján található Írj nekünk űrlapon. Írd le, mi történt, és ha tudod, hol (csatorna, időpont), hogy gyorsabban utánanézhessenek." id="faq-visszaeles">
+                            <h3 class="accordion-header" id="faqHeading11">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse11"
+                                    aria-expanded="false" aria-controls="faqCollapse11" data-no-uwu>
+                                    Visszaélést tapasztaltam. Kinek szóljak?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse11" class="accordion-collapse collapse" aria-labelledby="faqHeading11"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    A Discordon a moderátoroknak és adminisztrátoroknak, vagy az oldal alján található <a href="#contact">Írj nekünk</a> űrlapon. Írd le, mi történt, és ha tudod, hol (csatorna, időpont), hogy gyorsabban utánanézhessenek.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Mi az az UwU gomb a láblécben, és mi a buzi mód? A buzi mód egy szivárványos, csillámos téma UwU-szövegátalakítással. Kizárólag a lábléc kerek ✨UwU gombjával kapcsolható be (és ki). A menüben lévő témagomb csak a világos és a sötét téma között vált. A beállítást a böngésződ jegyzi meg, az oldalnak nem küldjük el." id="faq-uwu">
+                            <h3 class="accordion-header" id="faqHeading12">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse12"
+                                    aria-expanded="false" aria-controls="faqCollapse12" data-no-uwu>
+                                    Mi az az UwU gomb a láblécben, és mi a buzi mód?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse12" class="accordion-collapse collapse" aria-labelledby="faqHeading12"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    A buzi mód egy szivárványos, csillámos téma UwU-szövegátalakítással. Kizárólag a lábléc kerek <strong>✨UwU</strong> gombjával kapcsolható be (és ki). A menüben lévő témagomb csak a világos és a sötét téma között vált. A beállítást a böngésződ jegyzi meg, az oldalnak nem küldjük el.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Tényleg AI csinálta ezt az oldalt? Igen, ez egy AI-slop, vibe-kódolt oldal, és ezt nem is titkoljuk: az oldal és a Pasztell Életút játék is mesterséges intelligencia segítségével készült, emberi irányítással. Hibák és furcsaságok előfordulhatnak; ha találsz egyet, szólj, és javítjuk." id="faq-slop">
+                            <h3 class="accordion-header" id="faqHeading13">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse13"
+                                    aria-expanded="false" aria-controls="faqCollapse13" data-no-uwu>
+                                    Tényleg AI csinálta ezt az oldalt?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse13" class="accordion-collapse collapse" aria-labelledby="faqHeading13"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Igen, ez egy AI-slop, vibe-kódolt oldal, és ezt nem is titkoljuk: az oldal és a Pasztell Életút játék is mesterséges intelligencia segítségével készült, emberi irányítással. Hibák és furcsaságok előfordulhatnak; ha találsz egyet, szólj, és javítjuk.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item custom-card mb-3 border-0 faq-item" data-search="Mi az a Pasztell Életút? Egy kattintgatós életjáték 14-től 25 éves korig: tanulás, munka, barátok, események és sok pasztell. Még egy AI-slop, vibe-kódolt játék, ezért ne várj tőle tökéletességet. Az állásod a böngésződben mentődik; a Életút oldalon bármikor kipróbálhatod." id="faq-eletut">
+                            <h3 class="accordion-header" id="faqHeading14">
+                                <button class="accordion-button fw-bold text-dark bg-transparent collapsed faq-question"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse14"
+                                    aria-expanded="false" aria-controls="faqCollapse14" data-no-uwu>
+                                    Mi az a Pasztell Életút?
+                                </button>
+                            </h3>
+                            <div id="faqCollapse14" class="accordion-collapse collapse" aria-labelledby="faqHeading14"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Egy kattintgatós életjáték 14-től 25 éves korig: tanulás, munka, barátok, események és sok pasztell. Még egy AI-slop, vibe-kódolt játék, ezért ne várj tőle tökéletességet. Az állásod a böngésződben mentődik; a <a href="eletut.html">Életút</a> oldalon bármikor kipróbálhatod.
                                 </div>
                             </div>
                         </div>
@@ -282,7 +416,7 @@
                             <h2 class="fw-bold">Írj nekünk! 💌</h2>
                             <p class="text-muted">Kérdésed van? Vagy csak beköszönnél?</p>
                         </div>
-                        <form action="https://formspree.io/f/xvgeqprb" method="POST">
+                        <form action="https://formspree.io/f/xvgeqprb" method="POST" data-privacy-gate>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Beceneved ✨</label>
                                 <input type="text" name="name" class="form-control" placeholder="Pl. CukiFemboy99"
@@ -313,8 +447,10 @@
 
     <div id="footer-placeholder"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <script src="privacy-gate.js"></script>
+    <script src="faq.js"></script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -333,31 +469,119 @@
         {
           "@type": "FAQPage",
           "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Mi az a Magyar Femboy Szakszervezet (MFSZ)?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Az MFSZ egy barátságos, elfogadó és biztonságos közösség (safe space) a magyar femboyok, transzneműek, az LMBTQ+ közösség tagjai és minden érdeklődő számára."
+              {
+                            "@type": "Question",
+                            "name": "Mi az az MFSZ, és tényleg szakszervezet?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Az MFSZ egy elfogadó, drámamentes közösség magyar femboyoknak, transzneműeknek, az LMBTQ+ közösség tagjainak és támogatóiknak. A név poén, nem munkavállalói érdekképviselet."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Mi az a femboy, és kell femboynak lennem a csatlakozáshoz?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A femboy önmeghatározó stílus és szubkultúra. Nem kell femboynak lenni a csatlakozáshoz, a címkét mindenki maga használja vagy nem."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Hogyan tudok csatlakozni?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Lépj be a Discord-szerverre, olvasd el a Szabályzatot, és mutatkozz be, ha van kedved. A subreddit is nyitva áll."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Van korhatár?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A Discord-szerverre a betöltött 15. életévtől lehet belépni. A 18+ szobákhoz külön, szigorú igazolás szükséges."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Mi a legfontosabb szabály?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Légy kedves. A homofóbia és a transzfóbia tilos, mások üzeneteinek és privát képeinek lementése és továbbadása is."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Kitiltottak. Van még esély?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A Szabályzat oldalon található Unban-kérelem ívvel lehet kérni a kitiltás felülvizsgálatát. Egy újabb kitiltás végleges."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Tényleg vannak élő találkozók és programok?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Online minigame-esték, évi több túra, MondoCon-látogatások, urbex és spontán programok. A részletek a Programok oldalon és a Discordon vannak."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Működik a Minecraft-szerver?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A Minecraft-szerver jelenleg üzemen kívül van, és önkéntesre vár, aki segít újraindítani."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Fizetős a tagság? Mi az a Premium gomb?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A tagság ingyenes. A Premium gomb csak egy vicces Easter Egg."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Mi történik az adataimmal, és mennyire biztonságosak a képek?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Az oldal nem használ saját sütiket. Az űrlapadatokat csak a válaszadáshoz kezeljük. Mások üzeneteit és privát képeit lementeni tilos."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Visszaélést tapasztaltam. Kinek szóljak?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Szólj a Discordon a moderátoroknak, vagy írj az oldal alján található űrlapon. Add meg, mi történt és hol."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Mi az az UwU gomb a láblécben, és mi a buzi mód?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A buzi mód egy szivárványos, UwU-szövegű téma, amit a lábléc UwU gombja kapcsol be és ki."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Tényleg AI csinálta ezt az oldalt?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "Igen, az oldal és a Pasztell Életút játék is AI-slop, vibe-kódolt, mesterséges intelligencia segítségével készült. Hibák előfordulhatnak."
+                            }
+              },
+              {
+                            "@type": "Question",
+                            "name": "Mi az a Pasztell Életút?",
+                            "acceptedAnswer": {
+                                          "@type": "Answer",
+                                          "text": "A Pasztell Életút egy kattintgatós életjáték 14-től 25 éves korig. Még AI-slop, vibe-kódolt, a mentés a böngészőben történik."
+                            }
               }
-            },
-            {
-              "@type": "Question",
-              "name": "Ki csatlakozhat a közösséghez? Van korhatár?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Bárki csatlakozhat, aki betöltötte a 15. életévét és tiszteletben tartja a szabályzatunkat. A felnőtt (18+) tartalmakhoz szigorú életkor-igazolási folyamat szükséges."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Tényleg vannak élő találkozók és programok?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Igen! Rendszeresen szervezünk online programokat (Minecraft, Voice chatek) és élő találkozókat (budapesti kávézások, MondoCon látogatások)."
-              }
-            }
-          ]
+]
         }
       ]
     }

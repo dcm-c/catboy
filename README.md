@@ -9,7 +9,8 @@ Ezen a repón található a femboy.hu weboldal teljes forráskódja (Cloudflare 
 | `public/` | A statikus oldal (HTML, CSS, JS, képek, adatfájlok) |
 | `src/index.js` | A Worker: `/api/reddit` (galéria-adat) és `/api/reddit/ingest` (Devvit-fogadás) |
 | `devvit/` | A Reddit-on futó Devvit-app: posztok → Worker, új posztok → Discord-kártya (lásd `devvit/README.md`) |
-| `public/theme.js`, `themes.css` | Téma: világos / sötét / **buzi mód** (szivárvány + UwU szövegmód) |
+| `public/theme.js`, `themes.css`, `uwu.js` | Téma: világos / sötét / **buzi mód** (szivárvány + UwU szövegmód; a buzi módot csak a lábléc UwU gombja kapcsolja). Az UwU-átalakítás (`uwu.js`) tiszta, tesztelt függvény |
+| `public/privacy-gate.js`, `faq.js` | Űrlapkapu (a küldés előtt el kell olvasni az adatkezelési tájékoztatót) és a GYIK keresője |
 | `public/eletut*` | A Pasztell Életút kattintgatós életjáték (adat, események, motor, grafika, felület) |
 | `public/data/reddit_backup.json` | A galéria Reddit-archívuma (NSFW posztok automatikusan kiszűrve) |
 | `public/data/hidden_posts.json` | Kézi tiltólista: ide írt poszt-azonosítók sosem jelennek meg |
@@ -20,7 +21,7 @@ Ezen a repón található a femboy.hu weboldal teljes forráskódja (Cloudflare 
 ```bash
 npx wrangler dev      # helyi futtatás
 npx wrangler deploy   # éles feltöltés
-node --test "test/eletut-*.test.js"   # a Pasztell Életút tesztjei (szabályok, kaszinó, grafika, teljes játékmenetek)
+node --test "test/*.test.js"          # minden teszt: Életút (szabályok, kaszinó, grafika, események képei, játékmenetek), UwU-átalakító, oldalszerkezet
 ```
 
 ## Témák

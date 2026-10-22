@@ -65,7 +65,7 @@
     function syncToggles() {
         var theme = find(current);
         if (!theme) return;
-        var next = find(THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length].id);
+        var next = find(nextTheme());
         var buttons = document.querySelectorAll('[data-theme-toggle]');
         for (var i = 0; i < buttons.length; i++) {
             var btn = buttons[i];
@@ -105,24 +105,28 @@
         if (persist) { userChose = true; store(current); }
     }
 
+    // A navigációs gomb csak a világos és a sötét téma között vált. A buzi módot kizárólag a lábléc UwU gombja
+    // kapcsolja be; a navigációs gombbal csak kilépni lehet belőle.
+    var beforeBuzi = null; // az UwU gombbal kilépéskor ide térünk vissza
+    function nextTheme() {
+        if (current === 'buzi') return beforeBuzi && beforeBuzi !== 'buzi' ? beforeBuzi : systemTheme();
+        return current === 'light' ? 'dark' : 'light';
+    }
+
     function cycle() {
-        var index = 0;
-        for (var i = 0; i < THEMES.length; i++) if (THEMES[i].id === current) index = i;
-        set(THEMES[(index + 1) % THEMES.length].id, true);
+        set(nextTheme(), true);
     }
 
     // --- UwU szövegmód: a Buzi mód része. Visszafordítható (az eredeti szövegek megmaradnak),
     //     és az utólag beillesztett tartalmat (navbar, galéria) is átírja. ---
-    var UWU_EMOJIS = [' :3', ' UwU', ' OwO', ' nyau~', ' mrrrp*'];
-    var UWU_SKIP = 'script, style, noscript, iframe, textarea, input, select, option, [data-no-uwu]';
+    // Az átalakítás logikája az uwu.js-ben van (tiszta, tesztelt függvények); ha az nem töltődött be, a szöveg marad.
+    var UWU_SKIP = 'script, style, noscript, iframe, textarea, input, select, option, code, pre, time, [data-no-uwu]';
     var uwuOn = false;
     var uwuOriginals = new Map(); // szövegcsomópont -> eredeti szöveg
     var uwuObserver = null;
 
     function uwuify(text) {
-        return text
-            .replace(/[rl]/g, 'w').replace(/[RL]/g, 'W')
-            .replace(/([.!?])/g, function (m) { return m + UWU_EMOJIS[Math.floor(Math.random() * UWU_EMOJIS.length)]; });
+        return window.MFSZUwu ? window.MFSZUwu.uwuify(text) : text;
     }
 
     function uwuNode(node) {
@@ -240,7 +244,6 @@
     apply(stored || systemTheme());
 
     // A kapcsoló a navbarban él, amit később töltünk be, ezért eseménydelegálás kell.
-    var beforeBuzi = null; // az UwU gombbal kilépéskor ide térünk vissza
     document.addEventListener('click', function (e) {
         if (!e.target.closest) return;
         if (e.target.closest('[data-theme-toggle]')) {
