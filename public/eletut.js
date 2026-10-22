@@ -292,10 +292,19 @@
             speedBtns.push({ b: b, v: d[1] });
         });
         var sv = $('el-menu-save'), nw = $('el-menu-new'), ex = $('el-menu-export'), im = $('el-menu-import');
-        clear(sv); clear(nw); clear(ex); clear(im);
-        sv.appendChild(icon('save')); nw.appendChild(icon('trash')); ex.appendChild(icon('download')); im.appendChild(icon('upload'));
+        [[sv, 'save'], [nw, 'trash'], [ex, 'download'], [im, 'upload']].forEach(function (x) {
+            clear(x[0]);
+            x[0].appendChild(icon(x[1]));
+            x[0].appendChild(el('span', '', x[0].dataset.label || ''));
+        });
         if (!sv.dataset.bound) {
             sv.dataset.bound = '1';
+            var more = $('el-more');
+            var closeMore = function () { if (more) more.open = false; };
+            Array.prototype.forEach.call(more.querySelectorAll('.el-menuitem'), function (b) { b.addEventListener('click', closeMore); });
+            document.addEventListener('click', function (e) { if (more.open && !more.contains(e.target)) closeMore(); });
+            more.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeMore(); more.querySelector('summary').focus(); } });
+            $('el-help').addEventListener('click', openHelp);
             sv.addEventListener('click', function () { save(); toast('Elmentve a böngészőbe.', 'good'); });
             ex.addEventListener('click', exportSave);
             im.addEventListener('click', function () { $('el-import-file').click(); });
@@ -319,7 +328,7 @@
         clear(host);
         statEls = {};
         [['conf', 'heart', 'Önbizalom', ''], ['money', 'coin', 'Pénz', ''], ['energy', 'bolt', 'Energia', 'energy'], ['comm', 'users', 'Közösség', ''], ['risk', 'lock', 'Titok', 'risk']].forEach(function (d) {
-            var box = el('div', 'el-stat');
+            var box = el('div', 'el-stat s-' + d[0]);
             var row = el('div', 'el-stat-row');
             var l = el('span', 'l');
             l.appendChild(icon(d[1]));
@@ -413,12 +422,15 @@
         }
 
         // akciógombok
+        $('el-act-mirror').title = 'Tükör (billentyű: 1)'; $('el-act-work').title = 'Munka (billentyű: 2)'; $('el-act-study').title = 'Tanulás (billentyű: 3)';
         setActBtn('el-act-mirror', 'heart', 'Tükör', '+' + f1(d.clickConf) + ' önbizalom', false);
         setActBtn('el-act-work', 'briefcase', d.workLabel, '+' + grp(d.workClick) + ' Ft · ' + E.WORK_ENERGY + ' energia', S.energy < E.WORK_ENERGY);
         if (S.activeSkill) {
             var sk = D.find(D.SKILLS, S.activeSkill);
             setActBtn('el-act-study', 'book', 'Tanulás: ' + sk.name, '+' + f1(d.studyClick) + ' pont · ' + E.STUDY_ENERGY + ' energia', S.energy < E.STUDY_ENERGY);
         } else setActBtn('el-act-study', 'book', 'Tanulás', 'válassz képességet', false);
+
+        renderHint(d);
 
         // jelzések
         var alert = $('el-alert');
@@ -439,6 +451,111 @@
         refreshAfford();
         refreshLive();
         void age;
+    }
+
+    // ---------- "Mi a következő lépés?" segítősáv ----------
+    function nextHint(d) {
+        if (S.money < 0) return { tone: 'bad', ico: 'coin', text: 'Adósságban vagy. Dolgozz (Munka gomb), amíg újra pozitív lesz az egyenleged.', tab: 'munka', btn: 'Munkák' };
+        if (d.secret && S.risk >= 70) return { tone: 'bad', ico: 'lock', text: 'Lebukás közel! Rejtőzz el: Szekrény → Titkolózás és rejtekhelyek.', tab: 'szekreny', btn: 'Szekrény' };
+        if (d.broken) return { tone: 'bad', ico: 'monitor', text: 'A gép elromlott, a Gép fülön megjavíthatod.', tab: 'gep', btn: 'Gép' };
+        if (S.energy < E.WORK_ENERGY) return { tone: 'warn', ico: 'bolt', text: 'Kifogytál az energiából. Pihenj egy kicsit, a sáv magától töltődik.' };
+        if (!Object.keys(S.items).length) return { tone: 'tip', ico: 'shirt', text: 'Első lépés: vegyél egy kis cuccot a Szekrényben. Attól nő a Tükör-kattintásonkénti önbizalom.', tab: 'szekreny', btn: 'Szekrény' };
+        if (!S.activeSkill) return { tone: 'tip', ico: 'book', text: 'Válassz egy képességet a Tanulás fülön, utána a Tanulás gomb pontokat hoz.', tab: 'tanulas', btn: 'Tanulás' };
+        if (d.net < 0 && S.money < 20000) return { tone: 'warn', ico: 'coin', text: 'Havi mínuszban vagy: több megy ki, mint amennyi bejön. Nézd meg a Munka és a Lakás fület.', tab: 'munka', btn: 'Munka' };
+        return { tone: 'tip', ico: 'sparkle', text: 'Kattints a Tükörre és a Munkára, közben telik az idő. Ha összegyűlt a pénz, fejlessz a menüben.' };
+    }
+    function renderHint(d) {
+        var host = $('el-hint');
+        if (!host) return;
+        var h = nextHint(d);
+        var key = h.tone + '|' + h.text + '|' + (h.tab || '');
+        if (host.dataset.k === key) return;
+        host.dataset.k = key;
+        clear(host);
+        host.className = 'el-hint ' + h.tone;
+        host.appendChild(icon(h.ico));
+        host.appendChild(el('span', 'el-hint-tx', h.text));
+        if (h.tab) {
+            var b = el('button', 'el-btn alt el-hint-go', h.btn + ' →');
+            b.type = 'button';
+            b.addEventListener('click', function () { selectTab(h.tab); scrollToPanel(true); });
+            host.appendChild(b);
+        }
+        host.hidden = false;
+    }
+    function scrollToPanel(force) {
+        var pn = $('el-panel');
+        if (!pn) return;
+        var top = pn.getBoundingClientRect().top;
+        if (force || top < 110 || top > window.innerHeight * 0.65) pn.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+
+    // ---------- Súgó ----------
+    var helpPaused = false, helpEl = null;
+    function closeHelp() {
+        if (!helpEl) return;
+        helpEl.remove(); helpEl = null;
+        if (helpPaused && S && S.paused && !S.event && !S.ending) { S.paused = false; lastTs = performance.now(); updateSpeed(); save(); }
+        helpPaused = false;
+        var hb = $('el-help'); if (hb) hb.focus();
+    }
+    function openHelp() {
+        if (helpEl || !S || S.event || S.ending) return;
+        if (!S.paused) { S.paused = true; helpPaused = true; updateSpeed(); }
+        var ov = el('div', 'el-overlay');
+        var m = el('div', 'el-modal el-help-modal');
+        m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'el-help-title');
+        var body = el('div', 'el-modal-body');
+        body.setAttribute('data-no-uwu', '');
+        body.appendChild(el('div', 'el-kicker', 'Röviden'));
+        var h = el('h2', '', 'Hogyan kell játszani?'); h.id = 'el-help-title';
+        body.appendChild(h);
+        var ul = el('ul', 'el-help-list');
+        [
+            ['heart', 'Tükör', 'Kattintásra önbizalmat kapsz. Ebből „fizeted” a legtöbb fejlesztést.'],
+            ['briefcase', 'Munka', 'Pénzt hoz, de energiába kerül. Ha elfogy az energia, várd meg, amíg visszatöltődik.'],
+            ['book', 'Tanulás', 'Előbb válassz képességet a Tanulás fülön; a szintek új lehetőségeket nyitnak.'],
+            ['shirt', 'Menü', 'Szekrény, smink, szoba, gép, barátok, lakás… mindennek van hatása az értékeidre. A színes csoportok segítenek tájékozódni.'],
+            ['lock', 'Titok', 'Ha rejtegeted magad, a Titok sáv nő. 70% felett nagy a lebukás esélye.'],
+            ['calendar', 'Idő', 'Az idő magától telik (felül állíthatod a sebességet vagy szüneteltethetsz). Az események megállítják a játékot, a döntéseid számítanak.'],
+            ['save', 'Mentés', 'A játék automatikusan ment a böngészőbe. A ⋯ menüben fájlba is exportálhatod.']
+        ].forEach(function (x) {
+            var li = el('li');
+            li.appendChild(icon(x[0]));
+            var d = el('div');
+            d.appendChild(el('b', '', x[1]));
+            d.appendChild(el('span', '', ' – ' + x[2]));
+            li.appendChild(d);
+            ul.appendChild(li);
+        });
+        body.appendChild(ul);
+        var kb = el('p', 'el-note');
+        kb.innerHTML = 'Billentyűk: <kbd>1</kbd> Tükör · <kbd>2</kbd> Munka · <kbd>3</kbd> Tanulás · <kbd>P</kbd> szünet · <kbd>?</kbd> ez a súgó';
+        body.appendChild(kb);
+        var ok = el('button', 'el-btn', 'Értem, folytatom');
+        ok.type = 'button';
+        ok.addEventListener('click', closeHelp);
+        body.appendChild(ok);
+        m.appendChild(body); ov.appendChild(m);
+        ov.addEventListener('click', function (e) { if (e.target === ov) closeHelp(); });
+        ov.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); closeHelp(); } else if (e.key === 'Tab') { e.preventDefault(); ok.focus(); } });
+        document.body.appendChild(ov);
+        helpEl = ov;
+        ok.focus();
+    }
+
+    // ---------- Billentyűk ----------
+    function bindKeys() {
+        document.addEventListener('keydown', function (e) {
+            if (!S || e.ctrlKey || e.metaKey || e.altKey || $('el-game').hidden) return;
+            var t = e.target, tn = t && t.tagName;
+            if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT' || (t && t.isContentEditable)) return;
+            if (document.querySelector('.el-overlay')) return;
+            var k = e.key;
+            if (k === '1' || k === '2' || k === '3') { e.preventDefault(); $(k === '1' ? 'el-act-mirror' : k === '2' ? 'el-act-work' : 'el-act-study').click(); }
+            else if (k === 'p' || k === 'P') { if (S.event || S.ending) return; S.paused = !S.paused; autoPaused = false; if (!S.paused) lastTs = performance.now(); updateSpeed(); save(); }
+            else if (k === '?') { e.preventDefault(); openHelp(); }
+        });
     }
 
     function setActBtn(id, ico, title, sub, cant) {
@@ -486,10 +603,10 @@
     // ---------- Menü (csoportosított oldalsáv) ----------
     var tabsHasCasino = false;
     var NAV = [
-        { label: 'Stílus', tabs: [['szekreny', 'shirt', 'Szekrény'], ['smink', 'lips', 'Smink'], ['szoba', 'sparkle', 'Szoba']] },
-        { label: 'Fejlődés', tabs: [['gep', 'monitor', 'Gép'], ['tanulas', 'book', 'Tanulás'], ['munka', 'briefcase', 'Munka']] },
-        { label: 'Élet', tabs: [['baratok', 'users', 'Barátok'], ['lakas', 'house', 'Lakás'], ['lepesek', 'star', 'Merész lépések'], ['elmenyek', 'gift', 'Élmények'], ['kaszino', 'dice', 'Kaszinó']] },
-        { label: 'Napló', tabs: [['naplo', 'calendar', 'Napló'], ['eredmenyek', 'trophy', 'Eredmények']] }
+        { g: 'style', label: 'Stílus', tabs: [['szekreny', 'shirt', 'Szekrény'], ['smink', 'lips', 'Smink'], ['szoba', 'sparkle', 'Szoba']] },
+        { g: 'grow', label: 'Fejlődés', tabs: [['gep', 'monitor', 'Gép'], ['tanulas', 'book', 'Tanulás'], ['munka', 'briefcase', 'Munka']] },
+        { g: 'life', label: 'Élet', tabs: [['baratok', 'users', 'Barátok'], ['lakas', 'house', 'Lakás'], ['lepesek', 'star', 'Merész lépések'], ['elmenyek', 'gift', 'Élmények'], ['kaszino', 'dice', 'Kaszinó']] },
+        { g: 'log', label: 'Napló', tabs: [['naplo', 'calendar', 'Napló'], ['eredmenyek', 'trophy', 'Eredmények']] }
     ];
     function selectTab(id) {
         var wasBeauty = tab === 'smink';
@@ -503,11 +620,12 @@
     var giftFor = null, giftPick = null;
     function buildTabs() {
         var host = $('el-tabs');
+        var keepX = host.scrollLeft;
         clear(host);
         tabsHasCasino = E.ageFloat(S) >= D.CASINO_MIN_AGE;
         if (tab === 'kaszino' && !tabsHasCasino) tab = 'szekreny';
         NAV.forEach(function (g) {
-            var box = el('div', 'el-nav-group');
+            var box = el('div', 'el-nav-group g-' + g.g);
             box.appendChild(el('div', 'el-nav-label', g.label));
             var row = el('div', 'el-nav-row');
             g.tabs.forEach(function (t) {
@@ -519,12 +637,19 @@
                 b.appendChild(icon(t[1]));
                 b.appendChild(el('span', '', t[2]));
                 b.dataset.tab = t[0];
-                b.addEventListener('click', function () { selectTab(t[0]); var pn = $('el-panel'); if (pn && window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) pn.scrollIntoView({ block: 'nearest' }); });
+                b.addEventListener('click', function () { selectTab(t[0]); if (window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches) scrollToPanel(false); });
                 row.appendChild(b);
             });
             box.appendChild(row);
             host.appendChild(box);
         });
+        // a görgethető mobilmenün a kiválasztott fül maradjon látható
+        host.scrollLeft = keepX;
+        var sel = host.querySelector('.el-tab[aria-selected="true"]');
+        if (sel && host.scrollWidth > host.clientWidth + 2) {
+            var l = sel.offsetParent === host ? sel.offsetLeft : sel.offsetLeft - host.offsetLeft, r = l + sel.offsetWidth;
+            if (l < host.scrollLeft + 8 || r > host.scrollLeft + host.clientWidth - 8) host.scrollLeft = Math.max(0, l - (host.clientWidth - sel.offsetWidth) / 2);
+        }
     }
 
     // Piros pont a Barátok fülön, ha valakivel rég nem beszéltél
@@ -2199,6 +2324,7 @@
     function boot() {
         document.body.insertAdjacentHTML('afterbegin', A.sprite());
         bindActions();
+        bindKeys();
         showIntro();
     }
 

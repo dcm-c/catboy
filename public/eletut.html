@@ -98,24 +98,32 @@
                         </div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <div class="el-speed" role="group" aria-label="Sebesség" id="el-speed"></div>
-                            <button type="button" class="el-iconbtn" id="el-menu-save" title="Mentés" aria-label="Mentés"></button>
-                            <button type="button" class="el-iconbtn" id="el-menu-export" title="Mentés letöltése fájlba" aria-label="Mentés letöltése fájlba"></button>
-                            <button type="button" class="el-iconbtn" id="el-menu-import" title="Mentés betöltése fájlból" aria-label="Mentés betöltése fájlból"></button>
+                            <button type="button" class="el-iconbtn" id="el-help" title="Hogyan kell játszani?" aria-label="Hogyan kell játszani?">?</button>
+                            <details class="el-more" id="el-more">
+                                <summary class="el-iconbtn" aria-label="Mentés és egyebek" title="Mentés és egyebek">⋯</summary>
+                                <div class="el-more-pop">
+                                    <button type="button" class="el-menuitem" id="el-menu-save" data-label="Mentés a böngészőbe"></button>
+                                    <button type="button" class="el-menuitem" id="el-menu-export" data-label="Mentés letöltése fájlba"></button>
+                                    <button type="button" class="el-menuitem" id="el-menu-import" data-label="Mentés betöltése fájlból"></button>
+                                    <button type="button" class="el-menuitem danger" id="el-menu-new" data-label="Új játék (törli a mentést)"></button>
+                                </div>
+                            </details>
                             <input type="file" id="el-import-file" accept=".json,application/json,.pasztell" hidden>
-                            <button type="button" class="el-iconbtn" id="el-menu-new" title="Új játék" aria-label="Új játék"></button>
                         </div>
                     </div>
                     <div>
                         <div class="el-timeline" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Életút" id="el-timeline">
                             <div class="el-timeline-fill" id="el-timeline-fill"></div>
                         </div>
-                        <div class="el-ticks" aria-hidden="true"><span>14</span><span>16</span><span>18</span><span>20</span><span>23</span><span>25</span></div>
+                        <div class="el-ticks" aria-hidden="true"><span style="left:0%">14</span><span style="left:18.18%">16</span><span style="left:36.36%">18</span><span style="left:54.55%">20</span><span style="left:81.82%">23</span><span style="left:100%">25</span></div>
                     </div>
                 </div>
 
+                <div class="el-hint" id="el-hint" role="note" data-no-uwu hidden></div>
+
                 <div class="row g-3">
                     <div class="col-lg-5">
-                        <div class="el-card" style="position: sticky; top: 76px;">
+                        <div class="el-card el-side">
                             <div class="el-stage mb-3">
                                 <div id="el-scene"></div>
                                 <div class="el-floats" id="el-floats" data-no-uwu></div>
@@ -127,16 +135,16 @@
                             <div class="el-stats mb-3" id="el-stats" data-no-uwu></div>
                             <div class="el-month-line mb-3" id="el-monthline" data-no-uwu></div>
 
-                            <div class="el-actions">
-                                <button type="button" class="el-act main" id="el-act-mirror" data-no-uwu></button>
-                                <button type="button" class="el-act" id="el-act-work" data-no-uwu></button>
-                                <button type="button" class="el-act" id="el-act-study" data-no-uwu></button>
+                            <div class="el-actions" role="group" aria-label="Gyors akciók">
+                                <button type="button" class="el-act a-conf" id="el-act-mirror" data-no-uwu></button>
+                                <button type="button" class="el-act a-work" id="el-act-work" data-no-uwu></button>
+                                <button type="button" class="el-act a-study" id="el-act-study" data-no-uwu></button>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-7">
                         <div class="el-card el-main">
-                            <nav class="el-nav" id="el-tabs" role="tablist" aria-label="Menü"></nav>
+                            <nav class="el-nav" id="el-tabs" role="tablist" aria-label="Menü" data-no-uwu></nav>
                             <div class="el-panel" id="el-panel" role="tabpanel" aria-live="off"></div>
                         </div>
                     </div>

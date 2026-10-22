@@ -1693,6 +1693,12 @@ footer {
     font-size: 1.05rem;
 }
 
+@media (max-width: 575.98px) {
+    .slop-banner { padding: .75rem .9rem .85rem; margin-bottom: 1rem; border-width: 3px; border-radius: 18px; }
+    .slop-banner-title { font-size: 1.45rem; margin-bottom: .3rem; }
+    .slop-banner-text { font-size: .9rem; }
+}
+
 /* =========================================================
    Közös oldalelemek (eddig oldalanként külön <style>-ban ismétlődtek)
    ========================================================= */
