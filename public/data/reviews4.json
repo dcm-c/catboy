@@ -1,0 +1,86 @@
+[
+    {
+        "name": "LegoKing",
+        "stars": 5,
+        "title": "Kocka-fesztivál",
+        "desc": "A közös építős estén senki nem szólt a dániai lego-árakért. Ez a közösség megérti, hogy a kockák komoly dolog. Ötcsillag.",
+        "date": "2026.01.08."
+    },
+    {
+        "name": "TanuloLilla",
+        "stars": 5,
+        "title": "Vizsgaidőszak",
+        "desc": "A tanulós voice-ban mindenki némán tanul, de tudod, hogy ott van valaki. Átmentem Analízisből. Köszi.",
+        "date": "2026.01.27."
+    },
+    {
+        "name": "MacskaNelkuliMacsek",
+        "stars": 4,
+        "title": "Cicahiány",
+        "desc": "Szerettem volna egy macskát, de allergiás vagyok. Itt mindenki mutat képet a sajátjáról, szóval most már nagyjából nekem is van. Egy csillag levonás az allergiáért.",
+        "date": "2026.02.14."
+    },
+    {
+        "name": "ReggeliMadar",
+        "stars": 5,
+        "title": "Jó reggelt-szoba",
+        "desc": "Minden reggel van valaki, aki jó napot kíván a chatben. Kicsi dolog, de nekem ma ez tartotta egyben a napot.",
+        "date": "2026.03.02."
+    },
+    {
+        "name": "KavezoKlari",
+        "stars": 5,
+        "title": "Budapesti kávézás",
+        "desc": "Tíz perc után elfelejtettem, hogy szorongok. Kétszer is rendeltem, mert beszélgetés közben elfogyott az első kávém. Következő hónapban megyek megint.",
+        "date": "2026.03.19."
+    },
+    {
+        "name": "SzakszervezetiTitkar",
+        "stars": 3,
+        "title": "Hol a bértárgyalás?",
+        "desc": "Szakszervezetnek lenni szép és jó, de még nem láttam bértárgyalást. A Monster-ellátás viszont példás. Három csillag a hiányzó kollektív szerződésért.",
+        "date": "2026.04.06."
+    },
+    {
+        "name": "FehervariBoy",
+        "stars": 5,
+        "title": "Vidéki vagyok",
+        "desc": "Nem Budapesten élek, de a Discord miatt egyáltalán nem érzem magam egyedül. Nyáron elutazom a találkozóra, már a vonatjegyet is megvettem.",
+        "date": "2026.04.28."
+    },
+    {
+        "name": "LanyosAnyuka",
+        "stars": 5,
+        "title": "Anyukám is vette",
+        "desc": "Megmutattam anyukámnak a weboldalt. Annyit mondott: 'Jó, hogy van hova menned.' Majdnem sírtam. Az oldalnak ez a legjobb értékelés.",
+        "date": "2026.05.16."
+    },
+    {
+        "name": "HoodieHerceg",
+        "stars": 4,
+        "title": "Hoodie-szezon",
+        "desc": "Október óta senki nem látott engem pulóver nélkül. A szerver elfogadta, a nagymamám még nem. Dolgozom rajta.",
+        "date": "2026.06.10."
+    },
+    {
+        "name": "PixelPina",
+        "stars": 5,
+        "title": "Rajzos este",
+        "desc": "Egy rajzos esten először mutattam meg, amit rajzolok. Senki nem kritizált, mindenki kért egy kitűzőt. Most kitűzőket árulok. Köszönöm, MFSZ.",
+        "date": "2026.07.03."
+    },
+    {
+        "name": "Kuki_a_Kutya",
+        "stars": 1,
+        "title": "Nem engedtek be",
+        "desc": "A cicafüleseknek van külön szoba, a kutyafüleseknek nincs. Hol az egyenlőség? (Kérdezte egy husky, aki 4 éves.)",
+        "date": "2026.08.01."
+    },
+    {
+        "name": "BetatesztelAnna",
+        "stars": 5,
+        "title": "Életút játék",
+        "desc": "Végigvittem a játékot 25 évesig. Sírtam a végén, aztán újra kezdtem. Tudom, hogy AI-slop, de működik. :3",
+        "date": "2026.09.12."
+    }
+]

@@ -1,0 +1,86 @@
+[
+    {
+        "name": "TeaBoy_Zoli",
+        "stars": 5,
+        "title": "Teaidő",
+        "desc": "Három fajta tea áll a gép mellett, mert a péntek esti voice 2 órásnak indult, aztán 6 lett. Hajnalra a teám kihűlt, de a társaság nem.",
+        "date": "2025.01.14."
+    },
+    {
+        "name": "MinecraftMesterEszti",
+        "stars": 5,
+        "title": "Creeper barátság",
+        "desc": "Péntek este fél óráig építettünk egy rózsaszín kastélyt, aztán egy creeper felrobbantotta. Mindenki röhögött, senki nem hibáztatott senkit. Ez a safe space.",
+        "date": "2025.02.03."
+    },
+    {
+        "name": "VonatonUtazo",
+        "stars": 4,
+        "title": "Villamosos közösség",
+        "desc": "Egy találkozó után mindenki ugyanarra a villamosra szállt, és hirtelen a 4-6-os lett a hivatalos állomásunk. Négy csillag, mert a kalauz is megkérdezte, hol lehet cicafület kapni.",
+        "date": "2025.03.22."
+    },
+    {
+        "name": "SzekrenyMelyen",
+        "stars": 5,
+        "title": "Nem szekrény, gardrób",
+        "desc": "Hosszú ideig csak a szekrény mélyén jártam, most már csak nyáron járok vissza. A szoknyák a szekrény elején vannak, sosem éreztem jobban magam.",
+        "date": "2025.04.09."
+    },
+    {
+        "name": "FelhoVadasz",
+        "stars": 3,
+        "title": "Túl sok a válasz",
+        "desc": "Feltettem egy kérdést, kaptam hat választ, három mémet, két ölelést és egy Blåhaj-képet. A kérdésemre végül kiderült a válasz is. Minden ilyen kedves legyen az internet.",
+        "date": "2025.05.17."
+    },
+    {
+        "name": "ApuBoltjaBetonKft",
+        "stars": 2,
+        "title": "Összetévesztettem",
+        "desc": "Betonkeverőt kerestem, nem szakszervezetet. Maradtam, mert a Discord hangulata jobb, mint a betonszállítóké. Betont azóta sem találtam.",
+        "date": "2025.06.01."
+    },
+    {
+        "name": "Nyuszifulu_Bence",
+        "stars": 5,
+        "title": "Első találkozó",
+        "desc": "Reszkettem az egész úton, aztán az első öt percben mindenki úgy beszélt velem, mintha évek óta ismernénk egymást. Nem kellett semmit bizonyítani. Köszönöm.",
+        "date": "2025.07.12."
+    },
+    {
+        "name": "CsendesOlvaso",
+        "stars": 5,
+        "title": "Nem kell sokat beszélni",
+        "desc": "Három hónapja csak olvasok. Senki nem kényszerített, hogy megszólaljak, és közben rengeteget tanultam a hangulatból. Hamarosan talán írok is.",
+        "date": "2025.08.30."
+    },
+    {
+        "name": "OutfitKritikus",
+        "stars": 4,
+        "title": "Csíkos zokni vita",
+        "desc": "Csíkos vagy pöttyös zokni? A vita 2 órán át tartott, a hangulat mégis végig kedves maradt. Ez a legdrámaibb dolog, ami itt történhet, és imádom.",
+        "date": "2025.09.18."
+    },
+    {
+        "name": "SzulinapiNyuszi",
+        "stars": 5,
+        "title": "Szülinap a szerveren",
+        "desc": "Voice-ban felénekelték a szülinapi dalt, kicsit hamisan, nagyon őszintén. Életem legjobb szülinapja volt, pedig a torta csak egy kép volt a chatben.",
+        "date": "2025.10.05."
+    },
+    {
+        "name": "GyorsGitarosAdam",
+        "stars": 5,
+        "title": "Gitárt vettem",
+        "desc": "Egy szerver-poszt után gitárt vettem, három akkordot már tudok. A szomszédok még nem panaszkodtak. A moderátor azt mondta, hogy ez egy szép kezdet.",
+        "date": "2025.11.21."
+    },
+    {
+        "name": "ZoknisFilozofus",
+        "stars": 4,
+        "title": "Mi a femboy?",
+        "desc": "Három órát vitatkoztunk azon, hogy mi a femboy, és a végére az lett, hogy mindenki úgy az, ahogy akar. Mondhatni a legszebb vita, amiben valaha részt vettem.",
+        "date": "2025.12.11."
+    }
+]
