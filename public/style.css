@@ -1178,7 +1178,7 @@ footer {
 
 /* --- Egyedi GYIK Harmonika Stílusok --- */
 .custom-accordion .accordion-button:not(.collapsed) {
-    color: white !important;
+    color: #3a2f45 !important;
     background-color: var(--pink) !important;
     box-shadow: 0 4px 15px rgba(245, 169, 184, 0.2);
 }
@@ -1478,11 +1478,15 @@ footer {
     border-radius: 16px;
 }
 
+/* A halvány színezés alatt tömör kitöltés van, különben a szegély színátmenete átüt, és rontja az olvashatóságot */
 .highlight-box.highlight-box {
     background:
         linear-gradient(135deg, rgba(245, 169, 184, 0.12), rgba(91, 206, 250, 0.12)) padding-box,
+        linear-gradient(var(--card-fill), var(--card-fill)) padding-box,
         var(--card-edge) border-box !important;
 }
+.highlight-box h3 { color: #732982; }
+[data-bs-theme="dark"] .highlight-box h3, [data-theme="buzi"] .highlight-box h3 { color: #e3b8ff; }
 
 /* Nem minden kártya egyforma: a színátmenetes szegély kétféle palettával váltakozik, a többi kártya
    egyszínű, szaggatott vagy oldalsávos keretet kap (a GYIK-elemek és a vélemények csak a palettát váltogatják). */

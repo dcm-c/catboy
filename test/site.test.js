@@ -57,7 +57,8 @@ test('GYIK: a látható kérdések és a JSON-LD egyezik, a kérdések UwU-mente
     const ld = JSON.parse(h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const faq = ld['@graph'].find(x => x['@type'] === 'FAQPage').mainEntity;
     assert.equal(items, faq.length);
-    assert.ok(items >= 10);
+    assert.ok(items >= 6 && items <= 10, 'a GYIK legyen tömör: ' + items + ' kérdés');
+    assert.ok(!/id="faq-search"/.test(h), 'nincs külön kereső a rövid listához');
     assert.equal([...h.matchAll(/class="accordion-button[^"]*faq-question"[^>]*data-no-uwu/g)].length, items);
     for (const q of faq) assert.ok(h.includes(q.name.replace(/&/g, '&amp;')) || h.includes(q.name), 'hiányzó kérdés: ' + q.name);
 });
