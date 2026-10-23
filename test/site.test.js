@@ -57,7 +57,8 @@ test('GYIK: a látható kérdések és a JSON-LD egyezik, a kérdések UwU-mente
     const ld = JSON.parse(h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const faq = ld['@graph'].find(x => x['@type'] === 'FAQPage').mainEntity;
     assert.equal(items, faq.length);
-    assert.ok(items >= 10);
+    assert.ok(items >= 6 && items <= 10, 'a GYIK legyen tömör: ' + items + ' kérdés');
+    assert.ok(!/id="faq-search"/.test(h), 'nincs külön kereső a rövid listához');
     assert.equal([...h.matchAll(/class="accordion-button[^"]*faq-question"[^>]*data-no-uwu/g)].length, items);
     for (const q of faq) assert.ok(h.includes(q.name.replace(/&/g, '&amp;')) || h.includes(q.name), 'hiányzó kérdés: ' + q.name);
 });
@@ -122,4 +123,17 @@ test('a femboy fogalom oldal befogadó szöveget tartalmaz és nem "NEM ..." cí
     assert.ok(/Ki lehet femboy/.test(h));
     assert.ok(!/NEM Transzneműség|NEM Sissy|NEM Crossdresser/.test(h));
     assert.ok(/nem bináris/i.test(h));
+});
+
+test('Programok és Fogalom: minden kártya a tartalmához illő (data-tone) keretet kap, a tónusok definiáltak', () => {
+    const css = read('style.css');
+    for (const f of ['events.html', 'fogalom.html']) {
+        const h = read(f);
+        const cards = [...h.matchAll(/<div class="(?:card h-100|highlight-box)[^"]*"([^>]*)>/g)];
+        assert.ok(cards.length >= 4, f);
+        for (const c of cards) assert.match(c[1], /data-tone="(blue|red|green|cyan|slate|pink|purple|trans)"/, f + ': tónus nélküli kártya');
+        for (const t of new Set([...h.matchAll(/data-tone="(\w+)"/g)].map(m => m[1]))) {
+            assert.ok(css.includes('[data-tone="' + t + '"]'), 'nincs CSS a tónushoz: ' + t);
+        }
+    }
 });

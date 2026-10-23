@@ -652,3 +652,16 @@
         animation: none !important;
     }
 }
+
+/* Buzi mód: a szivárvány-feliratban az emoji megtartja a saját színét (az egyszínű jelek fehérek), a jelvények szövege pedig látszik */
+:root[data-theme="buzi"] :is(.card, .custom-card, .review-card) :is(h3, h4, h5) .event-icon {
+    /* Színes emoji: a saját színét viszi. Ha egy jel (pl. ✝️) csak egyszínű betűként jelenik meg, az fehér, nem a
+       szivárvány-kitöltés áttetsző foltja. */
+    -webkit-text-fill-color: #fff;
+    color: #fff !important;
+    font-variant-emoji: emoji;
+}
+:root[data-theme="buzi"] :is(.card, .custom-card, .review-card) :is(h3, h4, h5) .badge {
+    -webkit-text-fill-color: #fff;
+    color: #fff !important;
+}

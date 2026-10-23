@@ -1178,7 +1178,7 @@ footer {
 
 /* --- Egyedi GYIK Harmonika Stílusok --- */
 .custom-accordion .accordion-button:not(.collapsed) {
-    color: white !important;
+    color: #3a2f45 !important;
     background-color: var(--pink) !important;
     box-shadow: 0 4px 15px rgba(245, 169, 184, 0.2);
 }
@@ -1478,11 +1478,15 @@ footer {
     border-radius: 16px;
 }
 
+/* A halvány színezés alatt tömör kitöltés van, különben a szegély színátmenete átüt, és rontja az olvashatóságot */
 .highlight-box.highlight-box {
     background:
         linear-gradient(135deg, rgba(245, 169, 184, 0.12), rgba(91, 206, 250, 0.12)) padding-box,
+        linear-gradient(var(--card-fill), var(--card-fill)) padding-box,
         var(--card-edge) border-box !important;
 }
+.highlight-box h3 { color: #732982; }
+[data-bs-theme="dark"] .highlight-box h3, [data-theme="buzi"] .highlight-box h3 { color: #e3b8ff; }
 
 /* Nem minden kártya egyforma: a színátmenetes szegély kétféle palettával váltakozik, a többi kártya
    egyszínű, szaggatott vagy oldalsávos keretet kap (a GYIK-elemek és a vélemények csak a palettát váltogatják). */
@@ -1764,3 +1768,39 @@ footer {
     text-decoration-thickness: 3px;
     opacity: .7;
 }
+
+
+/* =========================================================
+   Tartalomhoz illő keretek (Programok, Fogalom): a kártya szegélye a címe színét követi,
+   így a kártyák különböznek egymástól, de mindegyik illik a tartalmához.
+   A buzi mód saját szivárvány-kerete érintetlen marad.
+   ========================================================= */
+:is(.card, .highlight-box)[data-tone] {
+    --tone: #6c757d; --tone-2: #b4bcc4;
+}
+:is(.card, .highlight-box)[data-tone="blue"] { --tone: #0d6efd; --tone-2: #7db3ff; }
+:is(.card, .highlight-box)[data-tone="red"] { --tone: #dc3545; --tone-2: #f08a94; }
+:is(.card, .highlight-box)[data-tone="green"] { --tone: #198754; --tone-2: #6fcf9f; }
+:is(.card, .highlight-box)[data-tone="cyan"] { --tone: #0aa2c0; --tone-2: #6edcf2; }
+:is(.card, .highlight-box)[data-tone="slate"] { --tone: #6c757d; --tone-2: #b4bcc4; }
+:is(.card, .highlight-box)[data-tone="pink"] { --tone: #ee7d9a; --tone-2: #ffc2cf; }
+:is(.card, .highlight-box)[data-tone="purple"] { --tone: #732982; --tone-2: #c58bd6; }
+:is(.card, .highlight-box)[data-tone="trans"] { --tone: #f58fa8; --tone-2: #5bcefa; }
+[data-bs-theme="dark"] :is(.card, .highlight-box)[data-tone="blue"] { --tone: #6ea8fe; --tone-2: #a8c9ff; }
+[data-bs-theme="dark"] :is(.card, .highlight-box)[data-tone="red"] { --tone: #ea868f; --tone-2: #f5b5bb; }
+[data-bs-theme="dark"] :is(.card, .highlight-box)[data-tone="green"] { --tone: #75b798; --tone-2: #a9dcc2; }
+[data-bs-theme="dark"] :is(.card, .highlight-box)[data-tone="cyan"] { --tone: #6edff6; --tone-2: #a6ecf9; }
+[data-bs-theme="dark"] :is(.card, .highlight-box)[data-tone="slate"] { --tone: #adb5bd; --tone-2: #ced4da; }
+[data-bs-theme="dark"] :is(.card, .highlight-box)[data-tone="purple"] { --tone: #c58bd6; --tone-2: #e3b8ff; }
+
+:root:not([data-theme="buzi"]) :is(.card, .highlight-box)[data-tone][data-tone] {
+    border: 3px solid transparent !important;
+    border-radius: 20px;
+    background:
+        linear-gradient(color-mix(in srgb, var(--tone) 6%, var(--card-fill)), color-mix(in srgb, var(--tone) 6%, var(--card-fill))) padding-box,
+        linear-gradient(135deg, var(--tone), var(--tone-2) 55%, var(--tone)) border-box !important;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--tone) 18%, transparent);
+}
+
+.text-purple { color: #732982; }
+[data-bs-theme="dark"] .text-purple, [data-theme="buzi"] .text-purple { color: #d6a4ea; }
