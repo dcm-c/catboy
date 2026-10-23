@@ -11,7 +11,8 @@ Ezen a repón található a femboy.hu weboldal teljes forráskódja (Cloudflare 
 | `devvit/` | A Reddit-on futó Devvit-app: posztok → Worker, új posztok → Discord-kártya (lásd `devvit/README.md`) |
 | `public/theme.js`, `themes.css`, `uwu.js` | Téma: világos / sötét / **buzi mód** (szivárvány + UwU szövegmód; a buzi módot csak a lábléc UwU gombja kapcsolja). Az UwU-átalakítás (`uwu.js`) tiszta, tesztelt függvény |
 | `public/privacy-gate.js`, `faq.js` | Űrlapkapu (a küldés előtt el kell olvasni az adatkezelési tájékoztatót) és a GYIK-hivatkozások kinyitása |
-| `public/eletut*` | A Pasztell Életút kattintgatós életjáték (adat, események, motor, grafika, felület) |
+| `public/eletut*` | A Pasztell Életút kattintgatós életjáték (adat, események, motor, grafika, felület). A befejezés megosztási linkje az eredményt JSON-ként a `#r=` részben viszi |
+| `public/ertektest*` | Humoros értékrend-teszt magyar ügyekkel (`-data.js`: állítások, típusok; `-core.js`: tiszta, tesztelt pontozás és kódolás; `.js`/`.css`: felület). Az eredmény a `#r=` linkrészben utazik, nem mentünk semmit |
 | `public/data/reddit_backup.json` | A galéria Reddit-archívuma (NSFW posztok automatikusan kiszűrve) |
 | `public/data/hidden_posts.json` | Kézi tiltólista: ide írt poszt-azonosítók sosem jelennek meg |
 | `docs/DEVVIT.md` | A Devvit-app és a Worker közti szerződés |
