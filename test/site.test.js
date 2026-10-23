@@ -124,3 +124,16 @@ test('a femboy fogalom oldal befogadó szöveget tartalmaz és nem "NEM ..." cí
     assert.ok(!/NEM Transzneműség|NEM Sissy|NEM Crossdresser/.test(h));
     assert.ok(/nem bináris/i.test(h));
 });
+
+test('Programok és Fogalom: minden kártya a tartalmához illő (data-tone) keretet kap, a tónusok definiáltak', () => {
+    const css = read('style.css');
+    for (const f of ['events.html', 'fogalom.html']) {
+        const h = read(f);
+        const cards = [...h.matchAll(/<div class="(?:card h-100|highlight-box)[^"]*"([^>]*)>/g)];
+        assert.ok(cards.length >= 4, f);
+        for (const c of cards) assert.match(c[1], /data-tone="(blue|red|green|cyan|slate|pink|purple|trans)"/, f + ': tónus nélküli kártya');
+        for (const t of new Set([...h.matchAll(/data-tone="(\w+)"/g)].map(m => m[1]))) {
+            assert.ok(css.includes('[data-tone="' + t + '"]'), 'nincs CSS a tónushoz: ' + t);
+        }
+    }
+});

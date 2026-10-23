@@ -652,3 +652,13 @@
         animation: none !important;
     }
 }
+
+/* Buzi mód: a szivárvány-feliratban az emoji megtartja a saját színét, a jelvények szövege pedig látszik */
+:root[data-theme="buzi"] :is(.card, .custom-card, .review-card) :is(h3, h4, h5) .event-icon {
+    -webkit-text-fill-color: initial;
+    color: initial !important;
+}
+:root[data-theme="buzi"] :is(.card, .custom-card, .review-card) :is(h3, h4, h5) .badge {
+    -webkit-text-fill-color: #fff;
+    color: #fff !important;
+}
