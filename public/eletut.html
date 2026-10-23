@@ -151,6 +151,19 @@
                 </div>
             </section>
 
+            <!-- MEGOSZTOTT ÉLETÚT (link megnyitásakor) -->
+            <section id="el-shared" aria-label="Megosztott életút" hidden>
+                <div class="el-card">
+                    <div class="el-kicker" id="el-sh-kicker"></div>
+                    <div class="el-end-art mb-3" id="el-sh-art"></div>
+                    <h2 class="fw-bold" id="el-sh-title"></h2>
+                    <p id="el-sh-text" class="mb-3"></p>
+                    <div class="el-end-stats mb-3" id="el-sh-stats" data-no-uwu></div>
+                    <p class="el-note">Ezt valaki megosztotta veled: ez nem a te mentésed, a játékod érintetlen marad.</p>
+                    <button type="button" class="btn btn-primary-custom" id="el-sh-play">Kipróbálom én is</button>
+                </div>
+            </section>
+
             <!-- BEFEJEZÉS -->
             <section id="el-end" aria-label="Befejezés" hidden>
                 <div class="el-card">
@@ -164,6 +177,13 @@
                         <button type="button" class="btn btn-primary-custom" id="el-end-again">Új életút</button>
                         <button type="button" class="btn btn-secondary-custom" id="el-end-share">Megosztás</button>
                         <a class="btn btn-secondary-custom" id="el-end-discord" target="_blank" rel="noopener noreferrer">Csatlakozom a Discordhoz</a>
+                    </div>
+                    <div class="el-share-box mt-3" id="el-share-box" hidden data-no-uwu>
+                        <label for="el-share-url" class="el-note d-block mb-1">Ezt a linket küldd el: aki megnyitja, látja az életutadat.</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" id="el-share-url" class="el-input" readonly>
+                            <button type="button" class="el-btn" id="el-share-copy">Másolás</button>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -1,0 +1,98 @@
+/* =========================================================
+   ÉRTÉKTEST - stílusok (a kártyák a közös data-tone keretet kapják a style.css-ből)
+   ========================================================= */
+.et-wrap { max-width: 760px; }
+.et-slop {
+    display: inline-block; max-width: 640px; margin: .2rem 0 0; padding: .3rem .9rem; border-radius: 999px;
+    background: #fff3b0; color: #3a2f45; border: 2px solid #1b1b1b; font-weight: 700; font-size: .88rem;
+}
+.et-emoji { font-size: 3.2rem; line-height: 1; margin-bottom: .6rem; }
+.et-kicker { font-size: .8rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin-bottom: .3rem; }
+.et-title { margin-bottom: .4rem; }
+.et-fit { display: inline-block; margin-bottom: 1rem; padding: .15rem .9rem; border-radius: 999px; font-weight: 800; background: linear-gradient(90deg, #f5a9b8, #9bdcf7); color: #2f2640; }
+.et-desc { text-align: left; }
+.et-sunday { margin: 0; padding: .7rem 1rem; border-radius: 14px; text-align: left; background: color-mix(in srgb, var(--tone, #f58fa8) 10%, transparent); font-style: italic; }
+
+.et-progress { margin-bottom: 1.2rem; }
+.et-progress-top { display: flex; justify-content: space-between; font-size: .85rem; opacity: .8; margin-bottom: .3rem; }
+.et-bar { height: 10px; border-radius: 999px; background: rgba(120, 120, 140, .22); overflow: hidden; }
+.et-bar > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #5bcefa, #f5a9b8); transition: width .25s ease; }
+
+.et-statement { font-size: clamp(1.15rem, 3.2vw, 1.5rem); font-weight: 700; line-height: 1.35; margin: 0 0 .5rem; }
+.et-joke { font-size: .95rem; opacity: .75; font-style: italic; margin: 0 0 1.2rem; }
+
+.et-answers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1rem; }
+.et-ans, .et-hate {
+    --c: #7a7a90;
+    position: relative; border: 2px solid var(--c); border-radius: 14px; padding: 12px 6px 10px; font: inherit; font-weight: 700; cursor: pointer;
+    color: inherit; background: color-mix(in srgb, var(--c) 12%, var(--card-fill, #fff));
+    min-height: 74px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; line-height: 1.15;
+    touch-action: manipulation; transition: transform .08s ease, box-shadow .15s ease;
+}
+.et-ans:hover, .et-hate:hover { transform: translateY(-2px); box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 55%, transparent); }
+.et-ans:active, .et-hate:active { transform: translateY(1px); }
+.et-ans:focus-visible, .et-hate:focus-visible, .et-nav .btn:focus-visible { outline: 3px solid #5bcefa; outline-offset: 2px; }
+.et-ans.no2 { --c: #dc3545; }
+.et-ans.no1 { --c: #ee7d9a; }
+.et-ans.mid { --c: #7a8794; }
+.et-ans.yes1 { --c: #0aa2c0; }
+.et-ans.yes2 { --c: #198754; }
+.et-ans.on { box-shadow: 0 0 0 3px var(--c) inset; }
+.et-key {
+    position: absolute; top: 4px; left: 6px; font-size: .68rem; font-weight: 800; opacity: .55;
+}
+.et-ans-tx { font-size: .88rem; }
+.et-nav { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.et-hint { font-size: .8rem; opacity: .7; margin: .8rem 0 0; }
+
+.et-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+.et-hate { padding: 18px 12px 14px; min-height: 140px; font-weight: 500; }
+.et-hate b { font-size: 1.1rem; }
+.et-hate span:not(.et-key) { font-size: .9rem; opacity: .85; }
+.et-hate.h0 { --c: #dc3545; }
+.et-hate.h1 { --c: #6a4fc0; }
+
+.et-axis { margin-bottom: 1.1rem; }
+.et-axis-head { display: flex; justify-content: space-between; gap: 8px; font-size: .95rem; margin-bottom: 4px; }
+.et-axis-head span { opacity: .85; }
+.et-track { position: relative; height: 14px; border-radius: 999px; background: rgba(120, 120, 140, .22); }
+.et-mid { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: rgba(120, 120, 140, .6); }
+.et-fill { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+.et-thumb { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 3px solid var(--card-fill, #fff); box-shadow: 0 1px 4px rgba(0, 0, 0, .35); text-decoration: none; }
+.ax-e { background: #198754; }
+.ax-l { background: #0d6efd; }
+.ax-n { background: #dc3545; }
+.ax-t { background: #b8730b; }
+.ax-c { background: #6a4fc0; }
+.et-ends { display: flex; justify-content: space-between; font-size: .75rem; opacity: .65; margin-top: 3px; }
+
+.et-hated { font-size: 1.5rem; font-weight: 800; margin: 0 0 .3rem; }
+.et-sharednote {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 1.2rem; padding: .7rem 1rem;
+    border-radius: 16px; border: 2px dashed #5bcefa; background: color-mix(in srgb, #5bcefa 12%, transparent); font-weight: 600;
+}
+
+.et-toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 1080;
+    background: #1b6b47; color: #fff; padding: 10px 18px; border-radius: 14px; font-weight: 700; box-shadow: 0 8px 28px rgba(0, 0, 0, .3);
+    transition: opacity .2s ease, transform .2s ease; max-width: calc(100vw - 24px); text-align: center;
+}
+.et-toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 575.98px) {
+    .et-answers { grid-template-columns: 1fr; }
+    .et-ans { flex-direction: row; justify-content: flex-start; min-height: 52px; padding: 10px 14px 10px 34px; text-align: left; }
+    .et-ans .et-key { top: 50%; transform: translateY(-50%); left: 12px; font-size: .8rem; }
+    .et-pair { grid-template-columns: 1fr; }
+    .et-hate { min-height: 110px; }
+}
+
+/* Buzi mód: a felirat-szivárvány ne tegye olvashatatlanná a gombokat */
+:root[data-theme="buzi"] .et-ans, :root[data-theme="buzi"] .et-hate { background: color-mix(in srgb, var(--c) 18%, rgba(28, 14, 52, .9)); color: #fff; }
+:root[data-theme="buzi"] .et-slop { color: #1b1b1b; }
+[data-bs-theme="dark"] .et-slop { background: #4a4310; color: #fff3b0; border-color: #ffd23f; }
+[data-bs-theme="dark"] .et-ans, [data-bs-theme="dark"] .et-hate { color: #ebe7f5; }
+
+.et-nav .btn { color: inherit; background: transparent; border-color: color-mix(in srgb, currentColor 45%, transparent); }
+.et-nav .btn:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); color: inherit; }
+.et-nav .btn:disabled { opacity: .4; }

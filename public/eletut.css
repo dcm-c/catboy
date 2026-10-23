@@ -780,3 +780,7 @@
 [data-theme="buzi"] .el-actions { background: rgba(28, 14, 52, .94); }
 [data-theme="buzi"] .el-nav { background: rgba(28, 14, 52, .96); }
 [data-theme="buzi"] .el-stat { background: color-mix(in srgb, var(--c) 14%, rgba(28, 14, 52, .9)); }
+
+/* Megosztási link mező */
+.el-share-box .el-input { max-width: none; flex: 1; min-width: 0; font-size: .85rem; }
+.el-share-box .el-btn { flex: none; }

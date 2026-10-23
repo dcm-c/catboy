@@ -223,7 +223,7 @@
     function showIntro() {
         stopLoop();
         closeModal();
-        show('el-game', false); show('el-end', false); show('el-intro', true);
+        show('el-game', false); show('el-end', false); show('el-shared', false); show('el-intro', true);
         var saved = load();
         var r = $('el-resume');
         if (saved && saved.cheat) { r.hidden = true; buildCreator(); caught('save'); return; }
@@ -259,7 +259,7 @@
     // =========================================================
     function enterGame() {
         clearTimers();
-        show('el-intro', false); show('el-end', false); show('el-game', true);
+        show('el-intro', false); show('el-end', false); show('el-shared', false); show('el-game', true);
         buildHud();
         buildStats();
         buildTabs();
@@ -2203,7 +2203,7 @@
         closeModal();
         var d = E.derive(S);
         var v = Ev.endingView(S, E.ctx(S), d);
-        show('el-game', false); show('el-intro', false); show('el-end', true);
+        show('el-game', false); show('el-intro', false); show('el-shared', false); show('el-end', true);
         $('el-end-art').innerHTML = A.scene(v.art, Object.assign(currentView(), { mood: 'proud', scale: 1, uid: 'en' }));
         $('el-end-title').textContent = v.title;
         $('el-end-text').textContent = v.text;
@@ -2224,9 +2224,105 @@
         window.scrollTo({ top: 0 });
     }
 
+    // ---------- Megosztás: az eredmény JSON-ként a link #r= részében utazik ----------
+    function b64uEnc(str) {
+        var bytes = new TextEncoder().encode(str), bin = '';
+        for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function b64uDec(t) {
+        t = String(t).replace(/-/g, '+').replace(/_/g, '/');
+        while (t.length % 4) t += '=';
+        var bin = atob(t), bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+    }
+    function sharePayload() {
+        var v = Ev.endingView(S, E.ctx(S), E.derive(S));
+        return {
+            v: 1, n: S.name, i: v.id, t: v.title, x: v.text, s: v.stats,
+            l: { h: S.hairStyle, c: S.hairColor, k: S.skin, e: S.eyeStyle },
+            o: A.viewOf(S).outfit, u: S.housing
+        };
+    }
+    function pageBase() { return location.href.split('#')[0]; }
+    function shareUrl() { return pageBase() + '#r=' + b64uEnc(JSON.stringify(sharePayload())); }
     function shareText() {
         var v = Ev.endingView(S, E.ctx(S), E.derive(S));
-        return 'Pasztell Életút: ' + S.name + ' története a(z) „' + v.title + '” véggel zárult 25 évesen. Próbáld ki te is: ' + location.origin + '/eletut.html';
+        return 'Pasztell Életút: ' + S.name + ' története a(z) „' + v.title + '” véggel zárult 25 évesen. Nézd meg és próbáld ki te is!';
+    }
+    function cleanStr(x, max) { return String(x == null ? '' : x).replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, max); }
+    // A link tartalma idegen kéz is lehet: csak ismert azonosítókat és rövidített szöveget fogadunk el
+    function parseShared(hash) {
+        if (!/^#r=/.test(hash || '')) return null;
+        try {
+            var o = JSON.parse(b64uDec(hash.slice(3)));
+            if (!o || o.v !== 1 || !Ev.findEnding(String(o.i))) return null;
+            var l = o.l || {}, out = {
+                n: cleanStr(o.n, 16) || 'Nyau', i: String(o.i), t: cleanStr(o.t, 60), x: cleanStr(o.x, 1200),
+                s: (Array.isArray(o.s) ? o.s : []).slice(0, 8).map(function (p) { return [cleanStr(p && p[0], 24), cleanStr(p && p[1], 24)]; }),
+                l: {
+                    hairStyle: D.find(D.HAIR_STYLES, l.h) ? l.h : 'bob', hairColor: D.find(D.HAIR_COLORS, l.c) ? l.c : 'rozsa',
+                    skin: D.find(D.SKINS, l.k) ? l.k : 's2', eyeStyle: D.find(D.EYE_STYLES, l.e) ? l.e : 'kerek'
+                },
+                o: {}, u: D.find(D.HOUSING, o.u) ? o.u : 'szulo'
+            };
+            if (o.o && typeof o.o === 'object') {
+                Object.keys(o.o).forEach(function (slot) {
+                    var it = D.find(D.ITEMS, o.o[slot]);
+                    if (it && it.slot === slot) out.o[slot] = it.id;
+                });
+            }
+            if (!out.t) out.t = Ev.findEnding(out.i).title;
+            return out;
+        } catch (e) { return null; }
+    }
+    function showShared(o) {
+        stopLoop();
+        closeModal();
+        show('el-game', false); show('el-intro', false); show('el-end', false); show('el-shared', true);
+        var pseudo = E.newState({ name: o.n, hairStyle: o.l.hairStyle, hairColor: o.l.hairColor, skin: o.l.skin, eyeStyle: o.l.eyeStyle });
+        var view = A.viewOf(pseudo);
+        view.outfit = o.o; view.housing = o.u; view.mood = 'proud'; view.scale = 1; view.uid = 'sh';
+        $('el-sh-art').innerHTML = A.scene(Ev.findEnding(o.i).art, view);
+        $('el-sh-kicker').textContent = 'Megosztott életút · ' + o.n;
+        $('el-sh-title').textContent = o.t;
+        $('el-sh-text').textContent = o.x;
+        var st = $('el-sh-stats');
+        clear(st);
+        o.s.forEach(function (x) {
+            var box = el('div');
+            box.appendChild(el('span', '', x[0]));
+            box.appendChild(el('b', '', x[1]));
+            st.appendChild(box);
+        });
+        window.scrollTo({ top: 0 });
+    }
+    function openSharedFromHash() {
+        var o = parseShared(location.hash);
+        if (!o) return false;
+        if (S && !S.ending) save();
+        showShared(o);
+        return true;
+    }
+    function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+        return new Promise(function (ok, no) {
+            var inp = $('el-share-url');
+            try { inp.focus(); inp.select(); document.execCommand('copy') ? ok() : no(); } catch (e) { no(e); }
+        });
+    }
+    function doShare() {
+        var url = shareUrl(), text = shareText();
+        var box = $('el-share-box'), inp = $('el-share-url');
+        box.hidden = false;
+        inp.value = url;
+        inp.focus(); inp.select();
+        if (navigator.share && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+            navigator.share({ title: 'Pasztell Életút', text: text, url: url }).catch(function () { /* mégse */ });
+            return;
+        }
+        copyText(url).then(function () { toast('A megosztási link a vágólapra került.', 'good'); }, function () { toast('Másold ki a linket a mezőből.', ''); });
     }
 
     // =========================================================
@@ -2294,12 +2390,16 @@
             updateHud();
         });
         $('el-end-again').addEventListener('click', function () { wipe(); S = null; showIntro(); });
-        $('el-end-share').addEventListener('click', function () {
-            var text = shareText();
-            if (navigator.share) { navigator.share({ text: text }).catch(function () { /* mégse */ }); return; }
-            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast('Vágólapra másolva.', 'good'); }, function () { toast(text); });
-            else toast(text);
+        $('el-end-share').addEventListener('click', doShare);
+        $('el-share-copy').addEventListener('click', function () {
+            var url = $('el-share-url').value;
+            copyText(url).then(function () { toast('Link másolva.', 'good'); }, function () { toast('Jelöld ki és másold ki a linket.', ''); });
         });
+        $('el-sh-play').addEventListener('click', function () {
+            if (window.history && history.replaceState) history.replaceState(null, '', pageBase());
+            showIntro();
+        });
+        window.addEventListener('hashchange', function () { openSharedFromHash(); });
         $('el-view').addEventListener('click', function () { stageView = stageView === 'room' ? 'close' : (stageView === 'close' ? 'face' : 'room'); renderScene(true); });
         $('el-start').addEventListener('click', startNew);
         $('el-resume').addEventListener('click', resume);
@@ -2325,7 +2425,7 @@
         document.body.insertAdjacentHTML('afterbegin', A.sprite());
         bindActions();
         bindKeys();
-        showIntro();
+        if (!openSharedFromHash()) showIntro();
     }
 
     // Hibakereséshez és teszteléshez
