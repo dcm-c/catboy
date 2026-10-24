@@ -93,6 +93,7 @@
 
     // ---------- HOSSZÚ TESZT: utált-érték skálák + őszinteség-vizsgáló ----------
     // Skála 0..100: 50 = semleges. A statement.h súlya pozitív, ha az egyetértés azt jelenti, hogy az érték jobban zavar.
+    var SHRINK = 2;
     function scaleScores(answers, list, defs, key) {
         var sum = {}, max = {};
         defs.forEach(function (h) { sum[h.id] = 0; max[h.id] = 0; });
@@ -107,7 +108,9 @@
             });
         });
         var out = {};
-        defs.forEach(function (h) { out[h.id] = max[h.id] ? Math.round((clamp(sum[h.id] / max[h.id], -1, 1) + 1) * 50) : 50; });
+        // A skálák kevés tételből épülnek, ezért az érték az 50 felé "húzódik": két tételből nem lehet 100 vagy 0.
+        // pont = 50 + 50 × Σ(válasz × súly) / (Σ 2|súly| + SHRINK)
+        defs.forEach(function (h) { out[h.id] = max[h.id] ? Math.round(50 + 50 * clamp(sum[h.id] / (max[h.id] + SHRINK), -1, 1)) : 50; });
         return out;
     }
     function hatedScales(answers, list) { return scaleScores(answers, list, data.HATED, 'h'); }
@@ -153,9 +156,10 @@
                 total += TWIN_PENALTY * p;
             }
         });
-        var straight = false, top = 0;
+        // "Mindenre ugyanazt": vagy szinte minden válasz azonos, vagy szinte minden egyetértő (vagy elutasító) oldalon van.
+        var straight = false, top = 0, agreeN = (counts[1] || 0) + (counts[2] || 0), disN = (counts[-1] || 0) + (counts[-2] || 0);
         Object.keys(counts).forEach(function (k) { top = Math.max(top, counts[k]); });
-        if (answered >= 40 && top / answered >= 0.85) { straight = true; total += STRAIGHT_PENALTY; }
+        if (answered >= 40 && Math.max(top, agreeN, disN) / answered >= 0.85) { straight = true; total += STRAIGHT_PENALTY; }
         var index = Math.round(clamp(100 - total, 0, 100));
         return { index: index, lies: lies, twins: contra, liesN: lies.length, twinsN: contra.length, straight: straight, answered: answered };
     }
@@ -183,7 +187,7 @@
     // pts = a végső (−100..100 vagy 0..100) érték változása pontban, ahogy az eredmény sávjain látszik.
     function breakdown(answers, list) {
         list = list || data.LONG;
-        function collect(defs, key, mult) {
+        function collect(defs, key, mult, extra) {
             var max = {}, items = {};
             defs.forEach(function (d) { max[d.id] = 0; items[d.id] = []; });
             list.forEach(function (st) {
@@ -197,16 +201,16 @@
                 Object.keys(st[key] || {}).forEach(function (id) {
                     if (!(id in max)) return;
                     var vv = has ? clamp(v, -2, 2) : 0;
-                    items[id].push({ id: st.id, text: st.text, v: has ? vv : null, weight: st[key][id], pts: max[id] ? Math.round(mult * vv * st[key][id] / max[id] * 10) / 10 : 0 });
+                    items[id].push({ id: st.id, text: st.text, v: has ? vv : null, weight: st[key][id], pts: max[id] ? Math.round(mult * vv * st[key][id] / (max[id] + extra) * 10) / 10 : 0 });
                 });
             });
             defs.forEach(function (d) { items[d.id].sort(function (a, b) { return Math.abs(b.pts) - Math.abs(a.pts) || Math.abs(b.weight) - Math.abs(a.weight); }); });
             return items;
         }
         return {
-            axes: collect(data.AXES, 'w', 100),
-            hated: collect(data.HATED, 'h', 50),
-            prej: collect(data.PREJ, 'g', 50)
+            axes: collect(data.AXES, 'w', 100, 0),
+            hated: collect(data.HATED, 'h', 50, SHRINK),
+            prej: collect(data.PREJ, 'g', 50, SHRINK)
         };
     }
 

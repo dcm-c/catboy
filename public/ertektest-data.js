@@ -140,7 +140,7 @@
     // HOSSZÚ TESZT (96 kérdés: 60 értékrész + 36 utált-érték rész)
     //  - 40 értékállítás: a rövid teszt 32 állítása + 7 ellentétes "iker" + 1 új. Sok értékállítás a zavar-skálákra is hat (h).
     //  - 24 "zavar-állítás": az utált értékek skáláit mérik (h), és sok közülük a tengelyeket is mozgatja (w).
-    //  - 6 hazugság-próba: olyan "soha"-állítások, amik gyakorlatilag senkire sem igazak.
+    //  - 4 hazugság-próba: olyan "soha"-állítások, amik gyakorlatilag senkire sem igazak.
     // Az őszinteséget háromféleképp vizsgáljuk: lehetetlen állítások, ellentmondó ikerpárok, "mindenre ugyanazt nyomtad".
     // A h súly pozitív: aki egyetért, annál jobban zavar az adott érték; negatív: kevésbé zavar.
     // =========================================================
@@ -163,6 +163,8 @@
         { id: 'bkk2', text: 'A tömegközlekedés legyen fizetős: aki használja, az fizessen érte.', w: { e: -1 }, h: { penz: -0.4 } },
         { id: 'adoemel', text: 'A nagyvállalatok adóját jelentősen emelni kellene, hogy jusson a közösre.', w: { e: 1 }, h: { penz: 0.5 } },
         { id: 'kemeny', text: 'Aki hibázik, viselje a következményeit: második esély nélkül.', joke: 'A „hiba nélküli ember” még nem született meg.', w: { l: 1 }, h: { parancs: -0.4 } },
+        { id: 'szemet', text: 'Aki a közterületen szemetel, azt pénzbírsággal kellene sújtani.', joke: 'A kukától három méterre eldobott csikk is számít.', w: { l: 1 }, h: { szabados: 0.5 } },
+        { id: 'moderal', text: 'A közösségi oldalakon a károsnak ítélt tartalmat gyorsan le kell venni, még ha néha tévedésből is.', w: { l: 1, c: 0.3 }, h: { szabados: 0.4 } },
         { id: 'kozmeghall', text: 'A közmeghallgatásokra el kellene járni: ha nem megyünk, nincs jogunk panaszkodni.', joke: 'A kávé és a pogácsa nem biztos, hogy van.', w: { c: -1, l: 0.3 }, h: { cinizmus: 0.5 } }
     ];
     // [id, id]: egyszerre egyetérteni mindkettővel ellentmondás
@@ -199,13 +201,11 @@
         { id: 'z_nai2', text: 'Zavar, ha a nehéz problémára annyi a válasz: „majd megoldódik”.', h: { naivitas: 1 }, w: { c: 0.5 } }
     ];
 
-    // Hazugság-próba: "soha / mindig" állítások, amiket gyakorlatilag senki nem mondhat el magáról igazán.
+    // Hazugság-próba: négy "soha / mindig" állítás, amit gyakorlatilag senki nem mondhat el magáról igazán (kevés, hogy ne legyen unalmas).
     var LIES = [
-        { id: 'l_keses', text: 'Életemben egyszer sem késtem el semmiről.', joke: 'A busz késése nem számít.' },
         { id: 'l_hazug', text: 'Életemben soha egyetlen hazugságot sem mondtam.', joke: 'Ez a mondat maga is próbálkozás.' },
         { id: 'l_eperc', text: 'Soha nem mondtam, hogy „öt perc, és ott vagyok”, miközben még el sem indultam.', joke: 'A cipő nem számít, az még a lépcsőházban van.' },
         { id: 'l_feltetel', text: 'Mindig elolvasom a felhasználási feltételeket, mielőtt az „Elfogadom” gombra kattintok.', joke: 'Mind a 94 oldalt.' },
-        { id: 'l_harag', text: 'Soha életemben nem haragudtam meg egy közeli ismerősömre sem.', joke: 'A családi ebédek nem számítanak.' },
         { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' }
     ];
 
@@ -248,23 +248,32 @@
         PREJ.push({ id: t.id + '_dn', topic: t.id, side: 'dn', name: t.dn });
     });
 
+    // Témánként 5 tétel: fenntartás felfelé (+), fenntartás lefelé (+), két fordított állítás (az egyetértés csökkenti a fenntartást),
+    // és egy "ellentétes hatású" állítás, ami az egyik skálát növeli, a másikat csökkenti.
     var PREJ_ST = [
         { id: 'p_nem1', text: 'A gyereknevelés és a háztartás alapvetően a nők dolga.', g: { nem_up: 1 }, w: { t: 0.6 } },
-        { id: 'p_nem2', text: 'Vezetői állásokra a férfiak általában alkalmasabbak.', g: { nem_up: 1 }, w: { t: 0.4 } },
         { id: 'p_nem3', text: 'A férfiak többsége eleve elnyomó, még ha nem is tud róla.', g: { nem_dn: 1 }, w: { t: -0.4 } },
-        { id: 'p_nem4', text: 'Egy férfi véleményét a nemek egyenjogúságáról nem érdemes komolyan venni.', g: { nem_dn: 1 } },
+        { id: 'p_nem5', text: 'A gyereknevelés és a háztartás mindkét szülő közös dolga, nemtől függetlenül.', g: { nem_up: -1 }, w: { t: -0.4 } },
+        { id: 'p_nem6', text: 'A férfiak többsége tisztességesen áll a nemek egyenjogúságához.', g: { nem_dn: -1 } },
+        { id: 'p_nem7', text: 'A nők sérelmei eltúlzottak, miközben a férfiak gondjaira alig figyel valaki.', g: { nem_up: 0.7, nem_dn: -0.4 }, w: { t: 0.3 } },
+
         { id: 'p_kulf1', text: 'Nem szívesen laknék olyan környéken, ahol sok a külföldi.', g: { kulf_up: 1 }, w: { n: 0.6 } },
-        { id: 'p_kulf2', text: 'Aki nem itt született, az sosem lesz igazi magyar.', g: { kulf_up: 1 }, w: { n: 0.6 } },
         { id: 'p_kulf3', text: 'Aki büszke a magyarságára, az általában szűk látókörű.', g: { kulf_dn: 1 }, w: { n: -0.6 } },
-        { id: 'p_kulf4', text: 'Aki ragaszkodik a magyar szokásokhoz, az haladásellenes.', g: { kulf_dn: 1 }, w: { n: -0.4, t: -0.4 } },
+        { id: 'p_kulf5', text: 'Aki beilleszkedik és megtanul magyarul, az ugyanolyan magyar, mint én.', g: { kulf_up: -1 }, w: { n: -0.4 } },
+        { id: 'p_kulf6', text: 'A magyarságára büszke ember is lehet nyitott és világlátott.', g: { kulf_dn: -1 } },
+        { id: 'p_kulf7', text: 'A saját hazánk dolgai előbbre valók, mint a külföldiek bajai.', g: { kulf_up: 0.7, kulf_dn: -0.4 }, w: { n: 0.5 } },
+
         { id: 'p_lgbt1', text: 'Zavar, ha két azonos nemű ember nyilvánosan csókolózik.', g: { lgbt_up: 1 }, w: { t: 0.6 } },
-        { id: 'p_lgbt2', text: 'A Pride-felvonulás nem az utcára való.', g: { lgbt_up: 1 }, w: { t: 0.5 } },
         { id: 'p_lgbt3', text: 'Aki a hagyományos családmodellt védi, az eleve gyűlölködő.', g: { lgbt_dn: 1 }, w: { t: -0.5 } },
-        { id: 'p_lgbt4', text: 'A hagyományos családban élők kiváltságosak, és ezt folyton illene elismerniük.', g: { lgbt_dn: 1 } },
+        { id: 'p_lgbt5', text: 'Két ember szerelme magánügy: mindegy, hogy azonos nemű vagy sem.', g: { lgbt_up: -1 }, w: { t: -0.4 } },
+        { id: 'p_lgbt6', text: 'Aki a hagyományos családot választja, attól még lehet elfogadó másokkal.', g: { lgbt_dn: -1 } },
+        { id: 'p_lgbt7', text: 'Ma már inkább a hagyományos családban élőket éri hátrány, mint a szivárványos közösséget.', g: { lgbt_up: 0.7, lgbt_dn: -0.4 }, w: { t: 0.4 } },
+
         { id: 'p_vall1', text: 'Zavar, ha egy másik vallás szokásai láthatóvá válnak a környezetemben.', g: { vall_up: 1 }, w: { n: 0.3 } },
-        { id: 'p_vall2', text: 'A kisebbségi vallások hívei nehezebben illeszkednek be, ezért kevésbé bízom bennük.', g: { vall_up: 1 } },
         { id: 'p_vall3', text: 'A vallásos emberek általában kevésbé gondolkodnak önállóan.', g: { vall_dn: 1 }, w: { t: -0.4 } },
-        { id: 'p_vall4', text: 'Aki hisz Istenben, azzal nem érdemes komoly vitát folytatni.', g: { vall_dn: 1 } }
+        { id: 'p_vall5', text: 'Egy másik hitű szomszéd ugyanolyan jó szomszéd lehet, mint bárki más.', g: { vall_up: -1 } },
+        { id: 'p_vall6', text: 'A hívők között is sok az önálló, gondolkodó ember.', g: { vall_dn: -1 }, w: { t: 0.2 } },
+        { id: 'p_vall7', text: 'A saját hitünk és hagyományunk védelme fontosabb, mint a más vallások szokásainak hangsúlyozása.', g: { vall_up: 0.7, vall_dn: -0.4 }, w: { t: 0.4 } }
     ];
 
     // Tükörpárok (a rövid tesztben és az utált-tesztben): melyik hozzáállás zavar jobban? min = a kisebbségi oldal lenézése, maj = a többségi oldalé.
@@ -278,6 +287,194 @@
         { topic: 'lgbt', min: 'Aki kiszól az utcán egy kézen fogva sétáló párnak.', maj: 'Aki gúnyolódik azon, aki a hagyományos értékeket tiszteli.' },
         { topic: 'vall', min: 'Aki szerint a más hitűek nem lehetnek megbízhatók.', maj: 'Aki szerint a hívők nem tudnak önállóan gondolkodni.' }
     ];
+
+
+    // =========================================================
+    // Segítség (mit kérdez pontosan) és további poénok. A help a kérdés alatt halványan jelenik meg.
+    // =========================================================
+    var HELP = {
+        // értékállítások
+        bkk: 'Arról szól, hogy a közösség fizesse a bérletet adóból, vagy az utas.',
+        palinka: 'A saját célra, otthon főzött pálinkára gondolunk, nem az árusításra.',
+        hatar: 'Azt kérdezzük, szerinted a határon túli magyar állampolgárok szavazhatnak-e a magyarországi választáson.',
+        csalad: 'A kérdés: tekinted-e a klasszikus anya-apa-gyerek családot a társadalom alapjának.',
+        politikus: 'Általánosságban: a politikusok többségére igaz-e, hogy elsősorban magukkal törődnek.',
+        piac: 'Itt a piaci logika kerül szembe a támogatással: az éri meg, ami nyereséges.',
+        sorkaton: 'Azt kérdezzük, jó ötlet-e visszahozni a sorkatonai szolgálatot.',
+        euro: 'A forint lecserélése euróra: igen vagy nem. Nincs időpont, csak a szándék.',
+        hazassag: 'Jogi egyenlőség: ugyanaz a házasság azonos nemű és különnemű pároknak.',
+        szavazat: 'Szerinted számít-e egyetlen szavazat, és érdemes-e emiatt elmenni.',
+        tanar: 'Ha egyetlen dologra jutna pénz, ez legyen az első, és minden más várhat.',
+        nyelv: 'Védjük-e a magyar nyelvet az idegen szavaktól, vagy hagyjuk, hogy természetesen változzon.',
+        smink: 'Egyéni szabadság kérdése: nem azt kérdezzük, mit gondolsz, hanem hogy szabad-e.',
+        haver: 'Szerinted a fontos döntések valójában nem hivatalos úton, ismeretségek útján születnek-e.',
+        privat: 'Az állami cégek (vasút, posta) magánkézbe adása: jó ötlet-e.',
+        tuntetes: 'A gyülekezési jog akkor is erős-e, ha ezzel másokat zavarunk.',
+        eu: 'Mekkora szerepet szánsz Magyarországnak az EU-ban: aktív tag vagy távolságtartó.',
+        vallas: 'Nem a hitről kérdezünk, hanem arról, van-e hasznos szerepe a közösségekben.',
+        hivatal: 'Személyes tapasztalatod: gyors, érthető és barátságos-e ma az ügyintézés. (Ez egy szándékosan csúsztatott kérdés.)',
+        halal: 'A legsúlyosabb bűncselekményekre gondolunk, igen vagy nem.',
+        ai: 'Ismétlődő, unalmas munkák: bízhatók-e gépre.',
+        vallalkozo: 'Azt kérdezzük, jobb-e a vállalkozóknak kevesebb szabály és adó.',
+        allam: 'Személyes szabadság: az állam ne avatkozzon bele a magánéletbe és az étkezésbe.',
+        unnep: 'A nemzeti ünnep hangulata: számít-e a szertartás, vagy elég a szabadnap.',
+        kakaos: 'Nosztalgia-kérdés. A válasz azt mutatja, mennyire hiszel a „régen jobb volt” érzésben.',
+        albi: 'Szabályozzon-e az állam albérlet-árakat, vagy hagyjuk a piacra.',
+        fegyelem: 'Iskolai rend: egyenruha, szigorú szabályok kontra szabadabb légkör.',
+        bevandor: 'Szigorú feltételekhez kötött letelepedés: egyetértesz-e a szigorú irányvonallal.',
+        nyugdij: 'Az idős kori ellátás: elsősorban saját felelősség vagy állami feladat.',
+        masodik: 'Ha valaki hibázik, jár-e neki második esély. (A következő iker-kérdésnél az ellenkezőjét kérdezzük.)',
+        panasz: 'Személyes tapasztalatod arról, mennyire reagálnak a hivatalok a panaszra.',
+        kisbolt: 'A hagyományok megőrzése vagy az újítás számít-e nálad többet.',
+        kamera: 'Biztonság és szabadság: szerinted a több kamera biztonságosabbá teszi-e a társadalmat.',
+        strand: 'Közösségi tulajdon vagy magántulajdon: szabad-e a vízpart mindenkinek, ingyen.',
+        termek: 'Hazai termékek előnyben részesítése, akkor is, ha az drágább.',
+        hirek: 'Bizalom a médiában: mennyire hiszel el egy hírt első olvasásra.',
+        civil: 'Összehasonlítás: az önkéntesek és civil szervezetek hatékonyabbak-e a pártoknál.',
+        projekt: 'Oktatás: tanulni könnyebb projektekkel, mint bemagolással. Igen vagy nem.',
+        sajat: 'Elsőbbség: előbb a belső gondok, vagy közben a világ bajai is számítanak.',
+        nyelv2: 'Oktatás: kötelező legyen-e az angol mellé egy második idegen nyelv.',
+        // új értékállítások és ikrek
+        sorkaton2: 'Az előző iker-kérdés tükörképe: kényszer nélkül, csak önkéntes jelentkezéssel.',
+        euro2: 'Az euróról szóló kérdés ellentéte: a forint megtartása nemzeti ügy-e.',
+        szavazat2: 'Az előző szavazásos kérdés ellentéte: úgysem számít, ezért nem kell elmenni.',
+        palinka2: 'A pálinkás kérdés ellentéte: engedélyhez és ellenőrzéshez kötött házi főzés.',
+        bkk2: 'A bérletes kérdés ellentéte: ne az adófizetők állják a közlekedést, hanem az utas.',
+        adoemel: 'A vállalkozói kérdés ellentéte: a nagy cégeket terhelje több adó.',
+        kemeny: 'A második esélyes kérdés ellentéte: következmények, kíméletlenül.',
+        szemet: 'Közterületi szemetelés: mennyire tartod szükségesnek a pénzbírságot.',
+        moderal: 'Közösségi oldalakon a gyors tartalomszűrés: elfogadod-e, hogy néha tévedésből is töröl.',
+        kozmeghall: 'Részvétel kérdése: számít-e, ha nem jelenünk meg, de utána elégedetlenkedünk.',
+        // zavar-állítások (agree = ez engem zavar)
+        z_penz1: 'Egyetértés = zavar, ha mindent a pénz mérce dönt el.',
+        z_penz2: 'Egyetértés = zavar, ha a magas ár önmagában már érték.',
+        z_penz3: 'Egyetértés = zavar, ha a kórház és az iskola is nyereségre dolgozik.',
+        z_egy1: 'Egyetértés = zavar, ha mindenkire ugyanazok a szabályok vonatkoznak, akármit tett.',
+        z_egy2: 'Egyetértés = zavar, ha a kitartás és a lazaság ugyanazt hozza.',
+        z_egy3: 'Egyetértés = zavar, ha nem szabad különbséget tenni az emberek között.',
+        z_par1: 'Egyetértés = zavar, ha az érv helyett a rang dönt.',
+        z_par2: 'Egyetértés = zavar az indokolatlan szabály.',
+        z_par3: 'Egyetértés = zavar, ha csak a pozíciója miatt kell valakit tisztelni.',
+        z_sza1: 'Egyetértés = zavar, ha valaki a szabadságra hivatkozva másokra hagyja a rendetlenséget.',
+        z_sza2: 'Egyetértés = zavar, ha valaki következmények nélkül oszt véleményt és tanácsot.',
+        z_sza3: 'Egyetértés = zavar, ha a szabály csak másoknak szól.',
+        z_pat1: 'Egyetértés = zavar a hangos, látványos hazafiaskodás.',
+        z_pat2: 'Egyetértés = zavar, ha valakit „nem elég magyarnak” bélyegeznek.',
+        z_pat3: 'Egyetértés = zavar, ha az ünnepi póz többet számít, mint az emlékezés.',
+        z_szn1: 'Egyetértés = zavar, ha valaki minden hazait lenéz, mert máshol másképp csinálják.',
+        z_szn2: 'Egyetértés = zavar, ha a külföldi divat dönti el, mi „menő”.',
+        z_szn3: 'Egyetértés = zavar, ha valami csak a külföldi címke miatt számít jobbnak.',
+        z_hag1: 'Egyetértés = zavar, ha a múlt érv helyett érv-pótlék.',
+        z_hag2: 'Egyetértés = zavar a kényszeres hagyománykövetés.',
+        z_hag3: 'Egyetértés = zavar, ha csak a környezet elvárása tart meg valamit.',
+        z_hag4: 'Egyetértés = zavar, ha a változtatás tabu.',
+        z_uj1: 'Egyetértés = zavar a felesleges átszervezés.',
+        z_uj2: 'Egyetértés = zavar, ha az újdonság már önmagában érv.',
+        z_uj3: 'Egyetértés = zavar, ha a jót is lecserélik, csak mert új van.',
+        z_uj4: 'Egyetértés = zavar az újracsomagolt régi dolog.',
+        z_cin1: 'Egyetértés = zavar az „úgysem számít” hozzáállás.',
+        z_cin2: 'Egyetértés = zavar, ha a cinizmus okosnak, a lelkesedés butának számít.',
+        z_cin3: 'Egyetértés = zavar, ha a lelkesedést rögtön lehűtik.',
+        z_cin4: 'Egyetértés = zavar, ha valaki a mások jókedvét gúnnyal rontja el.',
+        z_nai1: 'Egyetértés = zavar a kritikátlan hiszékenység.',
+        z_nai2: 'Egyetértés = zavar a „majd megoldódik” hozzáállás.',
+        z_nai3: 'Egyetértés = zavar, ha valaki a veszélyt is elbagatellizálja.',
+        z_nai4: 'Egyetértés = zavar, ha a jó szándék helyettesíti a megoldást.',
+        // hazugság-próba
+        l_hazug: 'Ez a „soha” szó komolyan veendő: nem „ritkán”, hanem egyszer sem.',
+        l_eperc: 'Pontosan erre gondolunk: azt mondod, mindjárt ott vagy, de még indulni sem indultál.',
+        l_feltetel: 'Teljes szöveg, sorról sorra, minden alkalommal. Nem a diagonális olvasás.',
+        l_telefon: 'A „csak egy percre” pillantás és az elröpült idő: soha egyetlen alkalommal sem.'
+    };
+    var JOKE = {
+        piac: 'A piac láthatatlan keze néha a zsebünkben is jár.',
+        szavazat: 'A „majd a következőn” a legnépszerűbb pártprogram.',
+        tanar: 'A hála szép dolog, de a rezsit nem fizeti.',
+        nyelv: 'A „heló” már magyar köszönés, a „bocsi” meg szinte hungarikum.',
+        smink: 'Szoknya vagy nadrág: a hőmérséklet dönt, nem a divatrendőrség.',
+        tuntetes: 'A 4-es 6-os ilyenkor „rendkívüli” járat, vagyis nem jár.',
+        halal: 'Erről úgyis lesz vita a vasárnapi ebédnél.',
+        ai: 'A gép nem kér szabadságot, de a kávét sem issza meg.',
+        vallalkozo: 'Fél nap várakozás egy pecsétre: nálunk ez a „start-up” fázis.',
+        allam: 'A hűtő tartalma legyen államtitok. A nagyié különösen.',
+        unnep: 'A kokárda minden évben megvan. A fiókban, legalul.',
+        albi: 'Az albérlet ára az egyetlen dolog, ami a fizetésnél gyorsabban nő.',
+        fegyelem: 'Az egyenruha előnye: reggel nem kell kitalálni, mit vegyen fel az ember.',
+        bevandor: 'A bürokrácia ezt már így is szigorúan ellenőrzi.',
+        nyugdij: 'A nagymama szerint a befőtt a legjobb nyugdíj-előtakarékosság.',
+        masodik: 'A nagymama szerint mindenki megérdemli a második szeletet.',
+        panasz: 'A „megvizsgáljuk” a magyar hivatal legszebb ígérete.',
+        kisbolt: 'A nagyi receptjét még senki nem tudta felülmúlni, de megpróbálni lehet.',
+        kamera: 'A kamera mindent lát, kivéve a tolvaj arcát.',
+        strand: 'A Balaton hullámai szerencsére nem kérnek belépőt.',
+        termek: 'A magyar paprika nem mindig magyar paprika, de legalább büszke.',
+        hirek: 'Az „állítólag” szó a legnagyobb magyar hírforrás.',
+        civil: 'A pogácsa itt is az igazi hatalom.',
+        projekt: 'A projektmunka végén mindig ugyanaz csinálja meg az egészet.',
+        sajat: 'Előbb a saját portánk előtt söpörjünk. A szomszédé is számít, persze.',
+        nyelv2: 'A „köszönöm” minden nyelven ugyanolyan jól hangzik.',
+        euro2: 'A forint legalább nem hagyja, hogy elfelejtsük a számolást.',
+        palinka2: 'Pista bácsi szerint az engedély a kazán mellé tartozik, a pálinka mellé nem.',
+        bkk2: 'Az ingyenes busz legnagyobb ellensége a pénztárgép.',
+        adoemel: 'Az adóemelésnek általában az adózó örül a legkevésbé.',
+        szemet: 'A kukától három méterre eldobott csikk is számít.',
+        // zavar-állítások
+        z_penz2: 'A drága lekvár is csak lekvár.',
+        z_penz3: 'A beteg is „ügyfél” lesz.',
+        z_egy1: 'A sorban állás nem válogat. Vagy mégis?',
+        z_egy3: 'A ruhatári cédula is megkülönböztet.',
+        z_par1: 'A „mert én mondtam” hatalmas érv az óvodában.',
+        z_par2: 'A „TILOS” felirat mögött ritkán áll indoklás.',
+        z_par3: 'A rang legnagyobb előnye a parkolóhely.',
+        z_sza1: 'A szabad ország szemeteskuka nélkül nem sokat ér.',
+        z_pat1: 'A zászló nem kiabál. Csak a tulajdonosa.',
+        z_pat3: 'A szelfi nem emlékezés.',
+        z_szn1: 'A „nálunk ez nem megy” a legtartósabb magyar hobbi.',
+        z_szn2: 'Párizsban is csak egy sima kávét kérnek.',
+        z_szn3: 'A címke a legolcsóbb minőség-garancia.',
+        z_hag1: 'A „mindig is így volt” az első magyar kifogás.',
+        z_hag3: 'A szomszéd mindent lát.',
+        z_uj1: 'A működő dolgot sosem szabad megjavítani.',
+        z_uj3: 'A régi tűzhely rendszerint tovább él, mint a modern.',
+        z_uj4: 'Az új név, a régi probléma.',
+        z_cin1: 'Az „úgysem számít” szavazótábor óriási.',
+        z_cin3: 'A „majd meglátod” a lelkesedés legnagyobb ellensége.',
+        z_cin4: 'A szarkazmus a magyar kultúra nemzeti sportja.',
+        z_nai1: 'A „minden igaz, amit az interneten olvasok” kategória.',
+        z_nai2: 'A „majd megoldódik” a legnagyobb magyar remény.',
+        z_nai3: 'Az „ugyan már” a veszélyjelzés legnagyobb ellensége.',
+        z_nai4: 'A jó szándék vezet a pokolba. Vagy legalább a bürokráciába.'
+    };
+    // Az előítélet-barométer tételeihez nincs poén, csak magyarázat: a téma nem vicc, a hozzáállás mérése a lényeg.
+    Object.assign(HELP, {
+        p_nem1: 'Azt kérdezzük, szerinted a gyereknevelés és a háztartás eleve a nők feladata-e. Az egyetértés a hagyományos szerepek felé visz.',
+        p_nem3: 'Azt kérdezzük, gyanakszol-e a férfiakra csak azért, mert férfiak. Az egyetértés a férfiakkal szembeni fenntartást növeli.',
+        p_nem5: 'Fordított állítás: az egyetértés itt a nyitottabb, egyenlőbb hozzáállást jelzi.',
+        p_nem6: 'Fordított állítás: az egyetértés itt a férfiakkal szembeni fenntartást csökkenti.',
+        p_nem7: 'Ellentétes hatású állítás: az egyetértés a nők ügyével szembeni fenntartást növeli, a férfiakkal szembenit csökkenti.',
+        p_kulf1: 'Azt kérdezzük, zavarna-e, ha a környéken sok külföldi élne. Az egyetértés a külföldiekkel szembeni fenntartást növeli.',
+        p_kulf3: 'Azt kérdezzük, gyanúsnak tartod-e azt, aki büszke a magyarságára. Az egyetértés a hazafiakkal szembeni fenntartást növeli.',
+        p_kulf5: 'Fordított állítás: az egyetértés itt a nyitottabb, befogadóbb hozzáállást jelzi.',
+        p_kulf6: 'Fordított állítás: az egyetértés itt a hazafiakkal szembeni fenntartást csökkenti.',
+        p_kulf7: 'Ellentétes hatású állítás: az egyetértés a külföldiekkel szembeni fenntartást növeli, a hazafiakkal szembenit csökkenti.',
+        p_lgbt1: 'Azt kérdezzük, zavar-e a közterületi, azonos neműek közötti gyengédség. Az egyetértés az LMBTQ+ emberekkel szembeni fenntartást növeli.',
+        p_lgbt3: 'Azt kérdezzük, gyűlölködőnek tartod-e a hagyományos családmodell védőit. Az egyetértés a hagyományvédőkkel szembeni fenntartást növeli.',
+        p_lgbt5: 'Fordított állítás: az egyetértés itt a nyitottabb hozzáállást jelzi.',
+        p_lgbt6: 'Fordított állítás: az egyetértés itt a hagyományvédőkkel szembeni fenntartást csökkenti.',
+        p_lgbt7: 'Ellentétes hatású állítás: az egyetértés az LMBTQ+ emberekkel szembeni fenntartást növeli, a hagyományvédőkkel szembenit csökkenti.',
+        p_vall1: 'Azt kérdezzük, zavar-e egy másik vallás látható jelenléte (öltözet, ünnep). Az egyetértés a más hitűekkel szembeni fenntartást növeli.',
+        p_vall3: 'Azt kérdezzük, gondolkodnak-e kevésbé a hívők. Az egyetértés a vallásosakkal szembeni fenntartást növeli.',
+        p_vall5: 'Fordított állítás: az egyetértés itt a más hitűekkel szembeni nyitottságot jelzi.',
+        p_vall6: 'Fordított állítás: az egyetértés itt a vallásosakkal szembeni fenntartást csökkenti.',
+        p_vall7: 'Ellentétes hatású állítás: az egyetértés a más hitűekkel szembeni fenntartást növeli, a vallásosakkal szembenit csökkenti.'
+    });
+    function enrich(list) {
+        list.forEach(function (st) {
+            if (HELP[st.id]) st.help = HELP[st.id];
+            if (!st.joke && JOKE[st.id]) st.joke = JOKE[st.id];
+        });
+    }
+    [STATEMENTS, NEW_V, HATED_ST, HATED_NEW, PREJ_ST, LIES].forEach(enrich);
 
     function mk(kind, part, st) { var o = { kind: kind, part: part }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); return o; }
 
