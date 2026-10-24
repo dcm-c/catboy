@@ -268,3 +268,10 @@ test('hosszú teszt felülete: módválasztó, hosszú nézet, hazugságvizsgál
     assert.match(js, /C\.honestyTier/);
     for (const c of ['.et-modes', '.et-hfill', '.et-flags']) assert.ok(css.includes(c), c);
 });
+
+test('navbar: a hosszú márkanév csak 1400px felett jelenik meg, a menüpontok nem törnek sorba', () => {
+    const nav = pub('navbar.html'), css = pub('style.css');
+    assert.match(nav, /d-lg-inline d-xxl-none[^>]*>MFSZ/);
+    assert.match(nav, /d-lg-none d-xxl-inline">Magyar Femboy Szakszervezet/);
+    assert.match(css, /\.navbar-nav \.nav-link \{ white-space: nowrap; \}/);
+});
