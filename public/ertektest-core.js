@@ -25,7 +25,7 @@
             });
         });
         var out = {};
-        AX.forEach(function (a) { out[a] = max[a] ? Math.round(clamp(sum[a] / max[a], -1, 1) * 100) : 0; });
+        AX.forEach(function (a) { out[a] = max[a] ? (Math.round(clamp(sum[a] / max[a], -1, 1) * 100) || 0) : 0; });
         return out;
     }
 

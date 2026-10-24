@@ -101,18 +101,18 @@ test('utált értékek: a legtöbbször választott nyer, döntetlennél a lista
     const r = C.hatedResult(picks);
     assert.equal(r.reduce((s, x) => s + x.count, 0), D.HATED_PAIRS.length);
     assert.ok(r[0].count >= r[1].count);
-    const same = C.hatedResult(['penz', 'penz', 'parancs']);
-    assert.equal(same[0].id, 'penz');
+    const same = C.hatedResult(['rongalas', 'rongalas', 'figyelem']);
+    assert.equal(same[0].id, 'rongalas');
     assert.equal(same[0].count, 2);
     assert.deepEqual(C.hatedResult([]).map(x => x.count).filter(Boolean), []);
-    const s = C.summarize({}, ['penz', 'penz', 'parancs']);
-    assert.deepEqual(s.h, ['penz', 'parancs']);
+    const s = C.summarize({}, ['rongalas', 'rongalas', 'figyelem']);
+    assert.deepEqual(s.h, ['rongalas', 'figyelem']);
 });
 
 test('megosztás: a tömör kódolás körbejár, a típus és az illeszkedés a tengelyekből számolódik újra', () => {
     const s = { e: 40, l: -20, n: 10, t: -60, c: 100 };
     const c = C.classify(s);
-    const sum = { s, a: c.id, fit: c.fit, h: ['patosz', 'penz'] };
+    const sum = { s, a: c.id, fit: c.fit, h: ['szexizmus', 'rongalas'] };
     const code = C.encode(sum);
     assert.match(code, /^[A-Za-z0-9_-]+$/);
     assert.ok(code.length <= 16, 'rövid teszt link: ' + code.length);
@@ -129,17 +129,17 @@ test('megosztás: a tömör kódolás körbejár, a típus és az illeszkedés a
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0], a: 'merleg' })), null, 'hiányzó tengely');
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0, 0], a: '<img onerror=x>' })), null, 'ismeretlen típus');
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0, 'x'], a: 'merleg' })), null, 'nem szám');
-    const clamped = C.decode(enc({ v: 1, s: [999, -999, 0, 0, 0], a: 'merleg', f: 1000, h: ['penz', '<b>', 'x', 'patosz'] }));
+    const clamped = C.decode(enc({ v: 1, s: [999, -999, 0, 0, 0], a: 'merleg', f: 1000, h: ['rongalas', '<b>', 'x', 'szexizmus'] }));
     assert.deepEqual(clamped.s, { e: 100, l: -100, n: 0, t: 0, c: 0 });
     assert.equal(clamped.fit, 99);
-    assert.deepEqual(clamped.h, ['penz', 'patosz'], 'az ismeretlen azonosítók kiesnek');
+    assert.deepEqual(clamped.h, ['rongalas', 'szexizmus'], 'az ismeretlen azonosítók kiesnek');
 });
 
 test('tömör link: minden mód rövid, a bináris formátum ellenőrzött', () => {
-    const sh = C.summarize(longAns(() => 1), ['penz', 'parancs'], D.MIRROR.map(() => 'min'));
+    const sh = C.summarize(longAns(() => 1), ['rongalas', 'figyelem'], D.MIRROR.map(() => 'min'));
     const lg = C.summarizeLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]));
     const hl = C.summarizeHatedLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]));
-    const hs = C.summarizeHatedShort(['penz', 'parancs', 'patosz', 'ujitas', 'cinizmus', 'penz', 'egyenlo', 'szabados', 'sznob', 'ujitas'], D.MIRROR.map(() => 'maj'));
+    const hs = C.summarizeHatedShort(['rongalas', 'figyelem', 'szexizmus', 'zaj', 'pletyka', 'rongalas', 'kornyezet', 'tragar', 'anarchia', 'zaj'], D.MIRROR.map(() => 'maj'));
     const lens = [C.encode(sh), C.encode(lg), C.encode(hl), C.encode(hs)].map(x => x.length);
     assert.ok(lens.every(n => n <= 32), 'link hossza: ' + lens);
     for (const sum of [sh, lg, hl, hs]) {
@@ -220,16 +220,16 @@ test('iker-párok: létező, ellentétes irányú tételek', () => {
 test('hosszú pontozás: utált-érték skálák 0..100, az egyetértés a súly irányában mozdít', () => {
     const none = C.hatedScales({});
     for (const h of D.HATED) assert.equal(none[h.id], 50);
-    const agree = C.hatedScales(longAns(s => (s.h && s.h.penz > 0 ? 2 : null)));
-    assert.ok(agree.penz >= 85 && agree.penz < 100, 'sok tételből magas, de nem 100: ' + agree.penz);
-    const disagree = C.hatedScales(longAns(s => (s.h && s.h.penz > 0 ? -2 : null)));
-    assert.ok(disagree.penz <= 15 && disagree.penz > 0, 'alacsony, de nem 0: ' + disagree.penz);
-    const few = C.hatedScales(bAns(s => (s.h && s.h.penz > 0 ? 2 : null)), D.LONG_B);
-    assert.ok(few.penz < agree.penz, 'kevés tétel kisebbet mozdít (húzás az 50 felé)');
+    const agree = C.hatedScales(longAns(s => (s.h && s.h.rongalas > 0 ? 2 : null)));
+    assert.ok(agree.rongalas >= 85 && agree.rongalas < 100, 'sok tételből magas, de nem 100: ' + agree.rongalas);
+    const disagree = C.hatedScales(longAns(s => (s.h && s.h.rongalas > 0 ? -2 : null)));
+    assert.ok(disagree.rongalas <= 15 && disagree.rongalas > 0, 'alacsony, de nem 0: ' + disagree.rongalas);
+    const few = C.hatedScales(bAns(s => (s.h && s.h.rongalas > 0 ? 2 : null)), D.LONG_B);
+    assert.ok(few.rongalas < agree.rongalas, 'kevés tétel kisebbet mozdít (húzás az 50 felé)');
     for (const v of Object.values(C.hatedScales(longAns((s, i) => [2, -2, 1, -1, 0][i % 5])))) assert.ok(v >= 0 && v <= 100);
-    assert.deepEqual(C.hatedTop(agree, 2)[0], 'penz');
+    assert.deepEqual(C.hatedTop(agree, 2)[0], 'rongalas');
     assert.deepEqual(C.hatedTop(none, 2), [], 'semleges esetben nincs "legutáltabb"');
-    assert.equal(C.hatedRanking(agree)[0].id, 'penz');
+    assert.equal(C.hatedRanking(agree)[0].id, 'rongalas');
 });
 
 test('hosszú pontozás: a hosszú lista pontozza a tengelyeket, hiányzó w nem dob hibát', () => {
@@ -372,21 +372,21 @@ test('tükörpárok: témánként -100..100, a kisebbségi oldal a pozitív', ()
 });
 
 test('csak utált-teszt összegzése: rövid és hosszú, megosztva (v3) körbejár', () => {
-    const picks = ['penz', 'parancs', 'patosz', 'ujitas', 'cinizmus', 'penz', 'egyenlo', 'szabados', 'sznob', 'ujitas'];
+    const picks = ['rongalas', 'figyelem', 'szexizmus', 'zaj', 'pletyka', 'rongalas', 'kornyezet', 'tragar', 'anarchia', 'zaj'];
     const mir = D.MIRROR.map((m, i) => (i % 2 ? 'maj' : 'min'));
     const hs = C.summarizeHatedShort(picks, mir);
     assert.equal(hs.kind, 'hshort');
-    assert.equal(hs.h[0], 'penz');
-    assert.equal(hs.counts.penz, 2);
+    assert.equal(hs.h[0], 'rongalas');
+    assert.equal(hs.counts.rongalas, 2);
     const back = C.decode(C.encode(hs));
     assert.equal(back.kind, 'hshort');
     assert.deepEqual(back.counts, hs.counts);
     assert.deepEqual(back.m, hs.m);
     assert.deepEqual(back.h, hs.h);
 
-    const hl = C.summarizeHatedLong(bAns(s => (s.h && s.h.cinizmus > 0 ? 2 : -1)));
+    const hl = C.summarizeHatedLong(bAns(s => (s.h && s.h.pletyka > 0 ? 2 : -1)));
     assert.equal(hl.kind, 'hlong');
-    assert.equal(hl.h[0], 'cinizmus');
+    assert.equal(hl.h[0], 'pletyka');
     const b2 = C.decode(C.encode(hl));
     assert.equal(b2.kind, 'hlong');
     assert.deepEqual(b2.hs, hl.hs);
@@ -405,10 +405,10 @@ test('v3 kódolás: hamis vagy hibás tartalom elutasítva, a régi v1/v2 linkek
     assert.deepEqual(Object.values(ok.pj), Array(8).fill(0));
     const v2 = C.decode(enc({ v: 2, s: [0, 0, 0, 0, 0], a: 'merleg', f: 50, hs: Array(10).fill(50), i: 80, k: [0, 0, 0] }));
     assert.ok(v2.long && !v2.pj);
-    const v1 = C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', f: 50, h: ['penz'], m: [100, -100, 0, 50] }));
+    const v1 = C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', f: 50, h: ['rongalas'], m: [100, -100, 0, 50] }));
     assert.deepEqual(v1.m, { nem: 100, kulf: -100, lgbt: 0, vall: 50 });
     assert.equal(C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', m: [1, 2] })).m, undefined, 'rossz hosszú tükör-adat kiesik');
-    const sh = C.summarize({}, ['penz'], D.MIRROR.map(() => 'min'));
+    const sh = C.summarize({}, ['rongalas'], D.MIRROR.map(() => 'min'));
     assert.ok(C.decode(C.encode(sh)).m);
 });
 
