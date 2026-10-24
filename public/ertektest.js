@@ -1,6 +1,7 @@
 // =========================================================
 // ÉRTÉKTEST - felület
-// Fázisok: bevezető -> állítások (1-5 gombbal / billentyűvel) -> "melyik zavar jobban" körök -> eredmény.
+// Fázisok: bevezető (gyors / részletes mód) -> állítások (1-5 gombbal / billentyűvel) -> (gyors módban) "melyik zavar jobban" körök -> eredmény.
+// A részletes mód 70 állítása az értékeket, az utált értékek skáláit és az őszinteség-vizsgálót is táplálja.
 // Az eredmény a link #r= részében utazik (base64url JSON), így megosztható, és nem mentünk semmit.
 // =========================================================
 (function () {
@@ -8,7 +9,7 @@
 
     var D = window.MFSZErtek.data, C = window.MFSZErtek.core;
     var stage = document.getElementById('et-stage');
-    var ST = D.STATEMENTS, PAIRS = D.HATED_PAIRS;
+    var ST = D.STATEMENTS, PAIRS = D.HATED_PAIRS, LONG = D.LONG;
 
     var ANSWERS = [
         { v: -2, label: 'Egyáltalán nem értek egyet', short: 'Nem, soha', cls: 'no2' },
@@ -18,7 +19,8 @@
         { v: 2, label: 'Teljesen egyetértek', short: 'Igen, abszolút', cls: 'yes2' }
     ];
 
-    var st = { phase: 'intro', i: 0, answers: [], j: 0, picks: [], result: null, shared: false };
+    var st = { phase: 'intro', mode: 'short', i: 0, answers: [], j: 0, picks: [], result: null, shared: false };
+    function list() { return st.mode === 'long' ? LONG : ST; }
 
     function el(tag, cls, text) {
         var n = document.createElement(tag);
@@ -71,28 +73,58 @@
         return box;
     }
 
+    function startMode(mode) {
+        st.mode = mode; st.i = 0; st.answers = []; st.j = 0; st.picks = [];
+        setPhase('quiz');
+    }
+
+    function modeCard(cls, emoji, title, lines, label, mode) {
+        var c = el('div', 'et-mode ' + cls);
+        c.appendChild(el('div', 'et-mode-emoji', emoji));
+        c.appendChild(el('b', 'et-mode-title', title));
+        var ul = el('ul', 'et-mode-list');
+        lines.forEach(function (l) { ul.appendChild(el('li', '', l)); });
+        c.appendChild(ul);
+        var go = el('button', 'btn btn-primary-custom px-4', label);
+        go.type = 'button';
+        go.id = 'et-start-' + mode;
+        go.addEventListener('click', function () { startMode(mode); });
+        c.appendChild(go);
+        return c;
+    }
+
     function renderIntro() {
         var card = el('div', 'card shadow-sm border-0 et-card');
         card.setAttribute('data-tone', 'trans');
         var body = el('div', 'card-body p-4 p-md-5 text-center');
         body.appendChild(el('div', 'et-emoji', '🧭'));
         body.appendChild(el('h2', 'h3 fw-bold mb-3', 'Hol állsz a nagy magyar értékvitában?'));
-        body.appendChild(el('p', 'lead mb-3', ST.length + ' állítás, ' + PAIRS.length + ' „melyik zavar jobban?” kör, a végén egy tréfás típus és a legutáltabb értéked.'));
-        body.appendChild(el('p', 'text-muted mb-4', 'Magyar ügyek, kávéházi hangulat, kakaóscsiga-nosztalgia. Nem pártot ajánl, nem ítélkezik, és semmit nem mentünk: az eredmény csak a megosztható linkben utazik.'));
-        var go = el('button', 'btn btn-primary-custom btn-lg px-5', 'Kezdjük');
-        go.type = 'button';
-        go.addEventListener('click', function () { st.i = 0; st.answers = []; st.j = 0; st.picks = []; setPhase('quiz'); });
-        body.appendChild(go);
+        body.appendChild(el('p', 'lead mb-3', 'Válassz hosszt: gyors kör kávé mellé, vagy részletes vizsgálat, ahol a hazugságot is lemérjük.'));
+        var modes = el('div', 'et-modes');
+        modes.appendChild(modeCard('quick', '☕', 'Gyors teszt', [
+            ST.length + ' állítás, ' + PAIRS.length + ' „melyik zavar jobban?” kör',
+            'Egy tréfás típus és a legutáltabb értéked',
+            'Kb. 5 perc'
+        ], 'Gyors kör', 'short'));
+        modes.appendChild(modeCard('deep', '🔬', 'Részletes teszt', [
+            LONG.length + ' állítás, mind az értékrendre és az utált értékekre is hat',
+            'Mind a 10 utált érték külön 0–100 skálán',
+            'Őszinteség-vizsgáló: lehetetlen állítások és ellentmondások',
+            'Kb. 12 perc'
+        ], 'Részletes teszt', 'long'));
+        body.appendChild(modes);
+        body.appendChild(el('p', 'text-muted mt-4 mb-0', 'Magyar ügyek, kávéházi hangulat, kakaóscsiga-nosztalgia. Nem pártot ajánl, nem ítélkezik, és semmit nem mentünk: az eredmény csak a megosztható linkben utazik.'));
         card.appendChild(body);
         stage.appendChild(card);
     }
 
     function renderQuiz() {
-        var s = ST[st.i];
+        var L = list();
+        var s = L[st.i];
         var card = el('div', 'card shadow-sm border-0 et-card');
         card.setAttribute('data-tone', 'blue');
         var body = el('div', 'card-body p-4');
-        body.appendChild(progress(st.i + 1, ST.length, 'Állítás'));
+        body.appendChild(progress(st.i + 1, L.length, st.mode === 'long' ? 'Részletes teszt' : 'Állítás'));
         var q = el('p', 'et-statement', s.text);
         q.setAttribute('aria-live', 'polite');
         body.appendChild(q);
@@ -129,8 +161,19 @@
 
     function answer(v) {
         st.answers[st.i] = v;
-        if (st.i + 1 < ST.length) { st.i++; render(); }
+        if (st.i + 1 < list().length) { st.i++; render(); }
+        else if (st.mode === 'long') finishLong();
         else { st.j = 0; st.picks = []; setPhase('hated'); }
+    }
+    function answersById(L) {
+        var answers = {};
+        L.forEach(function (s, i) { answers[s.id] = typeof st.answers[i] === 'number' ? st.answers[i] : null; });
+        return answers;
+    }
+    function finishLong() {
+        st.result = C.summarizeLong(answersById(LONG));
+        st.shared = false;
+        setPhase('result');
     }
     function goBack() {
         if (st.phase === 'quiz' && st.i > 0) { st.i--; render(); }
@@ -174,9 +217,7 @@
     function pickHated(id) {
         st.picks.push(id);
         if (st.j + 1 < PAIRS.length) { st.j++; render(); return; }
-        var answers = {};
-        ST.forEach(function (s, i) { answers[s.id] = typeof st.answers[i] === 'number' ? st.answers[i] : null; });
-        st.result = C.summarize(answers, st.picks);
+        st.result = C.summarize(answersById(ST), st.picks);
         st.shared = false;
         setPhase('result');
     }
@@ -212,7 +253,8 @@
     function resultText(r) {
         var ar = C.find(D.ARCHETYPES, r.a);
         var hated = r.h.length ? C.find(D.HATED, r.h[0]).name.toLowerCase() : null;
-        return 'Értékteszt: ' + ar.title + ' (' + r.fit + '% illeszkedés)' + (hated ? ', legjobban a(z) ' + hated + ' zavar.' : '.') + ' Te mit kapnál?';
+        var hon = r.long ? ' Őszinteség: ' + C.honestyTier(r.honesty.index).name + ' (' + r.honesty.index + '%).' : '';
+        return 'Értékteszt: ' + ar.title + ' (' + r.fit + '% illeszkedés)' + (hated ? ', legjobban a(z) ' + hated + ' zavar.' : '.') + hon + ' Te mit kapnál?';
     }
     function shareUrl(r) { return pageBase() + '#r=' + C.encode(r); }
 
@@ -221,6 +263,105 @@
         return new Promise(function (ok, no) {
             try { input.focus(); input.select(); document.execCommand('copy') ? ok() : no(); } catch (e) { no(e); }
         });
+    }
+
+    // ---------- Részletes teszt: utált-érték skálák és őszinteség-vizsgáló ----------
+    function hateRow(h, score, rank) {
+        var row = el('div', 'et-hrow' + (rank === 0 ? ' top' : ''));
+        var head = el('div', 'et-axis-head');
+        head.appendChild(el('b', '', h.name));
+        head.appendChild(el('span', '', score + ' / 100'));
+        row.appendChild(head);
+        var track = el('div', 'et-htrack');
+        track.setAttribute('role', 'img');
+        track.setAttribute('aria-label', h.name + ': ' + score + ' a 100-ból');
+        var fill = el('i', 'et-hfill ' + (score >= 58 ? 'hot' : score <= 42 ? 'cool' : 'mild'));
+        fill.style.width = score + '%';
+        track.appendChild(fill);
+        row.appendChild(track);
+        return row;
+    }
+
+    function stText(id) { var s = C.find(LONG, id); return s ? s.text : id; }
+
+    function renderLongExtras(r) {
+        var rank = C.hatedRanking(r.hs);
+        var box = el('div', 'card shadow-sm border-0 et-card mt-4');
+        box.setAttribute('data-tone', 'red');
+        var bd = el('div', 'card-body p-4');
+        bd.appendChild(el('h3', 'h5 fw-bold mb-1', 'Utált értékek skálája'));
+        bd.appendChild(el('p', 'et-joke mb-3', 'Minél hosszabb a sáv, annál jobban zavar az adott érték. Középen (50) a semleges.'));
+        var top = rank[0];
+        if (top.score >= 58) {
+            var h1 = C.find(D.HATED, top.id);
+            bd.appendChild(el('p', 'et-hated', '🙅 ' + h1.name));
+            bd.appendChild(el('p', 'mb-3', h1.roast));
+        } else bd.appendChild(el('p', 'mb-3', 'Egyik érték sem zavar kirívóan: vagy nagyon békés vagy, vagy mindenhol középen álltál.'));
+        rank.forEach(function (x, i) { bd.appendChild(hateRow(C.find(D.HATED, x.id), x.score, i)); });
+        var calm = rank.filter(function (x) { return x.score <= 42; });
+        if (calm.length) {
+            var last = rank[rank.length - 1];
+            bd.appendChild(el('p', 'text-muted mt-3 mb-0', 'A legkevésbé zavar: ' + C.find(D.HATED, last.id).name.toLowerCase() + '. Ez a te komfortzónád.'));
+        }
+        box.appendChild(bd);
+        stage.appendChild(box);
+
+        var hn = r.honesty, tier = C.honestyTier(hn.index);
+        var hb = el('div', 'card shadow-sm border-0 et-card mt-4');
+        hb.setAttribute('data-tone', hn.index >= 70 ? 'blue' : 'pink');
+        var hbd = el('div', 'card-body p-4');
+        var hh = el('h3', 'h5 fw-bold mb-3');
+        hh.appendChild(el('span', 'et-emo', '🕵️'));
+        hh.appendChild(document.createTextNode(' Hazugságvizsgáló'));
+        hbd.appendChild(hh);
+        var meter = el('div', 'et-honest');
+        var tr = el('div', 'et-htrack');
+        tr.setAttribute('role', 'img');
+        tr.setAttribute('aria-label', 'Őszinteség: ' + hn.index + ' a 100-ból');
+        var hf = el('i', 'et-hfill honest t' + (hn.index >= 70 ? 'good' : hn.index >= 45 ? 'mid' : 'bad'));
+        hf.style.width = hn.index + '%';
+        tr.appendChild(hf);
+        meter.appendChild(tr);
+        hbd.appendChild(meter);
+        hbd.appendChild(el('p', 'et-hated mt-3 mb-1', tier.name + ' · ' + hn.index + '%'));
+        hbd.appendChild(el('p', 'mb-3', tier.text));
+
+        var lies = hn.lies, twins = hn.twins;
+        if (lies) {
+            if (lies.length) {
+                hbd.appendChild(el('p', 'fw-bold mb-1', 'Gyanús bólintások (' + lies.length + ')'));
+                var ul = el('ul', 'et-flags');
+                lies.forEach(function (l) {
+                    var li = el('li');
+                    li.appendChild(el('span', '', '„' + stText(l.id) + '”'));
+                    var q = C.find(LONG, l.id);
+                    if (q && q.joke) li.appendChild(el('em', '', ' ' + q.joke));
+                    ul.appendChild(li);
+                });
+                hbd.appendChild(ul);
+            }
+            if (twins.length) {
+                hbd.appendChild(el('p', 'fw-bold mb-1', 'Ellentmondások (' + twins.length + ')'));
+                var ul2 = el('ul', 'et-flags');
+                twins.forEach(function (t) {
+                    var li = el('li');
+                    li.appendChild(el('span', '', 'Egyszerre értettél egyet ezzel: „' + stText(t.a) + '” és ezzel: „' + stText(t.b) + '”.'));
+                    ul2.appendChild(li);
+                });
+                hbd.appendChild(ul2);
+            }
+            if (hn.straight) hbd.appendChild(el('p', 'mb-2', '🔁 Szinte mindenre ugyanazt a választ nyomtad: ez a teszt szerint inkább gyors kattintgatás, mint vélemény.'));
+            if (!lies.length && !twins.length && !hn.straight) hbd.appendChild(el('p', 'mb-2', '✔ Nem találtunk lehetetlen állítást és önellentmondást.'));
+        } else {
+            var parts = [];
+            if (hn.liesN) parts.push(hn.liesN + ' lehetetlen állítást elfogadott');
+            if (hn.twinsN) parts.push(hn.twinsN + ' ellentmondó állításpárt is megerősített');
+            if (hn.straight) parts.push('szinte mindenre ugyanazt válaszolta');
+            hbd.appendChild(el('p', 'mb-2', parts.length ? 'Ez a kitöltő ' + parts.join(', ') + '.' : '✔ Nem találtunk lehetetlen állítást és önellentmondást.'));
+        }
+        hbd.appendChild(el('p', 'et-hint mb-0 mt-2', 'Játék, nem igazi hazugságvizsgálat: a „soha” és „mindig” állításokat, az ellentétes állításpárokat és az „mindenre ugyanaz” mintát figyeljük.'));
+        hb.appendChild(hbd);
+        stage.appendChild(hb);
     }
 
     function renderResult() {
@@ -260,6 +401,7 @@
         axes.appendChild(ab);
         stage.appendChild(axes);
 
+        if (r.long) { renderLongExtras(r); } else {
         var hatedBox = el('div', 'card shadow-sm border-0 et-card mt-4');
         hatedBox.setAttribute('data-tone', 'red');
         var hbd = el('div', 'card-body p-4');
@@ -276,6 +418,7 @@
         } else hbd.appendChild(el('p', 'mb-0', 'Nem találtunk kifejezetten utált értéket: vagy nagyon békés vagy, vagy nagyon gyorsan kattintgattál.'));
         hatedBox.appendChild(hbd);
         stage.appendChild(hatedBox);
+        }
 
         if (!st.shared) {
             var sh = el('div', 'card shadow-sm border-0 et-card mt-4');
@@ -354,5 +497,5 @@
     if (!openFromHash()) render();
 
     // Hibakereséshez és teszteléshez
-    window.MFSZErtek.ui = { state: function () { return st; }, answerAll: function (v) { ST.forEach(function (_, i) { st.answers[i] = v; }); } };
+    window.MFSZErtek.ui = { state: function () { return st; }, answerAll: function (v) { list().forEach(function (_, i) { st.answers[i] = v; }); } };
 })();

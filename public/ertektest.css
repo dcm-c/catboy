@@ -96,3 +96,36 @@
 .et-nav .btn { color: inherit; background: transparent; border-color: color-mix(in srgb, currentColor 45%, transparent); }
 .et-nav .btn:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); color: inherit; }
 .et-nav .btn:disabled { opacity: .4; }
+
+/* ---- Módválasztó (gyors / részletes) ---- */
+.et-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; }
+.et-mode { --c: #0aa2c0; display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 18px; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 9%, var(--card-fill, #fff)); }
+.et-mode.deep { --c: #c0408f; }
+.et-mode-emoji { font-size: 2rem; line-height: 1; }
+.et-mode-title { font-size: 1.15rem; }
+.et-mode-list { margin: 0 0 6px; padding-left: 1.1rem; flex: 1; font-size: .95rem; }
+.et-mode-list li { margin-bottom: 3px; }
+.et-mode .btn { align-self: flex-start; }
+
+/* ---- Utált értékek skálái, őszinteség-mérő ---- */
+.et-hrow { margin-bottom: 12px; }
+.et-hrow.top .et-axis-head b { color: #dc3545; }
+.et-htrack { position: relative; height: 14px; border-radius: 999px; background: rgba(120, 120, 140, .22); overflow: hidden; }
+.et-hfill { display: block; height: 100%; border-radius: 999px; background: #7a8794; }
+.et-hfill.hot { background: linear-gradient(90deg, #f1a33c, #dc3545); }
+.et-hfill.mild { background: linear-gradient(90deg, #9aa5b1, #7a8794); }
+.et-hfill.cool { background: linear-gradient(90deg, #5bc0de, #0aa2c0); }
+.et-hfill.honest.tgood { background: linear-gradient(90deg, #5cc08a, #198754); }
+.et-hfill.honest.tmid { background: linear-gradient(90deg, #f6d365, #f1a33c); }
+.et-hfill.honest.tbad { background: linear-gradient(90deg, #ee7d9a, #dc3545); }
+.et-honest .et-htrack { height: 20px; }
+.et-flags { padding-left: 1.1rem; margin-bottom: .9rem; }
+.et-flags li { margin-bottom: 6px; }
+.et-flags em { color: #8a7a00; }
+[data-bs-theme="dark"] .et-flags em { color: #ffd23f; }
+:root[data-theme="buzi"] .et-flags em { color: #ffe27a; }
+[data-bs-theme="dark"] .et-mode { background: color-mix(in srgb, var(--c) 14%, var(--card-fill, #1d1b2b)); }
+:root[data-theme="buzi"] .et-mode { background: color-mix(in srgb, var(--c) 18%, rgba(28, 14, 52, .9)); color: #fff; }
+@media (max-width: 575.98px) { .et-modes { grid-template-columns: 1fr; } }
+
+.et-emo { -webkit-text-fill-color: initial; color: initial; background: none; }
