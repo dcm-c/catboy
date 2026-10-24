@@ -16,11 +16,11 @@
     'use strict';
 
     var AXES = [
-        { id: 'e', name: 'Gazdaság', neg: 'Szabadpiac', pos: 'Elosztó állam' },
-        { id: 'l', name: 'Társadalom', neg: 'Szabadság', pos: 'Rend' },
-        { id: 'n', name: 'Közösség', neg: 'Világpolgár', pos: 'Nemzeti' },
-        { id: 't', name: 'Értékek', neg: 'Haladó', pos: 'Hagyománytisztelő' },
-        { id: 'c', name: 'Bizalom', neg: 'Bizakodó', pos: 'Cinikus' }
+        { id: 'e', name: 'Gazdaság', icon: '💶', negIcon: '🛍️', posIcon: '🏥', neg: 'Szabadpiac', pos: 'Elosztó állam' },
+        { id: 'l', name: 'Társadalom', icon: '⚖️', negIcon: '🕊️', posIcon: '🛂', neg: 'Szabadság', pos: 'Rend' },
+        { id: 'n', name: 'Közösség', icon: '🗺️', negIcon: '✈️', posIcon: '🏡', neg: 'Világpolgár', pos: 'Nemzeti' },
+        { id: 't', name: 'Értékek', icon: '⏳', negIcon: '🚀', posIcon: '🏺', neg: 'Haladó', pos: 'Hagyománytisztelő' },
+        { id: 'c', name: 'Bizalom', icon: '🤝', negIcon: '🌞', posIcon: '🧐', neg: 'Bizakodó', pos: 'Cinikus' }
     ];
 
     // A sorrend szándékosan kevert, hogy ne tengelyenként jöjjenek a kérdések.
@@ -137,7 +137,7 @@
     ];
 
     // =========================================================
-    // HOSSZÚ TESZT (70 kérdés)
+    // HOSSZÚ TESZT (96 kérdés: 60 értékrész + 36 utált-érték rész)
     //  - 40 értékállítás: a rövid teszt 32 állítása + 7 ellentétes "iker" + 1 új. Sok értékállítás a zavar-skálákra is hat (h).
     //  - 24 "zavar-állítás": az utált értékek skáláit mérik (h), és sok közülük a tengelyeket is mozgatja (w).
     //  - 6 hazugság-próba: olyan "soha"-állítások, amik gyakorlatilag senkire sem igazak.
@@ -209,17 +209,91 @@
         { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' }
     ];
 
-    var LONG = [];
+    // A zavar-állítások egy része az értékrészben (A) marad, mert a tengelyeket is mozgatja; a többi az utált-érték részbe (B) kerül.
+    var HATED_A = { z_penz3: 1, z_egy2: 1, z_par2: 1, z_sza1: 1, z_pat1: 1, z_szn1: 1, z_hag1: 1, z_hag2: 1, z_uj1: 1, z_uj2: 1, z_cin1: 1, z_cin2: 1, z_nai1: 1, z_nai2: 1 };
+
+    // 10 további zavar-állítás: így mind a 10 utált értéket pontosan 2 tétel méri a B részben.
+    var HATED_NEW = [
+        { id: 'z_pat3', text: 'Zavar, ha a nemzeti ünnepen a pózolás fontosabb, mint az emlékezés.', h: { patosz: 1 } },
+        { id: 'z_szn3', text: 'Idegesít, ha valami csak azért „jobb”, mert külföldi címke van rajta.', h: { sznob: 1 } },
+        { id: 'z_hag3', text: 'Bosszant, ha valamit csak azért tartanak meg, hogy a szomszéd ne szóljon meg.', h: { hagyomany: 1 }, w: { t: -0.5 } },
+        { id: 'z_hag4', text: 'Zavar, ha egy ünnepet vagy szokást megváltoztatni szentségtörésnek számít.', h: { hagyomany: 1 } },
+        { id: 'z_uj3', text: 'Idegesít, ha az újdonság kedvéért eldobják azt, ami még tökéletesen jó volt.', h: { ujitas: 1 } },
+        { id: 'z_uj4', text: 'Zavar, ha évente új szlogen, új rendszer és új név jön ugyanarra a dologra.', h: { ujitas: 1 }, w: { c: 0.3 } },
+        { id: 'z_cin3', text: 'Idegesít, ha a lelkesedésre az az első válasz: „majd meglátod”.', h: { cinizmus: 1 } },
+        { id: 'z_cin4', text: 'Zavar, ha mások jókedvét szarkazmussal kell elrontani.', h: { cinizmus: 1 } },
+        { id: 'z_nai3', text: 'Idegesít, ha valaki a veszélyt is csak legyinti: „ugyan, nem lesz baj”.', h: { naivitas: 1 } },
+        { id: 'z_nai4', text: 'Zavar, ha a jószándékot már a megoldásnak tartják.', h: { naivitas: 1 } }
+    ];
+
+    // =========================================================
+    // ELŐÍTÉLET-BAROMÉTER (csak a B részben): négy téma, mindkét irányban.
+    //   up = fenntartás a kisebbségi / kevésbé erős oldallal szemben, dn = fenntartás a többségi / hagyományos oldallal szemben.
+    // Szándékosan enyhe, felmérés-stílusú állítások: azt mérjük, mennyire "zavar" egy hozzáállás, nem pedig csoportokat minősítünk.
+    // Az 50 a semleges; a magasabb érték nagyobb fenntartást jelent. Szórakoztató teszt, nem pszichológiai mérés.
+    // =========================================================
+    var TOPICS = [
+        { id: 'nem', name: 'Nemek', icon: '👫', up: 'Nőkkel szembeni fenntartás', dn: 'Férfiakkal szembeni fenntartás',
+          minSide: 'A nők lenézése', majSide: 'A férfiak lenézése' },
+        { id: 'kulf', name: 'Külföldiek és hazafiak', icon: '🌍', up: 'Külföldiekkel szembeni fenntartás', dn: 'Hazafiakkal szembeni fenntartás',
+          minSide: 'A bevándorlók lenézése', majSide: 'A hazájukat szeretők lenézése' },
+        { id: 'lgbt', name: 'Szerelem és család', icon: '🏳️‍🌈', up: 'LMBTQ+ emberekkel szembeni fenntartás', dn: 'Hagyományos családmodellt védőkkel szembeni fenntartás',
+          minSide: 'A meleg és transz emberek lenézése', majSide: 'A hagyományos család védőinek lenézése' },
+        { id: 'vall', name: 'Hit és hitetlenség', icon: '🕯️', up: 'Más hitűekkel szembeni fenntartás', dn: 'Vallásosokkal szembeni fenntartás',
+          minSide: 'A kisebbségi vallások híveinek lenézése', majSide: 'A vallásosak lenézése' }
+    ];
+    var PREJ = [];
+    TOPICS.forEach(function (t) {
+        PREJ.push({ id: t.id + '_up', topic: t.id, side: 'up', name: t.up });
+        PREJ.push({ id: t.id + '_dn', topic: t.id, side: 'dn', name: t.dn });
+    });
+
+    var PREJ_ST = [
+        { id: 'p_nem1', text: 'A gyereknevelés és a háztartás alapvetően a nők dolga.', g: { nem_up: 1 }, w: { t: 0.6 } },
+        { id: 'p_nem2', text: 'Vezetői állásokra a férfiak általában alkalmasabbak.', g: { nem_up: 1 }, w: { t: 0.4 } },
+        { id: 'p_nem3', text: 'A férfiak többsége eleve elnyomó, még ha nem is tud róla.', g: { nem_dn: 1 }, w: { t: -0.4 } },
+        { id: 'p_nem4', text: 'Egy férfi véleményét a nemek egyenjogúságáról nem érdemes komolyan venni.', g: { nem_dn: 1 } },
+        { id: 'p_kulf1', text: 'Nem szívesen laknék olyan környéken, ahol sok a külföldi.', g: { kulf_up: 1 }, w: { n: 0.6 } },
+        { id: 'p_kulf2', text: 'Aki nem itt született, az sosem lesz igazi magyar.', g: { kulf_up: 1 }, w: { n: 0.6 } },
+        { id: 'p_kulf3', text: 'Aki büszke a magyarságára, az általában szűk látókörű.', g: { kulf_dn: 1 }, w: { n: -0.6 } },
+        { id: 'p_kulf4', text: 'Aki ragaszkodik a magyar szokásokhoz, az haladásellenes.', g: { kulf_dn: 1 }, w: { n: -0.4, t: -0.4 } },
+        { id: 'p_lgbt1', text: 'Zavar, ha két azonos nemű ember nyilvánosan csókolózik.', g: { lgbt_up: 1 }, w: { t: 0.6 } },
+        { id: 'p_lgbt2', text: 'A Pride-felvonulás nem az utcára való.', g: { lgbt_up: 1 }, w: { t: 0.5 } },
+        { id: 'p_lgbt3', text: 'Aki a hagyományos családmodellt védi, az eleve gyűlölködő.', g: { lgbt_dn: 1 }, w: { t: -0.5 } },
+        { id: 'p_lgbt4', text: 'A hagyományos családban élők kiváltságosak, és ezt folyton illene elismerniük.', g: { lgbt_dn: 1 } },
+        { id: 'p_vall1', text: 'Zavar, ha egy másik vallás szokásai láthatóvá válnak a környezetemben.', g: { vall_up: 1 }, w: { n: 0.3 } },
+        { id: 'p_vall2', text: 'A kisebbségi vallások hívei nehezebben illeszkednek be, ezért kevésbé bízom bennük.', g: { vall_up: 1 } },
+        { id: 'p_vall3', text: 'A vallásos emberek általában kevésbé gondolkodnak önállóan.', g: { vall_dn: 1 }, w: { t: -0.4 } },
+        { id: 'p_vall4', text: 'Aki hisz Istenben, azzal nem érdemes komoly vitát folytatni.', g: { vall_dn: 1 } }
+    ];
+
+    // Tükörpárok (a rövid tesztben és az utált-tesztben): melyik hozzáállás zavar jobban? min = a kisebbségi oldal lenézése, maj = a többségi oldalé.
+    var MIRROR = [
+        { topic: 'nem', min: 'Aki lenézi a nőket, csak mert nők.', maj: 'Aki lenézi a férfiakat, csak mert férfiak.' },
+        { topic: 'kulf', min: 'Aki lenézi a bevándorlókat.', maj: 'Aki lenézi a hazájukat szeretőket.' },
+        { topic: 'lgbt', min: 'Aki szerint a meleg párok nem érdemelnek tiszteletet.', maj: 'Aki szerint a hagyományos család védői gyűlölködők.' },
+        { topic: 'vall', min: 'Aki lenézi a kisebbségi vallások híveit.', maj: 'Aki lenézi a vallásosakat.' },
+        { topic: 'nem', min: 'Aki szerint a nők nem lehetnek jó vezetők.', maj: 'Aki szerint a férfiak eleve elnyomók.' },
+        { topic: 'kulf', min: 'Aki szerint a külföldiek csak bajt hoznak.', maj: 'Aki szerint a hazaszeretet szűklátókörűség.' },
+        { topic: 'lgbt', min: 'Aki kiszól az utcán egy kézen fogva sétáló párnak.', maj: 'Aki gúnyolódik azon, aki a hagyományos értékeket tiszteli.' },
+        { topic: 'vall', min: 'Aki szerint a más hitűek nem lehetnek megbízhatók.', maj: 'Aki szerint a hívők nem tudnak önállóan gondolkodni.' }
+    ];
+
+    function mk(kind, part, st) { var o = { kind: kind, part: part }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); return o; }
+
+    var LONG_A = [], LONG_B = [];
     STATEMENTS.forEach(function (st) {
         if (LONG_DROP[st.id]) return;
-        var o = { kind: 'v' };
-        Object.keys(st).forEach(function (k) { o[k] = st[k]; });
+        var o = mk('v', 'a', st);
         if (H_BOTH[st.id]) o.h = H_BOTH[st.id];
-        LONG.push(o);
+        LONG_A.push(o);
     });
-    NEW_V.forEach(function (st) { var o = { kind: 'v' }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); LONG.push(o); });
-    HATED_ST.forEach(function (st) { var o = { kind: 'h' }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); LONG.push(o); });
-    LIES.forEach(function (st) { var o = { kind: 'l', w: {}, lie: true }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); LONG.push(o); });
+    NEW_V.forEach(function (st) { LONG_A.push(mk('v', 'a', st)); });
+    HATED_ST.forEach(function (st) { (HATED_A[st.id] ? LONG_A : LONG_B).push(mk('h', HATED_A[st.id] ? 'a' : 'b', st)); });
+    LIES.forEach(function (st) { var o = mk('l', 'a', st); o.w = {}; o.lie = true; LONG_A.push(o); });
+    HATED_NEW.forEach(function (st) { LONG_B.push(mk('h', 'b', st)); });
+    PREJ_ST.forEach(function (st) { LONG_B.push(mk('p', 'b', st)); });
+    var LONG = LONG_A.concat(LONG_B);
 
     // Az őszinteség-mérő sávjai (alsó határ szerint, csökkenő sorrendben)
     var HONESTY_TIERS = [
@@ -230,7 +304,7 @@
         { min: 0, name: 'Pinokkió-szint', text: 'A teszt orra is megnőtt, miközben értékelt. Az eredményt csak fenntartással érdemes olvasni.' }
     ];
 
-    var api = { AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
+    var api = { AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, LONG_A: LONG_A, LONG_B: LONG_B, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.data = api;

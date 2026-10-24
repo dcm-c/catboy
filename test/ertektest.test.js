@@ -151,20 +151,23 @@ test('Életút: a megosztás linkje JSON-t visz az URL-ben, és megnyitáskor el
 const byId = Object.fromEntries(D.LONG.map(s => [s.id, s]));
 const longAns = f => { const a = {}; D.LONG.forEach((s, i) => { a[s.id] = f(s, i); }); return a; };
 
-test('hosszú teszt adatai: 70 egyedi tétel, ismert tengelyek és utált értékek, minden utált értéket legalább 3 tétel mér', () => {
-    assert.equal(D.LONG.length, 70);
-    assert.equal(new Set(D.LONG.map(s => s.id)).size, 70);
+test('hosszú teszt adatai: 60 értékrész + 36 utált-érték rész, egyedi tételek, ismert tengelyek és skálák, minden utált értéket legalább 3 tétel mér', () => {
+    assert.equal(D.LONG_A.length, 60);
+    assert.ok(D.LONG_B.length >= 20 && D.LONG_B.length <= 40, 'a B rész 20-40 tétel');
+    assert.equal(D.LONG.length, D.LONG_A.length + D.LONG_B.length);
+    assert.equal(new Set(D.LONG.map(s => s.id)).size, D.LONG.length);
+    assert.ok(D.LONG_A.every(s => s.part === 'a') && D.LONG_B.every(s => s.part === 'b'));
     const hid = D.HATED.map(h => h.id);
     const hc = {}, ac = {}, hdir = {};
     for (const s of D.LONG) {
-        assert.ok(['v', 'h', 'l'].includes(s.kind), s.id);
+        assert.ok(['v', 'h', 'l', 'p'].includes(s.kind), s.id);
         assert.ok(s.text.length > 20 && s.text.length < 220, s.id);
         for (const [a, w] of Object.entries(s.w || {})) { assert.ok(AX.includes(a), s.id + ' tengely ' + a); assert.ok(Math.abs(w) > 0 && Math.abs(w) <= 1); ac[a] = (ac[a] || 0) + 1; }
         for (const [h, w] of Object.entries(s.h || {})) { assert.ok(hid.includes(h), s.id + ' utált érték ' + h); assert.ok(Math.abs(w) > 0 && Math.abs(w) <= 1); hc[h] = (hc[h] || 0) + 1; (hdir[h] = hdir[h] || new Set()).add(Math.sign(w)); }
     }
     for (const h of hid) assert.ok(hc[h] >= 3, h + ' skálához kevés tétel: ' + hc[h]);
     for (const a of AX) assert.ok(ac[a] >= 10, a + ' tengelyhez kevés tétel a hosszú tesztben: ' + ac[a]);
-    assert.ok(D.LONG.filter(s => s.kind === 'h').length >= 20);
+    assert.ok(D.LONG.filter(s => s.kind === 'h').length >= 30);
     assert.ok(D.LONG.filter(s => s.h && s.w && Object.keys(s.h).length && Object.keys(s.w).length).length >= 30, 'sok tétel hasson mindkét részre');
     assert.ok(D.LONG.filter(s => s.kind === 'l').every(s => s.lie && s.joke));
     assert.ok(D.LONG.filter(s => s.kind === 'l').length >= 5);
@@ -261,9 +264,10 @@ test('hosszú megosztás (v2): körbejár, a hamis tartalom elutasítva', () => 
 test('hosszú teszt felülete: módválasztó, hosszú nézet, hazugságvizsgáló be van kötve', () => {
     const js = pub('ertektest.js'), css = pub('ertektest.css');
     assert.match(js, /startMode\(mode\)/);
-    assert.match(js, /modeCard\('deep'[\s\S]*'long'\)/);
+    for (const m of ['short', 'long', 'hshort', 'hlong']) assert.ok(js.includes("'" + m + "'"), m);
     assert.match(js, /C\.summarizeLong/);
-    assert.match(js, /renderLongExtras/);
+    assert.match(js, /renderHonesty/);
+    assert.match(js, /renderHatedScales/);
     assert.match(js, /Hazugságvizsgáló/);
     assert.match(js, /C\.honestyTier/);
     for (const c of ['.et-modes', '.et-hfill', '.et-flags']) assert.ok(css.includes(c), c);
@@ -274,4 +278,117 @@ test('navbar: a hosszú márkanév csak 1400px felett jelenik meg, a menüpontok
     assert.match(nav, /d-lg-inline d-xxl-none[^>]*>MFSZ/);
     assert.match(nav, /d-lg-none d-xxl-inline">Magyar Femboy Szakszervezet/);
     assert.match(css, /\.navbar-nav \.nav-link \{ white-space: nowrap; \}/);
+});
+
+// ---------- B rész: utált értékek, előítélet-barométer, tükörpárok, dev mód ----------
+const B = D.LONG_B;
+const bAns = f => { const a = {}; B.forEach((s, i) => { a[s.id] = f(s, i); }); return a; };
+
+test('B rész: minden utált értéket pontosan 2 tétel mér, minden előítélet-skálát legalább 2 tétel, mindkét irányban', () => {
+    const hc = {}, gc = {};
+    for (const s of B) {
+        for (const h of Object.keys(s.h || {})) hc[h] = (hc[h] || 0) + 1;
+        for (const g of Object.keys(s.g || {})) { assert.ok(D.PREJ.some(p => p.id === g), g); gc[g] = (gc[g] || 0) + 1; }
+        if (s.kind === 'p') assert.ok(Object.keys(s.g).length === 1, s.id);
+    }
+    for (const h of D.HATED) assert.ok(hc[h.id] >= 2, h.id);
+    for (const p of D.PREJ) assert.ok(gc[p.id] >= 2, p.id);
+    assert.equal(D.PREJ.length, D.TOPICS.length * 2);
+    for (const t of D.TOPICS) { assert.ok(t.name && t.icon && t.up && t.dn && t.minSide && t.majSide, t.id); }
+});
+
+test('előítélet-tételek: enyhe felmérés-stílusú állítások, nincs gyűlöletbeszéd-szó vagy erőszak-felhívás', () => {
+    const bad = /(népirtás|genocid|rabszolg|kiirt|holokauszt|zsidó|cigány|néger|buzi|\bölj)/i;
+    for (const s of D.LONG.concat(D.MIRROR.map(m => ({ id: m.topic, text: m.min + ' ' + m.maj })))) assert.ok(!bad.test(s.text), s.id + ': ' + s.text);
+    assert.equal(D.MIRROR.length, 8);
+    for (const t of D.TOPICS) assert.equal(D.MIRROR.filter(m => m.topic === t.id).length, 2, t.id);
+});
+
+test('előítélet-skálák: 0..100, 50 a semleges, a súly irányába mozdul', () => {
+    for (const v of Object.values(C.prejScales({}))) assert.equal(v, 50);
+    const hi = C.prejScales(bAns(s => (s.g && s.g.nem_up ? 2 : null)));
+    assert.equal(hi.nem_up, 100);
+    assert.equal(hi.nem_dn, 50);
+    assert.equal(C.prejScales(bAns(s => (s.g && s.g.vall_dn ? -2 : null))).vall_dn, 0);
+    for (const v of Object.values(C.prejScales(bAns((s, i) => [2, -2, 1, -1, 0][i % 5])))) assert.ok(v >= 0 && v <= 100);
+});
+
+test('tükörpárok: témánként -100..100, a kisebbségi oldal a pozitív', () => {
+    const all = (v) => D.MIRROR.map(() => v);
+    for (const v of Object.values(C.mirrorResult(all('min')))) assert.equal(v, 100);
+    for (const v of Object.values(C.mirrorResult(all('maj')))) assert.equal(v, -100);
+    const mixed = C.mirrorResult(D.MIRROR.map((m, i) => (i < 4 ? 'min' : 'maj')));
+    for (const t of D.TOPICS) assert.equal(mixed[t.id], 0, 'egy-egy kör minden témában kiegyenlít');
+    assert.deepEqual(Object.values(C.mirrorResult([])).filter(Boolean), []);
+});
+
+test('csak utált-teszt összegzése: rövid és hosszú, megosztva (v3) körbejár', () => {
+    const picks = ['penz', 'parancs', 'patosz', 'ujitas', 'cinizmus', 'penz', 'egyenlo', 'szabados', 'sznob', 'ujitas'];
+    const mir = D.MIRROR.map((m, i) => (i % 2 ? 'maj' : 'min'));
+    const hs = C.summarizeHatedShort(picks, mir);
+    assert.equal(hs.kind, 'hshort');
+    assert.equal(hs.h[0], 'penz');
+    assert.equal(hs.counts.penz, 2);
+    const back = C.decode(C.encode(hs));
+    assert.equal(back.kind, 'hshort');
+    assert.deepEqual(back.counts, hs.counts);
+    assert.deepEqual(back.m, hs.m);
+    assert.deepEqual(back.h, hs.h);
+
+    const hl = C.summarizeHatedLong(bAns(s => (s.h && s.h.cinizmus > 0 ? 2 : -1)));
+    assert.equal(hl.kind, 'hlong');
+    assert.equal(hl.h[0], 'cinizmus');
+    const b2 = C.decode(C.encode(hl));
+    assert.equal(b2.kind, 'hlong');
+    assert.deepEqual(b2.hs, hl.hs);
+    assert.deepEqual(b2.pj, hl.pj);
+    assert.ok(!b2.s && !b2.a, 'nincs típus az utált-tesztben');
+});
+
+test('v3 kódolás: hamis vagy hibás tartalom elutasítva, a régi v1/v2 linkek élnek', () => {
+    const enc = o => Buffer.from(JSON.stringify(o)).toString('base64url');
+    assert.equal(C.decode(enc({ v: 3, k: 'hl', hs: [1, 2], pj: [] })), null);
+    assert.equal(C.decode(enc({ v: 3, k: 'hs', c: Array(10).fill(0), m: [1] })), null);
+    assert.equal(C.decode(enc({ v: 3, k: 'zz' })), null);
+    assert.equal(C.decode(enc({ v: 3, k: 'l', s: [0, 0, 0, 0, 0], a: 'merleg', hs: Array(10).fill(50), pj: [1], i: 50, kk: [0, 0, 0] })), null, 'rossz előítélet-skála hossz');
+    const ok = C.decode(enc({ v: 3, k: 'hl', hs: Array(10).fill(999), pj: Array(8).fill(-5) }));
+    assert.deepEqual(Object.values(ok.hs), Array(10).fill(100));
+    assert.deepEqual(Object.values(ok.pj), Array(8).fill(0));
+    const v2 = C.decode(enc({ v: 2, s: [0, 0, 0, 0, 0], a: 'merleg', f: 50, hs: Array(10).fill(50), i: 80, k: [0, 0, 0] }));
+    assert.ok(v2.long && !v2.pj);
+    const v1 = C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', f: 50, h: ['penz'], m: [100, -100, 0, 50] }));
+    assert.deepEqual(v1.m, { nem: 100, kulf: -100, lgbt: 0, vall: 50 });
+    assert.equal(C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', m: [1, 2] })).m, undefined, 'rossz hosszú tükör-adat kiesik');
+    const sh = C.summarize({}, ['penz'], D.MIRROR.map(() => 'min'));
+    assert.ok(C.decode(C.encode(sh)).m);
+});
+
+test('fejlesztői nézet: a hozzájárulások összege megegyezik a tengelyek értékével', () => {
+    const ans = longAns((s, i) => [2, -1, 1, 0, -2, 1][i % 6]);
+    const bk = C.breakdown(ans);
+    const sc = C.axisScores(ans, D.LONG);
+    for (const a of AX) {
+        const total = bk.axes[a].reduce((t, x) => t + x.pts, 0);
+        assert.ok(Math.abs(total - sc[a]) <= 1.5, a + ': ' + total + ' vs ' + sc[a]);
+        assert.ok(bk.axes[a].every((x, i, arr) => i === 0 || Math.abs(arr[i - 1].pts) >= Math.abs(x.pts)), 'rendezett');
+    }
+    const hs = C.hatedScales(ans);
+    for (const h of D.HATED) {
+        const total = bk.hated[h.id].reduce((t, x) => t + x.pts, 0);
+        assert.ok(Math.abs(50 + total - hs[h.id]) <= 1.5, h.id);
+    }
+    assert.ok(bk.axes.e.every(x => x.text && typeof x.weight === 'number'));
+    const part = C.breakdown({}, D.STATEMENTS);
+    assert.ok(part.axes.e.every(x => x.v === null && x.pts === 0), 'megválaszolatlan kérdés nem ad pontot');
+});
+
+test('tengely-ikonok és felület: ikonok, 4 mód, fejlesztői mód, tükörpár nézet', () => {
+    for (const a of D.AXES) assert.ok(a.icon && a.negIcon && a.posIcon, a.id);
+    const js = pub('ertektest.js'), css = pub('ertektest.css');
+    assert.match(js, /negIcon/);
+    assert.match(js, /mfsz-ertek-dev/);
+    assert.match(js, /renderDevResult/);
+    assert.match(js, /renderMirror/);
+    assert.match(js, /renderPrej/);
+    for (const c of ['.et-ico', '.et-dev', '.et-devtable', '.et-topic', '.et-sect']) assert.ok(css.includes(c), c);
 });
