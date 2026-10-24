@@ -1806,7 +1806,14 @@ footer {
 [data-bs-theme="dark"] .text-purple, [data-theme="buzi"] .text-purple { color: #d6a4ea; }
 
 /* Hat menüpont mellett is elférjen a navigáció a nagy (lg-xl) kijelzőkön */
-@media (min-width: 992px) and (max-width: 1399.98px) {
+@media (min-width: 992px) {
     .navbar-nav.navbar-nav { gap: .2rem !important; }
     .navbar-nav .nav-link { padding: 8px 14px !important; margin: 0 2px; }
+}
+/* A menüpontok sosem törnek két sorba: inkább a rövid márkanév marad (a hosszú csak 1400px felett fér el) */
+@media (min-width: 992px) {
+    .navbar-nav .nav-link { white-space: nowrap; }
+}
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .navbar-nav .nav-link { padding: 8px 11px !important; }
 }

@@ -136,7 +136,101 @@
         ['penz', 'parancs'], ['egyenlo', 'patosz'], ['szabados', 'hagyomany'], ['sznob', 'cinizmus'], ['ujitas', 'naivitas']
     ];
 
-    var api = { AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS };
+    // =========================================================
+    // HOSSZÚ TESZT (70 kérdés)
+    //  - 40 értékállítás: a rövid teszt 32 állítása + 7 ellentétes "iker" + 1 új. Sok értékállítás a zavar-skálákra is hat (h).
+    //  - 24 "zavar-állítás": az utált értékek skáláit mérik (h), és sok közülük a tengelyeket is mozgatja (w).
+    //  - 6 hazugság-próba: olyan "soha"-állítások, amik gyakorlatilag senkire sem igazak.
+    // Az őszinteséget háromféleképp vizsgáljuk: lehetetlen állítások, ellentmondó ikerpárok, "mindenre ugyanazt nyomtad".
+    // A h súly pozitív: aki egyetért, annál jobban zavar az adott érték; negatív: kevésbé zavar.
+    // =========================================================
+    var LONG_DROP = { civil: 1, nyelv2: 1, projekt: 1, strand: 1, kamera: 1, sajat: 1, hirek: 1, termek: 1 };
+
+    var H_BOTH = {
+        sorkaton: { szabados: 0.5 }, palinka: { parancs: 0.5 }, piac: { egyenlo: 0.7 }, tanar: { penz: 0.5 }, privat: { egyenlo: 0.4 },
+        hazassag: { hagyomany: 0.5 }, csalad: { ujitas: 0.5 }, unnep: { sznob: 0.5 }, euro: { patosz: 0.5 },
+        politikus: { naivitas: 0.5, cinizmus: -0.5 }, szavazat: { cinizmus: 0.7 }, hivatal: { cinizmus: 0.5 }, haver: { naivitas: 0.5 },
+        kakaos: { ujitas: 0.5 }, fegyelem: { szabados: 0.5 }, allam: { parancs: 0.5 }, albi: { penz: 0.5 }, nyugdij: { egyenlo: 0.4 },
+        vallalkozo: { egyenlo: 0.5 }, masodik: { parancs: 0.4 }, smink: { hagyomany: 0.5 }, ai: { hagyomany: 0.3 }, vallas: { ujitas: 0.3 }
+    };
+
+    // Ellentétes párok az érték-részben: ha mindkettővel egyetértesz, ellentmondtál magadnak.
+    var NEW_V = [
+        { id: 'sorkaton2', text: 'A katonai szolgálat legyen kizárólag önkéntes: senkit ne lehessen belekényszeríteni.', w: { l: -1 }, h: { parancs: 0.5 } },
+        { id: 'euro2', text: 'A forint a nemzeti önállóságunk része: nem szabad lecserélni az euróra.', w: { n: 1 }, h: { patosz: -0.5 } },
+        { id: 'szavazat2', text: 'Egy szavazaton úgysem múlik semmi, felesleges elmenni a választásra.', w: { c: 1 }, h: { cinizmus: -0.7 } },
+        { id: 'palinka2', text: 'A házi párlat készítését szigorúan engedélyhez és ellenőrzéshez kellene kötni.', w: { l: 1 }, h: { parancs: -0.4 } },
+        { id: 'bkk2', text: 'A tömegközlekedés legyen fizetős: aki használja, az fizessen érte.', w: { e: -1 }, h: { penz: -0.4 } },
+        { id: 'adoemel', text: 'A nagyvállalatok adóját jelentősen emelni kellene, hogy jusson a közösre.', w: { e: 1 }, h: { penz: 0.5 } },
+        { id: 'kemeny', text: 'Aki hibázik, viselje a következményeit: második esély nélkül.', joke: 'A „hiba nélküli ember” még nem született meg.', w: { l: 1 }, h: { parancs: -0.4 } },
+        { id: 'kozmeghall', text: 'A közmeghallgatásokra el kellene járni: ha nem megyünk, nincs jogunk panaszkodni.', joke: 'A kávé és a pogácsa nem biztos, hogy van.', w: { c: -1, l: 0.3 }, h: { cinizmus: 0.5 } }
+    ];
+    // [id, id]: egyszerre egyetérteni mindkettővel ellentmondás
+    var TWINS = [
+        ['sorkaton', 'sorkaton2'], ['euro', 'euro2'], ['szavazat', 'szavazat2'], ['palinka', 'palinka2'],
+        ['bkk', 'bkk2'], ['vallalkozo', 'adoemel'], ['masodik', 'kemeny']
+    ];
+
+    // Zavar-állítások: az egyetértés itt azt jelenti, hogy az adott érték zavar.
+    var HATED_ST = [
+        { id: 'z_penz1', text: 'Zavar, ha mindent az határoz meg, mennyibe kerül.', h: { penz: 1 }, w: { e: 0.3 } },
+        { id: 'z_penz2', text: 'Idegesít, ha valamit csak azért tartanak értékesnek, mert drága.', h: { penz: 1 } },
+        { id: 'z_penz3', text: 'Bosszant, ha a közös dolgoknál (kórház, iskola) is előbb a haszon, utána az ember számít.', h: { penz: 1 }, w: { e: 1 } },
+        { id: 'z_egy1', text: 'Idegesít, ha mindenkit egyformán kezelnek, akármit tett le az asztalra.', h: { egyenlo: 1 }, w: { e: -0.5 } },
+        { id: 'z_egy2', text: 'Zavar, ha az erőfeszítés semmit nem számít, mert úgyis mindenki ugyanannyit kap.', h: { egyenlo: 1 }, w: { e: -1 } },
+        { id: 'z_egy3', text: 'Bosszant, ha tilos észrevenni a különbségeket ember és ember között.', h: { egyenlo: 1 } },
+        { id: 'z_par1', text: 'Idegesít, ha valaki azzal zárja le a vitát, hogy „mert én mondtam”.', h: { parancs: 1 }, w: { l: -0.5 } },
+        { id: 'z_par2', text: 'Zavar a felesleges szabály, amit senki nem tud megindokolni.', h: { parancs: 1 }, w: { l: -1 } },
+        { id: 'z_par3', text: 'Kínosan érzem magam, ha olyan embert kell tisztelni, aki semmit nem tett le az asztalra.', h: { parancs: 1 }, w: { c: 0.3 } },
+        { id: 'z_sza1', text: 'Idegesít, ha valaki a közösben szemetel, mert „szabad ország”.', h: { szabados: 1 }, w: { l: 1 } },
+        { id: 'z_sza2', text: 'Zavar, ha az emberek felelősség nélkül osztogatják a véleményüket és a veszélyeket.', h: { szabados: 1 } },
+        { id: 'z_sza3', text: 'Bosszant, ha a szabályok betartása mindig csak a többiek dolga.', h: { szabados: 1 }, w: { l: 0.5 } },
+        { id: 'z_pat1', text: 'Idegesít a hangos, zászlólengető hazafiaskodás.', h: { patosz: 1 }, w: { n: -1 } },
+        { id: 'z_pat2', text: 'Zavar, ha valakit azzal támadnak, hogy „nem elég magyar”.', h: { patosz: 1 }, w: { n: -0.5 } },
+        { id: 'z_szn1', text: 'Idegesít, ha valaki lenézi, ami magyar, csak mert külföldön másképp csinálják.', h: { sznob: 1 }, w: { n: 1 } },
+        { id: 'z_szn2', text: 'Zavar, ha mindent az dönt el, mi a divat Párizsban vagy New Yorkban.', h: { sznob: 1 } },
+        { id: 'z_hag1', text: 'Idegesít a „mindig is így volt” érv.', h: { hagyomany: 1 }, w: { t: -1 } },
+        { id: 'z_hag2', text: 'Zavar, ha valamit csak azért kell megtenni, mert a nagyszülők is megtették.', h: { hagyomany: 1 }, w: { t: -0.7 } },
+        { id: 'z_uj1', text: 'Idegesít, ha mindent újra akarnak gondolni, ami addig tökéletesen működött.', h: { ujitas: 1 }, w: { t: 1 } },
+        { id: 'z_uj2', text: 'Zavar, ha a „modern” szó önmagában érvnek számít.', h: { ujitas: 1 }, w: { t: 0.5 } },
+        { id: 'z_cin1', text: 'Idegesít, ha valaki mindenre azt mondja: „úgysem számít semmi”.', h: { cinizmus: 1 }, w: { c: -1 } },
+        { id: 'z_cin2', text: 'Zavar, ha a cinizmust okosságnak, a lelkesedést butaságnak tartják.', h: { cinizmus: 1 }, w: { c: -0.5 } },
+        { id: 'z_nai1', text: 'Idegesít, ha valaki gondolkodás nélkül elhisz mindent, amit mondanak neki.', h: { naivitas: 1 }, w: { c: 1 } },
+        { id: 'z_nai2', text: 'Zavar, ha a nehéz problémára annyi a válasz: „majd megoldódik”.', h: { naivitas: 1 }, w: { c: 0.5 } }
+    ];
+
+    // Hazugság-próba: "soha / mindig" állítások, amiket gyakorlatilag senki nem mondhat el magáról igazán.
+    var LIES = [
+        { id: 'l_keses', text: 'Életemben egyszer sem késtem el semmiről.', joke: 'A busz késése nem számít.' },
+        { id: 'l_hazug', text: 'Életemben soha egyetlen hazugságot sem mondtam.', joke: 'Ez a mondat maga is próbálkozás.' },
+        { id: 'l_eperc', text: 'Soha nem mondtam, hogy „öt perc, és ott vagyok”, miközben még el sem indultam.', joke: 'A cipő nem számít, az még a lépcsőházban van.' },
+        { id: 'l_feltetel', text: 'Mindig elolvasom a felhasználási feltételeket, mielőtt az „Elfogadom” gombra kattintok.', joke: 'Mind a 94 oldalt.' },
+        { id: 'l_harag', text: 'Soha életemben nem haragudtam meg egy közeli ismerősömre sem.', joke: 'A családi ebédek nem számítanak.' },
+        { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' }
+    ];
+
+    var LONG = [];
+    STATEMENTS.forEach(function (st) {
+        if (LONG_DROP[st.id]) return;
+        var o = { kind: 'v' };
+        Object.keys(st).forEach(function (k) { o[k] = st[k]; });
+        if (H_BOTH[st.id]) o.h = H_BOTH[st.id];
+        LONG.push(o);
+    });
+    NEW_V.forEach(function (st) { var o = { kind: 'v' }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); LONG.push(o); });
+    HATED_ST.forEach(function (st) { var o = { kind: 'h' }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); LONG.push(o); });
+    LIES.forEach(function (st) { var o = { kind: 'l', w: {}, lie: true }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); LONG.push(o); });
+
+    // Az őszinteség-mérő sávjai (alsó határ szerint, csökkenő sorrendben)
+    var HONESTY_TIERS = [
+        { min: 90, name: 'Kristálytiszta', text: 'Alig akadt fogás rajtad: vagy őszinte vagy, vagy nagyon jól hazudsz.' },
+        { min: 70, name: 'Többnyire őszinte', text: 'Néhol szépítettél egy kicsit, de ez teljesen emberi.' },
+        { min: 45, name: 'Kicsit szépítettél', text: 'Pár válaszod nem fér össze egymással, vagy a lehetetlen állításokra is bólintottál.' },
+        { min: 20, name: 'Meseszerű', text: 'Ha ez egy mese, akkor ez a mese elég szórakoztató, de a teszt nem hiszi el.' },
+        { min: 0, name: 'Pinokkió-szint', text: 'A teszt orra is megnőtt, miközben értékelt. Az eredményt csak fenntartással érdemes olvasni.' }
+    ];
+
+    var api = { AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.data = api;

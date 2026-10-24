@@ -146,3 +146,132 @@ test('Életút: a megosztás linkje JSON-t visz az URL-ben, és megnyitáskor el
     assert.match(js, /D\.find\(D\.ITEMS, o\.o\[slot\]\)/, 'a ruhák azonosítóit ellenőrzi');
     for (const id of ['el-shared', 'el-sh-art', 'el-sh-play', 'el-share-box', 'el-share-url', 'el-share-copy']) assert.ok(html.includes('id="' + id + '"'), id);
 });
+
+// ---------- Hosszú (70 kérdéses) teszt ----------
+const byId = Object.fromEntries(D.LONG.map(s => [s.id, s]));
+const longAns = f => { const a = {}; D.LONG.forEach((s, i) => { a[s.id] = f(s, i); }); return a; };
+
+test('hosszú teszt adatai: 70 egyedi tétel, ismert tengelyek és utált értékek, minden utált értéket legalább 3 tétel mér', () => {
+    assert.equal(D.LONG.length, 70);
+    assert.equal(new Set(D.LONG.map(s => s.id)).size, 70);
+    const hid = D.HATED.map(h => h.id);
+    const hc = {}, ac = {}, hdir = {};
+    for (const s of D.LONG) {
+        assert.ok(['v', 'h', 'l'].includes(s.kind), s.id);
+        assert.ok(s.text.length > 20 && s.text.length < 220, s.id);
+        for (const [a, w] of Object.entries(s.w || {})) { assert.ok(AX.includes(a), s.id + ' tengely ' + a); assert.ok(Math.abs(w) > 0 && Math.abs(w) <= 1); ac[a] = (ac[a] || 0) + 1; }
+        for (const [h, w] of Object.entries(s.h || {})) { assert.ok(hid.includes(h), s.id + ' utált érték ' + h); assert.ok(Math.abs(w) > 0 && Math.abs(w) <= 1); hc[h] = (hc[h] || 0) + 1; (hdir[h] = hdir[h] || new Set()).add(Math.sign(w)); }
+    }
+    for (const h of hid) assert.ok(hc[h] >= 3, h + ' skálához kevés tétel: ' + hc[h]);
+    for (const a of AX) assert.ok(ac[a] >= 10, a + ' tengelyhez kevés tétel a hosszú tesztben: ' + ac[a]);
+    assert.ok(D.LONG.filter(s => s.kind === 'h').length >= 20);
+    assert.ok(D.LONG.filter(s => s.h && s.w && Object.keys(s.h).length && Object.keys(s.w).length).length >= 30, 'sok tétel hasson mindkét részre');
+    assert.ok(D.LONG.filter(s => s.kind === 'l').every(s => s.lie && s.joke));
+    assert.ok(D.LONG.filter(s => s.kind === 'l').length >= 5);
+});
+
+test('iker-párok: létező, ellentétes irányú tételek', () => {
+    assert.ok(D.TWINS.length >= 5);
+    for (const [a, b] of D.TWINS) {
+        assert.ok(byId[a] && byId[b], a + '/' + b);
+        const shared = Object.keys(byId[a].w).filter(x => byId[b].w[x]);
+        assert.ok(shared.length, a + '/' + b + ' közös tengely');
+        assert.ok(shared.some(x => Math.sign(byId[a].w[x]) !== Math.sign(byId[b].w[x])), a + '/' + b + ' ugyanazt jelenti');
+    }
+});
+
+test('hosszú pontozás: utált-érték skálák 0..100, az egyetértés a súly irányában mozdít', () => {
+    const none = C.hatedScales({});
+    for (const h of D.HATED) assert.equal(none[h.id], 50);
+    const agree = C.hatedScales(longAns(s => (s.h && s.h.penz > 0 ? 2 : null)));
+    assert.equal(agree.penz, 100);
+    const disagree = C.hatedScales(longAns(s => (s.h && s.h.penz > 0 ? -2 : null)));
+    assert.equal(disagree.penz, 0);
+    for (const v of Object.values(C.hatedScales(longAns((s, i) => [2, -2, 1, -1, 0][i % 5])))) assert.ok(v >= 0 && v <= 100);
+    assert.deepEqual(C.hatedTop(agree, 2)[0], 'penz');
+    assert.deepEqual(C.hatedTop(none, 2), [], 'semleges esetben nincs "legutáltabb"');
+    assert.equal(C.hatedRanking(agree)[0].id, 'penz');
+});
+
+test('hosszú pontozás: a hosszú lista pontozza a tengelyeket, hiányzó w nem dob hibát', () => {
+    const s = C.summarizeLong(longAns(() => 0));
+    for (const a of AX) assert.equal(s.s[a], 0);
+    assert.ok(C.find(D.ARCHETYPES, s.a));
+    const hi = C.axisScores(longAns(st => ((st.w || {}).e > 0 ? 2 : (st.w || {}).e < 0 ? -2 : null)), D.LONG);
+    assert.ok(hi.e >= 90);
+});
+
+test('hazugságvizsgáló: lehetetlen állítások, ellentmondó iker-párok, mindenre ugyanaz', () => {
+    const honest = C.honesty(longAns(s => (s.lie ? -2 : [1, -1, 0, 2, -2][s.id.length % 5])));
+    assert.equal(honest.lies.length, 0);
+    const lied = C.honesty(longAns(s => (s.lie ? 2 : 0)));
+    assert.equal(lied.lies.length, D.LONG.filter(s => s.lie).length);
+    assert.ok(lied.index < honest.index);
+    assert.ok(lied.index <= 40, 'ha minden lehetetlent elfogad, nagyon rossz az őszinteség: ' + lied.index);
+    const pair = D.TWINS[0];
+    const contra = C.honesty({ [pair[0]]: 2, [pair[1]]: 2 });
+    assert.equal(contra.twins.length, 1);
+    assert.equal(contra.index, 90);
+    assert.equal(C.honesty({ [pair[0]]: 2, [pair[1]]: -2 }).twins.length, 0, 'az ellentétes válasz nem hazugság');
+    assert.equal(C.honesty({ [pair[0]]: 2, [pair[1]]: null }).twins.length, 0, 'passzolt tétel nem számít');
+    const all = C.honesty(longAns(() => 1));
+    assert.ok(all.straight, 'mindenre ugyanaz');
+    assert.ok(!C.honesty(longAns((s, i) => [2, 1, -1, -2][i % 4])).straight);
+    assert.ok(!C.honesty({ a: 1, b: 1 }).straight, 'kevés válasznál nem gyanakszunk');
+    assert.equal(C.honesty({}).index, 100);
+});
+
+test('őszinteség-sávok: csökkenő, mindegyik index kap sávot', () => {
+    const t = D.HONESTY_TIERS;
+    for (let i = 1; i < t.length; i++) assert.ok(t[i - 1].min > t[i].min);
+    assert.equal(t[t.length - 1].min, 0);
+    for (let i = 0; i <= 100; i++) assert.ok(C.honestyTier(i).name);
+    assert.equal(C.honestyTier(100).name, t[0].name);
+    assert.equal(C.honestyTier(0).name, t[t.length - 1].name);
+});
+
+test('hosszú megosztás (v2): körbejár, a hamis tartalom elutasítva', () => {
+    const sum = C.summarizeLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]));
+    const code = C.encode(sum);
+    assert.match(code, /^[A-Za-z0-9_-]+$/);
+    assert.ok(code.length < 500);
+    const back = C.decode(code);
+    assert.ok(back.long);
+    assert.deepEqual(back.s, sum.s);
+    assert.deepEqual(back.hs, sum.hs);
+    assert.equal(back.a, sum.a);
+    assert.equal(back.honesty.index, sum.honesty.index);
+    assert.equal(back.honesty.liesN, sum.honesty.lies.length);
+    assert.equal(back.honesty.twinsN, sum.honesty.twins.length);
+    const enc = o => Buffer.from(JSON.stringify(o)).toString('base64url');
+    const ok = { v: 2, s: [0, 0, 0, 0, 0], a: 'merleg', f: 50, hs: Array(10).fill(50), i: 80, k: [0, 0, 0] };
+    assert.ok(C.decode(enc(ok)));
+    assert.equal(C.decode(enc({ ...ok, hs: [1, 2] })), null, 'rossz hosszúságú skála');
+    assert.equal(C.decode(enc({ ...ok, hs: Array(10).fill('x') })), null);
+    assert.equal(C.decode(enc({ ...ok, k: [0, 0] })), null);
+    assert.equal(C.decode(enc({ ...ok, i: 'x' })), null);
+    assert.equal(C.decode(enc({ ...ok, a: '<b>' })), null);
+    const c = C.decode(enc({ ...ok, hs: Array(10).fill(999), i: -50, k: [99, 99, 5] }));
+    assert.deepEqual(Object.values(c.hs), Array(10).fill(100));
+    assert.equal(c.honesty.index, 0);
+    assert.equal(c.honesty.liesN, 6);
+    assert.equal(c.honesty.twinsN, 7);
+});
+
+test('hosszú teszt felülete: módválasztó, hosszú nézet, hazugságvizsgáló be van kötve', () => {
+    const js = pub('ertektest.js'), css = pub('ertektest.css');
+    assert.match(js, /startMode\(mode\)/);
+    assert.match(js, /modeCard\('deep'[\s\S]*'long'\)/);
+    assert.match(js, /C\.summarizeLong/);
+    assert.match(js, /renderLongExtras/);
+    assert.match(js, /Hazugságvizsgáló/);
+    assert.match(js, /C\.honestyTier/);
+    for (const c of ['.et-modes', '.et-hfill', '.et-flags']) assert.ok(css.includes(c), c);
+});
+
+test('navbar: a hosszú márkanév csak 1400px felett jelenik meg, a menüpontok nem törnek sorba', () => {
+    const nav = pub('navbar.html'), css = pub('style.css');
+    assert.match(nav, /d-lg-inline d-xxl-none[^>]*>MFSZ/);
+    assert.match(nav, /d-lg-none d-xxl-inline">Magyar Femboy Szakszervezet/);
+    assert.match(css, /\.navbar-nav \.nav-link \{ white-space: nowrap; \}/);
+});
