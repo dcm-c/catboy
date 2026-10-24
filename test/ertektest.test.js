@@ -109,16 +109,22 @@ test('utált értékek: a legtöbbször választott nyer, döntetlennél a lista
     assert.deepEqual(s.h, ['penz', 'parancs']);
 });
 
-test('megosztás: a kódolás körbejár, a hibás vagy hamis tartalom elutasítva', () => {
-    const sum = { s: { e: 40, l: -20, n: 10, t: -60, c: 100 }, a: 'vitorlazo', fit: 83, h: ['patosz', 'penz'] };
+test('megosztás: a tömör kódolás körbejár, a típus és az illeszkedés a tengelyekből számolódik újra', () => {
+    const s = { e: 40, l: -20, n: 10, t: -60, c: 100 };
+    const c = C.classify(s);
+    const sum = { s, a: c.id, fit: c.fit, h: ['patosz', 'penz'] };
     const code = C.encode(sum);
     assert.match(code, /^[A-Za-z0-9_-]+$/);
-    assert.ok(code.length < 400);
-    const back = C.decode(code);
-    assert.deepEqual(back, sum);
+    assert.ok(code.length <= 16, 'rövid teszt link: ' + code.length);
+    assert.deepEqual(C.decode(code), sum);
+    const withM = { ...sum, m: { nem: 100, kulf: -100, lgbt: 0, vall: 50 } };
+    assert.deepEqual(C.decode(C.encode(withM)), withM);
     assert.equal(C.decode('zzzz'), null);
     assert.equal(C.decode(''), null);
+    assert.equal(C.decode(code + 'AA'), null, 'hosszabb adat');
+    assert.equal(C.decode(code.slice(0, code.length - 3)), null, 'levágott adat');
     const enc = o => Buffer.from(JSON.stringify(o)).toString('base64url');
+    // régi, JSON alapú linkek még érvényesek
     assert.equal(C.decode(enc({ v: 2, s: [0, 0, 0, 0, 0], a: 'merleg' })), null, 'ismeretlen verzió');
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0], a: 'merleg' })), null, 'hiányzó tengely');
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0, 0], a: '<img onerror=x>' })), null, 'ismeretlen típus');
@@ -127,6 +133,32 @@ test('megosztás: a kódolás körbejár, a hibás vagy hamis tartalom elutasít
     assert.deepEqual(clamped.s, { e: 100, l: -100, n: 0, t: 0, c: 0 });
     assert.equal(clamped.fit, 99);
     assert.deepEqual(clamped.h, ['penz', 'patosz'], 'az ismeretlen azonosítók kiesnek');
+});
+
+test('tömör link: minden mód rövid, a bináris formátum ellenőrzött', () => {
+    const sh = C.summarize(longAns(() => 1), ['penz', 'parancs'], D.MIRROR.map(() => 'min'));
+    const lg = C.summarizeLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]));
+    const hl = C.summarizeHatedLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]));
+    const hs = C.summarizeHatedShort(['penz', 'parancs', 'patosz', 'ujitas', 'cinizmus', 'penz', 'egyenlo', 'szabados', 'sznob', 'ujitas'], D.MIRROR.map(() => 'maj'));
+    const lens = [C.encode(sh), C.encode(lg), C.encode(hl), C.encode(hs)].map(x => x.length);
+    assert.ok(lens.every(n => n <= 32), 'link hossza: ' + lens);
+    for (const sum of [sh, lg, hl, hs]) {
+        const back = C.decode(C.encode(sum));
+        assert.ok(back, 'visszafejthető');
+        assert.deepEqual(back.s, sum.s);
+        assert.deepEqual(back.h, sum.h);
+    }
+    const b64 = bytes => Buffer.from(bytes).toString('base64url');
+    assert.equal(C.decode(b64([0x20, 1, 2, 3])), null, 'ismeretlen formátum');
+    assert.equal(C.decode(b64([0x12, 0, 0])), null, 'rossz hossz');
+    const longBytes = Buffer.from(C.encode(lg), 'base64url');
+    assert.equal(longBytes[0], 0x11);
+    longBytes[1] = 255;
+    assert.equal(C.decode(longBytes.toString('base64url')).s.e, 100, 'tartományon kívüli érték vágva');
+    const shBytes = Buffer.from(C.encode({ s: { e: 0, l: 0, n: 0, t: 0, c: 0 }, h: [] }), 'base64url');
+    shBytes[6] = 0x0F; // ismeretlen utált érték: 0xF = nincs, de 12 nem létezik
+    shBytes[6] = 0xCF;
+    assert.equal(C.decode(shBytes.toString('base64url')), null, 'ismeretlen utált-érték azonosító');
 });
 
 test('oldal: az értékteszt be van kötve (navbar, sitemap, scriptek, AI-slop és szórakoztató jelzés)', () => {
@@ -391,4 +423,14 @@ test('tengely-ikonok és felület: ikonok, 4 mód, fejlesztői mód, tükörpár
     assert.match(js, /renderMirror/);
     assert.match(js, /renderPrej/);
     for (const c of ['.et-ico', '.et-dev', '.et-devtable', '.et-topic', '.et-sect']) assert.ok(css.includes(c), c);
+});
+
+test('fejlesztői mód rejtett: nincs jelölőnégyzet és nincs ?dev, csak a 7 kattintásos titok', () => {
+    const js = pub('ertektest.js');
+    assert.match(js, /function devTap/);
+    assert.match(js, /devClicks\.length >= 7/);
+    assert.match(js, /compass\.addEventListener\('click', devTap\)/);
+    assert.ok(!/location\.search/.test(js), 'nincs URL-paraméteres bekapcsolás');
+    assert.ok(!js.includes("'et-dev'") || !/cb\.id = 'et-dev'/.test(js), 'nincs látható jelölőnégyzet');
+    assert.match(js, /et-devpill/);
 });

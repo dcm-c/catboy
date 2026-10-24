@@ -210,42 +210,111 @@
         };
     }
 
-    // ---------- Megosztható kódolás: {v:1, s:[e,l,n,t,c], a:típus, f:illeszkedés, h:[érték,érték]} base64url-ben ----------
-    function b64uEnc(str) {
-        var bytes = new TextEncoder().encode(str), bin = '';
+    // ---------- Megosztható kódolás ----------
+    // Tömör bináris formátum: az eredmény bitekre csomagolva, base64url-ben (kb. 16-32 karakter).
+    // A típus és az illeszkedés nem utazik a linkben, az érkező a tengelyekből újraszámolja.
+    // Az első bájt: 0x10 | mód (0 rövid, 1 hosszú, 2 csak-utált rövid, 3 csak-utált hosszú) | 0x04 ha a rövid eredményben van tükörpár.
+    // (A régi, JSON alapú linkek 0x7B-vel kezdődnek, azokat a decode továbbra is érti.)
+    function b64uEncBytes(bytes) {
+        var bin = '';
         for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
         return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
-    function b64uDec(t) {
+    function b64uDecBytes(t) {
         t = String(t).replace(/-/g, '+').replace(/_/g, '/');
         while (t.length % 4) t += '=';
-        var bin = atob(t), bytes = new Uint8Array(bin.length);
-        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        return new TextDecoder().decode(bytes);
+        var bin = atob(t), bytes = [];
+        for (var i = 0; i < bin.length; i++) bytes.push(bin.charCodeAt(i));
+        return bytes;
     }
+    function BitWriter() { this.bits = []; }
+    BitWriter.prototype.put = function (val, n) { for (var i = n - 1; i >= 0; i--) this.bits.push((val >> i) & 1); };
+    BitWriter.prototype.bytes = function () {
+        var out = [], b = this.bits;
+        for (var i = 0; i < b.length; i += 8) { var v = 0; for (var j = 0; j < 8; j++) v = (v << 1) | (b[i + j] || 0); out.push(v); }
+        return out;
+    };
+    function BitReader(bytes, from) { this.b = bytes; this.pos = from * 8; this.end = bytes.length * 8; }
+    BitReader.prototype.get = function (n) {
+        var v = 0;
+        for (var i = 0; i < n; i++) { var p = this.pos++; v = (v << 1) | ((this.b[p >> 3] >> (7 - (p & 7))) & 1); }
+        return v;
+    };
+    // a hátralévő üres bitek legfeljebb 7 darab, mind nulla lehet
+    BitReader.prototype.tidy = function (bitsUsed) { return this.pos - this.b.length * 8 <= 0 && (this.b.length * 8 - this.pos) < 8; };
 
     var TOP_IDS = function () { return data.TOPICS.map(function (t) { return t.id; }); };
+    function ax8(v) { return clamp(Math.round(v), -100, 100) + 100; }
 
     function encode(sum) {
-        var o;
         var kind = sum.kind || (sum.long ? 'long' : 'short');
+        var w = new BitWriter(), head;
+        function putScales(sc, defs) { defs.forEach(function (d) { w.put(clamp(Math.round(sc[d.id]), 0, 100), 7); }); }
         if (kind === 'long') {
+            head = 0x11;
+            AX.forEach(function (a) { w.put(ax8(sum.s[a]), 8); });
+            putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
             var hn = sum.honesty || {};
-            o = {
-                v: 3, k: 'l', s: AX.map(function (a) { return sum.s[a]; }), a: sum.a, f: sum.fit,
-                hs: data.HATED.map(function (h) { return sum.hs[h.id]; }),
-                pj: data.PREJ.map(function (p) { return sum.pj[p.id]; }),
-                i: hn.index, kk: [(hn.lies || []).length, (hn.twins || []).length, hn.straight ? 1 : 0]
-            };
+            w.put(clamp(Math.round(hn.index), 0, 100), 7);
+            w.put(clamp((hn.lies || []).length, 0, 7), 3);
+            w.put(clamp((hn.twins || []).length, 0, 7), 3);
+            w.put(hn.straight ? 1 : 0, 1);
         } else if (kind === 'hlong') {
-            o = { v: 3, k: 'hl', hs: data.HATED.map(function (h) { return sum.hs[h.id]; }), pj: data.PREJ.map(function (p) { return sum.pj[p.id]; }) };
+            head = 0x13;
+            putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
         } else if (kind === 'hshort') {
-            o = { v: 3, k: 'hs', c: data.HATED.map(function (h) { return sum.counts[h.id] || 0; }), m: TOP_IDS().map(function (t) { return sum.m ? sum.m[t] : 0; }) };
+            head = 0x12;
+            data.HATED.forEach(function (h) { w.put(clamp(sum.counts[h.id] || 0, 0, 7), 3); });
+            TOP_IDS().forEach(function (t) { w.put(ax8(sum.m ? sum.m[t] : 0), 8); });
         } else {
-            o = { v: 1, s: AX.map(function (a) { return sum.s[a]; }), a: sum.a, f: sum.fit, h: sum.h };
-            if (sum.m) o.m = TOP_IDS().map(function (t) { return sum.m[t]; });
+            head = 0x10 | (sum.m ? 0x04 : 0);
+            AX.forEach(function (a) { w.put(ax8(sum.s[a]), 8); });
+            var ids = data.HATED.map(function (h) { return h.id; });
+            for (var i = 0; i < 2; i++) { var ix = sum.h && sum.h[i] ? ids.indexOf(sum.h[i]) : -1; w.put(ix < 0 ? 15 : ix, 4); }
+            if (sum.m) TOP_IDS().forEach(function (t) { w.put(ax8(sum.m[t]), 8); });
         }
-        return b64uEnc(JSON.stringify(o));
+        return b64uEncBytes([head].concat(w.bytes()));
+    }
+
+    function decodeBinary(bytes) {
+        var head = bytes[0];
+        if ((head & 0xF0) !== 0x10) return null;
+        var kind = head & 0x03, hasM = (head & 0x04) !== 0;
+        if (kind !== 0 && hasM) return null;
+        var hIds = data.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
+        var bitsNeeded;
+        if (kind === 0) bitsNeeded = 40 + 8 + (hasM ? 32 : 0);
+        else if (kind === 1) bitsNeeded = 40 + 70 + 56 + 17;
+        else if (kind === 2) bitsNeeded = 30 + 32;
+        else bitsNeeded = 70 + 56;
+        if (bytes.length !== 1 + Math.ceil(bitsNeeded / 8)) return null;
+        var rd = new BitReader(bytes, 1);
+        function scales(ids) { var o = {}; ids.forEach(function (id) { o[id] = clamp(rd.get(7), 0, 100); }); return o; }
+        function axes() { var o = {}; AX.forEach(function (a) { o[a] = clamp(rd.get(8) - 100, -100, 100); }); return o; }
+        function mirror() { var o = {}; TOP_IDS().forEach(function (t) { o[t] = clamp(rd.get(8) - 100, -100, 100); }); return o; }
+        var out;
+        if (kind === 0) {
+            var s = axes(), c = classify(s);
+            var h = [];
+            for (var i = 0; i < 2; i++) { var ix = rd.get(4); if (ix < hIds.length) h.push(hIds[ix]); else if (ix !== 15) return null; }
+            out = { s: s, a: c.id, fit: c.fit, h: h };
+            if (hasM) out.m = mirror();
+        } else if (kind === 1) {
+            var s1 = axes(), c1 = classify(s1);
+            var hs = scales(hIds), pj = scales(pIds);
+            var idx = clamp(rd.get(7), 0, 100), liesN = rd.get(3), twinsN = rd.get(3), straight = rd.get(1) === 1;
+            out = { kind: 'long', long: true, s: s1, a: c1.id, fit: c1.fit, hs: hs, pj: pj, h: hatedTop(hs, 2), honesty: { index: idx, liesN: Math.min(liesN, 6), twinsN: Math.min(twinsN, 7), straight: straight } };
+        } else if (kind === 2) {
+            var counts = {};
+            hIds.forEach(function (id) { counts[id] = rd.get(3); });
+            var top = data.HATED.map(function (hh, i) { return { id: hh.id, c: counts[hh.id], i: i }; }).filter(function (x) { return x.c > 0; });
+            top.sort(function (a, b) { return b.c - a.c || a.i - b.i; });
+            out = { kind: 'hshort', counts: counts, h: top.slice(0, 3).map(function (x) { return x.id; }), m: mirror() };
+        } else {
+            var hs3 = scales(hIds);
+            out = { kind: 'hlong', hs: hs3, pj: scales(pIds), h: hatedTop(hs3, 3) };
+        }
+        return out;
     }
 
     function numArr(arr, len, lo, hi) {
@@ -261,9 +330,9 @@
     function toObj(ids, vals) { var o = {}; ids.forEach(function (id, i) { o[id] = vals[i]; }); return o; }
 
     // Idegen kéz is írhatta a linket: csak ismert azonosítókat és tartományon belüli számokat fogadunk el
-    function decode(code) {
+    function decodeLegacy(text) {
         try {
-            var o = JSON.parse(b64uDec(code));
+            var o = JSON.parse(text);
             if (!o || typeof o !== 'object') return null;
             var hIds = data.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
             if (o.v === 3 && (o.k === 'hl' || o.k === 'hs')) {
@@ -316,6 +385,16 @@
             var out = { s: s, a: o.a, fit: fit, h: h };
             if (Array.isArray(o.m)) { var m = numArr(o.m, data.TOPICS.length, -100, 100); if (m) out.m = toObj(TOP_IDS(), m); }
             return out;
+        } catch (e) { return null; }
+    }
+
+
+    function decode(code) {
+        try {
+            var bytes = b64uDecBytes(code);
+            if (!bytes.length) return null;
+            if (bytes[0] === 0x7B) return decodeLegacy(new TextDecoder().decode(new Uint8Array(bytes)));
+            return decodeBinary(bytes);
         } catch (e) { return null; }
     }
 

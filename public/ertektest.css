@@ -151,8 +151,7 @@
 .et-sect { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin: 1.6rem 0 .8rem; opacity: .75; }
 .et-mode.hquick { --c: #d9534f; }
 .et-mode.hdeep { --c: #7a4fc0; }
-.et-devtoggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 1.4rem; padding: .45rem .9rem; border-radius: 999px; border: 2px dashed color-mix(in srgb, currentColor 35%, transparent); cursor: pointer; font-size: .9rem; text-align: left; }
-.et-devtoggle input { width: 1.1rem; height: 1.1rem; accent-color: #6a4fc0; }
+.et-devpill { margin-top: 1.2rem; padding: .35rem .9rem; border-radius: 999px; border: 2px dashed #6a4fc0; background: color-mix(in srgb, #6a4fc0 10%, transparent); color: inherit; font: inherit; font-size: .85rem; cursor: pointer; }
 .et-partnote { margin: 0 0 .9rem; padding: .6rem .9rem; border-radius: 12px; font-size: .9rem; background: color-mix(in srgb, #d9534f 10%, transparent); border-left: 4px solid #d9534f; }
 
 /* ---- Tengely-ikonok ---- */

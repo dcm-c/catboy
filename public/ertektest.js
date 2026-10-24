@@ -33,11 +33,21 @@
 
     var st = { phase: 'intro', mode: 'short', i: 0, answers: [], j: 0, picks: [], result: null, shared: false, dev: false, ansById: null };
 
-    try { st.dev = localStorage.getItem('mfsz-ertek-dev') === '1' || /[?&]dev(=1)?(&|$)/.test(location.search); } catch (e) { st.dev = /[?&]dev(=1)?(&|$)/.test(location.search); }
+    // A fejlesztői mód szándékosan rejtett: a bevezető iránytűjére kell gyorsan 7-et kattintani.
+    // A beállítás ebben a böngészőben megmarad; bekapcsolva a bevezetőn egy kis jelzés mutatja, és arra kattintva kikapcsolható.
+    try { st.dev = localStorage.getItem('mfsz-ertek-dev') === '1'; } catch (e) { st.dev = false; }
     function setDev(on) {
         st.dev = !!on;
         try { localStorage.setItem('mfsz-ertek-dev', on ? '1' : '0'); } catch (e) { /* nem baj */ }
+        toast(on ? '🛠 Fejlesztői mód bekapcsolva' : 'Fejlesztői mód kikapcsolva');
         render();
+    }
+    var devClicks = [];
+    function devTap() {
+        var now = Date.now();
+        devClicks = devClicks.filter(function (t) { return now - t < 4000; });
+        devClicks.push(now);
+        if (devClicks.length >= 7) { devClicks = []; setDev(!st.dev); }
     }
 
     function el(tag, cls, text) {
@@ -119,7 +129,9 @@
         var card = el('div', 'card shadow-sm border-0 et-card');
         card.setAttribute('data-tone', 'trans');
         var body = el('div', 'card-body p-4 p-md-5 text-center');
-        body.appendChild(el('div', 'et-emoji', '🧭'));
+        var compass = el('div', 'et-emoji', '🧭');
+        compass.addEventListener('click', devTap);
+        body.appendChild(compass);
         body.appendChild(el('h2', 'h3 fw-bold mb-3', 'Hol állsz a nagy magyar értékvitában?'));
         body.appendChild(el('p', 'lead mb-3', 'Válassz hosszt: gyors kör kávé mellé, vagy részletes vizsgálat, ahol a hazugságot is lemérjük.'));
 
@@ -152,13 +164,13 @@
         ], 'Csak utált, részletes', 'hlong'));
         body.appendChild(modes2);
 
-        var devRow = el('label', 'et-devtoggle');
-        var cb = el('input');
-        cb.type = 'checkbox'; cb.id = 'et-dev'; cb.checked = st.dev;
-        cb.addEventListener('change', function () { setDev(cb.checked); });
-        devRow.appendChild(cb);
-        devRow.appendChild(el('span', '', ' 🛠 Fejlesztői mód: kérdésenként látod, melyik válasz mit mozgat az eredményben'));
-        body.appendChild(devRow);
+        if (st.dev) {
+            var pill = el('button', 'et-devpill', '🛠 Fejlesztői mód be · kattints a kikapcsoláshoz');
+            pill.type = 'button';
+            pill.id = 'et-devpill';
+            pill.addEventListener('click', function () { setDev(false); });
+            body.appendChild(pill);
+        }
 
         body.appendChild(el('p', 'text-muted mt-3 mb-0', 'Magyar ügyek, kávéházi hangulat, kakaóscsiga-nosztalgia. Nem pártot ajánl, nem ítélkezik, és semmit nem mentünk: az eredmény csak a megosztható linkben utazik.'));
         card.appendChild(body);
