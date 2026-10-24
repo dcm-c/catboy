@@ -183,7 +183,7 @@ test('Életút: a megosztás linkje JSON-t visz az URL-ben, és megnyitáskor el
 const byId = Object.fromEntries(D.LONG.map(s => [s.id, s]));
 const longAns = f => { const a = {}; D.LONG.forEach((s, i) => { a[s.id] = f(s, i); }); return a; };
 
-test('hosszú teszt adatai: 60 értékrész + 36 utált-érték rész, egyedi tételek, ismert tengelyek és skálák, minden utált értéket legalább 3 tétel mér', () => {
+test('hosszú teszt adatai: 60 értékrész + 40 utált-érték rész, egyedi tételek, ismert tengelyek és skálák, minden utált értéket legalább 3 tétel mér', () => {
     assert.equal(D.LONG_A.length, 60);
     assert.ok(D.LONG_B.length >= 20 && D.LONG_B.length <= 40, 'a B rész 20-40 tétel');
     assert.equal(D.LONG.length, D.LONG_A.length + D.LONG_B.length);
@@ -201,8 +201,10 @@ test('hosszú teszt adatai: 60 értékrész + 36 utált-érték rész, egyedi t�
     for (const a of AX) assert.ok(ac[a] >= 10, a + ' tengelyhez kevés tétel a hosszú tesztben: ' + ac[a]);
     assert.ok(D.LONG.filter(s => s.kind === 'h').length >= 30);
     assert.ok(D.LONG.filter(s => s.h && s.w && Object.keys(s.h).length && Object.keys(s.w).length).length >= 30, 'sok tétel hasson mindkét részre');
+    assert.ok(D.LONG.every(s => s.help && s.help.length > 15), 'minden kérdéshez van magyarázat');
+    assert.ok(D.LONG.filter(s => s.kind !== 'p').length - D.LONG.filter(s => s.kind !== 'p' && s.joke).length <= 25, 'a legtöbb kérdéshez van poén');
     assert.ok(D.LONG.filter(s => s.kind === 'l').every(s => s.lie && s.joke));
-    assert.ok(D.LONG.filter(s => s.kind === 'l').length >= 5);
+    assert.equal(D.LONG.filter(s => s.kind === 'l').length, 4, 'kevés, nem túl nyilvánvaló hazugság-próba');
 });
 
 test('iker-párok: létező, ellentétes irányú tételek', () => {
@@ -219,9 +221,11 @@ test('hosszú pontozás: utált-érték skálák 0..100, az egyetértés a súly
     const none = C.hatedScales({});
     for (const h of D.HATED) assert.equal(none[h.id], 50);
     const agree = C.hatedScales(longAns(s => (s.h && s.h.penz > 0 ? 2 : null)));
-    assert.equal(agree.penz, 100);
+    assert.ok(agree.penz >= 85 && agree.penz < 100, 'sok tételből magas, de nem 100: ' + agree.penz);
     const disagree = C.hatedScales(longAns(s => (s.h && s.h.penz > 0 ? -2 : null)));
-    assert.equal(disagree.penz, 0);
+    assert.ok(disagree.penz <= 15 && disagree.penz > 0, 'alacsony, de nem 0: ' + disagree.penz);
+    const few = C.hatedScales(bAns(s => (s.h && s.h.penz > 0 ? 2 : null)), D.LONG_B);
+    assert.ok(few.penz < agree.penz, 'kevés tétel kisebbet mozdít (húzás az 50 felé)');
     for (const v of Object.values(C.hatedScales(longAns((s, i) => [2, -2, 1, -1, 0][i % 5])))) assert.ok(v >= 0 && v <= 100);
     assert.deepEqual(C.hatedTop(agree, 2)[0], 'penz');
     assert.deepEqual(C.hatedTop(none, 2), [], 'semleges esetben nincs "legutáltabb"');
@@ -321,10 +325,19 @@ test('B rész: minden utált értéket pontosan 2 tétel mér, minden előítél
     for (const s of B) {
         for (const h of Object.keys(s.h || {})) hc[h] = (hc[h] || 0) + 1;
         for (const g of Object.keys(s.g || {})) { assert.ok(D.PREJ.some(p => p.id === g), g); gc[g] = (gc[g] || 0) + 1; }
-        if (s.kind === 'p') assert.ok(Object.keys(s.g).length === 1, s.id);
+        if (s.kind === 'p') assert.ok(Object.keys(s.g).length >= 1 && Object.keys(s.g).length <= 2, s.id);
     }
     for (const h of D.HATED) assert.ok(hc[h.id] >= 2, h.id);
-    for (const p of D.PREJ) assert.ok(gc[p.id] >= 2, p.id);
+    for (const p of D.PREJ) assert.ok(gc[p.id] >= 3, p.id + ' skálához kevés tétel');
+    // fordított állítás (negatív súly) és ellentétes hatású állítás (az egyik skálát növeli, a másikat csökkenti) minden skálán
+    for (const p of D.PREJ) {
+        const items = B.filter(s => s.g && s.g[p.id]);
+        assert.ok(items.some(s => s.g[p.id] < 0 && Object.keys(s.g).length === 1), p.id + ': nincs fordított állítás');
+        assert.ok(items.some(s => s.g[p.id] > 0 && Object.keys(s.g).length === 1), p.id + ': nincs egyenes állítás');
+    }
+    for (const t of D.TOPICS) {
+        assert.ok(B.some(s => s.g && s.g[t.id + '_up'] > 0 && s.g[t.id + '_dn'] < 0), t.id + ': nincs ellentétes hatású állítás');
+    }
     assert.equal(D.PREJ.length, D.TOPICS.length * 2);
     for (const t of D.TOPICS) { assert.ok(t.name && t.icon && t.up && t.dn && t.minSide && t.majSide, t.id); }
 });
@@ -336,12 +349,16 @@ test('előítélet-tételek: enyhe felmérés-stílusú állítások, nincs gyű
     for (const t of D.TOPICS) assert.equal(D.MIRROR.filter(m => m.topic === t.id).length, 2, t.id);
 });
 
-test('előítélet-skálák: 0..100, 50 a semleges, a súly irányába mozdul', () => {
+test('előítélet-skálák: 0..100, 50 a semleges, a súly irányába mozdul, a fordított állítás csökkent', () => {
     for (const v of Object.values(C.prejScales({}))) assert.equal(v, 50);
-    const hi = C.prejScales(bAns(s => (s.g && s.g.nem_up ? 2 : null)));
-    assert.equal(hi.nem_up, 100);
-    assert.equal(hi.nem_dn, 50);
-    assert.equal(C.prejScales(bAns(s => (s.g && s.g.vall_dn ? -2 : null))).vall_dn, 0);
+    const pos = bAns(s => (s.g && s.g.nem_up > 0 ? 2 : (s.g && s.g.nem_up < 0 ? -2 : null)));
+    const hi = C.prejScales(pos);
+    assert.ok(hi.nem_up >= 70 && hi.nem_up < 100, 'egyenesekre igen, fordítottra nem: ' + hi.nem_up);
+    const rev = C.prejScales(bAns(s => (s.g && s.g.nem_up < 0 ? 2 : null)));
+    assert.ok(rev.nem_up < 50, 'a fordított állításra adott igen csökkent: ' + rev.nem_up);
+    const cross = C.prejScales(bAns(s => (s.id === 'p_nem7' ? 2 : null)));
+    assert.ok(cross.nem_up > 50 && cross.nem_dn < 50, 'ellentétes hatású állítás: az egyik nő, a másik csökken');
+    assert.equal(C.prejScales(bAns(s => (s.g && s.g.vall_dn > 0 ? -2 : null))).vall_dn < 50, true);
     for (const v of Object.values(C.prejScales(bAns((s, i) => [2, -2, 1, -1, 0][i % 5])))) assert.ok(v >= 0 && v <= 100);
 });
 

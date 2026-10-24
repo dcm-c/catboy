@@ -250,9 +250,13 @@
         if (st.mode === 'hlong' && st.i === 0) {
             body.appendChild(el('p', 'et-partnote', 'Az „egyetértek” itt azt jelenti: ez engem zavar, vagy ez az én véleményem. Nem minősítünk senkit, csak a hozzáállásodat mérjük.'));
         }
+        if (s.kind === 'p' && !L.slice(0, st.i).some(function (x) { return x.kind === 'p'; })) {
+            body.appendChild(el('p', 'et-partnote', 'Ebben a szakaszban fordított állítások is vannak: ott az egyetértés a nyitottabb, elfogadóbb hozzáállást jelzi. Mindegyik a hozzáállásodat méri, senkit nem minősítünk.'));
+        }
         var q = el('p', 'et-statement', s.text);
         q.setAttribute('aria-live', 'polite');
         body.appendChild(q);
+        if (s.help) body.appendChild(el('p', 'et-help', 'ℹ️ ' + s.help));
         if (s.joke) body.appendChild(el('p', 'et-joke', s.joke));
         var grid = el('div', 'et-answers');
         grid.setAttribute('role', 'group');
@@ -486,7 +490,7 @@
     function renderPrej(r) {
         var bd = card('pink', true);
         bd.appendChild(el('h3', 'h5 fw-bold mb-1', 'Előítélet-barométer'));
-        bd.appendChild(el('p', 'et-joke mb-3', 'Négy témában, mindkét irányban: mennyire zavar egy-egy hozzáállás. 50 a semleges, a magasabb érték nagyobb fenntartás. Játékos felmérés: nem minősítünk csoportokat, csak a hozzáállásodat.'));
+        bd.appendChild(el('p', 'et-joke mb-3', 'Négy témában, mindkét irányban: mennyire zavar egy-egy hozzáállás. 50 a semleges, a magasabb érték nagyobb fenntartás. A kérdések közt fordított és ellentétes hatású állítás is volt, ezért nem lehet „csak bólogatva” magas értéket kapni. Játékos felmérés: nem minősítünk csoportokat, csak a hozzáállásodat.'));
         D.TOPICS.forEach(function (t) {
             var up = r.pj[t.id + '_up'], dn = r.pj[t.id + '_dn'];
             var box = el('div', 'et-topic');

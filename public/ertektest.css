@@ -195,3 +195,5 @@
 [data-bs-theme="dark"] .et-devtable tr.up td.p { color: #5cc08a; }
 [data-bs-theme="dark"] .et-devtable tr.dn td.p { color: #ff8a98; }
 .et-hrow .et-axis-head span { white-space: nowrap; }
+
+.et-help { margin: -.2rem 0 .9rem; font-size: .88rem; opacity: .85; line-height: 1.4; }
