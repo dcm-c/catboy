@@ -224,28 +224,29 @@
 
     // ---------- Eredmény ----------
     function axisRow(ax, score) {
-        var row = el('div', 'et-axis');
+        var pole = score === 0 ? 'mid' : (score > 0 ? 'pos' : 'neg');
+        var row = el('div', 'et-axis ' + pole);
         var head = el('div', 'et-axis-head');
         head.appendChild(el('b', '', ax.name));
         var side = score === 0 ? 'középen' : (Math.abs(score) + '% ' + (score > 0 ? ax.pos : ax.neg).toLowerCase());
-        head.appendChild(el('span', '', side));
+        head.appendChild(el('span', 'et-chip', side));
         row.appendChild(head);
         var track = el('div', 'et-track');
         track.setAttribute('role', 'img');
         track.setAttribute('aria-label', ax.name + ': ' + side);
-        var fill = el('i', 'et-fill ' + (score >= 0 ? 'pos' : 'neg') + ' ax-' + ax.id);
         var w = Math.abs(score) / 2;
+        var fill = el('i', 'et-fill ' + pole);
         fill.style.width = w + '%';
-        if (score >= 0) fill.style.left = '50%'; else fill.style.left = (50 - w) + '%';
+        fill.style.left = score >= 0 ? '50%' : (50 - w) + '%';
         track.appendChild(fill);
-        track.appendChild(el('s', 'et-mid'));
-        var thumb = el('u', 'et-thumb ax-' + ax.id);
+        [25, 50, 75].forEach(function (p) { var t = el('s', 'et-tick' + (p === 50 ? ' mid' : '')); t.style.left = p + '%'; track.appendChild(t); });
+        var thumb = el('u', 'et-thumb ' + pole);
         thumb.style.left = ((score + 100) / 2) + '%';
         track.appendChild(thumb);
         row.appendChild(track);
         var ends = el('div', 'et-ends');
-        ends.appendChild(el('span', '', ax.neg));
-        ends.appendChild(el('span', '', ax.pos));
+        ends.appendChild(el('span', score < 0 ? 'lead' : '', ax.neg));
+        ends.appendChild(el('span', score > 0 ? 'lead' : '', ax.pos));
         row.appendChild(ends);
         return row;
     }
