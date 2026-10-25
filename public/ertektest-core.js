@@ -25,7 +25,7 @@
             });
         });
         var out = {};
-        AX.forEach(function (a) { out[a] = max[a] ? Math.round(clamp(sum[a] / max[a], -1, 1) * 100) : 0; });
+        AX.forEach(function (a) { out[a] = max[a] ? (Math.round(clamp(sum[a] / max[a], -1, 1) * 100) || 0) : 0; });
         return out;
     }
 
@@ -77,7 +77,7 @@
         var s = axisScores(answers);
         var c = classify(s);
         var h = hatedResult(picks).filter(function (x) { return x.count > 0; }).slice(0, 2).map(function (x) { return x.id; });
-        var r = { s: s, a: c.id, fit: c.fit, h: h };
+        var r = { s: s, a: c.id, fit: c.fit, h: h, ver: data.VERSION };
         if (mirrorPicks && mirrorPicks.length) r.m = mirrorResult(mirrorPicks);
         return r;
     }
@@ -87,7 +87,7 @@
         var list = hatedResult(picks);
         var counts = {};
         list.forEach(function (x) { counts[x.id] = x.count; });
-        return { kind: 'hshort', counts: counts, h: list.filter(function (x) { return x.count > 0; }).slice(0, 3).map(function (x) { return x.id; }), m: mirrorResult(mirrorPicks) };
+        return { kind: 'hshort', ver: data.VERSION, counts: counts, h: list.filter(function (x) { return x.count > 0; }).slice(0, 3).map(function (x) { return x.id; }), m: mirrorResult(mirrorPicks) };
     }
 
 
@@ -118,15 +118,15 @@
     function prejScales(answers, list) { return scaleScores(answers, list, data.PREJ, 'g'); }
 
     // Csökkenő sorrend, azonos értéknél az eredeti sorrend marad
-    function hatedRanking(scales) {
-        var list = data.HATED.map(function (h, i) { return { id: h.id, score: scales[h.id], i: i }; });
+    function hatedRanking(scales, defs) {
+        var list = (defs || data.HATED).map(function (h, i) { return { id: h.id, score: scales[h.id], i: i }; });
         list.sort(function (a, b) { return b.score - a.score || a.i - b.i; });
         return list;
     }
 
     // A legzavaróbb értékek: csak ami tényleg a semleges fölött van
-    function hatedTop(scales, n) {
-        return hatedRanking(scales).filter(function (x) { return x.score >= 58; }).slice(0, n || 2).map(function (x) { return x.id; });
+    function hatedTop(scales, n, defs) {
+        return hatedRanking(scales, defs).filter(function (x) { return x.score >= 58; }).slice(0, n || 2).map(function (x) { return x.id; });
     }
 
     // Őszinteség: a) lehetetlen "soha/mindig" állítások, b) ellentmondó ikerpárok, c) mindenre ugyanazt nyomta.
@@ -174,13 +174,13 @@
         var s = axisScores(answers, data.LONG);
         var c = classify(s);
         var hs = hatedScales(answers);
-        return { kind: 'long', s: s, a: c.id, fit: c.fit, hs: hs, pj: prejScales(answers), h: hatedTop(hs, 2), honesty: honesty(answers), long: true };
+        return { kind: 'long', ver: data.VERSION, s: s, a: c.id, fit: c.fit, hs: hs, pj: prejScales(answers), h: hatedTop(hs, 2), honesty: honesty(answers), long: true };
     }
 
     // Csak az utált-érték teszt hosszú változata (a B rész): nincs tengely és típus
     function summarizeHatedLong(answers) {
         var hs = hatedScales(answers, data.LONG_B);
-        return { kind: 'hlong', hs: hs, pj: prejScales(answers, data.LONG_B), h: hatedTop(hs, 3) };
+        return { kind: 'hlong', ver: data.VERSION, hs: hs, pj: prejScales(answers, data.LONG_B), h: hatedTop(hs, 3) };
     }
 
     // Fejlesztői nézet: melyik kérdés hány ponttal járult hozzá az egyes tengelyekhez / skálákhoz.
@@ -217,7 +217,7 @@
     // ---------- Megosztható kódolás ----------
     // Tömör bináris formátum: az eredmény bitekre csomagolva, base64url-ben (kb. 16-32 karakter).
     // A típus és az illeszkedés nem utazik a linkben, az érkező a tengelyekből újraszámolja.
-    // Az első bájt: 0x10 | mód (0 rövid, 1 hosszú, 2 csak-utált rövid, 3 csak-utált hosszú) | 0x04 ha a rövid eredményben van tükörpár.
+    // Az első bájt: (teszt-verzió << 4) | mód (0 rövid, 1 hosszú, 2 csak-utált rövid, 3 csak-utált hosszú) | 0x04 ha a rövid eredményben van tükörpár.
     // (A régi, JSON alapú linkek 0x7B-vel kezdődnek, azokat a decode továbbra is érti.)
     function b64uEncBytes(bytes) {
         var bin = '';
@@ -247,6 +247,12 @@
     // a hátralévő üres bitek legfeljebb 7 darab, mind nulla lehet
     BitReader.prototype.tidy = function (bitsUsed) { return this.pos - this.b.length * 8 <= 0 && (this.b.length * 8 - this.pos) < 8; };
 
+    // Az adott verzió utált-érték listája (a jelenlegi vagy a régi), ismeretlen verzióra null
+    function hatedDefsFor(ver) {
+        if (ver === data.VERSION) return data.HATED;
+        return data.LEGACY && data.LEGACY[ver] ? data.LEGACY[ver].HATED : null;
+    }
+
     var TOP_IDS = function () { return data.TOPICS.map(function (t) { return t.id; }); };
     function ax8(v) { return clamp(Math.round(v), -100, 100) + 100; }
 
@@ -255,7 +261,7 @@
         var w = new BitWriter(), head;
         function putScales(sc, defs) { defs.forEach(function (d) { w.put(clamp(Math.round(sc[d.id]), 0, 100), 7); }); }
         if (kind === 'long') {
-            head = 0x11;
+            head = (data.VERSION << 4) | 1;
             AX.forEach(function (a) { w.put(ax8(sum.s[a]), 8); });
             putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
             var hn = sum.honesty || {};
@@ -264,14 +270,14 @@
             w.put(clamp((hn.twins || []).length, 0, 7), 3);
             w.put(hn.straight ? 1 : 0, 1);
         } else if (kind === 'hlong') {
-            head = 0x13;
+            head = (data.VERSION << 4) | 3;
             putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
         } else if (kind === 'hshort') {
-            head = 0x12;
+            head = (data.VERSION << 4) | 2;
             data.HATED.forEach(function (h) { w.put(clamp(sum.counts[h.id] || 0, 0, 7), 3); });
             TOP_IDS().forEach(function (t) { w.put(ax8(sum.m ? sum.m[t] : 0), 8); });
         } else {
-            head = 0x10 | (sum.m ? 0x04 : 0);
+            head = (data.VERSION << 4) | (sum.m ? 0x04 : 0);
             AX.forEach(function (a) { w.put(ax8(sum.s[a]), 8); });
             var ids = data.HATED.map(function (h) { return h.id; });
             for (var i = 0; i < 2; i++) { var ix = sum.h && sum.h[i] ? ids.indexOf(sum.h[i]) : -1; w.put(ix < 0 ? 15 : ix, 4); }
@@ -282,10 +288,12 @@
 
     function decodeBinary(bytes) {
         var head = bytes[0];
-        if ((head & 0xF0) !== 0x10) return null;
+        var ver = head >> 4;
+        var defs = hatedDefsFor(ver);
+        if (!defs) return null;
         var kind = head & 0x03, hasM = (head & 0x04) !== 0;
         if (kind !== 0 && hasM) return null;
-        var hIds = data.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
+        var hIds = defs.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
         var bitsNeeded;
         if (kind === 0) bitsNeeded = 40 + 8 + (hasM ? 32 : 0);
         else if (kind === 1) bitsNeeded = 40 + 70 + 56 + 17;
@@ -311,13 +319,14 @@
         } else if (kind === 2) {
             var counts = {};
             hIds.forEach(function (id) { counts[id] = rd.get(3); });
-            var top = data.HATED.map(function (hh, i) { return { id: hh.id, c: counts[hh.id], i: i }; }).filter(function (x) { return x.c > 0; });
+            var top = defs.map(function (hh, i) { return { id: hh.id, c: counts[hh.id], i: i }; }).filter(function (x) { return x.c > 0; });
             top.sort(function (a, b) { return b.c - a.c || a.i - b.i; });
             out = { kind: 'hshort', counts: counts, h: top.slice(0, 3).map(function (x) { return x.id; }), m: mirror() };
         } else {
             var hs3 = scales(hIds);
-            out = { kind: 'hlong', hs: hs3, pj: scales(pIds), h: hatedTop(hs3, 3) };
+            out = { kind: 'hlong', hs: hs3, pj: scales(pIds), h: hatedTop(hs3, 3, defs) };
         }
+        out.ver = ver;
         return out;
     }
 
@@ -338,20 +347,22 @@
         try {
             var o = JSON.parse(text);
             if (!o || typeof o !== 'object') return null;
-            var hIds = data.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
+            var defs = hatedDefsFor(1);
+            if (!defs) return null;
+            var hIds = defs.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
             if (o.v === 3 && (o.k === 'hl' || o.k === 'hs')) {
                 if (o.k === 'hl') {
                     var hv = numArr(o.hs, hIds.length, 0, 100), pv = numArr(o.pj, pIds.length, 0, 100);
                     if (!hv || !pv) return null;
                     var hs0 = toObj(hIds, hv);
-                    return { kind: 'hlong', hs: hs0, pj: toObj(pIds, pv), h: hatedTop(hs0, 3) };
+                    return { kind: 'hlong', hs: hs0, pj: toObj(pIds, pv), h: hatedTop(hs0, 3, defs), ver: 1 };
                 }
                 var cv = numArr(o.c, hIds.length, 0, 6), mv = numArr(o.m, data.TOPICS.length, -100, 100);
                 if (!cv || !mv) return null;
                 var counts = toObj(hIds, cv);
-                var top = data.HATED.map(function (h, i) { return { id: h.id, c: counts[h.id], i: i }; }).filter(function (x) { return x.c > 0; });
+                var top = defs.map(function (h, i) { return { id: h.id, c: counts[h.id], i: i }; }).filter(function (x) { return x.c > 0; });
                 top.sort(function (a, b) { return b.c - a.c || a.i - b.i; });
-                return { kind: 'hshort', counts: counts, h: top.slice(0, 3).map(function (x) { return x.id; }), m: toObj(TOP_IDS(), mv) };
+                return { kind: 'hshort', ver: data.VERSION, counts: counts, h: top.slice(0, 3).map(function (x) { return x.id; }), m: toObj(TOP_IDS(), mv), ver: 1 };
             }
             if (!(o.v === 1 || o.v === 2 || (o.v === 3 && o.k === 'l')) || !Array.isArray(o.s) || o.s.length !== AX.length) return null;
             var s = {};
@@ -377,16 +388,16 @@
                     pj = toObj(pIds, pv3);
                 }
                 var r = {
-                    kind: 'long', long: true, s: s, a: o.a, fit: fit, hs: hs, h: hatedTop(hs, 2),
+                    kind: 'long', long: true, s: s, a: o.a, fit: fit, hs: hs, h: hatedTop(hs, 2, defs), ver: 1,
                     honesty: { index: Math.round(clamp(o.i, 0, 100)), liesN: clamp(kk[0], 0, 6), twinsN: clamp(kk[1], 0, 7), straight: kk[2] === 1 }
                 };
                 if (pj) r.pj = pj;
                 return r;
             }
             var known = {};
-            data.HATED.forEach(function (h) { known[h.id] = true; });
+            defs.forEach(function (h) { known[h.id] = true; });
             var h = (Array.isArray(o.h) ? o.h : []).filter(function (id) { return known[id]; }).slice(0, 2);
-            var out = { s: s, a: o.a, fit: fit, h: h };
+            var out = { s: s, a: o.a, fit: fit, h: h, ver: 1 };
             if (Array.isArray(o.m)) { var m = numArr(o.m, data.TOPICS.length, -100, 100); if (m) out.m = toObj(TOP_IDS(), m); }
             return out;
         } catch (e) { return null; }
@@ -404,7 +415,7 @@
 
     function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 
-    var api = { prejScales: prejScales, mirrorResult: mirrorResult, summarizeHatedShort: summarizeHatedShort, summarizeHatedLong: summarizeHatedLong, breakdown: breakdown, hatedScales: hatedScales, hatedRanking: hatedRanking, hatedTop: hatedTop, honesty: honesty, honestyTier: honestyTier, summarizeLong: summarizeLong, axisScores: axisScores, classify: classify, hatedResult: hatedResult, summarize: summarize, encode: encode, decode: decode, find: find, distance: distance };
+    var api = { hatedDefsFor: hatedDefsFor, prejScales: prejScales, mirrorResult: mirrorResult, summarizeHatedShort: summarizeHatedShort, summarizeHatedLong: summarizeHatedLong, breakdown: breakdown, hatedScales: hatedScales, hatedRanking: hatedRanking, hatedTop: hatedTop, honesty: honesty, honestyTier: honestyTier, summarizeLong: summarizeLong, axisScores: axisScores, classify: classify, hatedResult: hatedResult, summarize: summarize, encode: encode, decode: decode, find: find, distance: distance };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.core = api;

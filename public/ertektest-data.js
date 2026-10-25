@@ -116,24 +116,24 @@
           sunday: 'Ebéden te vagy, aki bejelenti, hogy jövő szombaton szemétszedés lesz, és már mindenkit beírt.' }
     ];
 
-    // "Utált értékek": párokban kell dönteni, melyik zavar jobban. A pontszám = hányszor választottad.
+    // "Utált értékek": társadalmi bosszantó dolgok. Párokban kell dönteni, melyik zavar jobban. A pontszám = hányszor választottad.
     var HATED = [
-        { id: 'penz', name: 'Pénzhajhászás', blurb: 'amikor mindent az üzlet dönt el', roast: 'Szerinted nem minden áru: a barátság, a naplemente és a Balaton sem.' },
-        { id: 'egyenlo', name: 'Kényszerű egyenlősdi', blurb: 'amikor mindenki ugyanannyit kap, akármit tett', roast: 'Szerinted az igazságosság nem egyforma szelet tortát jelent.' },
-        { id: 'parancs', name: 'Parancsuralom', blurb: 'amikor az az érv, hogy „mert én mondtam”', roast: 'Nálad az érvelés nem hangerő kérdése.' },
-        { id: 'szabados', name: 'Felelőtlen szabadosság', blurb: 'amikor mindenki azt csinál, amit akar, és másokra marad a rendetlenség', roast: 'Szerinted a szabadság addig szép, amíg valaki nem a te kapudba parkol.' },
-        { id: 'patosz', name: 'Nemzeti pátosz', blurb: 'amikor a hazafiasságot hangerővel mérik', roast: 'Neked a szeretet a falunapi hurrázásnál csendesebb is lehet.' },
-        { id: 'sznob', name: 'Világpolgár-sznobéria', blurb: 'amikor mindent lenéznek, ami nem külföldi', roast: 'Szerinted a „nálunk ez nem divat” és a „Párizsban ez másképp van” ugyanaz a mondat.' },
-        { id: 'hagyomany', name: 'Erőltetett hagyománytisztelet', blurb: 'amikor az az érv, hogy „mindig is így volt”', roast: 'A mindig is így volt a legrégebbi kifogás: ráadásul ritkán igaz.' },
-        { id: 'ujitas', name: 'Megújítási láz', blurb: 'amikor mindent újra kell gondolni, csak azért is', roast: 'Szerinted nem minden rossz, ami régi, és nem minden jó, ami új.' },
-        { id: 'cinizmus', name: 'Cinizmus', blurb: 'amikor „úgysem számít semmi”', roast: 'Utálod az „úgyis mindegy” hangulatot: pedig néha tényleg szórakoztató.' },
-        { id: 'naivitas', name: 'Gyanútlan naivitás', blurb: 'amikor mindenki azt hiszi, hogy majd minden megoldódik magától', roast: 'Te legalább számolod a következményeket, még ha ezzel a vacsora hangulatát is elviszed.' }
+        { id: 'rongalas', name: 'Rongálás', blurb: 'amikor a közös dolgot összefirkálják, eltörik, leszerelik', roast: 'Szerinted a pad nem a „senkié”, hanem mindenkié. A filctollas „művész” nálad nem festő, hanem tettes, a törött hinta pedig nem ártatlan baleset.' },
+        { id: 'kornyezet', name: 'Környezetszennyezés', blurb: 'amikor a természetet vagy a közteret kukának nézik', roast: 'Nálad a szemét nem a kuka mellett kezdődik, hanem a gondolkodásban. Az erdő nem szeméttelep, és a „majd valaki összeszedi” nem hatástanulmány.' },
+        { id: 'figyelem', name: 'Figyelmetlenség', blurb: 'amikor valaki hozzád szól, de közben a telefonját nézi', roast: 'Te még meghallod, ha beszélnek hozzád. A „mondj még egyszer, nem hallottam” és a fél füllel hallgatás nálad udvariatlanság, nem divat.' },
+        { id: 'tragar', name: 'Trágárság', blurb: 'amikor minden második szó káromkodás', roast: 'Szerinted a káromkodás nem erő, hanem szókincs-hiány. Nálad a jó vita érvekből áll, nem sértésekből, és a gyerekek jelenlétében kétszer is.' },
+        { id: 'szexizmus', name: 'Szexizmus', blurb: 'amikor valakit a neme miatt néznek le vagy kezelnek másképp', roast: 'Nálad a nem nem képesség. A „férfi dolog” és a „női dolog” kifejezések gyanúsan hasonlítanak a „mert mindig is így volt” érvre.' },
+        { id: 'anarchia', name: 'Szabálytalan zűrzavar', blurb: 'amikor senki nem tartja be a szabályt, és nincs, aki számon kérje', roast: 'Neked a piros lámpa nem javaslat. A „szabad ország” még nem azt jelenti, hogy a lépcsőház a tiéd, és a rend nálad nem elnyomás, hanem a közös élet alapja.' },
+        { id: 'tolvaj', name: 'Lopás és csalás', blurb: 'amikor valaki más pénzét, munkáját vagy ötletét viszi', roast: 'Szerinted a „mindenki lop” nem mentség, és a „csak egy kicsit” sem. A közös hűtőből eltűnt joghurt nálad nem apróság, hanem jellemvizsga.' },
+        { id: 'zaj', name: 'Hangoskodás', blurb: 'amikor a csendet és a nyugalmat nem tiszteli senki', roast: 'Neked az éjszakai csend nem javaslat, hanem házirend. A vasárnap reggeli fűnyíró és a hajnali fúrógép szerinted a modern kor tűrhetetlen hozadéka.' },
+        { id: 'pletyka', name: 'Pletyka és hátbatámadás', blurb: 'amikor a hátad mögött beszélnek rólad, szemben meg mosolyognak', roast: 'Nálad az őszinte szembeszólás többet ér a háttérbeszélgetésnél. A „csak mondom” és a „én nem mondtam semmit” után te már tudod, mi következik.' },
+        { id: 'potyazo', name: 'Lógás és potyázás', blurb: 'amikor más dolgozik, ő meg kihasználja', roast: 'Nálad a „majd a másik megcsinálja” a legnagyobb bűn. A közös munkából nem lehet lógni, a közös kasszából meg nem lehet ingyen élni.' }
     ];
 
     // Minden érték pontosan kétszer szerepel, így mindenkinek ugyanannyi esélye van.
     var HATED_PAIRS = [
-        ['penz', 'egyenlo'], ['parancs', 'szabados'], ['patosz', 'sznob'], ['hagyomany', 'ujitas'], ['cinizmus', 'naivitas'],
-        ['penz', 'parancs'], ['egyenlo', 'patosz'], ['szabados', 'hagyomany'], ['sznob', 'cinizmus'], ['ujitas', 'naivitas']
+        ['rongalas', 'kornyezet'], ['figyelem', 'tragar'], ['szexizmus', 'anarchia'], ['tolvaj', 'zaj'], ['pletyka', 'potyazo'],
+        ['rongalas', 'tolvaj'], ['kornyezet', 'figyelem'], ['tragar', 'szexizmus'], ['anarchia', 'pletyka'], ['zaj', 'potyazo']
     ];
 
     // =========================================================
@@ -147,58 +147,30 @@
     var LONG_DROP = { civil: 1, nyelv2: 1, projekt: 1, strand: 1, kamera: 1, sajat: 1, hirek: 1, termek: 1 };
 
     var H_BOTH = {
-        sorkaton: { szabados: 0.5 }, palinka: { parancs: 0.5 }, piac: { egyenlo: 0.7 }, tanar: { penz: 0.5 }, privat: { egyenlo: 0.4 },
-        hazassag: { hagyomany: 0.5 }, csalad: { ujitas: 0.5 }, unnep: { sznob: 0.5 }, euro: { patosz: 0.5 },
-        politikus: { naivitas: 0.5, cinizmus: -0.5 }, szavazat: { cinizmus: 0.7 }, hivatal: { cinizmus: 0.5 }, haver: { naivitas: 0.5 },
-        kakaos: { ujitas: 0.5 }, fegyelem: { szabados: 0.5 }, allam: { parancs: 0.5 }, albi: { penz: 0.5 }, nyugdij: { egyenlo: 0.4 },
-        vallalkozo: { egyenlo: 0.5 }, masodik: { parancs: 0.4 }, smink: { hagyomany: 0.5 }, ai: { hagyomany: 0.3 }, vallas: { ujitas: 0.3 }
+        sorkaton: { anarchia: 0.4 }, palinka: { anarchia: -0.4 }, piac: { potyazo: 0.5 }, tanar: { figyelem: 0.3 }, privat: { potyazo: 0.4 },
+        hazassag: { szexizmus: 0.4 }, csalad: { szexizmus: -0.3 }, unnep: { zaj: -0.3 }, tuntetes: { zaj: -0.3 },
+        politikus: { tolvaj: 0.6 }, hivatal: { figyelem: 0.4 }, haver: { tolvaj: -0.3 }, panasz: { figyelem: 0.4 },
+        fegyelem: { rongalas: 0.4, tragar: 0.5 }, allam: { anarchia: -0.4 }, nyugdij: { potyazo: 0.5 },
+        vallalkozo: { potyazo: 0.3 }, smink: { szexizmus: 0.5 }, bkk: { potyazo: -0.4 }, szavazat: { figyelem: 0.2 }
     };
 
     // Ellentétes párok az érték-részben: ha mindkettővel egyetértesz, ellentmondtál magadnak.
     var NEW_V = [
-        { id: 'sorkaton2', text: 'A katonai szolgálat legyen kizárólag önkéntes: senkit ne lehessen belekényszeríteni.', w: { l: -1 }, h: { parancs: 0.5 } },
-        { id: 'euro2', text: 'A forint a nemzeti önállóságunk része: nem szabad lecserélni az euróra.', w: { n: 1 }, h: { patosz: -0.5 } },
-        { id: 'szavazat2', text: 'Egy szavazaton úgysem múlik semmi, felesleges elmenni a választásra.', w: { c: 1 }, h: { cinizmus: -0.7 } },
-        { id: 'palinka2', text: 'A házi párlat készítését szigorúan engedélyhez és ellenőrzéshez kellene kötni.', w: { l: 1 }, h: { parancs: -0.4 } },
-        { id: 'bkk2', text: 'A tömegközlekedés legyen fizetős: aki használja, az fizessen érte.', w: { e: -1 }, h: { penz: -0.4 } },
-        { id: 'adoemel', text: 'A nagyvállalatok adóját jelentősen emelni kellene, hogy jusson a közösre.', w: { e: 1 }, h: { penz: 0.5 } },
-        { id: 'kemeny', text: 'Aki hibázik, viselje a következményeit: második esély nélkül.', joke: 'A „hiba nélküli ember” még nem született meg.', w: { l: 1 }, h: { parancs: -0.4 } },
-        { id: 'szemet', text: 'Aki a közterületen szemetel, azt pénzbírsággal kellene sújtani.', joke: 'A kukától három méterre eldobott csikk is számít.', w: { l: 1 }, h: { szabados: 0.5 } },
-        { id: 'moderal', text: 'A közösségi oldalakon a károsnak ítélt tartalmat gyorsan le kell venni, még ha néha tévedésből is.', w: { l: 1, c: 0.3 }, h: { szabados: 0.4 } },
-        { id: 'kozmeghall', text: 'A közmeghallgatásokra el kellene járni: ha nem megyünk, nincs jogunk panaszkodni.', joke: 'A kávé és a pogácsa nem biztos, hogy van.', w: { c: -1, l: 0.3 }, h: { cinizmus: 0.5 } }
+        { id: 'sorkaton2', text: 'A katonai szolgálat legyen kizárólag önkéntes: senkit ne lehessen belekényszeríteni.', w: { l: -1 }, h: { anarchia: -0.3 } },
+        { id: 'euro2', text: 'A forint a nemzeti önállóságunk része: nem szabad lecserélni az euróra.', w: { n: 1 } },
+        { id: 'szavazat2', text: 'Egy szavazaton úgysem múlik semmi, felesleges elmenni a választásra.', w: { c: 1 }, h: { figyelem: -0.3 } },
+        { id: 'palinka2', text: 'A házi párlat készítését szigorúan engedélyhez és ellenőrzéshez kellene kötni.', w: { l: 1 }, h: { anarchia: 0.4 } },
+        { id: 'bkk2', text: 'A tömegközlekedés legyen fizetős: aki használja, az fizessen érte.', w: { e: -1 }, h: { potyazo: 0.4 } },
+        { id: 'adoemel', text: 'A nagyvállalatok adóját jelentősen emelni kellene, hogy jusson a közösre.', w: { e: 1 }, h: { tolvaj: 0.3 } },
+        { id: 'kemeny', text: 'Aki hibázik, viselje a következményeit: második esély nélkül.', joke: 'A „hiba nélküli ember” még nem született meg.', w: { l: 1 }, h: { tolvaj: 0.4, rongalas: 0.3 } },
+        { id: 'szemet', text: 'Aki a közterületen szemetel, azt pénzbírsággal kellene sújtani.', joke: 'A kukától három méterre eldobott csikk is számít.', w: { l: 1 }, h: { kornyezet: 0.8 } },
+        { id: 'moderal', text: 'A közösségi oldalakon a károsnak ítélt tartalmat gyorsan le kell venni, még ha néha tévedésből is.', w: { l: 1, c: 0.3 }, h: { tragar: 0.4 } },
+        { id: 'kozmeghall', text: 'A közmeghallgatásokra el kellene járni: ha nem megyünk, nincs jogunk panaszkodni.', joke: 'A kávé és a pogácsa nem biztos, hogy van.', w: { c: -1, l: 0.3 }, h: { figyelem: 0.5 } }
     ];
     // [id, id]: egyszerre egyetérteni mindkettővel ellentmondás
     var TWINS = [
         ['sorkaton', 'sorkaton2'], ['euro', 'euro2'], ['szavazat', 'szavazat2'], ['palinka', 'palinka2'],
         ['bkk', 'bkk2'], ['vallalkozo', 'adoemel'], ['masodik', 'kemeny']
-    ];
-
-    // Zavar-állítások: az egyetértés itt azt jelenti, hogy az adott érték zavar.
-    var HATED_ST = [
-        { id: 'z_penz1', text: 'Zavar, ha mindent az határoz meg, mennyibe kerül.', h: { penz: 1 }, w: { e: 0.3 } },
-        { id: 'z_penz2', text: 'Idegesít, ha valamit csak azért tartanak értékesnek, mert drága.', h: { penz: 1 } },
-        { id: 'z_penz3', text: 'Bosszant, ha a közös dolgoknál (kórház, iskola) is előbb a haszon, utána az ember számít.', h: { penz: 1 }, w: { e: 1 } },
-        { id: 'z_egy1', text: 'Idegesít, ha mindenkit egyformán kezelnek, akármit tett le az asztalra.', h: { egyenlo: 1 }, w: { e: -0.5 } },
-        { id: 'z_egy2', text: 'Zavar, ha az erőfeszítés semmit nem számít, mert úgyis mindenki ugyanannyit kap.', h: { egyenlo: 1 }, w: { e: -1 } },
-        { id: 'z_egy3', text: 'Bosszant, ha tilos észrevenni a különbségeket ember és ember között.', h: { egyenlo: 1 } },
-        { id: 'z_par1', text: 'Idegesít, ha valaki azzal zárja le a vitát, hogy „mert én mondtam”.', h: { parancs: 1 }, w: { l: -0.5 } },
-        { id: 'z_par2', text: 'Zavar a felesleges szabály, amit senki nem tud megindokolni.', h: { parancs: 1 }, w: { l: -1 } },
-        { id: 'z_par3', text: 'Kínosan érzem magam, ha olyan embert kell tisztelni, aki semmit nem tett le az asztalra.', h: { parancs: 1 }, w: { c: 0.3 } },
-        { id: 'z_sza1', text: 'Idegesít, ha valaki a közösben szemetel, mert „szabad ország”.', h: { szabados: 1 }, w: { l: 1 } },
-        { id: 'z_sza2', text: 'Zavar, ha az emberek felelősség nélkül osztogatják a véleményüket és a veszélyeket.', h: { szabados: 1 } },
-        { id: 'z_sza3', text: 'Bosszant, ha a szabályok betartása mindig csak a többiek dolga.', h: { szabados: 1 }, w: { l: 0.5 } },
-        { id: 'z_pat1', text: 'Idegesít a hangos, zászlólengető hazafiaskodás.', h: { patosz: 1 }, w: { n: -1 } },
-        { id: 'z_pat2', text: 'Zavar, ha valakit azzal támadnak, hogy „nem elég magyar”.', h: { patosz: 1 }, w: { n: -0.5 } },
-        { id: 'z_szn1', text: 'Idegesít, ha valaki lenézi, ami magyar, csak mert külföldön másképp csinálják.', h: { sznob: 1 }, w: { n: 1 } },
-        { id: 'z_szn2', text: 'Zavar, ha mindent az dönt el, mi a divat Párizsban vagy New Yorkban.', h: { sznob: 1 } },
-        { id: 'z_hag1', text: 'Idegesít a „mindig is így volt” érv.', h: { hagyomany: 1 }, w: { t: -1 } },
-        { id: 'z_hag2', text: 'Zavar, ha valamit csak azért kell megtenni, mert a nagyszülők is megtették.', h: { hagyomany: 1 }, w: { t: -0.7 } },
-        { id: 'z_uj1', text: 'Idegesít, ha mindent újra akarnak gondolni, ami addig tökéletesen működött.', h: { ujitas: 1 }, w: { t: 1 } },
-        { id: 'z_uj2', text: 'Zavar, ha a „modern” szó önmagában érvnek számít.', h: { ujitas: 1 }, w: { t: 0.5 } },
-        { id: 'z_cin1', text: 'Idegesít, ha valaki mindenre azt mondja: „úgysem számít semmi”.', h: { cinizmus: 1 }, w: { c: -1 } },
-        { id: 'z_cin2', text: 'Zavar, ha a cinizmust okosságnak, a lelkesedést butaságnak tartják.', h: { cinizmus: 1 }, w: { c: -0.5 } },
-        { id: 'z_nai1', text: 'Idegesít, ha valaki gondolkodás nélkül elhisz mindent, amit mondanak neki.', h: { naivitas: 1 }, w: { c: 1 } },
-        { id: 'z_nai2', text: 'Zavar, ha a nehéz problémára annyi a válasz: „majd megoldódik”.', h: { naivitas: 1 }, w: { c: 0.5 } }
     ];
 
     // Hazugság-próba: négy "soha / mindig" állítás, amit gyakorlatilag senki nem mondhat el magáról igazán (kevés, hogy ne legyen unalmas).
@@ -209,21 +181,45 @@
         { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' }
     ];
 
-    // A zavar-állítások egy része az értékrészben (A) marad, mert a tengelyeket is mozgatja; a többi az utált-érték részbe (B) kerül.
-    var HATED_A = { z_penz3: 1, z_egy2: 1, z_par2: 1, z_sza1: 1, z_pat1: 1, z_szn1: 1, z_hag1: 1, z_hag2: 1, z_uj1: 1, z_uj2: 1, z_cin1: 1, z_cin2: 1, z_nai1: 1, z_nai2: 1 };
-
-    // 10 további zavar-állítás: így mind a 10 utált értéket pontosan 2 tétel méri a B részben.
-    var HATED_NEW = [
-        { id: 'z_pat3', text: 'Zavar, ha a nemzeti ünnepen a pózolás fontosabb, mint az emlékezés.', h: { patosz: 1 } },
-        { id: 'z_szn3', text: 'Idegesít, ha valami csak azért „jobb”, mert külföldi címke van rajta.', h: { sznob: 1 } },
-        { id: 'z_hag3', text: 'Bosszant, ha valamit csak azért tartanak meg, hogy a szomszéd ne szóljon meg.', h: { hagyomany: 1 }, w: { t: -0.5 } },
-        { id: 'z_hag4', text: 'Zavar, ha egy ünnepet vagy szokást megváltoztatni szentségtörésnek számít.', h: { hagyomany: 1 } },
-        { id: 'z_uj3', text: 'Idegesít, ha az újdonság kedvéért eldobják azt, ami még tökéletesen jó volt.', h: { ujitas: 1 } },
-        { id: 'z_uj4', text: 'Zavar, ha évente új szlogen, új rendszer és új név jön ugyanarra a dologra.', h: { ujitas: 1 }, w: { c: 0.3 } },
-        { id: 'z_cin3', text: 'Idegesít, ha a lelkesedésre az az első válasz: „majd meglátod”.', h: { cinizmus: 1 } },
-        { id: 'z_cin4', text: 'Zavar, ha mások jókedvét szarkazmussal kell elrontani.', h: { cinizmus: 1 } },
-        { id: 'z_nai3', text: 'Idegesít, ha valaki a veszélyt is csak legyinti: „ugyan, nem lesz baj”.', h: { naivitas: 1 } },
-        { id: 'z_nai4', text: 'Zavar, ha a jószándékot már a megoldásnak tartják.', h: { naivitas: 1 } }
+    // Zavar-állítások (társadalmi bosszantó dolgok): az egyetértés azt jelenti, hogy ez engem zavar.
+    // Az A részben 14 van (ezek a tengelyeket is mozgatják, ahol van w), a B részben 20: minden értéket pontosan 2.
+    var HATED_A_ITEMS = [
+        { id: 'z_ron1', text: 'Idegesít, ha valaki összefirkálja vagy megrongálja a közös dolgokat: a padot, a buszmegállót, a lépcsőházat.', joke: 'A filctoll nem művészeti eszköz, ha nem a sajátodon használod.', h: { rongalas: 1 }, w: { l: 0.5 } },
+        { id: 'z_kor1', text: 'Idegesít, ha valaki az erdőben vagy a parkban hagyja a szemetét.', joke: 'A csokipapír nem lebomló, csak „kicsit” lebomló.', h: { kornyezet: 1 }, w: { l: 0.4 } },
+        { id: 'z_kor2', text: 'Zavar, ha a gyár vagy a szomszéd mindent a levegőbe ereget, és senkit nem érdekel.', joke: 'A szomszéd „csak egy kis” avart éget, a fél utca köhög.', h: { kornyezet: 1 }, w: { e: 0.3 } },
+        { id: 'z_fig1', text: 'Idegesít, ha beszélgetés közben a másik a telefonját nézi.', joke: 'A „folytasd, hallgatlak” mondat a legnagyobb hazugság, ha közben görgetnek.', h: { figyelem: 1 } },
+        { id: 'z_tra1', text: 'Idegesít, ha valaki a gyerekek előtt is válogatás nélkül káromkodik.', joke: 'A gyerek mindent megjegyez, főleg a legrosszabbat.', h: { tragar: 1 }, w: { t: 0.3 } },
+        { id: 'z_tra2', text: 'Zavar, ha a vita érvek helyett sértésekbe és csúnya szavakba megy át.', joke: 'Aki először káromkodik, az már vesztett. Vagy legalább kifogyott az érvekből.', h: { tragar: 1 } },
+        { id: 'z_szx1', text: 'Idegesít, ha valakit a neme miatt néznek le vagy csúfolnak.', joke: 'A „ez férfi dolog” mondat általában ott hangzik el, ahol a mosogatás kezdődik.', h: { szexizmus: 1 }, w: { t: -0.4 } },
+        { id: 'z_szx2', text: 'Zavar, ha egy állásinterjún a nőtől azt kérdezik, mikor szeretne gyereket.', h: { szexizmus: 1 }, w: { t: -0.3 } },
+        { id: 'z_ana1', text: 'Idegesít, ha valaki a piros lámpán is átmegy, mert „úgysincs rendőr”.', joke: 'A zebrán a gyalogos mindig „csak most” siet.', h: { anarchia: 1 }, w: { l: 0.6 } },
+        { id: 'z_tol1', text: 'Idegesít, ha valaki a közös hűtőből viszi el más ebédjét.', joke: 'A lopott joghurt nem „maradék”, hanem bizonyíték.', h: { tolvaj: 1 } },
+        { id: 'z_tol2', text: 'Zavar, ha valaki más munkáját a sajátjaként adja el.', joke: 'Az ötlet, amit „együtt találtunk ki”, rendszerint az enyém volt.', h: { tolvaj: 1 }, w: { c: 0.2 } },
+        { id: 'z_zaj1', text: 'Idegesít, ha a szomszéd éjjel fúr, zenél vagy ordít.', joke: 'A „csak egy kis zene” este tízkor már házibuli.', h: { zaj: 1 } },
+        { id: 'z_ple1', text: 'Idegesít, ha valaki a háttérben pletykál, szemben meg mosolyog.', joke: 'A „nem mondom el senkinek” a legnagyobb magyar hazugság.', h: { pletyka: 1 } },
+        { id: 'z_pot1', text: 'Idegesít, ha a csoportmunkában valaki semmit nem csinál, de a jegyet elfogadja.', joke: 'A „én is ott voltam” nem munka.', h: { potyazo: 1 }, w: { e: -0.3 } }
+    ];
+    var HATED_B_ITEMS = [
+        { id: 'z_ron2', text: 'Bosszant, ha a nemrég felújított játszótéren egy hét múlva már törött a hinta.', joke: 'A felújítás ideje nálunk a rongálás előtti szünet.', h: { rongalas: 1 } },
+        { id: 'z_ron3', text: 'Zavar, ha valaki szándékosan eltöri, ami másoké, csak szórakozásból.', joke: 'A „viccből” csak az nevet, aki nem fizeti a javítást.', h: { rongalas: 1 } },
+        { id: 'z_kor3', text: 'Bosszant, ha valaki az ablakon dobja ki a csikket vagy az üres flakont.', joke: 'A gravitáció nem szemetesláda.', h: { kornyezet: 1 } },
+        { id: 'z_kor4', text: 'Zavar, ha a házi szemetet a patakparton vagy az út szélén hagyják.', joke: 'A patak ettől még nem lesz szemétszállító.', h: { kornyezet: 1 } },
+        { id: 'z_fig2', text: 'Zavar, ha valaki ötször elkérdezi ugyanazt, mert közben nem figyelt.', joke: 'A „mit mondtál?” a figyelemhiány másik neve.', h: { figyelem: 1 } },
+        { id: 'z_fig3', text: 'Bosszant, ha a sorban az előttem álló csak a pénztárnál kezd el gondolkodni, mit akar.', joke: 'A pénztár nem a döntés helye.', h: { figyelem: 1 } },
+        { id: 'z_tra3', text: 'Bosszant, ha a buszon valaki hangosan, csúnya szavakkal telefonál.', joke: 'A buszon mindenki hallgatózik, még a sofőr is.', h: { tragar: 1 } },
+        { id: 'z_tra4', text: 'Zavar, ha az internetes hozzászólásokban a durva szó a normális hangnem.', joke: 'A klaviatúra mögött mindenki bátor, és kevés udvarias.', h: { tragar: 1 } },
+        { id: 'z_szx3', text: 'Bosszant, ha a „férfiak úgyis ilyenek, a nők úgyis olyanok” mondattal zárják le a vitát.', joke: 'Az „úgyis” szó a közhelyek királynője.', h: { szexizmus: 1 } },
+        { id: 'z_szx4', text: 'Zavar, ha a megjegyzés a nemről szól, nem a munkáról.', joke: 'A jó munkának nincs neme, csak határideje.', h: { szexizmus: 1 } },
+        { id: 'z_ana2', text: 'Zavar, ha egy közösségben senki nem tartja be a megbeszélt szabályokat.', joke: 'A házirend nem dísz, de a falon ritkán ér célba.', h: { anarchia: 1 }, w: { l: 0.5 } },
+        { id: 'z_ana3', text: 'Bosszant, ha a rendetlenségre azt mondják: „szabad ország”.', joke: 'A szabadság nem a mosatlanra szól.', h: { anarchia: 1 } },
+        { id: 'z_tol3', text: 'Bosszant, ha valaki jegy nélkül utazik, és közben büszke rá.', joke: 'A „nem járt ellenőr” még nem érv.', h: { tolvaj: 1 } },
+        { id: 'z_tol4', text: 'Zavar, ha valaki a másik kárára csal: a vizsgán, a játékban vagy az adóban.', joke: 'A csalás nem ügyesség, csak lebukásra váró helyzet.', h: { tolvaj: 1 } },
+        { id: 'z_zaj2', text: 'Zavar, ha a vonaton valaki hangosan hallgat zenét a telefonjáról.', joke: 'A fülhallgató nem luxus, hanem szomszédi jószándék.', h: { zaj: 1 } },
+        { id: 'z_zaj3', text: 'Bosszant, ha a moziban beszélgetnek, csomagolóznak vagy világít a telefon.', joke: 'A popcorn csomagolása a mozi legnagyobb horror-effektje.', h: { zaj: 1 } },
+        { id: 'z_ple2', text: 'Zavar, ha tényként terjesztenek olyat, amit senki nem ellenőrzött.', joke: 'A „hallottam valakitől” a legmegbízhatóbb hamis forrás.', h: { pletyka: 1 } },
+        { id: 'z_ple3', text: 'Bosszant, ha a „csak mondom” mögé bújva szúrnak oda valakinek.', joke: 'A „csak mondom” után mindig következik valami, ami nem „csak”.', h: { pletyka: 1 } },
+        { id: 'z_pot2', text: 'Zavar, ha valaki mindig a másikra hagyja a mosogatást.', joke: 'A mosatlan nem tűnik el, csak halasztódik.', h: { potyazo: 1 } },
+        { id: 'z_pot3', text: 'Bosszant, ha a társasház közös költségét mindenki fizeti, csak az egyik lakó nem.', joke: 'A lift is csak azoknak jár, akik kifizették.', h: { potyazo: 1 } }
     ];
 
     // =========================================================
@@ -345,41 +341,6 @@
         szemet: 'Közterületi szemetelés: mennyire tartod szükségesnek a pénzbírságot.',
         moderal: 'Közösségi oldalakon a gyors tartalomszűrés: elfogadod-e, hogy néha tévedésből is töröl.',
         kozmeghall: 'Részvétel kérdése: számít-e, ha nem jelenünk meg, de utána elégedetlenkedünk.',
-        // zavar-állítások (agree = ez engem zavar)
-        z_penz1: 'Egyetértés = zavar, ha mindent a pénz mérce dönt el.',
-        z_penz2: 'Egyetértés = zavar, ha a magas ár önmagában már érték.',
-        z_penz3: 'Egyetértés = zavar, ha a kórház és az iskola is nyereségre dolgozik.',
-        z_egy1: 'Egyetértés = zavar, ha mindenkire ugyanazok a szabályok vonatkoznak, akármit tett.',
-        z_egy2: 'Egyetértés = zavar, ha a kitartás és a lazaság ugyanazt hozza.',
-        z_egy3: 'Egyetértés = zavar, ha nem szabad különbséget tenni az emberek között.',
-        z_par1: 'Egyetértés = zavar, ha az érv helyett a rang dönt.',
-        z_par2: 'Egyetértés = zavar az indokolatlan szabály.',
-        z_par3: 'Egyetértés = zavar, ha csak a pozíciója miatt kell valakit tisztelni.',
-        z_sza1: 'Egyetértés = zavar, ha valaki a szabadságra hivatkozva másokra hagyja a rendetlenséget.',
-        z_sza2: 'Egyetértés = zavar, ha valaki következmények nélkül oszt véleményt és tanácsot.',
-        z_sza3: 'Egyetértés = zavar, ha a szabály csak másoknak szól.',
-        z_pat1: 'Egyetértés = zavar a hangos, látványos hazafiaskodás.',
-        z_pat2: 'Egyetértés = zavar, ha valakit „nem elég magyarnak” bélyegeznek.',
-        z_pat3: 'Egyetértés = zavar, ha az ünnepi póz többet számít, mint az emlékezés.',
-        z_szn1: 'Egyetértés = zavar, ha valaki minden hazait lenéz, mert máshol másképp csinálják.',
-        z_szn2: 'Egyetértés = zavar, ha a külföldi divat dönti el, mi „menő”.',
-        z_szn3: 'Egyetértés = zavar, ha valami csak a külföldi címke miatt számít jobbnak.',
-        z_hag1: 'Egyetértés = zavar, ha a múlt érv helyett érv-pótlék.',
-        z_hag2: 'Egyetértés = zavar a kényszeres hagyománykövetés.',
-        z_hag3: 'Egyetértés = zavar, ha csak a környezet elvárása tart meg valamit.',
-        z_hag4: 'Egyetértés = zavar, ha a változtatás tabu.',
-        z_uj1: 'Egyetértés = zavar a felesleges átszervezés.',
-        z_uj2: 'Egyetértés = zavar, ha az újdonság már önmagában érv.',
-        z_uj3: 'Egyetértés = zavar, ha a jót is lecserélik, csak mert új van.',
-        z_uj4: 'Egyetértés = zavar az újracsomagolt régi dolog.',
-        z_cin1: 'Egyetértés = zavar az „úgysem számít” hozzáállás.',
-        z_cin2: 'Egyetértés = zavar, ha a cinizmus okosnak, a lelkesedés butának számít.',
-        z_cin3: 'Egyetértés = zavar, ha a lelkesedést rögtön lehűtik.',
-        z_cin4: 'Egyetértés = zavar, ha valaki a mások jókedvét gúnnyal rontja el.',
-        z_nai1: 'Egyetértés = zavar a kritikátlan hiszékenység.',
-        z_nai2: 'Egyetértés = zavar a „majd megoldódik” hozzáállás.',
-        z_nai3: 'Egyetértés = zavar, ha valaki a veszélyt is elbagatellizálja.',
-        z_nai4: 'Egyetértés = zavar, ha a jó szándék helyettesíti a megoldást.',
         // hazugság-próba
         l_hazug: 'Ez a „soha” szó komolyan veendő: nem „ritkán”, hanem egyszer sem.',
         l_eperc: 'Pontosan erre gondolunk: azt mondod, mindjárt ott vagy, de még indulni sem indultál.',
@@ -418,32 +379,6 @@
         bkk2: 'Az ingyenes busz legnagyobb ellensége a pénztárgép.',
         adoemel: 'Az adóemelésnek általában az adózó örül a legkevésbé.',
         szemet: 'A kukától három méterre eldobott csikk is számít.',
-        // zavar-állítások
-        z_penz2: 'A drága lekvár is csak lekvár.',
-        z_penz3: 'A beteg is „ügyfél” lesz.',
-        z_egy1: 'A sorban állás nem válogat. Vagy mégis?',
-        z_egy3: 'A ruhatári cédula is megkülönböztet.',
-        z_par1: 'A „mert én mondtam” hatalmas érv az óvodában.',
-        z_par2: 'A „TILOS” felirat mögött ritkán áll indoklás.',
-        z_par3: 'A rang legnagyobb előnye a parkolóhely.',
-        z_sza1: 'A szabad ország szemeteskuka nélkül nem sokat ér.',
-        z_pat1: 'A zászló nem kiabál. Csak a tulajdonosa.',
-        z_pat3: 'A szelfi nem emlékezés.',
-        z_szn1: 'A „nálunk ez nem megy” a legtartósabb magyar hobbi.',
-        z_szn2: 'Párizsban is csak egy sima kávét kérnek.',
-        z_szn3: 'A címke a legolcsóbb minőség-garancia.',
-        z_hag1: 'A „mindig is így volt” az első magyar kifogás.',
-        z_hag3: 'A szomszéd mindent lát.',
-        z_uj1: 'A működő dolgot sosem szabad megjavítani.',
-        z_uj3: 'A régi tűzhely rendszerint tovább él, mint a modern.',
-        z_uj4: 'Az új név, a régi probléma.',
-        z_cin1: 'Az „úgysem számít” szavazótábor óriási.',
-        z_cin3: 'A „majd meglátod” a lelkesedés legnagyobb ellensége.',
-        z_cin4: 'A szarkazmus a magyar kultúra nemzeti sportja.',
-        z_nai1: 'A „minden igaz, amit az interneten olvasok” kategória.',
-        z_nai2: 'A „majd megoldódik” a legnagyobb magyar remény.',
-        z_nai3: 'Az „ugyan már” a veszélyjelzés legnagyobb ellensége.',
-        z_nai4: 'A jó szándék vezet a pokolba. Vagy legalább a bürokráciába.'
     };
     // Az előítélet-barométer tételeihez nincs poén, csak magyarázat: a téma nem vicc, a hozzáállás mérése a lényeg.
     Object.assign(HELP, {
@@ -474,7 +409,9 @@
             if (!st.joke && JOKE[st.id]) st.joke = JOKE[st.id];
         });
     }
-    [STATEMENTS, NEW_V, HATED_ST, HATED_NEW, PREJ_ST, LIES].forEach(enrich);
+    [STATEMENTS, NEW_V, HATED_A_ITEMS, HATED_B_ITEMS, PREJ_ST, LIES].forEach(enrich);
+    // A zavar-állításoknál az automatikus magyarázat elég: az egyetértés azt jelenti, hogy ez engem zavar.
+    [HATED_A_ITEMS, HATED_B_ITEMS].forEach(function (l) { l.forEach(function (st) { if (!st.help) st.help = 'Egyetértés = ez engem zavar. (Téma: ' + HATED.filter(function (h) { return st.h[h.id]; })[0].name.toLowerCase() + ')'; }); });
 
     function mk(kind, part, st) { var o = { kind: kind, part: part }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); return o; }
 
@@ -486,9 +423,9 @@
         LONG_A.push(o);
     });
     NEW_V.forEach(function (st) { LONG_A.push(mk('v', 'a', st)); });
-    HATED_ST.forEach(function (st) { (HATED_A[st.id] ? LONG_A : LONG_B).push(mk('h', HATED_A[st.id] ? 'a' : 'b', st)); });
+    HATED_A_ITEMS.forEach(function (st) { LONG_A.push(mk('h', 'a', st)); });
     LIES.forEach(function (st) { var o = mk('l', 'a', st); o.w = {}; o.lie = true; LONG_A.push(o); });
-    HATED_NEW.forEach(function (st) { LONG_B.push(mk('h', 'b', st)); });
+    HATED_B_ITEMS.forEach(function (st) { LONG_B.push(mk('h', 'b', st)); });
     PREJ_ST.forEach(function (st) { LONG_B.push(mk('p', 'b', st)); });
     var LONG = LONG_A.concat(LONG_B);
 
@@ -501,7 +438,86 @@
         { min: 0, name: 'Pinokkió-szint', text: 'A teszt orra is megnőtt, miközben értékelt. Az eredményt csak fenntartással érdemes olvasni.' }
     ];
 
-    var api = { AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, LONG_A: LONG_A, LONG_B: LONG_B, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
+
+    // =========================================================
+    // TESZT-VERZIÓ
+    // A megosztott link tartalmazza, melyik verzióval készült az eredmény (a bináris link első bájtjának felső fele,
+    // a régi JSON linkek mind az 1-es verzió). Ha egy kérdés vagy skála jelentése változik, a VERSION nő, és a régi
+    // jelentést a LEGACY őrzi, hogy a korábban megosztott eredmények továbbra is helyesen jelenjenek meg.
+    // =========================================================
+    var VERSION = 2;
+    var VERSIONS = [
+        { v: 1, date: '2026-10-24', note: 'Az első kiadás: az utált értékek politikai-ideológiai dolgok voltak (pénzhajhászás, parancsuralom, pátosz és társaik).' },
+        { v: 2, date: '2026-10-25', note: 'Az utált értékek társadalmi bosszantó dolgok lettek (rongálás, környezetszennyezés, figyelmetlenség, trágárság, szexizmus és társaik).' }
+    ];
+    var LEGACY = {
+        1: {
+            HATED: [
+                {
+                    "id": "penz",
+                    "name": "Pénzhajhászás",
+                    "blurb": "amikor mindent az üzlet dönt el",
+                    "roast": "Szerinted nem minden áru: a barátság, a naplemente és a Balaton sem."
+                },
+                {
+                    "id": "egyenlo",
+                    "name": "Kényszerű egyenlősdi",
+                    "blurb": "amikor mindenki ugyanannyit kap, akármit tett",
+                    "roast": "Szerinted az igazságosság nem egyforma szelet tortát jelent."
+                },
+                {
+                    "id": "parancs",
+                    "name": "Parancsuralom",
+                    "blurb": "amikor az az érv, hogy „mert én mondtam”",
+                    "roast": "Nálad az érvelés nem hangerő kérdése."
+                },
+                {
+                    "id": "szabados",
+                    "name": "Felelőtlen szabadosság",
+                    "blurb": "amikor mindenki azt csinál, amit akar, és másokra marad a rendetlenség",
+                    "roast": "Szerinted a szabadság addig szép, amíg valaki nem a te kapudba parkol."
+                },
+                {
+                    "id": "patosz",
+                    "name": "Nemzeti pátosz",
+                    "blurb": "amikor a hazafiasságot hangerővel mérik",
+                    "roast": "Neked a szeretet a falunapi hurrázásnál csendesebb is lehet."
+                },
+                {
+                    "id": "sznob",
+                    "name": "Világpolgár-sznobéria",
+                    "blurb": "amikor mindent lenéznek, ami nem külföldi",
+                    "roast": "Szerinted a „nálunk ez nem divat” és a „Párizsban ez másképp van” ugyanaz a mondat."
+                },
+                {
+                    "id": "hagyomany",
+                    "name": "Erőltetett hagyománytisztelet",
+                    "blurb": "amikor az az érv, hogy „mindig is így volt”",
+                    "roast": "A mindig is így volt a legrégebbi kifogás: ráadásul ritkán igaz."
+                },
+                {
+                    "id": "ujitas",
+                    "name": "Megújítási láz",
+                    "blurb": "amikor mindent újra kell gondolni, csak azért is",
+                    "roast": "Szerinted nem minden rossz, ami régi, és nem minden jó, ami új."
+                },
+                {
+                    "id": "cinizmus",
+                    "name": "Cinizmus",
+                    "blurb": "amikor „úgysem számít semmi”",
+                    "roast": "Utálod az „úgyis mindegy” hangulatot: pedig néha tényleg szórakoztató."
+                },
+                {
+                    "id": "naivitas",
+                    "name": "Gyanútlan naivitás",
+                    "blurb": "amikor mindenki azt hiszi, hogy majd minden megoldódik magától",
+                    "roast": "Te legalább számolod a következményeket, még ha ezzel a vacsora hangulatát is elviszed."
+                }
+            ]
+        }
+    };
+
+    var api = { VERSION: VERSION, VERSIONS: VERSIONS, LEGACY: LEGACY, AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, LONG_A: LONG_A, LONG_B: LONG_B, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.data = api;
