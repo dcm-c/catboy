@@ -1,37 +1,55 @@
 // =========================================================
-// ÉRTÉKTEST - adatok
+// ÉRTÉKTEST - adatok (v3)
 //
-// Szórakoztató, nem tudományos teszt. Öt tengelyen mér, mindegyik -100 és +100 közötti érték:
-//   e  Gazdaság:  - szabadpiac      ... + elosztó állam
-//   l  Társadalom: - szabadság      ... + rend
-//   n  Közösség:  - világpolgár     ... + nemzeti
-//   t  Értékek:   - haladó          ... + hagyománytisztelő
-//   c  Bizalom:   - bizakodó        ... + cinikus
+// Szórakoztató, nem tudományos teszt. Tíz tengelyen mér, mindegyik -100 és +100 közötti érték:
+//   e  Gazdaság:   - szabadpiac      ... + elosztó állam
+//   l  Társadalom: - szabadság       ... + rend
+//   n  Haza:       - világpolgár     ... + nemzeti
+//   t  Értékek:    - haladó          ... + hagyománytisztelő
+//   c  Bizalom:    - bizakodó        ... + cinikus
+//   g  Környezet:  - növekedéspárti  ... + természetóvó
+//   m  Biztonság:  - békepárti       ... + erőpárti
+//   d  Hatalom:    - szakértői       ... + népi
+//   k  Kötelék:    - egyéni út       ... + közösségi, családi kötelék
+//   s  Világlátás: - tudományos      ... + megérzés- és hitvezérelt
 //
-// Az állítások súlya tengelyenként +1 / -1 körüli (a + irányba vagy a - irányba húz). Magyar ügyek, humorral,
-// és szándékosan mindkét irányból érkeznek, hogy ne lehessen "kitalálni a jó választ".
+// A tengelyek a hasonló tesztek mintájára (8values, 9axes, Political Compass, Big Five) külön, egymástól függetlenül mérnek:
+// nincs benne egyetlen "jobb-bal" skála. Az állítások súlya tengelyenként +1 / -1 körüli, és szándékosan mindkét irányból
+// érkeznek (fordított és ellentétes állítás is), hogy ne lehessen "kitalálni a jó választ" vagy csak bólogatni.
+// Három hossz: gyors (50 érték-állítás), részletes (100) és extra hosszú (150), ezek egymásra épülnek (tier 1, 2, 3).
+// A hosszabb változatokban ellentmondás-párok és hazugság-próbák is vannak, és minden eredményhez megbízhatósági jelzés tartozik.
+// Az utált értékek és az előítélet-barométer opcionális kiegészítő rész (B rész).
 // Nem pártot ajánl, nem valós politikust nevez meg: a végén egy tréfás típust kapsz, nem ítéletet.
 // =========================================================
 (function (root) {
     'use strict';
 
+    var isNode = typeof module !== 'undefined' && module.exports;
+    var ITEMS = isNode ? require('./ertektest-items.js') : root.MFSZErtek.items;
+    var LEGACY_DATA = isNode ? require('./ertektest-legacy.js') : root.MFSZErtek.legacy;
+
     var AXES = [
-        { id: 'e', name: 'Gazdaság', icon: '💶', negIcon: '🛍️', posIcon: '🏥', neg: 'Szabadpiac', pos: 'Elosztó állam' },
-        { id: 'l', name: 'Társadalom', icon: '⚖️', negIcon: '🕊️', posIcon: '🛂', neg: 'Szabadság', pos: 'Rend' },
-        { id: 'n', name: 'Közösség', icon: '🗺️', negIcon: '✈️', posIcon: '🏡', neg: 'Világpolgár', pos: 'Nemzeti' },
-        { id: 't', name: 'Értékek', icon: '⏳', negIcon: '🚀', posIcon: '🏺', neg: 'Haladó', pos: 'Hagyománytisztelő' },
-        { id: 'c', name: 'Bizalom', icon: '🤝', negIcon: '🌞', posIcon: '🧐', neg: 'Bizakodó', pos: 'Cinikus' }
+        { id: 'e', name: 'Gazdaság', icon: '💶', negIcon: '🛍️', posIcon: '🏥', neg: 'Szabadpiac', pos: 'Elosztó állam', group: 'Állam és gazdaság' },
+        { id: 'l', name: 'Társadalom', icon: '⚖️', negIcon: '🕊️', posIcon: '🛂', neg: 'Szabadság', pos: 'Rend', group: 'Állam és gazdaság' },
+        { id: 'd', name: 'Hatalom', icon: '🗳️', negIcon: '🎓', posIcon: '📣', neg: 'Szakértői', pos: 'Népi', group: 'Állam és gazdaság' },
+        { id: 'n', name: 'Haza', icon: '🗺️', negIcon: '✈️', posIcon: '🏡', neg: 'Világpolgár', pos: 'Nemzeti', group: 'Haza és világ' },
+        { id: 'm', name: 'Biztonság', icon: '🛡️', negIcon: '☮️', posIcon: '⚔️', neg: 'Békepárti', pos: 'Erőpárti', group: 'Haza és világ' },
+        { id: 'g', name: 'Környezet', icon: '🌍', negIcon: '🏭', posIcon: '🌿', neg: 'Növekedéspárti', pos: 'Természetóvó', group: 'Haza és világ' },
+        { id: 't', name: 'Értékek', icon: '⏳', negIcon: '🚀', posIcon: '🏺', neg: 'Haladó', pos: 'Hagyománytisztelő', group: 'Ember és közösség' },
+        { id: 'k', name: 'Kötelék', icon: '👨‍👩‍👧', negIcon: '🧍', posIcon: '🫂', neg: 'Egyéni út', pos: 'Közösségi kötelék', group: 'Ember és közösség' },
+        { id: 'c', name: 'Bizalom', icon: '🤝', negIcon: '🌞', posIcon: '🧐', neg: 'Bizakodó', pos: 'Cinikus', group: 'Ember és közösség' },
+        { id: 's', name: 'Világlátás', icon: '🔮', negIcon: '🔬', posIcon: '✨', neg: 'Tudományos', pos: 'Megérzésvezérelt', group: 'Ember és közösség' }
     ];
 
-    // A sorrend szándékosan kevert, hogy ne tengelyenként jöjjenek a kérdések.
-    var STATEMENTS = [
+    // Az eredeti 40 állítás (a v1/v2 tesztből). A sorrend szándékosan kevert, hogy ne tengelyenként jöjjenek a kérdések.
+    var OLD_ST = [
         { id: 'bkk', text: 'A BKK-bérlet legyen ingyenes mindenkinek, akkor is, ha ezért emelkedik az adó.', joke: 'A kalauz hiányát úgyis csak a nagyik érzik.', w: { e: 1 } },
         { id: 'palinka', text: 'A házipálinka-főzést teljesen szabaddá kellene tenni.', joke: 'Pista bácsi kazánja nem bűncselekmény, hanem örökség.', w: { l: -1 } },
         { id: 'hatar', text: 'A határon túli magyarok szavazati joga természetes.', w: { n: 1 } },
-        { id: 'csalad', text: 'A hagyományos családmodell (anya, apa, gyerek) a társadalom alapja.', w: { t: 1 } },
+        { id: 'csalad', text: 'A hagyományos családmodell (anya, apa, gyerek) a társadalom alapja.', w: { t: 1 , k: 0.5} },
         { id: 'politikus', text: 'A politikusok többsége elsősorban a saját zsebét nézi.', joke: 'Az enyémet ugyan senki.', w: { c: 1 } },
         { id: 'piac', text: 'A piac a legjobb döntéshozó: ami nem éri meg, az szűnjön meg, ne támogassuk.', w: { e: -1 } },
-        { id: 'sorkaton', text: 'Legyen újra kötelező a sorkatonaság: ennyi fiatal, és senki sem tud rendesen ágyat húzni.', w: { l: 1, t: 0.5 } },
+        { id: 'sorkaton', text: 'Legyen újra kötelező a sorkatonaság: ennyi fiatal, és senki sem tud rendesen ágyat húzni.', w: { l: 1, t: 0.5 , m: 0.4} },
         { id: 'euro', text: 'Jó lenne bevezetni az eurót, és végre elbúcsúzni a forintszámolgatástól.', joke: 'A nyaralás előtti átváltás is kevesebb fejtörés lenne.', w: { n: -1 } },
         { id: 'hazassag', text: 'Az azonos neműek házassága legyen ugyanúgy elismert, mint bárki másé.', w: { t: -1 } },
         { id: 'szavazat', text: 'A választáson egy szavazat is számít: érdemes elmenni.', w: { c: -1 } },
@@ -41,20 +59,20 @@
         { id: 'smink', text: 'Egy fiú szabadon hordhat szoknyát vagy sminket, ha attól jól érzi magát.', w: { t: -1 } },
         { id: 'haver', text: 'Az igazi ügyek mindig a háttérben, haverok között dőlnek el.', joke: 'A „Majd szólok egy ismerősnek” is ide tartozik.', w: { c: 1 } },
         { id: 'privat', text: 'A nagy állami cégeket (pl. MÁV, posta) jobb lenne magáncégeknek eladni.', w: { e: -1 } },
-        { id: 'tuntetes', text: 'A tüntetés joga szent: akkor is, ha torlódik tőle a Nagykörút.', w: { l: -1 } },
+        { id: 'tuntetes', text: 'A tüntetés joga szent: akkor is, ha torlódik tőle a Nagykörút.', w: { l: -1 , d: 0.3} },
         { id: 'eu', text: 'Magyarország legyen az EU erős, aktív tagja, ne a kakukk a fészekben.', w: { n: -1 } },
-        { id: 'vallas', text: 'A vallásnak fontos szerepe lehet a közösségek életében.', w: { t: 1 } },
+        { id: 'vallas', text: 'A vallásnak fontos szerepe lehet a közösségek életében.', w: { t: 1 , s: 0.4} },
         { id: 'hivatal', text: 'A hivatalok ma már tényleg ügyfélbarátok. Tényleg.', joke: 'Ezt a mondatot legalább háromszor el kell olvasni.', w: { c: -1 } },
-        { id: 'strand', text: 'A Balaton partján mindenkinek legyen szabad bejárása, strandbelépő nélkül.', w: { e: 1 } },
+        { id: 'strand', text: 'A Balaton partján mindenkinek legyen szabad bejárása, strandbelépő nélkül.', w: { e: 1 , g: 0.3} },
         { id: 'halal', text: 'A legsúlyosabb bűnökért vissza kellene állítani a halálbüntetést.', w: { l: 1 } },
-        { id: 'termek', text: 'A boltokban a magyar termékeket kellene előnyben részesíteni, még ha drágábbak is.', w: { n: 1, e: 0.5 } },
-        { id: 'ai', text: 'A rutinfeladatokat bátran rá lehetne bízni a mesterséges intelligenciára és az automatizálásra.', w: { t: -1 } },
+        { id: 'termek', text: 'A boltokban a magyar termékeket kellene előnyben részesíteni, még ha drágábbak is.', w: { n: 1, e: 0.5 , g: 0.3} },
+        { id: 'ai', text: 'A rutinfeladatokat bátran rá lehetne bízni a mesterséges intelligenciára és az automatizálásra.', w: { t: -1 , s: -0.3} },
         { id: 'hirek', text: 'A híreket mindig fenntartással olvasom: mindenkinek van valami érdeke.', w: { c: 1 } },
         { id: 'vallalkozo', text: 'A vállalkozókat inkább békén kellene hagyni: kevesebb adó, kevesebb papír, több lendület.', w: { e: -1 } },
         { id: 'allam', text: 'Az állam ne szóljon bele, mit eszem, iszom vagy mit csinálok a négy fal között.', w: { l: -1 } },
         { id: 'unnep', text: 'A nemzeti ünnepek hangulatát (kokárda, himnusz) meg kell őrizni, nem csak a hosszú hétvégét.', w: { n: 1, t: 0.7 } },
         { id: 'kakaos', text: 'Régen minden jobb volt: a kakaós csiga is nagyobb volt.', joke: 'A nosztalgia a legerősebb magyar hungarikum.', w: { t: 1, c: 0.5 } },
-        { id: 'civil', text: 'A civil szervezetek és az önkéntesek többet tesznek a közért, mint a pártok.', w: { c: 0.5, e: 0.3 } },
+        { id: 'civil', text: 'A civil szervezetek és az önkéntesek többet tesznek a közért, mint a pártok.', w: { c: 0.5, e: 0.3, k: 0.4} },
         { id: 'albi', text: 'Az albérletárakat szabályozni kellene: a lakhatás nem luxus.', w: { e: 1 } },
         { id: 'fegyelem', text: 'Az iskolában legyen fegyelem és egyenruha, a rend a félsiker.', w: { l: 1, t: 0.5 } },
         { id: 'bevandor', text: 'Magyarországra csak szigorú feltételekkel érkezhessen letelepedni külföldi.', w: { n: 1, l: 0.5 } },
@@ -69,51 +87,68 @@
 
     // Tréfás típusok: a középpont az öt tengelyen -1..1 között van.
     var ARCHETYPES = [
-        { id: 'vitorlazo', emoji: '⛵', title: 'A Hétvégi Vitorlázó Liberális', v: { e: -0.7, l: -0.6, n: -0.5, t: -0.6, c: 0.1 },
+        { id: 'vitorlazo', emoji: '⛵', title: 'A Hétvégi Vitorlázó Liberális', v: { e: -0.7, l: -0.6, n: -0.5, t: -0.6, c: 0.1, g: 0, m: -0.3, d: -0.2, k: -0.7, s: -0.4 },
           desc: 'Szerinted az állam akkor jó, ha nem látszik. A Balatonon a saját vitorlásodat részesíted előnyben, a kormányzást pedig a szezonális szél mintájára képzeled el: ha fúj, jó, ha nem, nem avatkozunk bele.',
           sunday: 'Vasárnapi ebéden te vagy, aki azt mondja: „De mi lenne, ha kevesebb szabály lenne?”, majd elhal a beszélgetés.' },
-        { id: 'kavehaz', emoji: '☕', title: 'A Kávéházi Világjavító', v: { e: 0.5, l: -0.7, n: -0.6, t: -0.7, c: 0.2 },
+        { id: 'kavehaz', emoji: '☕', title: 'A Kávéházi Világjavító', v: { e: 0.5, l: -0.7, n: -0.6, t: -0.7, c: 0.2, g: 0.5, m: -0.6, d: -0.1, k: -0.1, s: -0.3 },
           desc: 'Minden problémára van egy kávé, egy tanulmány és egy hosszú Facebook-hozzászólás. A világot jobbá teszed, de előbb még elmondod, hogy az előző kávéház jobb volt.',
           sunday: 'Ebéden az első húsleves után már a harmadik reformot vázolod egy szalvétán.' },
-        { id: 'nagyapa', emoji: '🌻', title: 'A Kiskerti Nagypapa', v: { e: 0.1, l: 0.6, n: 0.7, t: 0.8, c: 0.3 },
+        { id: 'nagyapa', emoji: '🌻', title: 'A Kiskerti Nagypapa', v: { e: 0.1, l: 0.6, n: 0.7, t: 0.8, c: 0.3, g: 0.4, m: 0.4, d: 0.5, k: 0.6, s: 0.5 },
           desc: 'Tudod, hogyan kell paradicsomot nevelni, és azt is, hogy mi romlott el a világban. Szerinted a rend, a hagyomány és a jó hazai szilva a három pillér, a többi csak divat.',
           sunday: 'Vasárnap te vagy, aki a kertből hoz fel egy szatyor zöldséget, és közben kikér egy véleményt a hírekről.' },
-        { id: 'palinka', emoji: '🍑', title: 'A Szabad Pálinkafőző', v: { e: -0.5, l: -0.8, n: 0.5, t: 0.5, c: 0.4 },
+        { id: 'palinka', emoji: '🍑', title: 'A Szabad Pálinkafőző', v: { e: -0.5, l: -0.8, n: 0.5, t: 0.5, c: 0.4, g: -0.1, m: 0.1, d: 0.6, k: 0.2, s: 0.4 },
           desc: 'Büszke vagy a magyar hagyományokra, de utálod, ha valaki megmondja, hogyan kell csinálni. A kazán a tiéd, a recept a tiéd, a hatóság pedig maradjon a hivatalban.',
           sunday: 'Ebéden megkínálsz mindenkit, és közben kifejted az államtalanítás elméletét.' },
-        { id: 'szakszi', emoji: '🛠️', title: 'A Szakszervezeti Veterán', v: { e: 0.8, l: 0.2, n: 0.3, t: 0.4, c: 0.1 },
+        { id: 'szakszi', emoji: '🛠️', title: 'A Szakszervezeti Veterán', v: { e: 0.8, l: 0.2, n: 0.3, t: 0.4, c: 0.1, g: 0, m: 0.1, d: 0.4, k: 0.7, s: -0.1 },
           desc: 'Szerinted a munkának tisztelete van, a bérnek minimuma, az ebédszünetnek pedig szent hossza. Minden vitából a kollektív szerződés felé tereled a témát.',
           sunday: 'Ebédnél felállsz, és megkérdezed, ki fizeti a túlórát. Senki sem válaszol.' },
-        { id: 'hazmester', emoji: '🔑', title: 'A Határozott Házmester', v: { e: 0.1, l: 0.9, n: 0.5, t: 0.6, c: 0.1 },
+        { id: 'hazmester', emoji: '🔑', title: 'A Határozott Házmester', v: { e: 0.1, l: 0.9, n: 0.5, t: 0.6, c: 0.1, g: 0.2, m: 0.5, d: 0.2, k: 0.4, s: -0.2 },
           desc: 'A lépcsőház tiszta, a kapukód titkos, a szabály az szabály. Szerinted a világ azért bonyolult, mert túl kevés benne a házirend.',
           sunday: 'Vasárnap te vagy, aki a tányért is rendben visszaviszi, és megjegyzi, ki hagyta nyitva az ajtót.' },
-        { id: 'nomad', emoji: '💻', title: 'A Digitális Nomád Kakaóscsiga-Hiányban', v: { e: -0.6, l: -0.4, n: -0.8, t: -0.8, c: 0.3 },
+        { id: 'nomad', emoji: '💻', title: 'A Digitális Nomád Kakaóscsiga-Hiányban', v: { e: -0.6, l: -0.4, n: -0.8, t: -0.8, c: 0.3, g: 0.2, m: -0.6, d: -0.4, k: -0.8, s: -0.2 },
           desc: 'Ma Lisszabon, holnap valahol laptoppal. A hazádat szereted, csak éppen a wifi jobb máshol. Szerinted a határok rossz ötletek, a távmunka pedig emberi jog.',
           sunday: 'Ebéden felhívod a családot videón, mert épp nem vagy otthon. Sosem vagy.' },
-        { id: 'cinikus', emoji: '🙄', title: 'Az Örök Cinikus (Mindenki Lop)', v: { e: 0, l: 0, n: 0, t: 0, c: 0.95 },
+        { id: 'cinikus', emoji: '🙄', title: 'Az Örök Cinikus (Mindenki Lop)', v: { e: 0, l: 0, n: 0, t: 0, c: 0.95, g: 0, m: 0, d: 0.5, k: -0.3, s: 0.1 },
           desc: 'Nem hiszel senkinek, semmiben, de legalább elég szórakoztatóan. Szerinted minden ígéret kampányszöveg, minden kampányszöveg ígéret, és a kettő között nincs különbség.',
           sunday: 'Ebédnél csak mosolyogsz: „Hát persze. Majd pont ezek.”' },
-        { id: 'bekes', emoji: '🕊️', title: 'A Békés Kompromisszum-Barát', v: { e: 0.1, l: -0.1, n: -0.1, t: -0.1, c: -0.7 },
+        { id: 'bekes', emoji: '🕊️', title: 'A Békés Kompromisszum-Barát', v: { e: 0.1, l: -0.1, n: -0.1, t: -0.1, c: -0.7, g: 0.3, m: -0.8, d: -0.2, k: 0.3, s: 0 },
           desc: 'Hiszel a párbeszédben, a jó szándékban és abban, hogy a vitából valami jó is kisülhet. Néha túl naiv vagy, de legalább te nem veszel részt a kommentháborúkban.',
           sunday: 'Ebéden te vagy az, aki közli: „Mindenkinek igaza van egy kicsit”, majd elosztja a sütit.' },
-        { id: 'hazafias', emoji: '🚩', title: 'A Hazafias Újító', v: { e: 0.2, l: 0.0, n: 0.7, t: -0.5, c: -0.2 },
+        { id: 'hazafias', emoji: '🚩', title: 'A Hazafias Újító', v: { e: 0.2, l: 0.0, n: 0.7, t: -0.5, c: -0.2, g: 0.1, m: 0.6, d: 0.3, k: 0.4, s: 0.2 },
           desc: 'Szereted az országod, és éppen ezért akarod megújítani. Zászló, közösség, de modern: a himnuszra is lehet remix, ha a szívből jön.',
           sunday: 'Ebéden elmeséled, hogy a falunapot ezúttal digitalizálnátok, és senki sem tudja eldönteni, hogy ez jó ötlet-e.' },
-        { id: 'piacos', emoji: '🥕', title: 'A Falusi Piacos Realista', v: { e: -0.3, l: 0.3, n: 0.6, t: 0.5, c: 0.0 },
+        { id: 'piacos', emoji: '🥕', title: 'A Falusi Piacos Realista', v: { e: -0.3, l: 0.3, n: 0.6, t: 0.5, c: 0.0, g: 0.3, m: 0.2, d: 0.4, k: 0.4, s: 0.3 },
           desc: 'Alaposan megnézed az árat, a termelőt és az időjárást. Szerinted a józan ész a legjobb közgazdaságtan, a magyar termék pedig mindig frissebb.',
           sunday: 'Ebéden megmondod, mennyibe került a krumpli, és hogy a tavalyi ennél olcsóbb volt.' },
-        { id: 'szabadelvu', emoji: '📜', title: 'A Szabadelvű Hagyományőrző', v: { e: -0.7, l: -0.3, n: 0.4, t: 0.6, c: 0.1 },
+        { id: 'szabadelvu', emoji: '📜', title: 'A Szabadelvű Hagyományőrző', v: { e: -0.7, l: -0.3, n: 0.4, t: 0.6, c: 0.1, g: -0.3, m: 0.3, d: -0.2, k: -0.2, s: 0 },
           desc: 'Tisztelettel nézed a múltat, de nem szereted, ha az állam bármit előír. Szerinted a hagyomány a család és a közösség dolga, nem a hivataloké.',
           sunday: 'Ebéden felsorolod a családfát, aztán az adókulcsot, és mindkét téma ugyanúgy végződik: „kevesebb beleszólás”.' },
-        { id: 'merleg', emoji: '⚖️', title: 'A Mérsékelt Mérleg', v: { e: 0, l: 0, n: 0, t: 0, c: 0 },
+        { id: 'merleg', bias: 1.25, emoji: '⚖️', title: 'A Mérsékelt Mérleg', v: { e: 0, l: 0, n: 0, t: 0, c: 0, g: 0, m: 0, d: 0, k: 0, s: 0 },
           desc: 'Mindenhol középen állsz, mintha a kiegyensúlyozottság hungarikum lenne. Meghallgatsz minden érvet, és valahogy mindegyikben van igazság. Ez néha bölcsesség, néha csak nem vettél részt a vitában.',
           sunday: 'Ebéden megkérdezed: „Mindkét oldalnak vannak jó pontjai”, mire három ember egyszerre sóhajt.' },
-        { id: 'technokrata', emoji: '📊', title: 'A Táblázatkezelő Technokrata', v: { e: 0.3, l: 0.5, n: -0.3, t: -0.7, c: -0.3 },
+        { id: 'technokrata', emoji: '📊', title: 'A Táblázatkezelő Technokrata', v: { e: 0.3, l: 0.5, n: -0.3, t: -0.7, c: -0.3, g: 0.2, m: 0.1, d: -0.9, k: -0.1, s: -0.9 },
           desc: 'Minden problémára van egy Excel-tábla, és minden Excel-tábla megoldás is. Szerinted a politika annyira működik, amennyire mérni lehet, és ahol nem mérhető, ott még dolgozni kell.',
           sunday: 'Ebédnél diagramon mutatod meg, hogy a rántott hús és a pörkölt valójában ugyanolyan hatékony.' },
-        { id: 'civil', emoji: '🧤', title: 'A Civil Önkéntes', v: { e: 0.7, l: -0.5, n: -0.2, t: -0.5, c: -0.4 },
+        { id: 'civil', emoji: '🧤', title: 'A Civil Önkéntes', v: { e: 0.7, l: -0.5, n: -0.2, t: -0.5, c: -0.4, g: 0.6, m: -0.4, d: 0.2, k: 0.6, s: -0.1 },
           desc: 'Ha baj van, nem vársz: összeszeded a szomszédokat, és megoldjátok. Hiszel a közösségben, a segítségben és abban, hogy a jó ügyekért érdemes időt áldozni.',
-          sunday: 'Ebéden te vagy, aki bejelenti, hogy jövő szombaton szemétszedés lesz, és már mindenkit beírt.' }
+          sunday: 'Ebéden te vagy, aki bejelenti, hogy jövő szombaton szemétszedés lesz, és már mindenkit beírt.' },
+        
+        { id: 'zold', emoji: '🚲', title: 'A Biciklis Természetbarát', v: { e: 0.4, l: -0.3, n: -0.5, t: -0.5, c: -0.1, g: 0.95, m: -0.5, d: 0, k: 0.3, s: -0.2 },
+          desc: 'A kerékpár nálad nem eszköz, hanem világnézet. Szerinted a bolygó nem a következő kormány ügye, hanem a tiéd, és ezt ki is mondod, lehetőleg a dugóban álló autósoknak, tisztelettel.',
+          sunday: 'Ebéden megkérdezed, honnan származik a hús, és ki szállította. Senki nem tudja, ezért mindenki a krumplit eszi.' },
+        { id: 'orszem', emoji: '🛡️', title: 'Az Éber Őrszem', v: { e: 0.1, l: 0.6, n: 0.6, t: 0.4, c: 0.2, g: 0, m: 0.9, d: 0.2, k: 0.3, s: -0.1 },
+          desc: 'Szerinted a béke nem ajándék, hanem szolgálat. Mindig van valaki, akinek résen kell lennie, és te szívesen vagy az. A zárat kétszer ellenőrzöd, a térképet háromszor.',
+          sunday: 'Ebédnél te állsz a leghátul, látod az ajtót, és tudod, hol van a tartalék sütemény.' },
+        { id: 'kocsma', emoji: '🍺', title: 'A Kocsmaasztali Népbölcs', v: { e: 0.2, l: -0.2, n: 0.4, t: 0.3, c: 0.5, g: -0.1, m: 0.2, d: 0.9, k: 0.3, s: 0.5 },
+          desc: 'Nem járt egyetemre, de az élet iskoláját kitűnőre végezte. Szerinted a szakértők a térképet ismerik, te viszont a terepet. Egy korsó mellett az egész világ megoldható, legalábbis a következő körig.',
+          sunday: 'Ebéden te vagy, aki kijelenti: „Nem kell ahhoz tanulmány, hogy ezt lássa az ember.” Mindenki bólint, mert megkapta a levest.' },
+        { id: 'jos', emoji: '🔮', title: 'A Csillagjós Intuíció-Mester', v: { e: 0, l: -0.4, n: -0.2, t: 0.2, c: -0.2, g: 0.4, m: -0.5, d: 0.2, k: 0.2, s: 0.95 },
+          desc: 'A horoszkópod szerint ma jó napod lesz, és te hiszel is neki. Az érzéseid többet számítanak, mint a táblázatok, a jelek pedig mindenhol ott vannak: a lift szintjében, a buszszámban, a kávé habjában.',
+          sunday: 'Ebéden megkérdezed mindenki csillagjegyét, majd az asztalnál ülők helyét átrendezed a „rezgések” miatt.' },
+        { id: 'remete', emoji: '🏔️', title: 'A Független Remete', v: { e: -0.4, l: -0.6, n: -0.2, t: -0.2, c: 0.3, g: 0.2, m: -0.2, d: -0.1, k: -0.95, s: 0 },
+          desc: 'A legjobb társaság a saját társaságod, a legjobb találkozó pedig az, amelyik elmarad. Szerinted mindenki járja a maga útját, és ha lehet, ne ugyanazon a szűk ösvényen.',
+          sunday: 'Vasárnap „megnézed” az ebédet, vagyis küldesz egy képet a tányérodról, és már indulsz is vissza a csendbe.' }
+    
     ];
 
     // "Utált értékek": társadalmi bosszantó dolgok. Párokban kell dönteni, melyik zavar jobban. A pontszám = hányszor választottad.
@@ -137,15 +172,9 @@
     ];
 
     // =========================================================
-    // HOSSZÚ TESZT (96 kérdés: 60 értékrész + 36 utált-érték rész)
-    //  - 40 értékállítás: a rövid teszt 32 állítása + 7 ellentétes "iker" + 1 új. Sok értékállítás a zavar-skálákra is hat (h).
-    //  - 24 "zavar-állítás": az utált értékek skáláit mérik (h), és sok közülük a tengelyeket is mozgatja (w).
-    //  - 4 hazugság-próba: olyan "soha"-állítások, amik gyakorlatilag senkire sem igazak.
-    // Az őszinteséget háromféleképp vizsgáljuk: lehetetlen állítások, ellentmondó ikerpárok, "mindenre ugyanazt nyomtad".
-    // A h súly pozitív: aki egyetért, annál jobban zavar az adott érték; negatív: kevésbé zavar.
+    // ÉRTÉK-ÁLLÍTÁSOK (A rész): gyors 50 (tier 1), részletes 100 (tier 1+2), extra hosszú 150 (tier 1+2+3), mindegyik mellett hazugság-próbák.
+    // Sok állítás a "zavar-skálákra" is hat (h), így a két rész kölcsönösen erősíti egymást, ha a B részt is kitöltöd.
     // =========================================================
-    var LONG_DROP = { civil: 1, nyelv2: 1, projekt: 1, strand: 1, kamera: 1, sajat: 1, hirek: 1, termek: 1 };
-
     var H_BOTH = {
         sorkaton: { anarchia: 0.4 }, palinka: { anarchia: -0.4 }, piac: { potyazo: 0.5 }, tanar: { figyelem: 0.3 }, privat: { potyazo: 0.4 },
         hazassag: { szexizmus: 0.4 }, csalad: { szexizmus: -0.3 }, unnep: { zaj: -0.3 }, tuntetes: { zaj: -0.3 },
@@ -167,10 +196,11 @@
         { id: 'moderal', text: 'A közösségi oldalakon a károsnak ítélt tartalmat gyorsan le kell venni, még ha néha tévedésből is.', w: { l: 1, c: 0.3 }, h: { tragar: 0.4 } },
         { id: 'kozmeghall', text: 'A közmeghallgatásokra el kellene járni: ha nem megyünk, nincs jogunk panaszkodni.', joke: 'A kávé és a pogácsa nem biztos, hogy van.', w: { c: -1, l: 0.3 }, h: { figyelem: 0.5 } }
     ];
-    // [id, id]: egyszerre egyetérteni mindkettővel ellentmondás
+    // [id, id]: egyszerre egyetérteni mindkettővel ellentmondás (csak akkor számít, ha a mód mindkettőt kérdezi)
     var TWINS = [
         ['sorkaton', 'sorkaton2'], ['euro', 'euro2'], ['szavazat', 'szavazat2'], ['palinka', 'palinka2'],
-        ['bkk', 'bkk2'], ['vallalkozo', 'adoemel'], ['masodik', 'kemeny']
+        ['bkk', 'bkk2'], ['vallalkozo', 'adoemel'], ['masodik', 'kemeny'],
+        ['g_muanyag', 'g_muanyag2'], ['d_nepakarat', 'd_nepakarat2'], ['m_haboru', 'm_haboru2'], ['k_aldozat', 'k_siker'], ['s_dont_esz', 's_dont_erzes']
     ];
 
     // Hazugság-próba: négy "soha / mindig" állítás, amit gyakorlatilag senki nem mondhat el magáról igazán (kevés, hogy ne legyen unalmas).
@@ -179,47 +209,6 @@
         { id: 'l_eperc', text: 'Soha nem mondtam, hogy „öt perc, és ott vagyok”, miközben még el sem indultam.', joke: 'A cipő nem számít, az még a lépcsőházban van.' },
         { id: 'l_feltetel', text: 'Mindig elolvasom a felhasználási feltételeket, mielőtt az „Elfogadom” gombra kattintok.', joke: 'Mind a 94 oldalt.' },
         { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' }
-    ];
-
-    // Zavar-állítások (társadalmi bosszantó dolgok): az egyetértés azt jelenti, hogy ez engem zavar.
-    // Az A részben 14 van (ezek a tengelyeket is mozgatják, ahol van w), a B részben 20: minden értéket pontosan 2.
-    var HATED_A_ITEMS = [
-        { id: 'z_ron1', text: 'Idegesít, ha valaki összefirkálja vagy megrongálja a közös dolgokat: a padot, a buszmegállót, a lépcsőházat.', joke: 'A filctoll nem művészeti eszköz, ha nem a sajátodon használod.', h: { rongalas: 1 }, w: { l: 0.5 } },
-        { id: 'z_kor1', text: 'Idegesít, ha valaki az erdőben vagy a parkban hagyja a szemetét.', joke: 'A csokipapír nem lebomló, csak „kicsit” lebomló.', h: { kornyezet: 1 }, w: { l: 0.4 } },
-        { id: 'z_kor2', text: 'Zavar, ha a gyár vagy a szomszéd mindent a levegőbe ereget, és senkit nem érdekel.', joke: 'A szomszéd „csak egy kis” avart éget, a fél utca köhög.', h: { kornyezet: 1 }, w: { e: 0.3 } },
-        { id: 'z_fig1', text: 'Idegesít, ha beszélgetés közben a másik a telefonját nézi.', joke: 'A „folytasd, hallgatlak” mondat a legnagyobb hazugság, ha közben görgetnek.', h: { figyelem: 1 } },
-        { id: 'z_tra1', text: 'Idegesít, ha valaki a gyerekek előtt is válogatás nélkül káromkodik.', joke: 'A gyerek mindent megjegyez, főleg a legrosszabbat.', h: { tragar: 1 }, w: { t: 0.3 } },
-        { id: 'z_tra2', text: 'Zavar, ha a vita érvek helyett sértésekbe és csúnya szavakba megy át.', joke: 'Aki először káromkodik, az már vesztett. Vagy legalább kifogyott az érvekből.', h: { tragar: 1 } },
-        { id: 'z_szx1', text: 'Idegesít, ha valakit a neme miatt néznek le vagy csúfolnak.', joke: 'A „ez férfi dolog” mondat általában ott hangzik el, ahol a mosogatás kezdődik.', h: { szexizmus: 1 }, w: { t: -0.4 } },
-        { id: 'z_szx2', text: 'Zavar, ha egy állásinterjún a nőtől azt kérdezik, mikor szeretne gyereket.', h: { szexizmus: 1 }, w: { t: -0.3 } },
-        { id: 'z_ana1', text: 'Idegesít, ha valaki a piros lámpán is átmegy, mert „úgysincs rendőr”.', joke: 'A zebrán a gyalogos mindig „csak most” siet.', h: { anarchia: 1 }, w: { l: 0.6 } },
-        { id: 'z_tol1', text: 'Idegesít, ha valaki a közös hűtőből viszi el más ebédjét.', joke: 'A lopott joghurt nem „maradék”, hanem bizonyíték.', h: { tolvaj: 1 } },
-        { id: 'z_tol2', text: 'Zavar, ha valaki más munkáját a sajátjaként adja el.', joke: 'Az ötlet, amit „együtt találtunk ki”, rendszerint az enyém volt.', h: { tolvaj: 1 }, w: { c: 0.2 } },
-        { id: 'z_zaj1', text: 'Idegesít, ha a szomszéd éjjel fúr, zenél vagy ordít.', joke: 'A „csak egy kis zene” este tízkor már házibuli.', h: { zaj: 1 } },
-        { id: 'z_ple1', text: 'Idegesít, ha valaki a háttérben pletykál, szemben meg mosolyog.', joke: 'A „nem mondom el senkinek” a legnagyobb magyar hazugság.', h: { pletyka: 1 } },
-        { id: 'z_pot1', text: 'Idegesít, ha a csoportmunkában valaki semmit nem csinál, de a jegyet elfogadja.', joke: 'A „én is ott voltam” nem munka.', h: { potyazo: 1 }, w: { e: -0.3 } }
-    ];
-    var HATED_B_ITEMS = [
-        { id: 'z_ron2', text: 'Bosszant, ha a nemrég felújított játszótéren egy hét múlva már törött a hinta.', joke: 'A felújítás ideje nálunk a rongálás előtti szünet.', h: { rongalas: 1 } },
-        { id: 'z_ron3', text: 'Zavar, ha valaki szándékosan eltöri, ami másoké, csak szórakozásból.', joke: 'A „viccből” csak az nevet, aki nem fizeti a javítást.', h: { rongalas: 1 } },
-        { id: 'z_kor3', text: 'Bosszant, ha valaki az ablakon dobja ki a csikket vagy az üres flakont.', joke: 'A gravitáció nem szemetesláda.', h: { kornyezet: 1 } },
-        { id: 'z_kor4', text: 'Zavar, ha a házi szemetet a patakparton vagy az út szélén hagyják.', joke: 'A patak ettől még nem lesz szemétszállító.', h: { kornyezet: 1 } },
-        { id: 'z_fig2', text: 'Zavar, ha valaki ötször elkérdezi ugyanazt, mert közben nem figyelt.', joke: 'A „mit mondtál?” a figyelemhiány másik neve.', h: { figyelem: 1 } },
-        { id: 'z_fig3', text: 'Bosszant, ha a sorban az előttem álló csak a pénztárnál kezd el gondolkodni, mit akar.', joke: 'A pénztár nem a döntés helye.', h: { figyelem: 1 } },
-        { id: 'z_tra3', text: 'Bosszant, ha a buszon valaki hangosan, csúnya szavakkal telefonál.', joke: 'A buszon mindenki hallgatózik, még a sofőr is.', h: { tragar: 1 } },
-        { id: 'z_tra4', text: 'Zavar, ha az internetes hozzászólásokban a durva szó a normális hangnem.', joke: 'A klaviatúra mögött mindenki bátor, és kevés udvarias.', h: { tragar: 1 } },
-        { id: 'z_szx3', text: 'Bosszant, ha a „férfiak úgyis ilyenek, a nők úgyis olyanok” mondattal zárják le a vitát.', joke: 'Az „úgyis” szó a közhelyek királynője.', h: { szexizmus: 1 } },
-        { id: 'z_szx4', text: 'Zavar, ha a megjegyzés a nemről szól, nem a munkáról.', joke: 'A jó munkának nincs neme, csak határideje.', h: { szexizmus: 1 } },
-        { id: 'z_ana2', text: 'Zavar, ha egy közösségben senki nem tartja be a megbeszélt szabályokat.', joke: 'A házirend nem dísz, de a falon ritkán ér célba.', h: { anarchia: 1 }, w: { l: 0.5 } },
-        { id: 'z_ana3', text: 'Bosszant, ha a rendetlenségre azt mondják: „szabad ország”.', joke: 'A szabadság nem a mosatlanra szól.', h: { anarchia: 1 } },
-        { id: 'z_tol3', text: 'Bosszant, ha valaki jegy nélkül utazik, és közben büszke rá.', joke: 'A „nem járt ellenőr” még nem érv.', h: { tolvaj: 1 } },
-        { id: 'z_tol4', text: 'Zavar, ha valaki a másik kárára csal: a vizsgán, a játékban vagy az adóban.', joke: 'A csalás nem ügyesség, csak lebukásra váró helyzet.', h: { tolvaj: 1 } },
-        { id: 'z_zaj2', text: 'Zavar, ha a vonaton valaki hangosan hallgat zenét a telefonjáról.', joke: 'A fülhallgató nem luxus, hanem szomszédi jószándék.', h: { zaj: 1 } },
-        { id: 'z_zaj3', text: 'Bosszant, ha a moziban beszélgetnek, csomagolóznak vagy világít a telefon.', joke: 'A popcorn csomagolása a mozi legnagyobb horror-effektje.', h: { zaj: 1 } },
-        { id: 'z_ple2', text: 'Zavar, ha tényként terjesztenek olyat, amit senki nem ellenőrzött.', joke: 'A „hallottam valakitől” a legmegbízhatóbb hamis forrás.', h: { pletyka: 1 } },
-        { id: 'z_ple3', text: 'Bosszant, ha a „csak mondom” mögé bújva szúrnak oda valakinek.', joke: 'A „csak mondom” után mindig következik valami, ami nem „csak”.', h: { pletyka: 1 } },
-        { id: 'z_pot2', text: 'Zavar, ha valaki mindig a másikra hagyja a mosogatást.', joke: 'A mosatlan nem tűnik el, csak halasztódik.', h: { potyazo: 1 } },
-        { id: 'z_pot3', text: 'Bosszant, ha a társasház közös költségét mindenki fizeti, csak az egyik lakó nem.', joke: 'A lift is csak azoknak jár, akik kifizették.', h: { potyazo: 1 } }
     ];
 
     // =========================================================
@@ -244,33 +233,6 @@
         PREJ.push({ id: t.id + '_dn', topic: t.id, side: 'dn', name: t.dn });
     });
 
-    // Témánként 5 tétel: fenntartás felfelé (+), fenntartás lefelé (+), két fordított állítás (az egyetértés csökkenti a fenntartást),
-    // és egy "ellentétes hatású" állítás, ami az egyik skálát növeli, a másikat csökkenti.
-    var PREJ_ST = [
-        { id: 'p_nem1', text: 'A gyereknevelés és a háztartás alapvetően a nők dolga.', g: { nem_up: 1 }, w: { t: 0.6 } },
-        { id: 'p_nem3', text: 'A férfiak többsége eleve elnyomó, még ha nem is tud róla.', g: { nem_dn: 1 }, w: { t: -0.4 } },
-        { id: 'p_nem5', text: 'A gyereknevelés és a háztartás mindkét szülő közös dolga, nemtől függetlenül.', g: { nem_up: -1 }, w: { t: -0.4 } },
-        { id: 'p_nem6', text: 'A férfiak többsége tisztességesen áll a nemek egyenjogúságához.', g: { nem_dn: -1 } },
-        { id: 'p_nem7', text: 'A nők sérelmei eltúlzottak, miközben a férfiak gondjaira alig figyel valaki.', g: { nem_up: 0.7, nem_dn: -0.4 }, w: { t: 0.3 } },
-
-        { id: 'p_kulf1', text: 'Nem szívesen laknék olyan környéken, ahol sok a külföldi.', g: { kulf_up: 1 }, w: { n: 0.6 } },
-        { id: 'p_kulf3', text: 'Aki büszke a magyarságára, az általában szűk látókörű.', g: { kulf_dn: 1 }, w: { n: -0.6 } },
-        { id: 'p_kulf5', text: 'Aki beilleszkedik és megtanul magyarul, az ugyanolyan magyar, mint én.', g: { kulf_up: -1 }, w: { n: -0.4 } },
-        { id: 'p_kulf6', text: 'A magyarságára büszke ember is lehet nyitott és világlátott.', g: { kulf_dn: -1 } },
-        { id: 'p_kulf7', text: 'A saját hazánk dolgai előbbre valók, mint a külföldiek bajai.', g: { kulf_up: 0.7, kulf_dn: -0.4 }, w: { n: 0.5 } },
-
-        { id: 'p_lgbt1', text: 'Zavar, ha két azonos nemű ember nyilvánosan csókolózik.', g: { lgbt_up: 1 }, w: { t: 0.6 } },
-        { id: 'p_lgbt3', text: 'Aki a hagyományos családmodellt védi, az eleve gyűlölködő.', g: { lgbt_dn: 1 }, w: { t: -0.5 } },
-        { id: 'p_lgbt5', text: 'Két ember szerelme magánügy: mindegy, hogy azonos nemű vagy sem.', g: { lgbt_up: -1 }, w: { t: -0.4 } },
-        { id: 'p_lgbt6', text: 'Aki a hagyományos családot választja, attól még lehet elfogadó másokkal.', g: { lgbt_dn: -1 } },
-        { id: 'p_lgbt7', text: 'Ma már inkább a hagyományos családban élőket éri hátrány, mint a szivárványos közösséget.', g: { lgbt_up: 0.7, lgbt_dn: -0.4 }, w: { t: 0.4 } },
-
-        { id: 'p_vall1', text: 'Zavar, ha egy másik vallás szokásai láthatóvá válnak a környezetemben.', g: { vall_up: 1 }, w: { n: 0.3 } },
-        { id: 'p_vall3', text: 'A vallásos emberek általában kevésbé gondolkodnak önállóan.', g: { vall_dn: 1 }, w: { t: -0.4 } },
-        { id: 'p_vall5', text: 'Egy másik hitű szomszéd ugyanolyan jó szomszéd lehet, mint bárki más.', g: { vall_up: -1 } },
-        { id: 'p_vall6', text: 'A hívők között is sok az önálló, gondolkodó ember.', g: { vall_dn: -1 }, w: { t: 0.2 } },
-        { id: 'p_vall7', text: 'A saját hitünk és hagyományunk védelme fontosabb, mint a más vallások szokásainak hangsúlyozása.', g: { vall_up: 0.7, vall_dn: -0.4 }, w: { t: 0.4 } }
-    ];
 
     // Tükörpárok (a rövid tesztben és az utált-tesztben): melyik hozzáállás zavar jobban? min = a kisebbségi oldal lenézése, maj = a többségi oldalé.
     var MIRROR = [
@@ -283,7 +245,6 @@
         { topic: 'lgbt', min: 'Aki kiszól az utcán egy kézen fogva sétáló párnak.', maj: 'Aki gúnyolódik azon, aki a hagyományos értékeket tiszteli.' },
         { topic: 'vall', min: 'Aki szerint a más hitűek nem lehetnek megbízhatók.', maj: 'Aki szerint a hívők nem tudnak önállóan gondolkodni.' }
     ];
-
 
     // =========================================================
     // Segítség (mit kérdez pontosan) és további poénok. A help a kérdés alatt halványan jelenik meg.
@@ -380,54 +341,132 @@
         adoemel: 'Az adóemelésnek általában az adózó örül a legkevésbé.',
         szemet: 'A kukától három méterre eldobott csikk is számít.',
     };
-    // Az előítélet-barométer tételeihez nincs poén, csak magyarázat: a téma nem vicc, a hozzáállás mérése a lényeg.
-    Object.assign(HELP, {
-        p_nem1: 'Azt kérdezzük, szerinted a gyereknevelés és a háztartás eleve a nők feladata-e. Az egyetértés a hagyományos szerepek felé visz.',
-        p_nem3: 'Azt kérdezzük, gyanakszol-e a férfiakra csak azért, mert férfiak. Az egyetértés a férfiakkal szembeni fenntartást növeli.',
-        p_nem5: 'Fordított állítás: az egyetértés itt a nyitottabb, egyenlőbb hozzáállást jelzi.',
-        p_nem6: 'Fordított állítás: az egyetértés itt a férfiakkal szembeni fenntartást csökkenti.',
-        p_nem7: 'Ellentétes hatású állítás: az egyetértés a nők ügyével szembeni fenntartást növeli, a férfiakkal szembenit csökkenti.',
-        p_kulf1: 'Azt kérdezzük, zavarna-e, ha a környéken sok külföldi élne. Az egyetértés a külföldiekkel szembeni fenntartást növeli.',
-        p_kulf3: 'Azt kérdezzük, gyanúsnak tartod-e azt, aki büszke a magyarságára. Az egyetértés a hazafiakkal szembeni fenntartást növeli.',
-        p_kulf5: 'Fordított állítás: az egyetértés itt a nyitottabb, befogadóbb hozzáállást jelzi.',
-        p_kulf6: 'Fordított állítás: az egyetértés itt a hazafiakkal szembeni fenntartást csökkenti.',
-        p_kulf7: 'Ellentétes hatású állítás: az egyetértés a külföldiekkel szembeni fenntartást növeli, a hazafiakkal szembenit csökkenti.',
-        p_lgbt1: 'Azt kérdezzük, zavar-e a közterületi, azonos neműek közötti gyengédség. Az egyetértés az LMBTQ+ emberekkel szembeni fenntartást növeli.',
-        p_lgbt3: 'Azt kérdezzük, gyűlölködőnek tartod-e a hagyományos családmodell védőit. Az egyetértés a hagyományvédőkkel szembeni fenntartást növeli.',
-        p_lgbt5: 'Fordított állítás: az egyetértés itt a nyitottabb hozzáállást jelzi.',
-        p_lgbt6: 'Fordított állítás: az egyetértés itt a hagyományvédőkkel szembeni fenntartást csökkenti.',
-        p_lgbt7: 'Ellentétes hatású állítás: az egyetértés az LMBTQ+ emberekkel szembeni fenntartást növeli, a hagyományvédőkkel szembenit csökkenti.',
-        p_vall1: 'Azt kérdezzük, zavar-e egy másik vallás látható jelenléte (öltözet, ünnep). Az egyetértés a más hitűekkel szembeni fenntartást növeli.',
-        p_vall3: 'Azt kérdezzük, gondolkodnak-e kevésbé a hívők. Az egyetértés a vallásosakkal szembeni fenntartást növeli.',
-        p_vall5: 'Fordított állítás: az egyetértés itt a más hitűekkel szembeni nyitottságot jelzi.',
-        p_vall6: 'Fordított állítás: az egyetértés itt a vallásosakkal szembeni fenntartást csökkenti.',
-        p_vall7: 'Ellentétes hatású állítás: az egyetértés a más hitűekkel szembeni fenntartást növeli, a vallásosakkal szembenit csökkenti.'
-    });
     function enrich(list) {
         list.forEach(function (st) {
             if (HELP[st.id]) st.help = HELP[st.id];
             if (!st.joke && JOKE[st.id]) st.joke = JOKE[st.id];
         });
     }
-    [STATEMENTS, NEW_V, HATED_A_ITEMS, HATED_B_ITEMS, PREJ_ST, LIES].forEach(enrich);
-    // A zavar-állításoknál az automatikus magyarázat elég: az egyetértés azt jelenti, hogy ez engem zavar.
-    [HATED_A_ITEMS, HATED_B_ITEMS].forEach(function (l) { l.forEach(function (st) { if (!st.help) st.help = 'Egyetértés = ez engem zavar. (Téma: ' + HATED.filter(function (h) { return st.h[h.id]; })[0].name.toLowerCase() + ')'; }); });
+    [OLD_ST, NEW_V, LIES].forEach(enrich);
+
+    // ---------- A tételek összeállítása ----------
+    // Az eredeti állítások szintje (gyors / részletes / extra). Mindegyik tengelyen szintenként 5-5 állítás van.
+    var TIER_OLD = {
+        bkk: 1, bkk2: 1, tanar: 1, piac: 1, albi: 1,
+        sorkaton: 1, sorkaton2: 1, tuntetes: 1, kamera: 1, allam: 1,
+        euro: 1, euro2: 1, hatar: 1, eu: 1, nyelv: 1,
+        csalad: 1, hazassag: 1, vallas: 1, smink: 1, kakaos: 1,
+        szavazat: 1, szavazat2: 1, politikus: 1, hivatal: 1, hirek: 1,
+        privat: 2, strand: 2, vallalkozo: 2, adoemel: 2, nyugdij: 2,
+        palinka: 2, palinka2: 2, halal: 2, fegyelem: 2, masodik: 2,
+        unnep: 2, nyelv2: 2, bevandor: 2,
+        ai: 2, kisbolt: 2, projekt: 2,
+        haver: 2, panasz: 2, civil: 2, kozmeghall: 2,
+        kemeny: 3, szemet: 3, moderal: 3, termek: 3, sajat: 3
+    };
+    var LIE_TIER = { l_hazug: 1, l_telefon: 2, l_eperc: 2, l_feltetel: 3 };
 
     function mk(kind, part, st) { var o = { kind: kind, part: part }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); return o; }
 
-    var LONG_A = [], LONG_B = [];
-    STATEMENTS.forEach(function (st) {
-        if (LONG_DROP[st.id]) return;
+    var VALUE_ALL = [];
+    OLD_ST.forEach(function (st) {
         var o = mk('v', 'a', st);
+        o.tier = TIER_OLD[st.id];
         if (H_BOTH[st.id]) o.h = H_BOTH[st.id];
-        LONG_A.push(o);
+        VALUE_ALL.push(o);
     });
-    NEW_V.forEach(function (st) { LONG_A.push(mk('v', 'a', st)); });
-    HATED_A_ITEMS.forEach(function (st) { LONG_A.push(mk('h', 'a', st)); });
-    LIES.forEach(function (st) { var o = mk('l', 'a', st); o.w = {}; o.lie = true; LONG_A.push(o); });
-    HATED_B_ITEMS.forEach(function (st) { LONG_B.push(mk('h', 'b', st)); });
-    PREJ_ST.forEach(function (st) { LONG_B.push(mk('p', 'b', st)); });
-    var LONG = LONG_A.concat(LONG_B);
+    NEW_V.forEach(function (st) { var o = mk('v', 'a', st); o.tier = TIER_OLD[st.id]; VALUE_ALL.push(o); });
+    ITEMS.VALUE.forEach(function (st) { VALUE_ALL.push(mk('v', 'a', st)); });
+    var LIE_ALL = LIES.map(function (st) { var o = mk('l', 'a', st); o.w = {}; o.lie = true; o.tier = LIE_TIER[st.id]; return o; });
+
+    var HATED_NAME = {};
+    HATED.forEach(function (h) { HATED_NAME[h.id] = h.name.toLowerCase(); });
+    var ROLE_HELP = {
+        R: 'Fordított állítás: az egyetértés itt azt jelzi, hogy ez kevésbé zavar.',
+        X: 'Összehasonlítás: az egyetértés az elsőnek említett dolgot teszi zavaróbbá, a másodikat kevésbé zavaróvá.',
+        S: 'Helyzetfüggő állítás: egyetértés = ez akkor is zavar, ha van mentség.'
+    };
+    var HATED_ALL = ITEMS.HATED_B.map(function (st) {
+        var o = mk('h', 'b', st);
+        if (!o.help) {
+            if (o.role === 'D') {
+                var main = Object.keys(o.h).sort(function (a, b) { return Math.abs(o.h[b]) - Math.abs(o.h[a]); })[0];
+                o.help = 'Egyetértés = ez engem zavar. (Téma: ' + HATED_NAME[main] + ')';
+            } else o.help = ROLE_HELP[o.role];
+        }
+        return o;
+    });
+    var PREJ_ALL = ITEMS.PREJ_B.map(function (st) { return mk('p', 'b', st); });
+    var ALL = VALUE_ALL.concat(LIE_ALL, HATED_ALL, PREJ_ALL);
+
+    // Kevert, de egyenletes sorrend: tengelyenként (témánként) véletlenszerű, a csoportok egyenletesen elosztva, az ikrek egymástól távol.
+    // A magot rögzítettük, így mindenki ugyanazt a sorrendet kapja, és a teszt tesztelhető.
+    function rng(seed) {
+        var a = seed >>> 0;
+        return function () {
+            a = (a + 0x6D2B79F5) >>> 0;
+            var t = a;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+    function groupOf(it) {
+        if (it.kind === 'l') return 'lie';
+        var o = it.kind === 'v' ? it.w : it.kind === 'h' ? it.h : it.g;
+        var best = null;
+        Object.keys(o || {}).forEach(function (k) { if (best === null || Math.abs(o[k]) > Math.abs(o[best])) best = k; });
+        return it.kind === 'p' ? best.split('_')[0] : best;
+    }
+    function spread(items, seed) {
+        var rnd = rng(seed), groups = {};
+        items.forEach(function (it) { var g = groupOf(it); (groups[g] = groups[g] || []).push(it); });
+        var keyed = [];
+        Object.keys(groups).sort().forEach(function (g) {
+            var arr = groups[g];
+            for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)); var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; }
+            arr.forEach(function (it, i) { keyed.push({ it: it, k: (i + 0.15 + rnd() * 0.7) / arr.length }); });
+        });
+        keyed.sort(function (a, b) { return a.k - b.k; });
+        return keyed.map(function (x) { return x.it; });
+    }
+    var MIN_GAP = 10;
+    function separateTwins(list) {
+        var pos = {};
+        for (var round = 0; round < 8; round++) {
+            var moved = false;
+            list.forEach(function (it, i) { pos[it.id] = i; });
+            TWINS.forEach(function (p) {
+                var a = pos[p[0]], b = pos[p[1]];
+                if (a === undefined || b === undefined || Math.abs(a - b) >= MIN_GAP) return;
+                var hi = Math.max(a, b), lo = Math.min(a, b);
+                var to = hi + MIN_GAP + 4 < list.length ? hi + MIN_GAP + 4 : Math.max(0, lo - MIN_GAP - 4);
+                var tmp = list[hi]; list[hi] = list[to]; list[to] = tmp;
+                list.forEach(function (it, i) { pos[it.id] = i; });
+                moved = true;
+            });
+            if (!moved) break;
+        }
+        return list;
+    }
+    function tierOf(list, max) { return list.filter(function (it) { return it.tier <= max; }); }
+
+    // Az A rész listái módonként (az állítások és a hazugság-próbák együtt)
+    var A_LISTS = {
+        short: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL), 1), 101)),
+        long: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL), 2), 202)),
+        xlong: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL), 3), 303))
+    };
+    // A B rész: előbb az utált értékek, utána az előítélet-barométer tételei
+    function bList(max, seed) { return spread(tierOf(HATED_ALL, max), seed).concat(spread(tierOf(PREJ_ALL, max), seed + 1)); }
+    var B_LISTS = { short: [], long: bList(1, 404), xlong: bList(2, 505) };
+    B_LISTS.hlong = B_LISTS.long;
+    // Az ikerpárok csak azokban a módokban számítanak, ahol mindkét tagot megkérdezzük
+    function twinsIn(list) {
+        var ids = {};
+        list.forEach(function (it) { ids[it.id] = true; });
+        return TWINS.filter(function (p) { return ids[p[0]] && ids[p[1]]; });
+    }
 
     // Az őszinteség-mérő sávjai (alsó határ szerint, csökkenő sorrendben)
     var HONESTY_TIERS = [
@@ -438,87 +477,61 @@
         { min: 0, name: 'Pinokkió-szint', text: 'A teszt orra is megnőtt, miközben értékelt. Az eredményt csak fenntartással érdemes olvasni.' }
     ];
 
+    // Megbízhatóság: figyelmeztető jelzések (a sorszám a megosztott linkben a bitmaszk helye), sávok és a tengelyek biztosságának szintjei
+    var REL_FLAGS = [
+        { id: 'straight', text: 'Szinte mindenre ugyanazt válaszoltad, ezért a válaszok nem rajzolnak ki valódi képet.' },
+        { id: 'lies', text: 'A „soha / mindig” állítások közül lehetetleneknek is bólintottál.' },
+        { id: 'twins', text: 'Egymásnak ellentmondó állításokkal is egyetértettél.' },
+        { id: 'neutral', text: 'Sok válaszod közepes vagy „passz-féle” volt, ezért kevés a támpont.' },
+        { id: 'skips', text: 'Sok kérdést kihagytál, ezért kevesebb adatból számoltunk.' },
+        { id: 'axes', text: 'Több tengelyen ellentmondó válaszaid voltak, vagy kevés volt a támpont.' },
+        { id: 'mixed', text: 'A típusod nem egyértelmű: két típus majdnem egyformán illik rád.' },
+        { id: 'lowfit', text: 'Egyik tréfás típus sem illik igazán rád, ez egy ritka, vegyes profil.' },
+        { id: 'scales', text: 'Néhány utált-érték vagy előítélet-skálán ellentmondtál magadnak.' },
+        { id: 'flat', text: 'Nincs kirívó utált értéked: a válaszaid nem mutatnak erős preferenciát.' },
+        { id: 'few', text: 'Rövid teszt: tengelyenként csak öt állításból dolgozik, ezért tágabb a hibahatár.' },
+        { id: 'mirror', text: 'A tükörpárokban többször ellentétes irányba döntöttél, ezért a téma eredménye középre húzódik.' }
+    ];
+    var REL_TIERS = [
+        { min: 80, id: 'high', name: 'Megbízható', text: 'Következetes válaszok: az eredmény jó eséllyel tükrözi a valódi nézeteidet.' },
+        { min: 60, id: 'good', name: 'Többnyire megbízható', text: 'Néhány kisebb ellentmondás vagy bizonytalanság volt, de a kép összességében stabil.' },
+        { min: 40, id: 'unsure', name: 'Bizonytalan', text: 'Több válaszod ellentmond egymásnak, vagy sok volt a közepes válasz: az eredményt fenntartással olvasd.' },
+        { min: 0, id: 'low', name: 'Nem megbízható', text: 'Az ellentmondások miatt ez az eredmény inkább játék, mint tükör. Próbáld meg újra, lassabban és következetesebben.' }
+    ];
+    var AXIS_LEVELS = [
+        { id: 0, name: 'bizonytalan', text: 'ellentmondó vagy kevés válasz' },
+        { id: 1, name: 'közepes', text: 'kisebb ellentmondás' },
+        { id: 2, name: 'biztos', text: 'következetes válaszok' }
+    ];
 
     // =========================================================
     // TESZT-VERZIÓ
     // A megosztott link tartalmazza, melyik verzióval készült az eredmény (a bináris link első bájtjának felső fele,
     // a régi JSON linkek mind az 1-es verzió). Ha egy kérdés vagy skála jelentése változik, a VERSION nő, és a régi
-    // jelentést a LEGACY őrzi, hogy a korábban megosztott eredmények továbbra is helyesen jelenjenek meg.
+    // jelentést a LEGACY őrzi (az ertektest-legacy.js-ben), hogy a korábban megosztott eredmények továbbra is helyesen jelenjenek meg.
     // =========================================================
-    var VERSION = 2;
+    var VERSION = 3;
     var VERSIONS = [
-        { v: 1, date: '2026-10-24', note: 'Az első kiadás: az utált értékek politikai-ideológiai dolgok voltak (pénzhajhászás, parancsuralom, pátosz és társaik).' },
-        { v: 2, date: '2026-10-25', note: 'Az utált értékek társadalmi bosszantó dolgok lettek (rongálás, környezetszennyezés, figyelmetlenség, trágárság, szexizmus és társaik).' }
+        { v: 1, date: '2026-10-24', note: 'Az első kiadás: öt tengely, az utált értékek politikai-ideológiai dolgok voltak (pénzhajhászás, parancsuralom, pátosz és társaik).' },
+        { v: 2, date: '2026-10-25', note: 'Az utált értékek társadalmi bosszantó dolgok lettek (rongálás, környezetszennyezés, figyelmetlenség, trágárság, szexizmus és társaik); még mindig öt tengely.' },
+        { v: 3, date: '2026-10-25', note: 'Tíz tengelyes értékrend (gyors 50, részletes 100, extra hosszú 150 állítással), megbízhatósági jelzés minden eredményhez, az utált értékek és az előítélet-barométer opcionális, bonyolultabb és tükrösebb kérdésekkel, kategóriánkénti megosztható képek.' }
     ];
-    var LEGACY = {
-        1: {
-            HATED: [
-                {
-                    "id": "penz",
-                    "name": "Pénzhajhászás",
-                    "blurb": "amikor mindent az üzlet dönt el",
-                    "roast": "Szerinted nem minden áru: a barátság, a naplemente és a Balaton sem."
-                },
-                {
-                    "id": "egyenlo",
-                    "name": "Kényszerű egyenlősdi",
-                    "blurb": "amikor mindenki ugyanannyit kap, akármit tett",
-                    "roast": "Szerinted az igazságosság nem egyforma szelet tortát jelent."
-                },
-                {
-                    "id": "parancs",
-                    "name": "Parancsuralom",
-                    "blurb": "amikor az az érv, hogy „mert én mondtam”",
-                    "roast": "Nálad az érvelés nem hangerő kérdése."
-                },
-                {
-                    "id": "szabados",
-                    "name": "Felelőtlen szabadosság",
-                    "blurb": "amikor mindenki azt csinál, amit akar, és másokra marad a rendetlenség",
-                    "roast": "Szerinted a szabadság addig szép, amíg valaki nem a te kapudba parkol."
-                },
-                {
-                    "id": "patosz",
-                    "name": "Nemzeti pátosz",
-                    "blurb": "amikor a hazafiasságot hangerővel mérik",
-                    "roast": "Neked a szeretet a falunapi hurrázásnál csendesebb is lehet."
-                },
-                {
-                    "id": "sznob",
-                    "name": "Világpolgár-sznobéria",
-                    "blurb": "amikor mindent lenéznek, ami nem külföldi",
-                    "roast": "Szerinted a „nálunk ez nem divat” és a „Párizsban ez másképp van” ugyanaz a mondat."
-                },
-                {
-                    "id": "hagyomany",
-                    "name": "Erőltetett hagyománytisztelet",
-                    "blurb": "amikor az az érv, hogy „mindig is így volt”",
-                    "roast": "A mindig is így volt a legrégebbi kifogás: ráadásul ritkán igaz."
-                },
-                {
-                    "id": "ujitas",
-                    "name": "Megújítási láz",
-                    "blurb": "amikor mindent újra kell gondolni, csak azért is",
-                    "roast": "Szerinted nem minden rossz, ami régi, és nem minden jó, ami új."
-                },
-                {
-                    "id": "cinizmus",
-                    "name": "Cinizmus",
-                    "blurb": "amikor „úgysem számít semmi”",
-                    "roast": "Utálod az „úgyis mindegy” hangulatot: pedig néha tényleg szórakoztató."
-                },
-                {
-                    "id": "naivitas",
-                    "name": "Gyanútlan naivitás",
-                    "blurb": "amikor mindenki azt hiszi, hogy majd minden megoldódik magától",
-                    "roast": "Te legalább számolod a következményeket, még ha ezzel a vacsora hangulatát is elviszed."
-                }
-            ]
-        }
-    };
+    var LEGACY = LEGACY_DATA;
 
-    var api = { VERSION: VERSION, VERSIONS: VERSIONS, LEGACY: LEGACY, AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, LONG_A: LONG_A, LONG_B: LONG_B, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
-    if (typeof module !== 'undefined' && module.exports) module.exports = api;
+    // Egy tesztverzió tengelyei, típusai és utált értékei (a régi linkek ezekkel jelennek meg), ismeretlen verzióra null
+    function defsFor(ver) {
+        if (ver === VERSION) return { AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED };
+        return LEGACY[ver] || null;
+    }
+
+    var api = {
+        VERSION: VERSION, VERSIONS: VERSIONS, LEGACY: LEGACY, defsFor: defsFor,
+        AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR,
+        VALUE: VALUE_ALL, LIES: LIE_ALL, HATED_ITEMS: HATED_ALL, PREJ_ITEMS: PREJ_ALL, ALL: ALL,
+        A_LISTS: A_LISTS, B_LISTS: B_LISTS, TWINS: TWINS, twinsIn: twinsIn,
+        HONESTY_TIERS: HONESTY_TIERS, REL_FLAGS: REL_FLAGS, REL_TIERS: REL_TIERS, AXIS_LEVELS: AXIS_LEVELS
+    };
+    if (isNode) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.data = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
