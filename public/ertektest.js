@@ -173,6 +173,13 @@
         }
 
         body.appendChild(el('p', 'text-muted mt-3 mb-0', 'Magyar ügyek, kávéházi hangulat, kakaóscsiga-nosztalgia. Nem pártot ajánl, nem ítélkezik, és semmit nem mentünk: az eredmény csak a megosztható linkben utazik.'));
+        var vd = el('details', 'et-vers');
+        vd.appendChild(el('summary', '', 'Teszt-verzió: ' + verLabel(D.VERSION)));
+        var vl = el('ul', 'mb-0');
+        D.VERSIONS.slice().reverse().forEach(function (x) { vl.appendChild(el('li', '', 'v' + x.v + ' (' + x.date + '): ' + x.note)); });
+        vd.appendChild(vl);
+        vd.appendChild(el('p', 'et-hint mb-0 mt-2', 'A megosztott linkek tartalmazzák a verziót, ezért a régi eredmények a régi utált értékekkel is helyesen jelennek meg.'));
+        body.appendChild(vd);
         card.appendChild(body);
         stage.appendChild(card);
     }
@@ -411,7 +418,7 @@
 
     function resultText(r) {
         var k = kindOf(r);
-        var hated = r.h && r.h.length ? C.find(D.HATED, r.h[0]).name.toLowerCase() : null;
+        var hated = r.h && r.h.length ? C.find(hdefs(r), r.h[0]).name.toLowerCase() : null;
         if (k === 'hshort' || k === 'hlong') {
             return 'Utált értékek teszt: ' + (hated ? 'legjobban a(z) ' + hated + ' zavar.' : 'nem találtam kirívóan zavaró értéket.') + ' Te mit kapnál?';
         }
@@ -447,6 +454,14 @@
         return row;
     }
 
+    // Teszt-verziók: a megosztott eredmény a saját (régi) utált-érték készletével jelenik meg
+    function hdefs(r) { return C.hatedDefsFor((r && r.ver) || D.VERSION) || D.HATED; }
+    function verInfo(v) {
+        for (var i = 0; i < D.VERSIONS.length; i++) if (D.VERSIONS[i].v === v) return D.VERSIONS[i];
+        return null;
+    }
+    function verLabel(v) { var i = verInfo(v); return 'v' + v + (i ? ' · ' + i.date : ''); }
+
     function stText(id) { var s = C.find(LONG, id); return s ? s.text : id; }
 
     function card(tone, mt) {
@@ -460,21 +475,21 @@
 
     // Utált értékek: 10 skála, 0–100
     function renderHatedScales(r) {
-        var rank = C.hatedRanking(r.hs);
+        var HD = hdefs(r), rank = C.hatedRanking(r.hs, HD);
         var bd = card('red', true);
         bd.appendChild(el('h3', 'h5 fw-bold mb-1', 'Utált értékek skálája'));
         bd.appendChild(el('p', 'et-joke mb-3', 'Minél hosszabb a sáv, annál jobban zavar az adott érték. Középen (50) a semleges.'));
         var top = rank[0];
         if (top.score >= 58) {
-            var h1 = C.find(D.HATED, top.id);
+            var h1 = C.find(HD, top.id);
             bd.appendChild(el('p', 'et-hated', '🙅 ' + h1.name));
             bd.appendChild(el('p', 'mb-3', h1.roast));
         } else bd.appendChild(el('p', 'mb-3', 'Egyik érték sem zavar kirívóan: vagy nagyon békés vagy, vagy mindenhol középen álltál.'));
-        rank.forEach(function (x, i) { bd.appendChild(hateRow(C.find(D.HATED, x.id).name, x.score, i)); });
+        rank.forEach(function (x, i) { bd.appendChild(hateRow(C.find(HD, x.id).name, x.score, i)); });
         var calm = rank.filter(function (x) { return x.score <= 42; });
         if (calm.length) {
             var last = rank[rank.length - 1];
-            bd.appendChild(el('p', 'text-muted mt-3 mb-0', 'A legkevésbé zavar: ' + C.find(D.HATED, last.id).name.toLowerCase() + '. Ez a te komfortzónád.'));
+            bd.appendChild(el('p', 'text-muted mt-3 mb-0', 'A legkevésbé zavar: ' + C.find(HD, last.id).name.toLowerCase() + '. Ez a te komfortzónád.'));
         }
     }
 
@@ -518,19 +533,20 @@
     function renderHatedTop(r, counts) {
         var bd = card('red', true);
         bd.appendChild(el('h3', 'h5 fw-bold mb-3', 'A legkevésbé szimpatikus érték'));
+        var HD = hdefs(r);
         if (r.h.length) {
-            var h1 = C.find(D.HATED, r.h[0]);
+            var h1 = C.find(HD, r.h[0]);
             bd.appendChild(el('p', 'et-hated', '🙅 ' + h1.name));
             bd.appendChild(el('p', 'et-joke mb-2', 'Ez az, ' + h1.blurb + '.'));
             bd.appendChild(el('p', 'mb-2', h1.roast));
             if (r.h[1]) {
-                var h2 = C.find(D.HATED, r.h[1]);
+                var h2 = C.find(HD, r.h[1]);
                 bd.appendChild(el('p', 'text-muted mb-0', 'Mellette még: ' + h2.name.toLowerCase() + '.'));
             }
         } else bd.appendChild(el('p', 'mb-0', 'Nem találtunk kifejezetten utált értéket: vagy nagyon békés vagy, vagy nagyon gyorsan kattintgattál.'));
         if (counts) {
             var tally = el('div', 'et-tally');
-            D.HATED.map(function (h, i) { return { h: h, c: counts[h.id] || 0, i: i }; })
+            HD.map(function (h, i) { return { h: h, c: counts[h.id] || 0, i: i }; })
                 .sort(function (a, b) { return b.c - a.c || a.i - b.i; }).filter(function (x) { return x.c > 0; })
                 .forEach(function (x) { tally.appendChild(el('span', 'et-tally-i', x.h.name + ' · ' + x.c + '×')); });
             if (tally.firstChild) bd.appendChild(tally);
@@ -682,6 +698,14 @@
             });
             note.appendChild(mine);
             stage.appendChild(note);
+            if ((r.ver || D.VERSION) !== D.VERSION) {
+                var old = el('div', 'et-oldnote');
+                old.setAttribute('role', 'note');
+                old.appendChild(el('b', '', '🕰 Régebbi tesztverzióból származik (' + verLabel(r.ver) + ')'));
+                var vi = verInfo(r.ver);
+                old.appendChild(el('span', '', ' Az eredményt a link készítésekor érvényes utált értékekkel mutatjuk, ezért más nevek szerepelhetnek, mint a mostani tesztben.' + (vi ? ' ' + vi.note : '') + ' A mostani teszt: ' + verLabel(D.VERSION) + '.'));
+                stage.appendChild(old);
+            }
         }
 
         if (kind === 'short' || kind === 'long') {
@@ -707,7 +731,7 @@
             var hd = el('div', 'card-body p-4 p-md-5 text-center');
             hd.appendChild(el('div', 'et-emoji', '🙅'));
             hd.appendChild(el('div', 'et-kicker', kind === 'hlong' ? 'Utált értékek: részletes' : 'Utált értékek: gyors'));
-            var t1 = r.h.length ? C.find(D.HATED, r.h[0]) : null;
+            var t1 = r.h.length ? C.find(hdefs(r), r.h[0]) : null;
             hd.appendChild(el('h2', 'h2 fw-bold et-title', t1 ? t1.name : 'Békés lélek'));
             hd.appendChild(el('p', 'mb-0 et-desc', t1 ? t1.roast : 'Nem találtunk kifejezetten utált értéket. Vagy nagyon békés vagy, vagy mindenhol középen álltál.'));
             head.appendChild(hd);
@@ -776,6 +800,7 @@
         }
 
         stage.appendChild(el('p', 'et-hint text-center mt-4', 'Szórakoztató teszt, nem tudományos mérés: sem pártot, sem világnézetet nem ajánl. Ha nem értesz egyet az eredménnyel, az a teszt hibája. 🧭'));
+        stage.appendChild(el('p', 'et-ver text-center', 'Teszt-verzió: ' + verLabel(r.ver || D.VERSION)));
     }
 
     // ---------- Billentyűk ----------
@@ -796,16 +821,22 @@
     });
 
     // ---------- Megosztott link megnyitása ----------
+    var lastBadHash = null;
     function openFromHash() {
         var m = /^#r=(.+)$/.exec(location.hash || '');
         if (!m) return false;
         var r = C.decode(m[1]);
-        if (!r) return false;
+        if (!r) {
+            if (location.hash !== lastBadHash) { lastBadHash = location.hash; setTimeout(function () { toast('Ez a megosztott link nem olvasható (hibás, csonka vagy újabb tesztverzióból való).'); }, 150); }
+            return false;
+        }
         st.result = r; st.shared = true;
         setPhase('result');
         return true;
     }
-    window.addEventListener('hashchange', function () { openFromHash(); });
+    window.addEventListener('hashchange', function () {
+        if (!openFromHash() && /^#r=/.test(location.hash || '') && st.shared) { st.shared = false; st.result = null; setPhase('intro'); }
+    });
     if (!openFromHash()) render();
 
     // Hibakereséshez és teszteléshez

@@ -116,9 +116,9 @@ test('megosztás: a tömör kódolás körbejár, a típus és az illeszkedés a
     const code = C.encode(sum);
     assert.match(code, /^[A-Za-z0-9_-]+$/);
     assert.ok(code.length <= 16, 'rövid teszt link: ' + code.length);
-    assert.deepEqual(C.decode(code), sum);
+    assert.deepEqual(C.decode(code), { ...sum, ver: D.VERSION });
     const withM = { ...sum, m: { nem: 100, kulf: -100, lgbt: 0, vall: 50 } };
-    assert.deepEqual(C.decode(C.encode(withM)), withM);
+    assert.deepEqual(C.decode(C.encode(withM)), { ...withM, ver: D.VERSION });
     assert.equal(C.decode('zzzz'), null);
     assert.equal(C.decode(''), null);
     assert.equal(C.decode(code + 'AA'), null, 'hosszabb adat');
@@ -129,10 +129,11 @@ test('megosztás: a tömör kódolás körbejár, a típus és az illeszkedés a
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0], a: 'merleg' })), null, 'hiányzó tengely');
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0, 0], a: '<img onerror=x>' })), null, 'ismeretlen típus');
     assert.equal(C.decode(enc({ v: 1, s: [0, 0, 0, 0, 'x'], a: 'merleg' })), null, 'nem szám');
-    const clamped = C.decode(enc({ v: 1, s: [999, -999, 0, 0, 0], a: 'merleg', f: 1000, h: ['rongalas', '<b>', 'x', 'szexizmus'] }));
+    const clamped = C.decode(enc({ v: 1, s: [999, -999, 0, 0, 0], a: 'merleg', f: 1000, h: ['penz', '<b>', 'x', 'patosz', 'rongalas'] }));
     assert.deepEqual(clamped.s, { e: 100, l: -100, n: 0, t: 0, c: 0 });
     assert.equal(clamped.fit, 99);
-    assert.deepEqual(clamped.h, ['rongalas', 'szexizmus'], 'az ismeretlen azonosítók kiesnek');
+    assert.deepEqual(clamped.h, ['penz', 'patosz'], 'az ismeretlen (és az új verziós) azonosítók kiesnek');
+    assert.equal(clamped.ver, 1, 'a JSON linkek az 1-es verzióhoz tartoznak');
 });
 
 test('tömör link: minden mód rövid, a bináris formátum ellenőrzött', () => {
@@ -149,10 +150,11 @@ test('tömör link: minden mód rövid, a bináris formátum ellenőrzött', () 
         assert.deepEqual(back.h, sum.h);
     }
     const b64 = bytes => Buffer.from(bytes).toString('base64url');
-    assert.equal(C.decode(b64([0x20, 1, 2, 3])), null, 'ismeretlen formátum');
-    assert.equal(C.decode(b64([0x12, 0, 0])), null, 'rossz hossz');
+    assert.equal(C.decode(b64([0x20, 1, 2, 3])), null, 'rossz hossz');
+    assert.equal(C.decode(b64([0x50, 1, 2, 3])), null, 'ismeretlen (újabb) verzió');
+    assert.equal(C.decode(b64([0x22, 0, 0])), null, 'rossz hossz');
     const longBytes = Buffer.from(C.encode(lg), 'base64url');
-    assert.equal(longBytes[0], 0x11);
+    assert.equal(longBytes[0], (D.VERSION << 4) | 1);
     longBytes[1] = 255;
     assert.equal(C.decode(longBytes.toString('base64url')).s.e, 100, 'tartományon kívüli érték vágva');
     const shBytes = Buffer.from(C.encode({ s: { e: 0, l: 0, n: 0, t: 0, c: 0 }, h: [] }), 'base64url');
@@ -405,7 +407,7 @@ test('v3 kódolás: hamis vagy hibás tartalom elutasítva, a régi v1/v2 linkek
     assert.deepEqual(Object.values(ok.pj), Array(8).fill(0));
     const v2 = C.decode(enc({ v: 2, s: [0, 0, 0, 0, 0], a: 'merleg', f: 50, hs: Array(10).fill(50), i: 80, k: [0, 0, 0] }));
     assert.ok(v2.long && !v2.pj);
-    const v1 = C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', f: 50, h: ['rongalas'], m: [100, -100, 0, 50] }));
+    const v1 = C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', f: 50, h: ['penz'], m: [100, -100, 0, 50] }));
     assert.deepEqual(v1.m, { nem: 100, kulf: -100, lgbt: 0, vall: 50 });
     assert.equal(C.decode(enc({ v: 1, s: [1, 2, 3, 4, 5], a: 'merleg', m: [1, 2] })).m, undefined, 'rossz hosszú tükör-adat kiesik');
     const sh = C.summarize({}, ['rongalas'], D.MIRROR.map(() => 'min'));
@@ -450,4 +452,79 @@ test('fejlesztői mód rejtett: nincs jelölőnégyzet és nincs ?dev, csak a 7 
     assert.ok(!/location\.search/.test(js), 'nincs URL-paraméteres bekapcsolás');
     assert.ok(!js.includes("'et-dev'") || !/cb\.id = 'et-dev'/.test(js), 'nincs látható jelölőnégyzet');
     assert.match(js, /et-devpill/);
+});
+
+// ---------- Teszt-verziók és a korábban megosztott linkek ----------
+test('verziók: a jelenlegi verzió szerepel a változásnaplóban, minden régi verziónak megvan az utált-érték készlete', () => {
+    assert.ok(Number.isInteger(D.VERSION) && D.VERSION >= 2 && D.VERSION <= 15, 'a fejlécben 4 bit jut a verziónak');
+    assert.deepEqual(D.VERSIONS.map(x => x.v), Array.from({ length: D.VERSION }, (_, i) => i + 1));
+    for (const x of D.VERSIONS) { assert.match(x.date, /^\d{4}-\d{2}-\d{2}$/); assert.ok(x.note.length > 20); }
+    for (let v = 1; v < D.VERSION; v++) {
+        const defs = D.LEGACY[v] && D.LEGACY[v].HATED;
+        assert.ok(defs && defs.length === 10, 'v' + v + ' utált-érték készlete');
+        for (const h of defs) assert.ok(h.id && h.name && h.blurb && h.roast, h.id);
+        assert.equal(new Set(defs.map(h => h.id)).size, 10);
+    }
+    assert.equal(C.hatedDefsFor(D.VERSION), D.HATED);
+    assert.equal(C.hatedDefsFor(1), D.LEGACY[1].HATED);
+    assert.equal(C.hatedDefsFor(D.VERSION + 1), null);
+    assert.equal(C.hatedDefsFor(0), null);
+    assert.ok(!D.LEGACY[1].HATED.some(h => D.HATED.some(n => n.id === h.id)), 'az azonosítók nem ütköznek a régiekkel');
+});
+
+test('korábban megosztott bináris linkek (1-es verzió): régi utált értékekkel olvashatók', () => {
+    const lg = C.summarizeLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]));
+    const bytes = Buffer.from(C.encode(lg), 'base64url');
+    assert.equal(C.decode(bytes.toString('base64url')).ver, D.VERSION);
+    bytes[0] = (bytes[0] & 0x0F) | 0x10; // ugyanaz a bájtsorozat, de 1-es verzió
+    const old = C.decode(bytes.toString('base64url'));
+    assert.ok(old && old.ver === 1 && old.long);
+    assert.deepEqual(Object.keys(old.hs), D.LEGACY[1].HATED.map(h => h.id), 'régi skálák');
+    assert.deepEqual(old.s, lg.s, 'a tengelyek nem változnak');
+    const top = C.hatedTop(old.hs, 2, C.hatedDefsFor(1));
+    assert.ok(top.every(id => D.LEGACY[1].HATED.some(h => h.id === id)));
+
+    // rövid teszt 1-es verziós fejléccel: a nibble-ben a régi azonosítók indexe van
+    const sh = Buffer.from(C.encode({ s: { e: 0, l: 0, n: 0, t: 0, c: 0 }, h: ['rongalas', 'figyelem'] }), 'base64url');
+    sh[0] = (sh[0] & 0x0F) | 0x10;
+    const oldSh = C.decode(sh.toString('base64url'));
+    assert.equal(oldSh.ver, 1);
+    const ix = id => D.HATED.findIndex(h => h.id === id);
+    assert.deepEqual(oldSh.h, [D.LEGACY[1].HATED[ix('rongalas')].id, D.LEGACY[1].HATED[ix('figyelem')].id], 'az index a fejléc verziója szerinti készletre mutat');
+
+    // utált-értékek részletes teszt (hlong) és gyors teszt (hshort)
+    const hl = Buffer.from(C.encode(C.summarizeHatedLong(longAns((s, i) => [2, -1, 1, 0, -2][i % 5]))), 'base64url');
+    hl[0] = (hl[0] & 0x0F) | 0x10;
+    const oldHl = C.decode(hl.toString('base64url'));
+    assert.equal(oldHl.ver, 1);
+    assert.ok(oldHl.hs.penz !== undefined && oldHl.hs.rongalas === undefined);
+    const hs = Buffer.from(C.encode(C.summarizeHatedShort(D.HATED_PAIRS.map(p => p[0]), D.MIRROR.map(() => 'maj'))), 'base64url');
+    hs[0] = (hs[0] & 0x0F) | 0x10;
+    const oldHs = C.decode(hs.toString('base64url'));
+    assert.equal(oldHs.ver, 1);
+    assert.ok(Object.keys(oldHs.counts).every(id => D.LEGACY[1].HATED.some(h => h.id === id)));
+});
+
+test('korábban megosztott JSON linkek (v1/v2/v3): régi utált értékekkel, 1-es verzióként olvashatók', () => {
+    const enc = o => Buffer.from(JSON.stringify(o)).toString('base64url');
+    const v1 = C.decode(enc({ v: 1, s: [10, 20, 30, 40, 50], a: 'merleg', f: 70, h: ['penz', 'patosz'] }));
+    assert.equal(v1.ver, 1); assert.deepEqual(v1.h, ['penz', 'patosz']);
+    const v2 = C.decode(enc({ v: 2, s: [0, 0, 0, 0, 0], a: 'merleg', f: 50, hs: Array(10).fill(50), i: 80, k: [0, 0, 0] }));
+    assert.equal(v2.ver, 1); assert.deepEqual(Object.keys(v2.hs), D.LEGACY[1].HATED.map(h => h.id));
+    const v3 = C.decode(enc({ v: 3, k: 'hl', hs: Array(10).fill(70), pj: Array(8).fill(40) }));
+    assert.equal(v3.ver, 1); assert.deepEqual(Object.keys(v3.hs), D.LEGACY[1].HATED.map(h => h.id));
+    const v3s = C.decode(enc({ v: 3, k: 'hs', c: Array(10).fill(1), m: [0, 0, 0, 0] }));
+    assert.equal(v3s.ver, 1); assert.deepEqual(Object.keys(v3s.counts), D.LEGACY[1].HATED.map(h => h.id));
+});
+
+test('verziók a felületen: régi eredmény régi nevekkel, figyelmeztetéssel; hibás link jelzése; verziócímke', () => {
+    const js = pub('ertektest.js'), css = pub('ertektest.css');
+    assert.match(js, /function hdefs\(r\)/);
+    assert.match(js, /C\.hatedDefsFor\(/);
+    assert.ok(!/C\.find\(D\.HATED, (top|x|last|r\.h)/.test(js), 'az eredménynézet nem használhatja a mostani készletet');
+    assert.match(js, /et-oldnote/);
+    assert.match(js, /Teszt-verzió: /);
+    assert.match(js, /nem olvasható/);
+    for (const c of ['.et-oldnote', '.et-vers', '.et-ver']) assert.ok(css.includes(c), c);
+    assert.match(fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8'), /Teszt-verzió/);
 });

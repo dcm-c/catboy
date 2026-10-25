@@ -438,7 +438,86 @@
         { min: 0, name: 'Pinokkió-szint', text: 'A teszt orra is megnőtt, miközben értékelt. Az eredményt csak fenntartással érdemes olvasni.' }
     ];
 
-    var api = { AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, LONG_A: LONG_A, LONG_B: LONG_B, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
+
+    // =========================================================
+    // TESZT-VERZIÓ
+    // A megosztott link tartalmazza, melyik verzióval készült az eredmény (a bináris link első bájtjának felső fele,
+    // a régi JSON linkek mind az 1-es verzió). Ha egy kérdés vagy skála jelentése változik, a VERSION nő, és a régi
+    // jelentést a LEGACY őrzi, hogy a korábban megosztott eredmények továbbra is helyesen jelenjenek meg.
+    // =========================================================
+    var VERSION = 2;
+    var VERSIONS = [
+        { v: 1, date: '2026-10-24', note: 'Az első kiadás: az utált értékek politikai-ideológiai dolgok voltak (pénzhajhászás, parancsuralom, pátosz és társaik).' },
+        { v: 2, date: '2026-10-25', note: 'Az utált értékek társadalmi bosszantó dolgok lettek (rongálás, környezetszennyezés, figyelmetlenség, trágárság, szexizmus és társaik).' }
+    ];
+    var LEGACY = {
+        1: {
+            HATED: [
+                {
+                    "id": "penz",
+                    "name": "Pénzhajhászás",
+                    "blurb": "amikor mindent az üzlet dönt el",
+                    "roast": "Szerinted nem minden áru: a barátság, a naplemente és a Balaton sem."
+                },
+                {
+                    "id": "egyenlo",
+                    "name": "Kényszerű egyenlősdi",
+                    "blurb": "amikor mindenki ugyanannyit kap, akármit tett",
+                    "roast": "Szerinted az igazságosság nem egyforma szelet tortát jelent."
+                },
+                {
+                    "id": "parancs",
+                    "name": "Parancsuralom",
+                    "blurb": "amikor az az érv, hogy „mert én mondtam”",
+                    "roast": "Nálad az érvelés nem hangerő kérdése."
+                },
+                {
+                    "id": "szabados",
+                    "name": "Felelőtlen szabadosság",
+                    "blurb": "amikor mindenki azt csinál, amit akar, és másokra marad a rendetlenség",
+                    "roast": "Szerinted a szabadság addig szép, amíg valaki nem a te kapudba parkol."
+                },
+                {
+                    "id": "patosz",
+                    "name": "Nemzeti pátosz",
+                    "blurb": "amikor a hazafiasságot hangerővel mérik",
+                    "roast": "Neked a szeretet a falunapi hurrázásnál csendesebb is lehet."
+                },
+                {
+                    "id": "sznob",
+                    "name": "Világpolgár-sznobéria",
+                    "blurb": "amikor mindent lenéznek, ami nem külföldi",
+                    "roast": "Szerinted a „nálunk ez nem divat” és a „Párizsban ez másképp van” ugyanaz a mondat."
+                },
+                {
+                    "id": "hagyomany",
+                    "name": "Erőltetett hagyománytisztelet",
+                    "blurb": "amikor az az érv, hogy „mindig is így volt”",
+                    "roast": "A mindig is így volt a legrégebbi kifogás: ráadásul ritkán igaz."
+                },
+                {
+                    "id": "ujitas",
+                    "name": "Megújítási láz",
+                    "blurb": "amikor mindent újra kell gondolni, csak azért is",
+                    "roast": "Szerinted nem minden rossz, ami régi, és nem minden jó, ami új."
+                },
+                {
+                    "id": "cinizmus",
+                    "name": "Cinizmus",
+                    "blurb": "amikor „úgysem számít semmi”",
+                    "roast": "Utálod az „úgyis mindegy” hangulatot: pedig néha tényleg szórakoztató."
+                },
+                {
+                    "id": "naivitas",
+                    "name": "Gyanútlan naivitás",
+                    "blurb": "amikor mindenki azt hiszi, hogy majd minden megoldódik magától",
+                    "roast": "Te legalább számolod a következményeket, még ha ezzel a vacsora hangulatát is elviszed."
+                }
+            ]
+        }
+    };
+
+    var api = { VERSION: VERSION, VERSIONS: VERSIONS, LEGACY: LEGACY, AXES: AXES, STATEMENTS: STATEMENTS, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, LONG: LONG, LONG_A: LONG_A, LONG_B: LONG_B, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR, TWINS: TWINS, HONESTY_TIERS: HONESTY_TIERS };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.data = api;
