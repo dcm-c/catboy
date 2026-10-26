@@ -2,6 +2,7 @@
 // ÉRTÉKTEST - az új (v3) kérdések
 //   VALUE:   az értékrész új állításai (a régi 50 az ertektest-data.js-ben marad). tier: 1 = gyors, 2 = + részletes, 3 = + extra hosszú.
 //            w = tengely-súlyok (a + irány: lásd AXES), h = az utált értékek skáláira gyakorolt hatás.
+//   RANK:    rangsorolós feladatok (5 lehetőség, tengelyenként más): a helyezésből +2 … −2 válasz lesz.
 //   HATED_B: az utált értékek tételei (szerep: D közvetlen, R fordított, X összehasonlító, S helyzetfüggő). 4 tétel értékenként.
 //   PREJ_B:  az előítélet-barométer tételei (témánként 8: két irány × közvetlen / helyzetfüggő / fordított + két ellentétes hatású).
 // A szöveg szándékosan mindkét irányból érkezik: fordított és ellentétes állítások is vannak, hogy ne lehessen „csak bólogatni”.
@@ -229,7 +230,58 @@
         { id: 'p_vall_x2', role: 'X2', tier: 2, text: 'A vallásos emberek véleménye ma túl nagy súlyt kap, a más hitűek és a hitetlenek rovására.', g: { vall_dn: 0.7, vall_up: -0.4 }, help: 'Ellentétes hatású állítás: az egyetértés a vallásosakkal szembeni fenntartást növeli, a más hitűekkel szembenit csökkenti.' }
     ];
 
-    var api = { VALUE: VALUE, HATED_B: HATED_B, PREJ_B: PREJ_B };
+    // Rangsorolós feladatok: 5 lehetőség, a válaszadó sorba állítja őket (a legfontosabbtól a legkevésbé fontosig).
+    // A helyezésből tételenkénti válasz lesz: 1. hely = +2, 2. = +1, 3. = 0, 4. = −1, 5. = −2 (lásd RANK_VALUES az ertektest-data.js-ben).
+    // Minden lehetőség más tengelyt mozgat, így a sorrend tengelyek közti fontossági sorrendet is jelent.
+    var RANK = [
+        { id: 'r_koltseg', tier: 1, text: 'Rangsorold, mire költene legszívesebben az állam a következő költségvetésből: elsőnek arra, ami neked a legfontosabb, utoljára arra, ami a legkevésbé.',
+          help: 'Koppints sorban a lehetőségekre: az első a legfontosabb, az ötödik a legkevésbé fontos. Az utolsót magunk kitöltjük.',
+          opts: [
+              { id: 'r_koltseg_a', text: 'Egészségügy és szociális ellátás', w: { e: 0.9 } },
+              { id: 'r_koltseg_b', text: 'Hadsereg és határvédelem', w: { m: 0.9 } },
+              { id: 'r_koltseg_c', text: 'Kutatás, egyetemek, innováció', w: { s: -0.9 } },
+              { id: 'r_koltseg_d', text: 'Zöld átállás és természetvédelem', w: { g: 0.9 } },
+              { id: 'r_koltseg_e', text: 'Rendőrség és közbiztonság', w: { l: 0.9 } }
+          ] },
+        { id: 'r_ero', tier: 2, text: 'Rangsorold, mitől lesz erős egy ország: elsőnek az, ami szerinted a legfontosabb.',
+          help: 'Koppints sorban a lehetőségekre: az első a legfontosabb, az ötödik a legkevésbé fontos. Az utolsót magunk kitöltjük.',
+          opts: [
+              { id: 'r_ero_a', text: 'Erős közösségek: családok, falvak, civil körök', w: { k: 0.9 } },
+              { id: 'r_ero_b', text: 'Szabad piac és vállalkozói kedv', w: { e: -0.9 } },
+              { id: 'r_ero_c', text: 'Hagyományok és közös ünnepek', w: { t: 0.9 } },
+              { id: 'r_ero_d', text: 'Nyitottság a világra: egyetemek, utazás, külföldi ötletek', w: { n: -0.9 } },
+              { id: 'r_ero_e', text: 'Szakértők által vezetett, hatékony államapparátus', w: { d: -0.9 } }
+          ] },
+        { id: 'r_polgarmester', tier: 2, text: 'Rangsorold, mire költenél először, ha egy kisváros polgármestere lennél.',
+          help: 'Koppints sorban a lehetőségekre: az első a legfontosabb, az ötödik a legkevésbé fontos. Az utolsót magunk kitöltjük.',
+          opts: [
+              { id: 'r_polgarmester_a', text: 'Közös programok: fesztivál, kultúrház, falunap', w: { k: 0.9 } },
+              { id: 'r_polgarmester_b', text: 'Parkok, fásítás, zöld területek', w: { g: 0.9 } },
+              { id: 'r_polgarmester_c', text: 'Kamerák és közterület-felügyelet', w: { l: 0.9 } },
+              { id: 'r_polgarmester_d', text: 'Népszavazás a nagy helyi kérdésekről', w: { d: 0.9 } },
+              { id: 'r_polgarmester_e', text: 'Adókedvezmény a helyi vállalkozóknak', w: { e: -0.9 } }
+          ] },
+        { id: 'r_veszely', tier: 3, text: 'Rangsorold, mi a legnagyobb veszély a mai világban: elsőnek az, ami szerinted a legsúlyosabb.',
+          help: 'Koppints sorban a lehetőségekre: az első a legsúlyosabb, az ötödik a legkevésbé súlyos. Az utolsót magunk kitöltjük.',
+          opts: [
+              { id: 'r_veszely_a', text: 'Háborúk és hatalmi konfliktusok, amelyekre erős védelem kell', w: { m: 0.9 } },
+              { id: 'r_veszely_b', text: 'A klímaváltozás és a természet pusztulása', w: { g: 0.9 } },
+              { id: 'r_veszely_c', text: 'A hagyományos családi és közösségi értékek eltűnése', w: { t: 0.9 } },
+              { id: 'r_veszely_d', text: 'A nemzeti önállóság és kultúra elvesztése', w: { n: 0.9 } },
+              { id: 'r_veszely_e', text: 'Hogy az emberek már semmiben és senkiben nem bíznak', w: { c: -0.9 } }
+          ] },
+        { id: 'r_atad', tier: 3, text: 'Rangsorold, mit adnál át legszívesebben a gyerekeidnek vagy a fiatalabbaknak: elsőnek azt, ami neked a legfontosabb.',
+          help: 'Koppints sorban a lehetőségekre: az első a legfontosabb, az ötödik a legkevésbé fontos. Az utolsót magunk kitöltjük.',
+          opts: [
+              { id: 'r_atad_a', text: 'Kíváncsiságot és tudományos gondolkodást', w: { s: -0.9 } },
+              { id: 'r_atad_b', text: 'Hagyományokat, ünnepeket, családi történeteket', w: { t: 0.9 } },
+              { id: 'r_atad_c', text: 'Önállóságot: járja a saját útját', w: { k: -0.9 } },
+              { id: 'r_atad_d', text: 'Bizalmat az emberekben', w: { c: -0.9 } },
+              { id: 'r_atad_e', text: 'Szabadságszeretetet: ne hagyja magát irányítani', w: { l: -0.9 } }
+          ] }
+    ];
+
+    var api = { VALUE: VALUE, RANK: RANK, HATED_B: HATED_B, PREJ_B: PREJ_B };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.items = api;

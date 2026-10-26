@@ -248,3 +248,31 @@
 .et-img-cv { width: 100%; height: auto; aspect-ratio: 1080 / 1350; border-radius: 14px; border: 2px solid color-mix(in srgb, currentColor 20%, transparent); background: #fff; }
 .et-img-cap { display: flex; flex-direction: column; gap: 6px; }
 @media (max-width: 575.98px) { .et-imgs { grid-template-columns: 1fr; } }
+
+/* ---- Fontos-jelölés (csillag) és rangsorolós feladat ---- */
+.et-starbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 1rem; }
+.et-star {
+    padding: 4px 14px; border-radius: 999px; font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; color: inherit;
+    border: 2px solid #e0a100; background: transparent; touch-action: manipulation;
+}
+.et-star:hover { background: color-mix(in srgb, #ffc107 22%, transparent); }
+.et-star.on { background: #ffc107; color: #3a2f00; border-color: #c48a00; }
+.et-star:focus-visible, .et-rk:focus-visible { outline: 3px solid #5bcefa; outline-offset: 2px; }
+.et-starcount { font-size: .8rem; opacity: .75; }
+.et-rank { display: grid; gap: 8px; margin-bottom: .6rem; }
+.et-rk {
+    --c: #7a8794;
+    position: relative; display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 40px 12px 12px; border-radius: 14px; cursor: pointer;
+    font: inherit; font-weight: 600; color: inherit; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 8%, var(--card-fill, #fff));
+    touch-action: manipulation; transition: transform .08s ease, background .15s ease;
+}
+.et-rk:hover { transform: translateY(-1px); }
+.et-rk.on { --c: #0aa2c0; background: color-mix(in srgb, var(--c) 18%, var(--card-fill, #fff)); }
+.et-rk-n { flex: 0 0 auto; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-weight: 800; border: 2px solid var(--c); }
+.et-rk.on .et-rk-n { background: var(--c); color: #fff; }
+.et-rk .et-key { top: 50%; left: auto; right: 12px; transform: translateY(-50%); }
+[data-bs-theme="dark"] .et-rk { color: #ebe7f5; }
+:root[data-theme="buzi"] .et-rk { background: color-mix(in srgb, var(--c) 18%, rgba(28, 14, 52, .9)); color: #fff; }
+.et-nav .btn.btn-primary-custom { color: #fff; background: var(--pink, #f5a9b8); border-color: transparent; padding: 4px 16px; }
+.et-nav .btn.btn-primary-custom:hover:not(:disabled) { background: #f08ca0; color: #fff; }
+.et-nav .btn.btn-primary-custom:disabled { opacity: .45; }

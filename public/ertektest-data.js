@@ -203,12 +203,17 @@
         ['g_muanyag', 'g_muanyag2'], ['d_nepakarat', 'd_nepakarat2'], ['m_haboru', 'm_haboru2'], ['k_aldozat', 'k_siker'], ['s_dont_esz', 's_dont_erzes']
     ];
 
-    // Hazugság-próba: négy "soha / mindig" állítás, amit gyakorlatilag senki nem mondhat el magáról igazán (kevés, hogy ne legyen unalmas).
+    // Ellenőrző kérdések. Kétféle van, hogy ne lehessen „mindenre igent / nemet” mondva átmenni:
+    //   expect 'no':  „soha / mindig” állítás, amit gyakorlatilag senki nem mondhat el magáról igazán: a bólintás gyanús.
+    //   expect 'yes': szinte mindenkivel megtörtént, hétköznapi tény: a tagadás gyanús.
     var LIES = [
         { id: 'l_hazug', text: 'Életemben soha egyetlen hazugságot sem mondtam.', joke: 'Ez a mondat maga is próbálkozás.' },
         { id: 'l_eperc', text: 'Soha nem mondtam, hogy „öt perc, és ott vagyok”, miközben még el sem indultam.', joke: 'A cipő nem számít, az még a lépcsőházban van.' },
         { id: 'l_feltetel', text: 'Mindig elolvasom a felhasználási feltételeket, mielőtt az „Elfogadom” gombra kattintok.', joke: 'Mind a 94 oldalt.' },
-        { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' }
+        { id: 'l_telefon', text: 'Sosem fordult elő velem, hogy „csak egy percre” megnéztem a telefonom, és eltelt egy óra.', joke: 'Ezt éppen a telefonodon olvasod.' },
+        { id: 'l_kulcs', expect: 'yes', text: 'Életemben legalább egyszer elfelejtettem, hová tettem a kulcsomat, a telefonomat vagy a szemüvegemet.', joke: 'Gyanús, hogy most is a kezedben van.' },
+        { id: 'l_bolint', expect: 'yes', text: 'Előfordult már, hogy bólogattam valamire, pedig nem értettem teljesen.', joke: 'A bólogatás a legrégebbi beleegyezés-szimulátor.' },
+        { id: 'l_nev', expect: 'yes', text: 'Legalább egyszer megfeledkeztem valaki nevéről, miközben beszélgettem vele.', joke: 'A „na, te” teljesen jogos megszólítás.' }
     ];
 
     // =========================================================
@@ -306,7 +311,10 @@
         l_hazug: 'Ez a „soha” szó komolyan veendő: nem „ritkán”, hanem egyszer sem.',
         l_eperc: 'Pontosan erre gondolunk: azt mondod, mindjárt ott vagy, de még indulni sem indultál.',
         l_feltetel: 'Teljes szöveg, sorról sorra, minden alkalommal. Nem a diagonális olvasás.',
-        l_telefon: 'A „csak egy percre” pillantás és az elröpült idő: soha egyetlen alkalommal sem.'
+        l_telefon: 'A „csak egy percre” pillantás és az elröpült idő: soha egyetlen alkalommal sem.',
+        l_kulcs: 'Ellenőrző kérdés: ez szinte mindenkivel megtörtént, ezért itt az „egyetértek” az őszinte válasz.',
+        l_bolint: 'Ellenőrző kérdés: szinte mindenki bólintott már úgy, hogy nem értett mindent, ezért itt az „egyetértek” az őszinte válasz.',
+        l_nev: 'Ellenőrző kérdés: ez gyakorlatilag mindenkivel előfordult, ezért itt az „egyetértek” az őszinte válasz.'
     };
     var JOKE = {
         piac: 'A piac láthatatlan keze néha a zsebünkben is jár.',
@@ -364,7 +372,7 @@
         haver: 2, panasz: 2, civil: 2, kozmeghall: 2,
         kemeny: 3, szemet: 3, moderal: 3, termek: 3, sajat: 3
     };
-    var LIE_TIER = { l_hazug: 1, l_telefon: 2, l_eperc: 2, l_feltetel: 3 };
+    var LIE_TIER = { l_hazug: 1, l_kulcs: 1, l_telefon: 2, l_eperc: 2, l_bolint: 2, l_feltetel: 3, l_nev: 3 };
 
     function mk(kind, part, st) { var o = { kind: kind, part: part }; Object.keys(st).forEach(function (k) { o[k] = st[k]; }); return o; }
 
@@ -377,7 +385,9 @@
     });
     NEW_V.forEach(function (st) { var o = mk('v', 'a', st); o.tier = TIER_OLD[st.id]; VALUE_ALL.push(o); });
     ITEMS.VALUE.forEach(function (st) { VALUE_ALL.push(mk('v', 'a', st)); });
-    var LIE_ALL = LIES.map(function (st) { var o = mk('l', 'a', st); o.w = {}; o.lie = true; o.tier = LIE_TIER[st.id]; return o; });
+    var LIE_ALL = LIES.map(function (st) { var o = mk('l', 'a', st); o.w = {}; o.lie = true; o.expect = st.expect || 'no'; o.tier = LIE_TIER[st.id]; return o; });
+    // Rangsorolós feladatok: a feladat egy lista-elem, a lehetőségei a válaszok kulcsai (lásd core.flat)
+    var RANK_ALL = ITEMS.RANK.map(function (t) { return mk('r', 'a', t); });
 
     var HATED_NAME = {};
     HATED.forEach(function (h) { HATED_NAME[h.id] = h.name.toLowerCase(); });
@@ -397,7 +407,7 @@
         return o;
     });
     var PREJ_ALL = ITEMS.PREJ_B.map(function (st) { return mk('p', 'b', st); });
-    var ALL = VALUE_ALL.concat(LIE_ALL, HATED_ALL, PREJ_ALL);
+    var ALL = VALUE_ALL.concat(LIE_ALL, RANK_ALL, HATED_ALL, PREJ_ALL);
 
     // Kevert, de egyenletes sorrend: tengelyenként (témánként) véletlenszerű, a csoportok egyenletesen elosztva, az ikrek egymástól távol.
     // A magot rögzítettük, így mindenki ugyanazt a sorrendet kapja, és a teszt tesztelhető.
@@ -413,6 +423,7 @@
     }
     function groupOf(it) {
         if (it.kind === 'l') return 'lie';
+        if (it.kind === 'r') return 'rank';
         var o = it.kind === 'v' ? it.w : it.kind === 'h' ? it.h : it.g;
         var best = null;
         Object.keys(o || {}).forEach(function (k) { if (best === null || Math.abs(o[k]) > Math.abs(o[best])) best = k; });
@@ -453,9 +464,9 @@
 
     // Az A rész listái módonként (az állítások és a hazugság-próbák együtt)
     var A_LISTS = {
-        short: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL), 1), 101)),
-        long: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL), 2), 202)),
-        xlong: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL), 3), 303))
+        short: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL, RANK_ALL), 1), 101)),
+        long: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL, RANK_ALL), 2), 202)),
+        xlong: separateTwins(spread(tierOf(VALUE_ALL.concat(LIE_ALL, RANK_ALL), 3), 303))
     };
     // A B rész: előbb az utált értékek, utána az előítélet-barométer tételei
     function bList(max, seed) { return spread(tierOf(HATED_ALL, max), seed).concat(spread(tierOf(PREJ_ALL, max), seed + 1)); }
@@ -472,7 +483,7 @@
     var HONESTY_TIERS = [
         { min: 90, name: 'Kristálytiszta', text: 'Alig akadt fogás rajtad: vagy őszinte vagy, vagy nagyon jól hazudsz.' },
         { min: 70, name: 'Többnyire őszinte', text: 'Néhol szépítettél egy kicsit, de ez teljesen emberi.' },
-        { min: 45, name: 'Kicsit szépítettél', text: 'Pár válaszod nem fér össze egymással, vagy a lehetetlen állításokra is bólintottál.' },
+        { min: 45, name: 'Kicsit szépítettél', text: 'Pár válaszod nem fér össze egymással, vagy az ellenőrző kérdéseken gyanúsan válaszoltál.' },
         { min: 20, name: 'Meseszerű', text: 'Ha ez egy mese, akkor ez a mese elég szórakoztató, de a teszt nem hiszi el.' },
         { min: 0, name: 'Pinokkió-szint', text: 'A teszt orra is megnőtt, miközben értékelt. Az eredményt csak fenntartással érdemes olvasni.' }
     ];
@@ -480,7 +491,7 @@
     // Megbízhatóság: figyelmeztető jelzések (a sorszám a megosztott linkben a bitmaszk helye), sávok és a tengelyek biztosságának szintjei
     var REL_FLAGS = [
         { id: 'straight', text: 'Szinte mindenre ugyanazt válaszoltad, ezért a válaszok nem rajzolnak ki valódi képet.' },
-        { id: 'lies', text: 'A „soha / mindig” állítások közül lehetetleneknek is bólintottál.' },
+        { id: 'lies', text: 'Az ellenőrző kérdéseken gyanúsan válaszoltál: lehetetlen állításnak bólintottál, vagy egy mindenkivel megtörtént dolgot tagadtál.' },
         { id: 'twins', text: 'Egymásnak ellentmondó állításokkal is egyetértettél.' },
         { id: 'neutral', text: 'Sok válaszod közepes vagy „passz-féle” volt, ezért kevés a támpont.' },
         { id: 'skips', text: 'Sok kérdést kihagytál, ezért kevesebb adatból számoltunk.' },
@@ -527,7 +538,7 @@
     var api = {
         VERSION: VERSION, VERSIONS: VERSIONS, LEGACY: LEGACY, defsFor: defsFor,
         AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR,
-        VALUE: VALUE_ALL, LIES: LIE_ALL, HATED_ITEMS: HATED_ALL, PREJ_ITEMS: PREJ_ALL, ALL: ALL,
+        VALUE: VALUE_ALL, LIES: LIE_ALL, RANK_ITEMS: RANK_ALL, RANK_VALUES: [2, 1, 0, -1, -2], STARS: { short: 1, long: 2, xlong: 3 }, STAR_MULT: 2, HATED_ITEMS: HATED_ALL, PREJ_ITEMS: PREJ_ALL, ALL: ALL,
         A_LISTS: A_LISTS, B_LISTS: B_LISTS, TWINS: TWINS, twinsIn: twinsIn,
         HONESTY_TIERS: HONESTY_TIERS, REL_FLAGS: REL_FLAGS, REL_TIERS: REL_TIERS, AXIS_LEVELS: AXIS_LEVELS
     };

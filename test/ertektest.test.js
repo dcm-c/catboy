@@ -56,14 +56,19 @@ test('adatok: tengelyenként 5/10/15 elsődleges tétel, mindkét irányból (ne
 
 test('módok: a listák mérete, a rövid ⊂ hosszú ⊂ extra, az ikerpárok és hazugságpróbák száma nő', () => {
     const n = m => D.A_LISTS[m].length;
-    assert.ok(n('short') >= 50 && n('short') <= 55, 'gyors: ' + n('short'));
-    assert.ok(n('long') >= 100 && n('long') <= 110, 'részletes: ' + n('long'));
-    assert.ok(n('xlong') >= 150 && n('xlong') <= 160, 'extra: ' + n('xlong'));
+    const nv = m => D.A_LISTS[m].filter(s => s.kind === 'v').length;
+    assert.deepEqual(MODES.map(nv), [50, 100, 150], 'értékállítások');
+    assert.ok(n('short') >= 50 && n('short') <= 58, 'gyors: ' + n('short'));
+    assert.ok(n('long') >= 100 && n('long') <= 115, 'részletes: ' + n('long'));
+    assert.ok(n('xlong') >= 150 && n('xlong') <= 170, 'extra: ' + n('xlong'));
     const shortIds = new Set(D.A_LISTS.short.map(s => s.id)), longIds = new Set(D.A_LISTS.long.map(s => s.id));
     for (const id of shortIds) assert.ok(longIds.has(id), 'a rövid tétele hiányzik a hosszúból: ' + id);
     for (const id of longIds) assert.ok(D.A_LISTS.xlong.some(s => s.id === id), id);
     const lies = m => D.A_LISTS[m].filter(s => s.kind === 'l').length;
-    assert.deepEqual([lies('short'), lies('long'), lies('xlong')], [1, 3, 4]);
+    assert.deepEqual([lies('short'), lies('long'), lies('xlong')], [2, 5, 7]);
+    assert.ok(lies('xlong') <= 7, 'a megosztott linkben 3 bit jut rájuk');
+    const ranks = m => D.A_LISTS[m].filter(s => s.kind === 'r').length;
+    assert.deepEqual([ranks('short'), ranks('long'), ranks('xlong')], [1, 3, 5]);
     assert.deepEqual(MODES.map(m => D.twinsIn(D.A_LISTS[m]).length), [4, 8, 12]);
     assert.ok(D.B_LISTS.long.length >= 54 && D.B_LISTS.xlong.length >= 72);
     assert.equal(D.B_LISTS.hlong, D.B_LISTS.long);
@@ -168,7 +173,8 @@ test('megbízhatóság: következetes kitöltés megbízható, ellentmondásos �
     // következetes: a saját "profil" szerint válaszol, a hazugságpróbákra nemet mond
     const prof = {}; AX.forEach((a, i) => { prof[a] = [0.8, -0.7, 0.5, -0.9, 0.3, 0.9, -0.4, 0.6, -0.8, 0.2][i]; });
     const good = ansOf(list, s => {
-        if (s.lie) return -2;
+        if (s.lie) return s.expect === 'yes' ? 2 : -2;
+        if (s.kind === 'r') return 0;
         const w = Object.entries(s.w || {})[0];
         if (!w) return 0;
         const v = prof[w[0]] * Math.sign(w[1]);
@@ -205,17 +211,106 @@ test('megbízhatóság: sok kihagyott válasz jelzett, rövid tesztnél figyelme
     assert.deepEqual(D.REL_TIERS.map(t => t.name).length, 4);
 });
 
-test('hazugságvizsgáló: lehetetlen állítások, ellentmondó iker-párok, mindenre ugyanaz', () => {
+test('ellenőrző kérdések: van olyan, ahol az „igen”, és olyan, ahol a „nem” a jó válasz, minden módban', () => {
+    for (const m of MODES) {
+        const probes = D.A_LISTS[m].filter(s => s.kind === 'l');
+        assert.ok(probes.some(s => s.expect === 'no') && probes.some(s => s.expect === 'yes'), m);
+        for (const p of probes) { assert.ok(['yes', 'no'].includes(p.expect), p.id); assert.ok(p.help && p.joke, p.id); }
+    }
+    assert.ok(D.LIES.filter(s => s.expect === 'yes').length >= 3);
+});
+
+test('hazugságvizsgáló: lehetetlen állítások (igen gyanús), hétköznapi tények (nem gyanús), ellentmondó iker-párok, mindenre ugyanaz', () => {
     const list = D.A_LISTS.xlong;
-    const h0 = C.honesty(ansOf(list, () => 2), list);
-    assert.ok(h0.straight && h0.lies.length === 4 && h0.twins.length === 12 && h0.index < 20);
+    const nNo = list.filter(s => s.expect === 'no').length, nYes = list.filter(s => s.expect === 'yes').length;
+    const yes = C.honesty(ansOf(list, () => 2), list);
+    assert.ok(yes.straight && yes.twins.length === 12 && yes.index < 20);
+    assert.equal(yes.lies.length, nNo, 'mindenre igen: csak a lehetetlen állítások gyanúsak');
+    assert.ok(yes.lies.every(l => l.expect === 'no'));
+    const no = C.honesty(ansOf(list, () => -2), list);
+    assert.equal(no.lies.length, nYes, 'mindenre nem: csak a hétköznapi tények tagadása gyanús');
+    assert.ok(no.lies.every(l => l.expect === 'yes') && no.straight);
+    assert.ok(no.index < 70 && yes.index < no.index + 30);
+    // a helyes válaszok: lehetetlenre nem, hétköznapira igen
     const R = rng(5);
-    const prof = ansOf(list, s => s.lie ? -2 : [1, 2, -1, -2, 0][Math.floor(R() * 5)]);
+    const prof = ansOf(list, s => s.lie ? (s.expect === 'yes' ? 2 : -2) : [1, 2, -1, -2, 0][Math.floor(R() * 5)]);
     const h1 = C.honesty(prof, list);
     assert.equal(h1.lies.length, 0);
-    const tiers = D.HONESTY_TIERS;
+    // enyhe tagadás is gyanús, de kisebb pontlevonással
+    const soft = C.honesty(ansOf(list, s => s.lie ? (s.expect === 'yes' ? -1 : 1) : 0), list);
+    assert.equal(soft.lies.length, list.filter(s => s.lie).length);
+    const hardOne = C.honesty({ l_kulcs: -2 }, D.A_LISTS.short), softOne = C.honesty({ l_kulcs: -1 }, D.A_LISTS.short);
+    assert.ok(hardOne.index < softOne.index);
+    assert.equal(C.honesty({ l_kulcs: 0, l_hazug: 0 }, D.A_LISTS.short).lies.length, 0, 'a közepes válasz nem gyanús');
     for (let i = 0; i <= 100; i++) assert.ok(C.honestyTier(i).name, String(i));
-    assert.ok(tiers.length >= 3);
+    assert.ok(D.HONESTY_TIERS.length >= 3);
+});
+
+// ---------- Fontos-jelölés (csillag) és rangsorolás ----------
+test('fontos-jelölés: módonként 1/2/3 kérdés, a jelölt állítás kétszeres súllyal számít, csak értékállításra és csak limitig', () => {
+    assert.deepEqual(D.STARS, { short: 1, long: 2, xlong: 3 });
+    assert.equal(D.STAR_MULT, 2);
+    const items = D.VALUE.filter(s => s.w.e).slice(0, 3);
+    const a = { [items[0].id]: 2 * Math.sign(items[0].w.e), [items[1].id]: -2 * Math.sign(items[1].w.e) };
+    const plain = C.axisScores(a, items).e;
+    const star0 = C.axisScores(a, items, undefined, { [items[0].id]: true }).e;
+    const star1 = C.axisScores(a, items, undefined, { [items[1].id]: true }).e;
+    assert.equal(plain, 0, 'két ellentétes válasz kioltja egymást');
+    assert.ok(star0 > 0 && star1 < 0, 'a jelölt kérdés dönt: ' + star0 + ' / ' + star1);
+    assert.ok(Math.abs(star0) > 20 && Math.abs(star0) < 50, 'kétszeres, nem korlátlan súly: ' + star0);
+    // semleges válasz + jelölés nem mozdít
+    assert.equal(C.axisScores({ [items[0].id]: 0 }, items, undefined, { [items[0].id]: true }).e, 0);
+    // az eredményben a limitig és csak értékállításokat tartunk meg
+    const L = D.A_LISTS.long, ans = ansOf(L, (s, i) => cyc[i % 5]);
+    const many = {}; L.forEach(s => { many[s.id] = true; });
+    const r = C.summarizeValues('long', ans, { stars: many });
+    assert.equal(r.starred.length, 2);
+    assert.ok(r.starred.every(id => D.VALUE.some(v => v.id === id)));
+    assert.equal(C.summarizeValues('short', ansOf(D.A_LISTS.short, (s, i) => cyc[i % 5]), { stars: many }).starred.length, 1);
+    assert.equal(C.summarizeValues('xlong', ansOf(D.A_LISTS.xlong, (s, i) => cyc[i % 5]), { stars: many }).starred.length, 3);
+    assert.equal(C.summarizeValues('long', ans).starred, undefined);
+    // a jelölés nem kerül a linkbe, a link ugyanúgy körbejár
+    const d = C.decode(C.encode(r));
+    assert.deepEqual(d.s, r.s);
+    assert.equal(d.starred, undefined);
+    // fejlesztői bontás: a jelölt tétel súlya duplázódik
+    const bd = C.breakdown(a, items, { [items[0].id]: true });
+    const row = bd.axes.e.find(x => x.id === items[0].id);
+    assert.ok(row.star && Math.abs(row.weight) === Math.abs(items[0].w.e) * 2);
+});
+
+test('rangsorolás: 5 feladat, minden lehetőség más tengelyt mozgat, a helyezésből +2…−2 válasz lesz', () => {
+    assert.equal(D.RANK_ITEMS.length, 5);
+    assert.deepEqual(D.RANK_VALUES, [2, 1, 0, -1, -2]);
+    const ids = new Set(D.ALL.map(x => x.id));
+    for (const t of D.RANK_ITEMS) {
+        assert.equal(t.opts.length, 5, t.id);
+        assert.ok(t.text.length > 20 && t.help, t.id);
+        const axes = new Set();
+        for (const o of t.opts) {
+            assert.ok(!ids.has(o.id), 'ütköző azonosító: ' + o.id); ids.add(o.id);
+            const ks = Object.keys(o.w);
+            assert.equal(ks.length, 1, o.id);
+            assert.ok(AX.includes(ks[0]));
+            axes.add(ks[0]);
+        }
+        assert.equal(axes.size, 5, t.id + ': mind az 5 lehetőség más tengely');
+    }
+    const t = D.RANK_ITEMS[0], ans = {};
+    t.opts.forEach((o, i) => { ans[o.id] = D.RANK_VALUES[i]; });
+    const sc = C.axisScores(ans, [t]);
+    const [first, last] = [Object.keys(t.opts[0].w)[0], Object.keys(t.opts[4].w)[0]];
+    assert.equal(sc[first], 100 * Math.sign(t.opts[0].w[first]));
+    assert.equal(sc[last], -100 * Math.sign(t.opts[4].w[last]));
+    assert.equal(sc[Object.keys(t.opts[2].w)[0]], 0, 'a középső helyezés nem mozdít');
+    // a feladat önmagában nem számít a semleges/kihagyott statisztikába
+    const L = D.A_LISTS.long;
+    const base = ansOf(L.filter(s => s.kind !== 'r'), (s, i) => cyc[i % 5]);
+    const r0 = C.summarizeValues('long', base);
+    const r1 = C.summarizeValues('long', Object.assign({}, base, ...D.RANK_ITEMS.filter(x => L.includes(x)).map(x => Object.fromEntries(x.opts.map((o, i) => [o.id, D.RANK_VALUES[i]])))));
+    assert.ok(!r0.rel.flags.includes('skips'), 'a kihagyott rangsor nem számít kihagyott kérdésnek');
+    assert.notDeepEqual(r0.s, r1.s, 'a rangsor mozgatja a tengelyeket');
+    assert.ok(Math.abs(r1.rel.index - r0.rel.index) <= 12);
 });
 
 // ---------- B rész pontozása ----------
@@ -440,6 +535,11 @@ test('felület: 3 értékrend-mód + csak utált, opcionális B rész, megbízha
     const js = pub('ertektest.js'), css = pub('ertektest.css');
     for (const m of ['short', 'long', 'xlong', 'hlong']) assert.ok(js.includes("'" + m + "'"), m);
     assert.match(js, /function renderReliability/);
+    assert.match(js, /function renderRank/); assert.match(js, /function pickRank/); assert.match(js, /function toggleStar/); assert.match(js, /function starBox/);
+    assert.match(js, /stars: st\.stars/, 'a jelölések az összesítőbe kerülnek');
+    assert.match(js, /e\.key === 'f'/, 'F billentyű a fontosnak jelöléshez');
+    assert.match(js, /D\.RANK_VALUES/);
+    assert.match(js, /l\.expect === 'yes'/, 'az ellenőrző kérdéseknél mindkét irány külön szöveget kap');
     assert.match(js, /function renderImages/);
     assert.match(js, /et-b-yes/); assert.match(js, /et-b-no/); assert.match(js, /et-b-continue/);
     assert.match(js, /navigator\.share/);
@@ -450,7 +550,7 @@ test('felület: 3 értékrend-mód + csak utált, opcionális B rész, megbízha
     assert.match(js, /function devTap/);
     assert.match(js, /devClicks\.length >= 7/);
     assert.ok(!/location\.search/.test(js), 'nincs URL-paraméteres fejlesztői mód');
-    for (const c of ['.et-modes.three', '.et-cert', '.et-axchip', '.et-imgs', '.et-img-cv', '.et-oldnote', '.et-vers', '.et-group']) assert.ok(css.includes(c), c);
+    for (const c of ['.et-modes.three', '.et-star', '.et-rank', '.et-rk', '.et-cert', '.et-axchip', '.et-imgs', '.et-img-cv', '.et-oldnote', '.et-vers', '.et-group']) assert.ok(css.includes(c), c);
     assert.ok(!/C\.find\(D\.HATED, (top|x|last|r\.h)/.test(js), 'az eredménynézet nem használhatja a mostani készletet');
 });
 
