@@ -18,17 +18,31 @@
     // ---------- Tengelyek és típusok ----------
     // answers: { állításId: -2..2 | null }. A null (passz) nem számít bele, a 0 ("nem tudom / közepes") igen.
     // Tengelyenként a súlyozott átlag, -100..100 között: Σ(válasz × súly) / Σ(2 × |súly|).
-    function axisScores(answers, list, defs) {
+    // A rangsorolós feladat a listában egy elem (kind 'r'), a lehetőségei külön „tételek” (kind 'ro'), a helyezésből adódó válasszal.
+    // flat: a feladatokat kibontja a lehetőségeikre, így a pontozás egyformán kezeli őket.
+    function flat(list) {
+        var out = [];
+        list.forEach(function (it) {
+            if (it.kind === 'r') it.opts.forEach(function (o) { out.push({ kind: 'ro', id: o.id, text: o.text, w: o.w, parent: it.id }); });
+            else out.push(it);
+        });
+        return out;
+    }
+    // Fontosnak jelölt kérdés (csak az értékrész állításai): kétszeres súllyal számít
+    function mult(it, stars) { return stars && stars[it.id] && it.kind === 'v' ? data.STAR_MULT : 1; }
+
+    function axisScores(answers, list, defs, stars) {
         var ids = axIds(defs), sum = {}, max = {};
         ids.forEach(function (a) { sum[a] = 0; max[a] = 0; });
-        (list || data.A_LISTS.xlong).forEach(function (st) {
+        flat(list || data.A_LISTS.xlong).forEach(function (st) {
             var v = answers ? answers[st.id] : null;
             if (!isNum(v)) return;
             v = clamp(v, -2, 2);
+            var m = mult(st, stars);
             Object.keys(st.w || {}).forEach(function (a) {
                 if (!(a in sum)) return;
-                sum[a] += v * st.w[a];
-                max[a] += 2 * Math.abs(st.w[a]);
+                sum[a] += v * st.w[a] * m;
+                max[a] += 2 * Math.abs(st.w[a]) * m;
             });
         });
         var out = {};
@@ -134,10 +148,14 @@
             if (!isNum(v)) return;
             v = clamp(Math.round(v), -2, 2);
             answered++; counts[v] = (counts[v] || 0) + 1;
-            if (st.lie && v >= 1) {
-                var p = v === 2 ? 1 : 0.6;
-                lies.push({ id: st.id, v: v });
-                total += LIE_PENALTY * p;
+            if (st.lie) {
+                // expect 'no' (alapértelmezett): lehetetlen állítás, az egyetértés gyanús; expect 'yes': mindenkivel megtörtént dolog, a tagadás gyanús
+                var yes = st.expect === 'yes', bad = yes ? v <= -1 : v >= 1;
+                if (bad) {
+                    var p = Math.abs(v) === 2 ? 1 : 0.6;
+                    lies.push({ id: st.id, v: v, expect: yes ? 'yes' : 'no' });
+                    total += LIE_PENALTY * p;
+                }
             }
         });
         twins.forEach(function (pair) {
@@ -170,19 +188,20 @@
     //   - tengelyenként: kevés tétel, vagy a + és − irányú válaszok erősen keverednek (ellentmondás),
     //   - a típus nem egyértelmű (két típus majdnem egyforma, vagy gyenge az illeszkedés),
     //   - a skálákon: a közvetlen és a fordított állításra is igent mondott.
-    function axisStats(answers, list, ids) {
+    function axisStats(answers, list, ids, stars) {
         var st = {};
         ids.forEach(function (a) { st[a] = { n: 0, pos: 0, neg: 0, max: 0 }; });
-        list.forEach(function (it) {
+        flat(list).forEach(function (it) {
             var v = answers ? answers[it.id] : null;
             if (!isNum(v)) return;
             v = clamp(v, -2, 2);
+            var m = mult(it, stars);
             Object.keys(it.w || {}).forEach(function (a) {
                 if (!st[a]) return;
-                var w = it.w[a], c = v * w;
+                var w = it.w[a], c = v * w * m;
                 if (Math.abs(w) >= 0.5) st[a].n++;
                 if (c > 0) st[a].pos += c; else st[a].neg -= c;
-                st[a].max += 2 * Math.abs(w);
+                st[a].max += 2 * Math.abs(w) * m;
             });
         });
         return st;
@@ -232,7 +251,7 @@
         var answers = ctx.answers, list = ctx.list, flags = {}, pen = 0;
         var answered = 0, neutral = 0, nonLie = 0;
         list.forEach(function (it) {
-            if (it.kind === 'l') return;
+            if (it.kind === 'l' || it.kind === 'r') return;
             nonLie++;
             var v = answers ? answers[it.id] : null;
             if (isNum(v)) { answered++; if (Math.round(v) === 0) neutral++; }
@@ -253,7 +272,7 @@
 
         var axes = null;
         if (ctx.s) {
-            var st = axisStats(answers, ctx.values, AX);
+            var st = axisStats(answers, ctx.values, AX, ctx.stars);
             axes = {};
             var weak = 0, mid = 0;
             AX.forEach(function (a) {
@@ -294,10 +313,12 @@
     function summarizeValues(mode, answers, opts) {
         opts = opts || {};
         var A = data.A_LISTS[mode], B = data.B_LISTS[mode];
-        var s = axisScores(answers, A);
+        var stars = cleanStars(opts.stars, mode, A);
+        var s = axisScores(answers, A, undefined, stars);
         var cls = classify(s);
         var hon = honesty(answers, A);
         var r = { kind: mode, ver: data.VERSION, s: s, a: cls.id, a2: cls.second, fit: cls.fit, honesty: hon };
+        if (Object.keys(stars).length) r.starred = Object.keys(stars);
         var list = A.slice(), rounds = null, hasScales = false;
         if (opts.b) {
             if (mode === 'short') {
@@ -316,8 +337,16 @@
                 hasScales = true;
             }
         }
-        r.rel = reliability({ answers: answers, list: list, values: A, mode: mode, s: s, cls: cls, hon: hon, scales: hasScales, rounds: rounds });
+        r.rel = reliability({ answers: answers, list: list, values: A, stars: stars, mode: mode, s: s, cls: cls, hon: hon, scales: hasScales, rounds: rounds });
         return r;
+    }
+
+    // A fontosnak jelölt kérdések: csak az A lista értékállításai, módonként legfeljebb data.STARS[mode] darab
+    function cleanStars(stars, mode, A) {
+        var out = {}, max = data.STARS[mode] || 0, n = 0;
+        if (!stars) return out;
+        A.forEach(function (it) { if (it.kind === 'v' && stars[it.id] && n < max) { out[it.id] = true; n++; } });
+        return out;
     }
 
     // Csak az utált értékek és az előítélet-barométer (a B rész önállóan)
@@ -330,14 +359,15 @@
 
     // Fejlesztői nézet: melyik kérdés hány ponttal járult hozzá az egyes tengelyekhez / skálákhoz.
     // pts = a végső (−100..100 vagy 0..100) érték változása pontban, ahogy az eredmény sávjain látszik.
-    function breakdown(answers, list) {
-        list = list || data.ALL;
-        function collect(defs, key, mult, extra) {
+    function breakdown(answers, list, stars) {
+        list = flat(list || data.ALL);
+        function collect(defs, key, scale, extra) {
+            function mm(it) { return key === 'w' ? mult(it, stars) : 1; }
             var max = {}, items = {};
             defs.forEach(function (d) { max[d.id] = 0; items[d.id] = []; });
             list.forEach(function (st) {
                 Object.keys(st[key] || {}).forEach(function (id) {
-                    if (id in max) max[id] += 2 * Math.abs(st[key][id]);
+                    if (id in max) max[id] += 2 * Math.abs(st[key][id]) * mm(st);
                 });
             });
             list.forEach(function (st) {
@@ -346,7 +376,7 @@
                 Object.keys(st[key] || {}).forEach(function (id) {
                     if (!(id in max)) return;
                     var vv = has ? clamp(v, -2, 2) : 0;
-                    items[id].push({ id: st.id, text: st.text, v: has ? vv : null, weight: st[key][id], pts: max[id] ? Math.round(mult * vv * st[key][id] / (max[id] + extra) * 10) / 10 : 0 });
+                    items[id].push({ id: st.id, text: st.text, v: has ? vv : null, weight: st[key][id] * mm(st), star: mm(st) > 1, rank: st.kind === 'ro', pts: max[id] ? Math.round(scale * vv * st[key][id] * mm(st) / (max[id] + extra) * 10) / 10 : 0 });
                 });
             });
             defs.forEach(function (d) { items[d.id].sort(function (a, b) { return Math.abs(b.pts) - Math.abs(a.pts) || Math.abs(b.weight) - Math.abs(a.weight); }); });
@@ -467,7 +497,7 @@
             var cls = classify(s);
             var rel = getRel(rd, true);
             var idx = clamp(rd.get(7), 0, 100), liesN = rd.get(3), twinsN = rd.get(4);
-            out = { kind: kind, s: s, a: cls.id, a2: cls.second, fit: cls.fit, rel: rel, honesty: { index: idx, liesN: Math.min(liesN, 4), twinsN: Math.min(twinsN, 12), straight: rel.flags.indexOf('straight') >= 0 } };
+            out = { kind: kind, s: s, a: cls.id, a2: cls.second, fit: cls.fit, rel: rel, honesty: { index: idx, liesN: Math.min(liesN, 7), twinsN: Math.min(twinsN, 12), straight: rel.flags.indexOf('straight') >= 0 } };
             if (hasB) {
                 if (kind === 'short') {
                     var h = [];
@@ -618,7 +648,7 @@
     function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 
     var api = {
-        defsFor: defsFor, hatedDefsFor: hatedDefsFor, axisScores: axisScores, classify: classify, distance: distance,
+        defsFor: defsFor, hatedDefsFor: hatedDefsFor, axisScores: axisScores, flat: flat, classify: classify, distance: distance,
         hatedResult: hatedResult, mirrorResult: mirrorResult, hatedScales: hatedScales, prejScales: prejScales, hatedRanking: hatedRanking, hatedTop: hatedTop,
         honesty: honesty, honestyTier: honestyTier, reliability: reliability, relTier: relTier, axisStats: axisStats, axisLevel: axisLevel, scaleConflicts: scaleConflicts,
         summarizeValues: summarizeValues, summarizeHated: summarizeHated, breakdown: breakdown, encode: encode, decode: decode, find: find

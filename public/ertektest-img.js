@@ -273,7 +273,7 @@
             y = Math.max(y + 20, 1010);
             var parts = [];
             parts.push('Őszinteség: ' + core.honestyTier(r.honesty.index).name.toLowerCase() + ' (' + r.honesty.index + '%)');
-            if (r.honesty.liesN) parts.push(r.honesty.liesN + ' lehetetlen állítás elfogadva');
+            if (r.honesty.liesN) parts.push(r.honesty.liesN + ' gyanús válasz az ellenőrző kérdéseken');
             if (r.honesty.twinsN) parts.push(r.honesty.twinsN + ' ellentmondó pár');
             paragraph(ctx, parts.join(' · '), PAD, y, W - 2 * PAD, 24, 700, C.soft, 32, 2);
         }
