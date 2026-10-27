@@ -162,6 +162,16 @@
         ctx.fillStyle = C.ink; ctx.fillRect(x + w / 2 - 1.5, y + 8, 3, 38);
         text(ctx, score + '', W - PAD, y + 37, 28, 800, col, 'right');
     }
+    // Sűrített változat (sok skálánál): kisebb betű és sáv
+    function barRowCompact(ctx, y, name, score, hot) {
+        text(ctx, name, PAD, y + 26, 23, hot ? 800 : 600, C.ink);
+        var x = 520, w = W - PAD - x - 100;
+        fillRR(ctx, x, y + 9, w, 20, 10, C.track);
+        var col = score >= 58 ? C.bad : score <= 42 ? C.blue : C.mid;
+        fillRR(ctx, x, y + 9, Math.max(8, w * score / 100), 20, 10, col);
+        ctx.fillStyle = C.ink; ctx.fillRect(x + w / 2 - 1.5, y + 4, 3, 30);
+        text(ctx, score + '', W - PAD, y + 28, 23, 800, col, 'right');
+    }
     // Széles változat: a felirat a sáv fölött áll (hosszú nevekhez)
     function barRowWide(ctx, y, name, score) {
         text(ctx, name, PAD, y + 22, 25, 600, C.ink);
@@ -190,9 +200,12 @@
             var y = 450;
             text(ctx, 'Minél hosszabb a sáv, annál jobban zavar. Középen (50) a semleges.', PAD, y, 22, 600, C.soft);
             y += 22;
+            var compact = rows.length > 12, step = compact ? Math.min(72, Math.floor((H - 70 - y) / rows.length)) : 72;
             rows.forEach(function (x, i) {
-                barRow(ctx, y, core.find(defs.HATED, x.id).name, x.score, i === 0 && x.score >= 58);
-                y += 72;
+                var nm = core.find(defs.HATED, x.id).name;
+                if (compact) barRowCompact(ctx, y, nm, x.score, i === 0 && x.score >= 58);
+                else barRow(ctx, y, nm, x.score, i === 0 && x.score >= 58);
+                y += step;
             });
         } else {
             var y2 = 470;

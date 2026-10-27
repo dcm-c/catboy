@@ -462,7 +462,7 @@
             if (hasB) {
                 if (kind === 'short') {
                     var ids = data.HATED.map(function (h) { return h.id; });
-                    for (var i = 0; i < 2; i++) { var ix = sum.h && sum.h[i] ? ids.indexOf(sum.h[i]) : -1; w.put(ix < 0 ? 15 : ix, 4); }
+                    for (var i = 0; i < 2; i++) { /* a gyors mód körei az első tíz értékre szólnak */ var ix = sum.h && sum.h[i] ? ids.indexOf(sum.h[i]) : -1; w.put(ix < 0 || ix > 14 ? 15 : ix, 4); }
                     TOP_IDS().forEach(function (t) { w.put(ax8(sum.m ? sum.m[t] : 0), 8); });
                 } else {
                     putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
@@ -472,17 +472,20 @@
         return b64uEncBytes([head].concat(w.bytes()));
     }
 
-    function decodeV3(bytes) {
+    // A v3 és a v4 azonos felépítésű, csak az utált értékek száma különbözik (10, illetve 18): a verzió szerinti készlettel olvassuk
+    function decodeV3(bytes, ver) {
         var head = bytes[0];
+        var defs = defsFor(ver);
+        if (!defs) return null;
         if (head & 0x08) return null;
         var kind = MODE_OF[head & 0x03], hasB = (head & 0x04) !== 0;
         if (kind === 'hlong' && hasB) return null;
-        var hIds = data.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
-        var bits;
-        if (kind === 'hlong') bits = 70 + 56 + 7 + FLAG_N;
+        var hIds = defs.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
+        var hBits = hIds.length * 7, bits;
+        if (kind === 'hlong') bits = hBits + 56 + 7 + FLAG_N;
         else {
             bits = AX.length * 8 + 7 + FLAG_N + AX.length * 2 + 14;
-            if (hasB) bits += kind === 'short' ? 8 + 32 : 70 + 56;
+            if (hasB) bits += kind === 'short' ? 8 + 32 : hBits + 56;
         }
         if (bytes.length !== 1 + Math.ceil(bits / 8)) return null;
         var rd = new BitReader(bytes, 1);
@@ -490,27 +493,27 @@
         var out;
         if (kind === 'hlong') {
             var hs = scales(hIds), pj = scales(pIds);
-            out = { kind: 'hlong', hs: hs, pj: pj, h: hatedTop(hs, 3), rel: getRel(rd, false) };
+            out = { kind: 'hlong', hs: hs, pj: pj, h: hatedTop(hs, 3, defs.HATED), rel: getRel(rd, false) };
         } else {
             var s = {};
             AX.forEach(function (a) { s[a] = clamp(rd.get(8) - 100, -100, 100); });
-            var cls = classify(s);
+            var cls = classify(s, defs);
             var rel = getRel(rd, true);
             var idx = clamp(rd.get(7), 0, 100), liesN = rd.get(3), twinsN = rd.get(4);
             out = { kind: kind, s: s, a: cls.id, a2: cls.second, fit: cls.fit, rel: rel, honesty: { index: idx, liesN: Math.min(liesN, 7), twinsN: Math.min(twinsN, 12), straight: rel.flags.indexOf('straight') >= 0 } };
             if (hasB) {
                 if (kind === 'short') {
                     var h = [];
-                    for (var i = 0; i < 2; i++) { var ix = rd.get(4); if (ix < hIds.length) h.push(hIds[ix]); else if (ix !== 15) return null; }
+                    for (var i = 0; i < 2; i++) { var ix = rd.get(4); if (ix === 15) continue; if (ix < hIds.length) h.push(hIds[ix]); else return null; }
                     out.h = h;
                     out.m = {};
                     TOP_IDS().forEach(function (t) { out.m[t] = clamp(rd.get(8) - 100, -100, 100); });
                 } else {
-                    out.hs = scales(hIds); out.pj = scales(pIds); out.h = hatedTop(out.hs, 2);
+                    out.hs = scales(hIds); out.pj = scales(pIds); out.h = hatedTop(out.hs, 2, defs.HATED);
                 }
             }
         }
-        out.ver = data.VERSION;
+        out.ver = ver;
         return out;
     }
 
@@ -639,7 +642,7 @@
             if (!bytes.length) return null;
             if (bytes[0] === 0x7B) return decodeLegacy(new TextDecoder().decode(new Uint8Array(bytes)));
             var ver = bytes[0] >> 4;
-            if (ver === data.VERSION) return decodeV3(bytes);
+            if (ver === data.VERSION || ver === 3) return decodeV3(bytes, ver);
             if (ver === 1 || ver === 2) return decodeBinaryOld(bytes, ver);
             return null;
         } catch (e) { return null; }

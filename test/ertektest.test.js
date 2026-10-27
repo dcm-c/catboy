@@ -98,12 +98,17 @@ test('típusok: 20 típus, minden tengelyen érték, egyedi azonosító; utált 
         assert.ok(t.title && t.emoji && t.desc && t.sunday, t.id);
         for (const a of AX) assert.ok(typeof t.v[a] === 'number' && Math.abs(t.v[a]) <= 1, t.id + ' ' + a);
     }
-    assert.equal(D.HATED.length, 10);
+    assert.equal(D.HATED.length, 18);
+    assert.equal(new Set(D.HATED.map(h => h.id)).size, 18);
+    for (const h of D.HATED) assert.ok(h.name && h.blurb && h.roast, h.id);
+    for (const id of ['keses', 'sorban', 'okos', 'igeret', 'kutya', 'rendetlen', 'spoiler', 'henceg']) assert.ok(C.find(D.HATED, id), id + ' (v4 új utált érték)');
     assert.equal(D.TOPICS.length, 4);
     assert.equal(D.PREJ.length, 8);
     const cnt = {};
     D.HATED_PAIRS.forEach(p => p.forEach(id => { cnt[id] = (cnt[id] || 0) + 1; }));
-    for (const h of D.HATED) assert.equal(cnt[h.id], 2, h.id + ' pontosan kétszer szerepel a párokban');
+    // a gyors mód körei a klasszikus tíz értékre szólnak (a link 4 bites indexe miatt is), mindegyik pontosan kétszer
+    for (const h of D.HATED.slice(0, 10)) assert.equal(cnt[h.id], 2, h.id + ' pontosan kétszer szerepel a párokban');
+    assert.deepEqual(Object.keys(cnt).sort(), D.HATED.slice(0, 10).map(h => h.id).sort());
 });
 
 test('B rész: minden utált értéket és előítélet-skálát elég tétel mér, a tételek tükrösek és helyzetfüggők is', () => {
@@ -419,7 +424,8 @@ test('verziók: a jelenlegi verzió a változásnaplóban, minden régi verzió 
     for (const x of D.VERSIONS) { assert.match(x.date, /^\d{4}-\d{2}-\d{2}$/); assert.ok(x.note.length > 20); }
     for (let v = 1; v < D.VERSION; v++) {
         const defs = D.defsFor(v);
-        assert.ok(defs && defs.AXES.length === 5 && defs.ARCHETYPES.length === 15 && defs.HATED.length === 10, 'v' + v);
+        const [nA, nT] = v === 3 ? [10, 20] : [5, 15];
+        assert.ok(defs && defs.AXES.length === nA && defs.ARCHETYPES.length === nT && defs.HATED.length === 10, 'v' + v);
         for (const h of defs.HATED) assert.ok(h.id && h.name && h.blurb && h.roast, h.id);
     }
     assert.equal(D.defsFor(D.VERSION).AXES.length, 10);
@@ -465,13 +471,74 @@ test('régi JSON linkek: 5 tengely, 1-es verzióként olvashatók', () => {
     assert.equal(C.decode(enc({ v: 9, s: [0, 0, 0, 0, 0] })), null);
 });
 
+test('régi v3 linkek (10 utált értékkel): a v4 olvasja őket, a régi skálákkal és típusokkal', () => {
+    // valós v3 linkek a v3 kódolóval készítve (3. verziós fejléc, 10 utált érték)
+    const L = {
+        long_a: 'MWpkV0VUUUhoZoQWBMDLBNmQ',
+        long_b: 'NWpkV0VUUUhoZoQEJMDLBNmTxizQsGSWYpZMmTg-yPuFgA',
+        short_b: 'NFpabSg7Rn-EZKmHhAJVRZAEiyZDIyA',
+        hlong: 'M16xk4kP7BZ2yZRXDI-ycP7YgAA',
+        xlong_b: 'NmtnTmZdXlVGam8eJECAw0UCd4pZrHTVsmYr1yNSzer3AA'
+    };
+    const old10 = D.defsFor(3).HATED.map(h => h.id);
+    assert.equal(old10.length, 10);
+    assert.deepEqual(old10, D.HATED.slice(0, 10).map(h => h.id), 'a régi tíz az új lista eleje');
+    const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
+    const exp = { long_a: ['merleg', 76, 11], long_b: ['merleg', 76, 2], short_b: ['jos', 70, 67], xlong_b: ['merleg', 82, 15] };
+    for (const [k, code] of Object.entries(L)) {
+        const d = C.decode(code);
+        assert.ok(d, k);
+        assert.equal(d.ver, 3, k);
+        if (exp[k]) { assert.equal(d.a, exp[k][0], k); assert.equal(d.fit, exp[k][1], k); assert.equal(d.rel.index, exp[k][2], k); assert.equal(Object.keys(d.s).length, 10); }
+        if (d.hs) assert.deepEqual(Object.keys(d.hs), old10, k + ': csak a régi tíz skála');
+        if (d.h) assert.ok(d.h.every(id => old10.includes(id)), k);
+    }
+    assert.equal(sum(C.decode(L.long_b).hs), 495);
+    assert.equal(sum(C.decode(L.xlong_b).hs), 487);
+    assert.equal(sum(C.decode(L.hlong).hs), 551);
+    assert.deepEqual(C.decode(L.hlong).h, ['tolvaj', 'szexizmus', 'anarchia']);
+    assert.deepEqual(C.decode(L.short_b).h, ['potyazo', 'kornyezet']);
+    // a v3 fejléc a mostani (v4) hosszal nem olvasható, és fordítva: a hossz-ellenőrzés védi a kettőt
+    const b = Buffer.from(L.hlong, 'base64url');
+    b[0] = (4 << 4) | (b[0] & 0x0F);
+    assert.equal(C.decode(b.toString('base64url')), null, 'v3 hosszú adat v4 fejléccel nem érvényes');
+    const cur = Buffer.from(C.encode(C.summarizeHated(ansOf(D.B_LISTS.hlong, (s, i) => cyc[i % 5]))), 'base64url');
+    cur[0] = (3 << 4) | (cur[0] & 0x0F);
+    assert.equal(C.decode(cur.toString('base64url')), null, 'v4 hosszú adat v3 fejléccel nem érvényes');
+});
+
+test('v4: 18 skála, a B rész hosszabb (78 / 104), a hlong link 18 utált értéket visz, és az eredményben mind az új értékek ott vannak', () => {
+    assert.equal(D.B_LISTS.long.length, 78);
+    assert.equal(D.B_LISTS.xlong.length, 104);
+    const r = C.summarizeHated(ansOf(D.B_LISTS.hlong, (s, i) => cyc[(i * 2) % 5]));
+    assert.equal(Object.keys(r.hs).length, 18);
+    const d = C.decode(C.encode(r));
+    assert.equal(d.ver, 4);
+    assert.deepEqual(d.hs, r.hs);
+    for (const id of ['keses', 'sorban', 'okos', 'igeret', 'kutya', 'rendetlen', 'spoiler', 'henceg']) {
+        assert.ok(id in d.hs, id);
+        const own = D.HATED_ITEMS.filter(x => x.h[id]);
+        assert.ok(own.length >= 4, id + ' tételei: ' + own.length);
+        assert.ok(own.some(x => x.h[id] < 0), id + ': van fordított tétel');
+        assert.ok(own.some(x => x.role === 'S') && own.some(x => x.role === 'X'), id);
+        // aki mindenre igent mond az adott értékre, annál magas a skála; aki a fordítottra, annál alacsony
+        const hi = C.hatedScales(ansOf(D.B_LISTS.xlong, s => s.h && s.h[id] ? 2 * Math.sign(s.h[id]) : 0), D.B_LISTS.xlong);
+        assert.ok(hi[id] > 60, id + ': ' + hi[id]);
+    }
+    // a gyors mód 15-ös indexe továbbra is „nincs”, a körök a klasszikus tíz értékből jönnek
+    const sh = C.decode(C.encode(C.summarizeValues('short', ansOf(D.A_LISTS.short, (s, i) => cyc[i % 5]), { b: true, picks: D.HATED_PAIRS.map(p => p[0]), mirror: D.MIRROR.map(() => 'min') })));
+    assert.ok(sh.h.every(id => D.HATED.slice(0, 10).some(h => h.id === id)));
+    const none = C.decode(C.encode({ kind: 'short', s: Object.fromEntries(AX.map(a => [a, 0])), rel: { index: 50, flags: [], axes: Object.fromEntries(AX.map(a => [a, 1])) }, honesty: { index: 100, liesN: 0, twinsN: 0 }, h: [], m: { nem: 0, kulf: 0, lgbt: 0, vall: 0 } }));
+    assert.deepEqual(none.h, []);
+});
+
 // ---------- Képek ----------
 function mockCtx() {
     const log = { text: [], fills: 0, bad: [] };
     const target = {
         measureText: t => ({ width: String(t).length * 11 }),
         createLinearGradient: () => ({ addColorStop() {} }),
-        fillText: (t, x, y) => { log.text.push(String(t)); if (![x, y].every(Number.isFinite)) log.bad.push(t); },
+        fillText: (t, x, y) => { log.text.push(String(t)); (log.ys = log.ys || {})[String(t)] = y; if (![x, y].every(Number.isFinite)) log.bad.push(t); },
         fill: () => { log.fills++; }, fillRect: () => { log.fills++; }
     };
     const ctx = new Proxy(target, { get: (t, k) => (k in t ? t[k] : (() => {})), set: (t, k, v) => { t[k] = v; return true; } });
@@ -499,6 +566,14 @@ test('képek: minden kategória lerajzolható, a méret fix, a kép a kitöltöt
     assert.ok(log.text.some(t => t.includes(C.find(D.ARCHETYPES, S.xlong_b.a).title)));
     assert.ok(log.text.some(t => /Megbízhatóság/i.test(t)));
     assert.throws(() => IMG.draw(ctx, 'nincs', S.xlong_b));
+    // 18 utált érték is elfér a képen
+    const mh = mockCtx();
+    IMG.draw(mh.ctx, 'hated', S.xlong_b);
+    assert.ok(S.xlong_b.hs && Object.keys(S.xlong_b.hs).length === 18);
+    for (const h of D.HATED) {
+        assert.ok(mh.log.text.includes(h.name), h.name + ' szerepel a képen');
+        assert.ok(mh.log.ys[h.name] < IMG.HEIGHT - 90, h.name + ' a lábléc fölött van: ' + mh.log.ys[h.name]);
+    }
 });
 
 test('képek: régi (v1/v2) eredmény is lerajzolható a régi tengelyekkel és típusokkal', () => {

@@ -162,7 +162,15 @@
         { id: 'tolvaj', name: 'Lopás és csalás', blurb: 'amikor valaki más pénzét, munkáját vagy ötletét viszi', roast: 'Szerinted a „mindenki lop” nem mentség, és a „csak egy kicsit” sem. A közös hűtőből eltűnt joghurt nálad nem apróság, hanem jellemvizsga.' },
         { id: 'zaj', name: 'Hangoskodás', blurb: 'amikor a csendet és a nyugalmat nem tiszteli senki', roast: 'Neked az éjszakai csend nem javaslat, hanem házirend. A vasárnap reggeli fűnyíró és a hajnali fúrógép szerinted a modern kor tűrhetetlen hozadéka.' },
         { id: 'pletyka', name: 'Pletyka és hátbatámadás', blurb: 'amikor a hátad mögött beszélnek rólad, szemben meg mosolyognak', roast: 'Nálad az őszinte szembeszólás többet ér a háttérbeszélgetésnél. A „csak mondom” és a „én nem mondtam semmit” után te már tudod, mi következik.' },
-        { id: 'potyazo', name: 'Lógás és potyázás', blurb: 'amikor más dolgozik, ő meg kihasználja', roast: 'Nálad a „majd a másik megcsinálja” a legnagyobb bűn. A közös munkából nem lehet lógni, a közös kasszából meg nem lehet ingyen élni.' }
+        { id: 'potyazo', name: 'Lógás és potyázás', blurb: 'amikor más dolgozik, ő meg kihasználja', roast: 'Nálad a „majd a másik megcsinálja” a legnagyobb bűn. A közös munkából nem lehet lógni, a közös kasszából meg nem lehet ingyen élni.' },
+        { id: 'keses', name: 'Késés és megbízhatatlanság', blurb: 'amikor valaki rendszeresen elkésik, vagy az utolsó pillanatban mond le', roast: 'Neked a megbeszélt időpont nem ajánlás, hanem ígéret. A „már úton vagyok” nálad akkor érvényes, ha tényleg úton van, nem az előszobában. Az idő mindenkié, csak a késők nem hajlandók ezt tudomásul venni.' },
+        { id: 'sorban', name: 'Sorbaállás és előzés', blurb: 'amikor valaki a sorban vagy a forgalomban mindenki elé akar kerülni', roast: 'Nálad a sor szent: aki előretolakszik, az nem siet, hanem csal. A „csak egy kérdésem lenne” a pénztárnál vészjelzés, a türelmes várakozás pedig a civilizáció egyik utolsó fényes pontja.' },
+        { id: 'okos', name: 'Fölényeskedés és közbevágás', blurb: 'amikor valaki mindent jobban tud, és még be sem fejezted a mondatot', roast: 'Te végighallgatod a másikat, mielőtt kijavítod. A „ezt én is tudom” és a közbevágás nálad nem lendület, hanem rossz szokás. A jó beszélgetésben mindenki befejezheti a mondatát, legalább az elsőt.' },
+        { id: 'igeret', name: 'Üres ígéret', blurb: 'amikor valaki megígér valamit, és eszében sincs megtartani', roast: 'Nálad az „ott leszek” és a „megcsinálom” fogadalom, nem hangulatjelentés. Az „írok még” szerinted nem udvariassági forma, hanem tartozás. Ezért nehéz veled: komolyan veszed, amit mondanak.' },
+        { id: 'kutya', name: 'Gazdátlan kutyapiszok', blurb: 'amikor a kutyás nem szedi fel, amit a kutyája otthagyott', roast: 'Szerinted a séta végén a zacskó nem opció, hanem a kutyatartás záradéka. A járdán a szabad szemmel is látható „meglepetések” nálad nem helyi színek, hanem bűnjelek, amelyekbe ráadásul belelép az ember.' },
+        { id: 'rendetlen', name: 'Rendetlenség a közös térben', blurb: 'amikor mások után kell elmosogatni, felmosni vagy összeszedni', roast: 'A közös konyha nálad nem szabad préri, hanem közös felelősség. A mosogatóban álló halom edényt múzeumnak látod, amelynek nincs nyitvatartása, de van felelőse.' },
+        { id: 'spoiler', name: 'Spoilerezés', blurb: 'amikor valaki elmondja a sorozat végét, mielőtt megnézted', roast: 'Nálad a „nem szólok, csak annyit, hogy a végén...” kezdetű mondat bűncselekmény gyanúja. A csavar titkát szerinted úgy kell őrizni, mint a nagymama receptjét: csak a családnak, és csak szükség esetén.' },
+        { id: 'henceg', name: 'Hencegés és fényezés', blurb: 'amikor valaki folyton azzal dicsekszik, mije van, vagy mit ért el', roast: 'Te örülsz mások sikerének, de a harmadik „én a múltkor éppen...” kezdetű mondatnál már a poharadat vizsgálod. Szerinted a tényleg jó dolgok magukért beszélnek; ami nem, azt úgyis a hencegő mondja el.' }
     ];
 
     // Minden érték pontosan kétszer szerepel, így mindenkinek ugyanannyi esélye van.
@@ -521,13 +529,16 @@
     // a régi JSON linkek mind az 1-es verzió). Ha egy kérdés vagy skála jelentése változik, a VERSION nő, és a régi
     // jelentést a LEGACY őrzi (az ertektest-legacy.js-ben), hogy a korábban megosztott eredmények továbbra is helyesen jelenjenek meg.
     // =========================================================
-    var VERSION = 3;
+    var VERSION = 4;
     var VERSIONS = [
         { v: 1, date: '2026-10-24', note: 'Az első kiadás: öt tengely, az utált értékek politikai-ideológiai dolgok voltak (pénzhajhászás, parancsuralom, pátosz és társaik).' },
         { v: 2, date: '2026-10-25', note: 'Az utált értékek társadalmi bosszantó dolgok lettek (rongálás, környezetszennyezés, figyelmetlenség, trágárság, szexizmus és társaik); még mindig öt tengely.' },
-        { v: 3, date: '2026-10-25', note: 'Tíz tengelyes értékrend (gyors 50, részletes 100, extra hosszú 150 állítással), megbízhatósági jelzés minden eredményhez, az utált értékek és az előítélet-barométer opcionális, bonyolultabb és tükrösebb kérdésekkel, kategóriánkénti megosztható képek.' }
+        { v: 3, date: '2026-10-25', note: 'Tíz tengelyes értékrend (gyors 50, részletes 100, extra hosszú 150 állítással), megbízhatósági jelzés minden eredményhez, az utált értékek és az előítélet-barométer opcionális, bonyolultabb és tükrösebb kérdésekkel, kategóriánkénti megosztható képek.' },
+        { v: 4, date: '2026-10-27', note: 'Nyolc új utált érték (késés, sorbaállás és előzés, fölényeskedés, üres ígéret, kutyapiszok, rendetlenség, spoilerezés, hencegés): összesen 18 skála az utált értékek és előítéletek részben, hosszabb B résszel. A gyors mód körei a klasszikus tíz értékkel maradtak.' }
     ];
-    var LEGACY = LEGACY_DATA;
+    // A v3 tengelyei és típusai változatlanok, csak az utált értékek (az első tíz) voltak kevesebben
+    var LEGACY = Object.assign({}, LEGACY_DATA);
+    LEGACY[3] = { AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED.slice(0, 10) };
 
     // Egy tesztverzió tengelyei, típusai és utált értékei (a régi linkek ezekkel jelennek meg), ismeretlen verzióra null
     function defsFor(ver) {

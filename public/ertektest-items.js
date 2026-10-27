@@ -182,7 +182,49 @@
         { id: 'x_ple_pot', role: 'X', tier: 1, text: 'A hátam mögötti pletyka jobban zavar, mint ha valaki kihasznál a munkában.', h: { pletyka: 0.5, potyazo: -0.5 } },
         { id: 'x_pot_zaj', role: 'X', tier: 1, text: 'A lógás és a potyázás rosszabb, mint a szomszéd éjszakai zaja.', h: { potyazo: 0.5, zaj: -0.5 } },
         { id: 'x_zaj_tol', role: 'X', tier: 1, text: 'Az éjszakai hangoskodás jobban zavar, mint egy eltűnt joghurt a közös hűtőből.', h: { zaj: 0.5, tolvaj: -0.5 }, joke: 'A joghurt legalább nem dübörög.' },
-        { id: 'x_tol_ron', role: 'X', tier: 1, text: 'A lopás rosszabb, mint a rongálás: legalább ott nem visznek el semmit.', h: { tolvaj: 0.5, rongalas: -0.5 } }
+        { id: 'x_tol_ron', role: 'X', tier: 1, text: 'A lopás rosszabb, mint a rongálás: legalább ott nem visznek el semmit.', h: { tolvaj: 0.5, rongalas: -0.5 } },
+        // ---- v4: további irritáló dolgok ----
+        // Késés és megbízhatatlanság
+        { id: 'z_kes1', role: 'D', tier: 1, text: 'Idegesít, ha valaki rendszeresen elkésik, és közben azt írja: „már úton vagyok”.', h: { keses: 1 }, joke: 'Az „úton vagyok” gyakran a lakás előszobáját jelenti.' },
+        { id: 'z_kes_r', role: 'R', tier: 1, text: 'A késés nem nagy ügy: a megbeszélt időpont inkább irányadó, mint kötelező.', h: { keses: -1 }, joke: 'A „negyed óra csúszás” nálunk akadémiai negyed.' },
+        { id: 'z_kes_s', role: 'S', tier: 2, text: 'A késés akkor is zavar, ha az illető kedves és elnézést kér: az én időm ettől még elment.', h: { keses: 1 } },
+        // Sorbaállás és előzés
+        { id: 'z_sor1', role: 'D', tier: 1, text: 'Idegesít, ha valaki a sorban vagy a forgalomban kikerüli a többieket, és előrefurakszik.', h: { sorban: 1 }, joke: 'A „csak egy kérdésem lenne” a sorban általában tizenöt perc.' },
+        { id: 'z_sor_r', role: 'R', tier: 1, text: 'Ha valakinek tényleg sietnie kell, nem baj, ha egy kicsit előrébb megy a sorban.', h: { sorban: -1 } },
+        { id: 'z_sor_s', role: 'S', tier: 2, text: 'A sorban tolakodás akkor is zavar, ha az illető udvariasan kér: a többiek is dolgozni mennének.', h: { sorban: 1 } },
+        // Fölényeskedés és közbevágás
+        { id: 'z_oko1', role: 'D', tier: 1, text: 'Idegesít, ha valaki közbevág, vagy mindenbe belemagyarázza, hogy ő jobban tudja.', h: { okos: 1 }, joke: 'A „ezt én is tudom” az okoskodás belépőkártyája.' },
+        { id: 'z_oko_r', role: 'R', tier: 1, text: 'A közbevágás a lelkes beszélgetés jele: aki szenvedélyesen vitázik, az nem udvariatlan.', h: { okos: -1 } },
+        { id: 'z_oko_s', role: 'S', tier: 2, text: 'A közbevágás akkor is zavar, ha az illetőnek igaza van: a mondatomat ettől még be akarom fejezni.', h: { okos: 1 } },
+        // Üres ígéret
+        { id: 'z_ige1', role: 'D', tier: 1, text: 'Idegesít, ha valaki megígér valamit, aztán szó nélkül elfelejti, vagy kibújik alóla.', h: { igeret: 1 }, joke: 'Az „írok még” a legnagyobb magyar udvariassági hazugság.' },
+        { id: 'z_ige_r', role: 'R', tier: 1, text: 'Egy elfelejtett kisebb ígéret nem számít: mindenkivel előfordul, nem érdemes számon kérni.', h: { igeret: -1 } },
+        { id: 'z_ige_s', role: 'S', tier: 2, text: 'Az üres ígéret akkor is zavar, ha az illető jó szándékú volt: a megbízhatóság nem hangulat kérdése.', h: { igeret: 1 } },
+        // Gazdátlan kutyapiszok
+        { id: 'z_kut1', role: 'D', tier: 1, text: 'Idegesít, ha a kutyás nem szedi fel a kutyája után, amit a járdán vagy a parkban otthagyott.', h: { kutya: 1 }, joke: 'A járdán lévő „meglepetés” nem lakberendezés, hanem bűnjel.' },
+        { id: 'z_kut_r', role: 'R', tier: 1, text: 'A kutyapiszok a városi élet velejárója: nem érdemes ezen felháborodni.', h: { kutya: -1 } },
+        { id: 'z_kut_s', role: 'S', tier: 2, text: 'A kutyapiszok akkor is zavar, ha a kutya édes, és a gazdi „éppen sietett”: a járdát ettől még mindenki használja.', h: { kutya: 1 } },
+        // Rendetlenség a közös térben
+        { id: 'z_ren1', role: 'D', tier: 1, text: 'Idegesít, ha valaki a közös konyhában vagy a mosdóban hagyja a koszát, és másnak kell elpakolnia.', h: { rendetlen: 1 }, joke: 'A „majd később elmosogatok” a mosatlan edény legfontosabb fűszere.' },
+        { id: 'z_ren_r', role: 'R', tier: 1, text: 'Egy kis rendetlenség a közös térben nem nagy baj: a lakótársak úgyis kiegyenlítik egymást.', h: { rendetlen: -1 } },
+        { id: 'z_ren_s', role: 'S', tier: 2, text: 'A rendetlenség akkor is zavar, ha az illető kedves, és mindig megígéri, hogy rendet rak.', h: { rendetlen: 1 } },
+        // Spoilerezés
+        { id: 'z_spo1', role: 'D', tier: 1, text: 'Idegesít, ha valaki elmondja egy film vagy sorozat fordulatát, mielőtt megnézhettem volna.', h: { spoiler: 1 }, joke: 'A „nem spoilerezek, csak annyit, hogy a végén...” maga a spoiler.' },
+        { id: 'z_spo_r', role: 'R', tier: 1, text: 'Az, hogy ismerem a végét, nem rontja el a történetet: a lényeg a hogyan, nem a mi.', h: { spoiler: -1 } },
+        { id: 'z_spo_s', role: 'S', tier: 2, text: 'A spoilerezés akkor is zavar, ha „már mindenki látta”: aki még nem, annak ez ugyanúgy elveszi az élményt.', h: { spoiler: 1 } },
+        // Hencegés és fényezés
+        { id: 'z_hen1', role: 'D', tier: 1, text: 'Idegesít, ha valaki folyton azzal dicsekszik, mije van, hol járt vagy mit ért el.', h: { henceg: 1 }, joke: 'A „csak megemlítem” a hencegés legszerényebb formája.' },
+        { id: 'z_hen_r', role: 'R', tier: 1, text: 'A dicsekvés ártalmatlan: aki büszke valamire, az az örömét osztja meg.', h: { henceg: -1 } },
+        { id: 'z_hen_s', role: 'S', tier: 2, text: 'A hencegés akkor is zavar, ha minden szava igaz: a tény ettől még nem lesz szimpatikusabb.', h: { henceg: 1 } },
+        // X: összehasonlítások az új értékek körében
+        { id: 'x_kes_sor', role: 'X', tier: 1, text: 'A rendszeres késés jobban zavar, mint ha valaki a sorban előre tolakszik.', h: { keses: 0.5, sorban: -0.5 } },
+        { id: 'x_sor_oko', role: 'X', tier: 1, text: 'A sorban tolakodás rosszabb, mint a közbevágás egy beszélgetésben.', h: { sorban: 0.5, okos: -0.5 } },
+        { id: 'x_oko_ige', role: 'X', tier: 1, text: 'A közbevágás és a fölényeskedés jobban zavar, mint egy elfelejtett ígéret.', h: { okos: 0.5, igeret: -0.5 } },
+        { id: 'x_ige_kut', role: 'X', tier: 1, text: 'Az üres ígéret rosszabb, mint a kutyapiszok a járdán.', h: { igeret: 0.5, kutya: -0.5 } },
+        { id: 'x_kut_ren', role: 'X', tier: 1, text: 'A gazdátlan kutyapiszok jobban zavar, mint a közös konyhában hagyott mosatlan.', h: { kutya: 0.5, rendetlen: -0.5 } },
+        { id: 'x_ren_spo', role: 'X', tier: 1, text: 'A közös térben hagyott rendetlenség rosszabb, mint egy elspoilerezett sorozat.', h: { rendetlen: 0.5, spoiler: -0.5 } },
+        { id: 'x_spo_hen', role: 'X', tier: 1, text: 'A spoilerezés jobban zavar, mint a hencegés.', h: { spoiler: 0.5, henceg: -0.5 } },
+        { id: 'x_hen_kes', role: 'X', tier: 1, text: 'A folyamatos hencegés rosszabb, mint ha valaki tíz percet késik.', h: { henceg: 0.5, keses: -0.5 } }
     ];
 
     // Az előítélet-barométer tételei. Téma × 8: U1 (fenntartás felfelé), U2 (felfelé, helyzetben), UR (fordított),
