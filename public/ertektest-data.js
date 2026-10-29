@@ -417,6 +417,22 @@
     var PREJ_ALL = ITEMS.PREJ_B.map(function (st) { return mk('p', 'b', st); });
     var ALL = VALUE_ALL.concat(LIE_ALL, RANK_ALL, HATED_ALL, PREJ_ALL);
 
+    // Téma-réteg: femboyosabb szövegek és poénok (csak text / help / joke íródik felül, a pontozás és a linkek nem változnak).
+    var THEME_UNKNOWN = [];
+    (function applyTheme() {
+        var T = ITEMS.THEME || {};
+        var groups = { VALUE: VALUE_ALL, RANK: RANK_ALL, HATED: HATED_ALL };
+        Object.keys(groups).forEach(function (g) {
+            var byId = {};
+            groups[g].forEach(function (it) { byId[it.id] = it; });
+            Object.keys(T[g] || {}).forEach(function (id) {
+                var it = byId[id], o = T[g][id];
+                if (!it) { THEME_UNKNOWN.push(g + ':' + id); return; }
+                ['text', 'help', 'joke'].forEach(function (f) { if (o[f]) it[f] = o[f]; });
+            });
+        });
+    })();
+
     // Kevert, de egyenletes sorrend: tengelyenként (témánként) véletlenszerű, a csoportok egyenletesen elosztva, az ikrek egymástól távol.
     // A magot rögzítettük, így mindenki ugyanazt a sorrendet kapja, és a teszt tesztelhető.
     function rng(seed) {
@@ -551,6 +567,7 @@
         AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR,
         VALUE: VALUE_ALL, LIES: LIE_ALL, RANK_ITEMS: RANK_ALL, RANK_VALUES: [2, 1, 0, -1, -2], STARS: { short: 1, long: 2, xlong: 3 }, STAR_MULT: 2, HATED_ITEMS: HATED_ALL, PREJ_ITEMS: PREJ_ALL, ALL: ALL,
         A_LISTS: A_LISTS, B_LISTS: B_LISTS, TWINS: TWINS, twinsIn: twinsIn,
+        THEME_UNKNOWN: THEME_UNKNOWN,
         HONESTY_TIERS: HONESTY_TIERS, REL_FLAGS: REL_FLAGS, REL_TIERS: REL_TIERS, AXIS_LEVELS: AXIS_LEVELS
     };
     if (isNode) module.exports = api;

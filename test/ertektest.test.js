@@ -650,3 +650,27 @@ test('README: az értékteszt új szerkezete és a teszt-verzió dokumentálva',
     assert.match(md, /10 tengely/);
     assert.match(md, /ertektest-img\.js/);
 });
+
+// ---------- Téma-réteg: femboyosabb szövegek, poénok ----------
+test('téma: minden téma-azonosító létezik, és minden értékkérdéshez van poén', () => {
+    assert.deepEqual(D.THEME_UNKNOWN, []);
+    const nojoke = D.VALUE.filter(s => !s.joke || s.joke.length < 15).map(s => s.id);
+    assert.deepEqual(nojoke, []);
+    assert.deepEqual(D.RANK_ITEMS.filter(s => !s.joke).map(s => s.id), []);
+    assert.deepEqual(D.HATED_ITEMS.filter(s => !s.joke).map(s => s.id), []);
+});
+test('téma: a poénok nem ismétlődnek, és a szövegek, súgók épek maradnak', () => {
+    const js = D.VALUE.concat(D.RANK_ITEMS, D.HATED_ITEMS).map(s => s.joke).filter(Boolean);
+    assert.equal(new Set(js).size, js.length, 'ismétlődő poén');
+    D.VALUE.concat(D.HATED_ITEMS).forEach(s => {
+        assert.ok(s.text.length >= 15 && s.text.length <= 259, s.id);
+        assert.ok(s.help && s.help.length >= 15, s.id + ' súgó');
+        assert.ok(s.joke.length <= 200, s.id + ' túl hosszú poén');
+    });
+});
+test('téma: a témaréteg nem érinti a pontozást (súlyok, szintek, ikerpárok változatlan szerkezetűek)', () => {
+    assert.equal(D.VERSION, 4);
+    assert.equal(D.VALUE.length, 150);
+    D.VALUE.forEach(s => { assert.ok(s.w && Object.keys(s.w).length >= 1, s.id); assert.ok([1, 2, 3].includes(s.tier), s.id); });
+    assert.equal(D.TWINS.length, 12);
+});
