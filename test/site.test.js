@@ -137,3 +137,62 @@ test('Programok és Fogalom: minden kártya a tartalmához illő (data-tone) ker
         }
     }
 });
+
+// ---------- SEO ----------
+const SEO_PAGES = ['index', 'rules', 'events', 'gallery', 'eletut', 'ertektest', 'privacy', 'fogalom'];
+const urlOf = p => 'https://femboy.hu' + (p === 'index' ? '/' : '/' + p);
+
+test('seo: minden indexelhető oldalnak egyedi címe, leírása, canonical-ja és közösségi-megosztási adata van', () => {
+    const titles = new Set(), descs = new Set();
+    for (const p of SEO_PAGES) {
+        const h = read(p + '.html');
+        const title = (h.match(/<title>(.*?)<\/title>/s) || [])[1];
+        const desc = (h.match(/<meta name="description"\s+content="(.*?)"/s) || [])[1];
+        assert.ok(title && title.length >= 20 && title.length <= 80, p + ': a cím hossza');
+        assert.ok(desc && desc.replace(/\s+/g, ' ').length >= 70 && desc.length <= 300, p + ': a leírás hossza');
+        assert.ok(!titles.has(title) && !descs.has(desc), p + ': a cím/leírás nem egyedi');
+        titles.add(title); descs.add(desc);
+        assert.ok(h.includes('<link rel="canonical" href="' + urlOf(p) + '">'), p + ': canonical');
+        assert.ok(h.includes('<meta property="og:url" content="' + urlOf(p) + '">'), p + ': og:url');
+        assert.ok(/og:image" content="https:\/\/femboy\.hu\/imgs\/og-mfsz\.jpg"/.test(h), p + ': og:image');
+        assert.ok(/name="twitter:card"/.test(h) && /rel="icon"/.test(h), p + ': twitter/favicon');
+        assert.equal((h.match(/<h1[\s>]/g) || []).length, 1, p + ': pontosan egy h1');
+        assert.ok(!/noindex/.test(h), p + ': nem lehet noindex');
+    }
+});
+
+test('seo: a sitemap az átirányítás nélküli címeket sorolja, és minden indexelhető oldal benne van', () => {
+    const sm = read('sitemap.xml');
+    const locs = [...sm.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
+    assert.deepEqual(new Set(locs), new Set(SEO_PAGES.map(urlOf)));
+    assert.ok(!locs.some(l => /\.html$/.test(l)), 'a .html-es cím átirányít');
+    const robots = read('robots.txt');
+    assert.ok(/Sitemap: https:\/\/femboy\.hu\/sitemap\.xml/.test(robots));
+    assert.ok(!/Disallow: \/api/.test(robots), 'a galéria az /api/reddit-ből tölt, a keresőnek is elérhetőnek kell lennie');
+});
+
+test('seo: a strukturált adatok a valódi domainre mutatnak, és érvényes JSON-ok', () => {
+    for (const p of SEO_PAGES) {
+        const h = read(p + '.html');
+        const blocks = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+        assert.ok(blocks.length >= 1, p + ': nincs strukturált adat');
+        for (const b of blocks) JSON.parse(b[1]);
+        assert.ok(!/magyarfemboy\.hu/.test(h), p + ': rossz domain');
+    }
+});
+
+test('seo: a menü JS nélkül is bejárható (noscript), a belső linkek nem .html-re mutatnak', () => {
+    for (const p of SEO_PAGES) {
+        const h = read(p + '.html');
+        assert.ok(/<noscript><nav aria-label="Főmenü"[\s\S]*?href="\/fogalom"[\s\S]*?<\/noscript>/.test(h), p + ': noscript menü');
+        assert.ok(!/href="[a-z0-9-]+\.html[#"]/.test(h), p + ': .html-s belső link');
+    }
+    assert.ok(!/href="[a-z0-9-]+\.html/.test(read('navbar.html') + read('footer.html')));
+});
+
+test('seo: a 404-oldal noindex, a statikus fejlécek és az OG-kép megvannak', () => {
+    assert.ok(/noindex/.test(read('404.html')));
+    assert.ok(/"not_found_handling":\s*"404-page"/.test(fs.readFileSync(path.join(pub, '..', 'wrangler.jsonc'), 'utf8')));
+    assert.ok(/Cache-Control/.test(read('_headers')));
+    assert.ok(fs.statSync(path.join(pub, 'imgs', 'og-mfsz.jpg')).size > 10000);
+});

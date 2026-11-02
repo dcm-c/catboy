@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /data/*
+Disallow: /data/
 Disallow: /fovi.html
+Disallow: /fovi
+
 Sitemap: https://femboy.hu/sitemap.xml

@@ -2,9 +2,9 @@
 // ÉRTÉKTEST - felület
 // Módok:
 //   short  Gyors: 50 értékállítás (10 tengely) + 1 rangsorolás + 2 ellenőrző kérdés. Opcionálisan: 10 „melyik zavar jobban?” pár + 8 tükörpár.
-//   long   Részletes: 100 értékállítás + 3 rangsorolás + 5 ellenőrző kérdés. Opcionálisan: 54 állítás az utált értékekről és az előítéletekről.
-//   xlong  Extra hosszú: 150 értékállítás + 5 rangsorolás + 7 ellenőrző kérdés. Opcionálisan: 72 állítás az utált értékekről és az előítéletekről.
-//   hlong  Csak az utált értékek és az előítélet-barométer (54 állítás).
+//   long   Részletes: 100 értékállítás + 3 rangsorolás + 5 ellenőrző kérdés. Opcionálisan: 78 állítás az utált értékekről és az előítéletekről.
+//   xlong  Extra hosszú: 150 értékállítás + 5 rangsorolás + 7 ellenőrző kérdés. Opcionálisan: 104 állítás az utált értékekről és az előítéletekről.
+//   hlong  Csak az utált értékek és az előítélet-barométer (78 állítás).
 // Fontosnak jelölhető kérdések (csillag): gyors 1, részletes 2, extra hosszú 3; a jelölt állítás kétszeres súllyal számít.
 // Az eredmény a link #r= részében utazik (tömör bináris kód), így megosztható, és nem mentünk semmit.
 // Minden eredményhez megbízhatósági jelzés és kategóriánkénti, megosztható kép tartozik.
@@ -158,7 +158,7 @@
             valuesOf(A.short.a) + ' állítás, mind a 10 tengelyen (tengelyenként 5)',
             D.twinsIn(A.short.a).length + ' ellentmondás-pár, ' + checksOf(A.short.a) + ' ellenőrző kérdés, ' + ranksOf(A.short.a) + ' rangsorolás',
             'Fontosnak jelölhetsz ' + D.STARS.short + ' kérdést (kétszeres súly)',
-            'Opcionálisan: ' + PAIRS.length + ' „melyik zavar jobban?” kör + ' + MIRROR.length + ' tükörpár',
+            'Opcionálisan: ' + PAIRS.length + ' „melyik zavar jobban?” kör (a klasszikus tíz értékből) + ' + MIRROR.length + ' tükörpár',
             'Kb. ' + minutes(A.short.a.length) + ' perc'
         ], 'Gyors teszt', 'short'));
         modes.appendChild(modeCard('deep', '🔬', 'Részletes', [
@@ -180,7 +180,7 @@
         body.appendChild(el('h3', 'et-sect', 'Csak az utált értékek és az előítéletek'));
         var modes2 = el('div', 'et-modes');
         modes2.appendChild(modeCard('hdeep', '🧪', 'Utált értékek és előítélet-barométer', [
-            A.hlong.b.length + ' állítás: 10 utált érték (közvetlen, fordított, összehasonlító és helyzetfüggő tételek) és 4 téma mindkét irányban',
+            A.hlong.b.length + ' állítás: ' + D.HATED.length + ' utált érték (közvetlen, fordított, összehasonlító és helyzetfüggő tételek) és 4 téma mindkét irányban',
             'Skálák 0–100 között, megbízhatósági jelzéssel',
             'Kb. ' + minutes(A.hlong.b.length) + ' perc'
         ], 'Csak utált és előítélet', 'hlong'));
