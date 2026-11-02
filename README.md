@@ -29,3 +29,10 @@ node --test "test/*.test.js"          # minden teszt: Életút (szabályok, kasz
 
 A jobb felső menüben a 🌙 gombbal váltható: világos → sötét → buzi mód. A választás a böngészőben marad meg
 (`localStorage`), első látogatáskor a rendszer beállítását követi. A lábléc „UwU" gombja a buzi módot kapcsolja.
+
+## SEO
+- Minden indexelhető oldal `<head>`-je tartalmaz egyedi címet és leírást, canonical-t, Open Graph/Twitter adatot (`imgs/og-mfsz.jpg`, 1200×630) és strukturált adatot (főoldal: Organization + WebSite + FAQPage, aloldalak: BreadcrumbList). Új oldalnál ezeket is ki kell tölteni, és fel kell venni a `sitemap.xml`-be (`test/site.test.js` ellenőrzi).
+- A Cloudflare a `.html`-es címeket kiterjesztés nélkülire irányítja át (`/gallery.html` → `/gallery`), ezért a canonical-ok, a sitemap és a belső linkek is kiterjesztés nélküliek. (A `navbar.html` / `footer.html` betöltése és a `data-page` értékek maradnak `.html`-esek.)
+- A menü és a lábléc JS-sel töltődik be, ezért minden oldalon van `<noscript>` tartalék-navigáció a bejárók számára.
+- `public/_headers`: gyorsítótár a képeknek és alap biztonsági fejlécek; `public/404.html` (noindex) a `wrangler.jsonc`-ben beállított `not_found_handling` szerint.
+- A `robots.txt` nem tiltja az `/api/`-t, mert a galéria onnan tölti a képeket (a keresőnek renderelés közben is el kell érnie).

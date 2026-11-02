@@ -602,8 +602,8 @@ test('oldal: az értékteszt be van kötve (scriptek sorrendje, navbar, sitemap,
     assert.match(h, /AI-slop, vibe kódolt/);
     assert.match(h, /id="et-stage"[^>]*data-no-uwu/);
     assert.ok(!/96 kérdés/.test(h));
-    assert.match(pub('navbar.html'), /href="ertektest\.html" data-page="ertektest\.html"/);
-    assert.match(pub('sitemap.xml'), /femboy\.hu\/ertektest\.html/);
+    assert.match(pub('navbar.html'), /href="\/ertektest" data-page="ertektest\.html"/);
+    assert.match(pub('sitemap.xml'), /femboy\.hu\/ertektest</);
 });
 
 test('felület: 3 értékrend-mód + csak utált, opcionális B rész, megbízhatóság-kártya, képek, folytatás az eredményből', () => {
