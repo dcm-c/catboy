@@ -30,6 +30,13 @@ node --test "test/*.test.js"          # minden teszt: Életút (szabályok, kasz
 A jobb felső menüben a 🌙 gombbal váltható: világos → sötét → buzi mód. A választás a böngészőben marad meg
 (`localStorage`), első látogatáskor a rendszer beállítását követi. A lábléc „UwU" gombja a buzi módot kapcsolja.
 
+## Femboy-típus teszt
+Külön, humoros teszt az értékteszt oldalán (a bevezető „Külön tesztek” sorában, az utált értékek kártya mellett): 32 állítás 8 tengelyen, 13 típus, 6 vicces mérő, következetességi jelző, megosztható kép és link.
+- `femtest-data.js`: tengelyek, állítások (mindegyikhez poén), típusok, mérők, pontozás és a link kódolása (tiszta modul, Node-ban tesztelhető).
+- `femtest.js`: felület és eredménykép; az `ertektest.js` eszköztárára (`MFSZErtek.kit`) épül, saját fázisai: `fem` és `femres`.
+- A link formátuma `#f=<18 karakter>`: csak a 32 választ tartalmazza (3 bit / válasz), az eredményt a böngésző számolja újra, így a szövegek javítása nem töri el a régi linkeket. Az állítások száma, sorrendje vagy iránya csak a `VERSION` növelésével változtatható.
+- A típusok `bias` értékét szimulációval hangoltuk, hogy a kitöltők nagyjából egyenletesen oszoljanak meg a típusok között (`test/femtest.test.js` ellenőrzi).
+
 ## SEO
 - Minden indexelhető oldal `<head>`-je tartalmaz egyedi címet és leírást, canonical-t, Open Graph/Twitter adatot (`imgs/og-mfsz.jpg`, 1200×630) és strukturált adatot (főoldal: Organization + WebSite + FAQPage, aloldalak: BreadcrumbList). Új oldalnál ezeket is ki kell tölteni, és fel kell venni a `sitemap.xml`-be (`test/site.test.js` ellenőrzi).
 - A Cloudflare a `.html`-es címeket kiterjesztés nélkülire irányítja át (`/gallery.html` → `/gallery`), ezért a canonical-ok, a sitemap és a belső linkek is kiterjesztés nélküliek. (A `navbar.html` / `footer.html` betöltése és a `data-page` értékek maradnak `.html`-esek.)
