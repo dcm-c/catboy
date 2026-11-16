@@ -276,3 +276,10 @@
 .et-nav .btn.btn-primary-custom { color: #fff; background: var(--pink, #f5a9b8); border-color: transparent; padding: 4px 16px; }
 .et-nav .btn.btn-primary-custom:hover:not(:disabled) { background: #f08ca0; color: #fff; }
 .et-nav .btn.btn-primary-custom:disabled { opacity: .45; }
+
+/* ---------- Femboy-típus teszt ---------- */
+.et-mode.fem { --c: #e8579a; }
+.fem-facts { list-style: none; margin: .9rem 0 .6rem; padding: 0; text-align: left; display: grid; gap: .5rem; }
+.fem-facts li { padding: .55rem .9rem; border-radius: 14px; background: color-mix(in srgb, #e8579a 8%, transparent); }
+.fem-fig { margin: 0 auto 1rem; max-width: 420px; }
+.fem-img { width: 100%; height: auto; border-radius: 18px; box-shadow: 0 6px 22px rgba(0, 0, 0, .14); }

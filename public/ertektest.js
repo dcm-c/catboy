@@ -88,12 +88,15 @@
     }
 
     // ---------- Kirajzolás ----------
+    // Külső modulok (pl. femtest.js) saját fázisokat regisztrálhatnak a kit.register-rel
+    var PHASES = {};
     function render() {
         clear(stage);
         if (st.phase === 'intro') renderIntro();
         else if (st.phase === 'quiz') renderQuiz();
         else if (st.phase === 'between') renderBetween();
         else if (st.phase === 'hated') renderRound();
+        else if (PHASES[st.phase]) PHASES[st.phase]();
         else renderResult();
     }
 
@@ -115,6 +118,7 @@
 
     // ---------- Bevezető ----------
     function startMode(mode) {
+        if (mode === 'fem') { if (window.MFSZErtek.femUI) window.MFSZErtek.femUI.start(); return; }
         var M = MODES[mode];
         st.mode = mode; st.ans = {}; st.stars = {}; st.rk = {}; st.j = 0; st.picks = []; st.result = null; st.bDone = false; st.shared = false;
         st.part = M.a.length ? 'a' : 'b';
@@ -177,13 +181,22 @@
         ], 'Extra hosszú teszt', 'xlong'));
         body.appendChild(modes);
 
-        body.appendChild(el('h3', 'et-sect', 'Csak az utált értékek és az előítéletek'));
+        body.appendChild(el('h3', 'et-sect', 'Külön tesztek: utált értékek és femboy-típus'));
         var modes2 = el('div', 'et-modes');
         modes2.appendChild(modeCard('hdeep', '🧪', 'Utált értékek és előítélet-barométer', [
             A.hlong.b.length + ' állítás: ' + D.HATED.length + ' utált érték (közvetlen, fordított, összehasonlító és helyzetfüggő tételek) és 4 téma mindkét irányban',
             'Skálák 0–100 között, megbízhatósági jelzéssel',
             'Kb. ' + minutes(A.hlong.b.length) + ' perc'
         ], 'Csak utált és előítélet', 'hlong'));
+        var FD = window.MFSZErtek.femdata;
+        if (FD) {
+            modes2.appendChild(modeCard('fem', '🎀', 'Femboy-típus teszt', [
+                FD.ITEMS.length + ' humoros állítás, ' + FD.AXES.length + ' tengelyen: stílus, outfit, energia, humor, szakszervezeti szellem és társaik',
+                FD.TYPES.length + ' típus a Pasztell Plüssmackótól a Magányos Rocksztárig, ' + FD.METERS.length + ' vicces mérővel (pl. térdzokni-függőség)',
+                'Megosztható link és kép; önálló teszt, nem kell hozzá az értékrész',
+                'Kb. 4 perc'
+            ], 'Femboy-típus teszt', 'fem'));
+        }
         body.appendChild(modes2);
 
         if (st.dev) {
@@ -1106,6 +1119,19 @@
         if (!openFromHash() && /^#r=/.test(location.hash || '') && st.shared) { st.shared = false; st.result = null; setPhase('intro'); }
     });
     if (!openFromHash()) render();
+
+    // Eszköztár a külön modulok (femtest.js) számára
+    window.MFSZErtek.kit = {
+        stage: stage, el: el, clear: clear, btn: btn, card: card, axisRow: axisRow, progress: progress, toast: toast, copyText: copyText, download: download,
+        pageBase: pageBase, answers: ANSWERS,
+        register: function (phase, fn) { PHASES[phase] = fn; },
+        setPhase: setPhase,
+        home: function () {
+            if (window.history && history.replaceState && location.hash) history.replaceState(null, '', pageBase());
+            st.shared = false; st.result = null; setPhase('intro');
+        }
+    };
+    if (window.MFSZErtek.femUI && window.MFSZErtek.femUI.mount) window.MFSZErtek.femUI.mount();
 
     // Hibakereséshez és teszteléshez
     window.MFSZErtek.ui = {
