@@ -27,6 +27,7 @@
     var isNode = typeof module !== 'undefined' && module.exports;
     var ITEMS = isNode ? require('./ertektest-items.js') : root.MFSZErtek.items;
     var LEGACY_DATA = isNode ? require('./ertektest-legacy.js') : root.MFSZErtek.legacy;
+    var FEM = isNode ? require('./femtest-data.js') : root.MFSZErtek.femdata;
 
     var AXES = [
         { id: 'e', name: 'Gazdaság', icon: '💶', negIcon: '🛍️', posIcon: '🏥', neg: 'Szabadpiac', pos: 'Elosztó állam', group: 'Állam és gazdaság' },
@@ -496,6 +497,9 @@
     function bList(max, seed) { return spread(tierOf(HATED_ALL, max), seed).concat(spread(tierOf(PREJ_ALL, max), seed + 1)); }
     var B_LISTS = { short: [], long: bList(1, 404), xlong: bList(2, 505) };
     B_LISTS.hlong = B_LISTS.long;
+    // A C rész (opcionális, csak a hosszú módokban): a femboy-típus teszt állításai, súlyokkal az értéktengelyekre
+    var FEM_LIST = FEM.ITEMS.map(function (it) { return { kind: 'f', part: 'c', id: it.id, text: it.text, joke: it.joke, w: FEM.weightsOf(it), fx: it.ax, dir: it.dir }; });
+    var C_LISTS = { short: [], long: FEM_LIST, xlong: FEM_LIST, hlong: [] };
     // Az ikerpárok csak azokban a módokban számítanak, ahol mindkét tagot megkérdezzük
     function twinsIn(list) {
         var ids = {};
@@ -545,16 +549,18 @@
     // a régi JSON linkek mind az 1-es verzió). Ha egy kérdés vagy skála jelentése változik, a VERSION nő, és a régi
     // jelentést a LEGACY őrzi (az ertektest-legacy.js-ben), hogy a korábban megosztott eredmények továbbra is helyesen jelenjenek meg.
     // =========================================================
-    var VERSION = 4;
+    var VERSION = 5;
     var VERSIONS = [
         { v: 1, date: '2026-10-24', note: 'Az első kiadás: öt tengely, az utált értékek politikai-ideológiai dolgok voltak (pénzhajhászás, parancsuralom, pátosz és társaik).' },
         { v: 2, date: '2026-10-25', note: 'Az utált értékek társadalmi bosszantó dolgok lettek (rongálás, környezetszennyezés, figyelmetlenség, trágárság, szexizmus és társaik); még mindig öt tengely.' },
         { v: 3, date: '2026-10-25', note: 'Tíz tengelyes értékrend (gyors 50, részletes 100, extra hosszú 150 állítással), megbízhatósági jelzés minden eredményhez, az utált értékek és az előítélet-barométer opcionális, bonyolultabb és tükrösebb kérdésekkel, kategóriánkénti megosztható képek.' },
-        { v: 4, date: '2026-10-27', note: 'Nyolc új utált érték (késés, sorbaállás és előzés, fölényeskedés, üres ígéret, kutyapiszok, rendetlenség, spoilerezés, hencegés): összesen 18 skála az utált értékek és előítéletek részben, hosszabb B résszel. A gyors mód körei a klasszikus tíz értékkel maradtak.' }
+        { v: 4, date: '2026-10-27', note: 'Nyolc új utált érték (késés, sorbaállás és előzés, fölényeskedés, üres ígéret, kutyapiszok, rendetlenség, spoilerezés, hencegés): összesen 18 skála az utált értékek és előítéletek részben, hosszabb B résszel. A gyors mód körei a klasszikus tíz értékkel maradtak.' },
+        { v: 5, date: '2026-11-17', note: 'A részletes és az extra hosszú teszthez opcionális C rész: a femboy-típus teszt (32 állítás). A válaszai kis súllyal beleszámítanak a tíz értéktengelybe, az eredményben megjelenik a femboy-típus, a tengelyek és a vicces mérők. A tengelyek, a típusok és az utált értékek változatlanok.' }
     ];
     // A v3 tengelyei és típusai változatlanok, csak az utált értékek (az első tíz) voltak kevesebben
     var LEGACY = Object.assign({}, LEGACY_DATA);
     LEGACY[3] = { AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED.slice(0, 10) };
+    LEGACY[4] = { AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED };
 
     // Egy tesztverzió tengelyei, típusai és utált értékei (a régi linkek ezekkel jelennek meg), ismeretlen verzióra null
     function defsFor(ver) {
@@ -566,7 +572,7 @@
         VERSION: VERSION, VERSIONS: VERSIONS, LEGACY: LEGACY, defsFor: defsFor,
         AXES: AXES, ARCHETYPES: ARCHETYPES, HATED: HATED, HATED_PAIRS: HATED_PAIRS, TOPICS: TOPICS, PREJ: PREJ, MIRROR: MIRROR,
         VALUE: VALUE_ALL, LIES: LIE_ALL, RANK_ITEMS: RANK_ALL, RANK_VALUES: [2, 1, 0, -1, -2], STARS: { short: 1, long: 2, xlong: 3 }, STAR_MULT: 2, HATED_ITEMS: HATED_ALL, PREJ_ITEMS: PREJ_ALL, ALL: ALL,
-        A_LISTS: A_LISTS, B_LISTS: B_LISTS, TWINS: TWINS, twinsIn: twinsIn,
+        A_LISTS: A_LISTS, B_LISTS: B_LISTS, C_LISTS: C_LISTS, FEM_LIST: FEM_LIST, TWINS: TWINS, twinsIn: twinsIn,
         THEME_UNKNOWN: THEME_UNKNOWN,
         HONESTY_TIERS: HONESTY_TIERS, REL_FLAGS: REL_FLAGS, REL_TIERS: REL_TIERS, AXIS_LEVELS: AXIS_LEVELS
     };

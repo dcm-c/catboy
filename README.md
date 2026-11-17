@@ -35,6 +35,8 @@ Külön, humoros teszt az értékteszt oldalán (a bevezető „Külön tesztek�
 - `femtest-data.js`: tengelyek, állítások (mindegyikhez poén), típusok, mérők, pontozás és a link kódolása (tiszta modul, Node-ban tesztelhető).
 - `femtest.js`: felület és eredménykép; az `ertektest.js` eszköztárára (`MFSZErtek.kit`) épül, saját fázisai: `fem` és `femres`.
 - A link formátuma `#f=<18 karakter>`: csak a 32 választ tartalmazza (3 bit / válasz), az eredményt a böngésző számolja újra, így a szövegek javítása nem töri el a régi linkeket. Az állítások száma, sorrendje vagy iránya csak a `VERSION` növelésével változtatható.
+- **C rész a hosszú tesztben:** a részletes és az extra hosszú teszt végén (és az eredményoldalról utólag is) opcionális rész: ugyanez a 32 állítás. A válaszok kis súllyal (0,3-0,6, a `FX` táblában) beleszámítanak a tíz értéktengelybe (pl. a szolidaritás a Kötelék és a Gazdaság tengelyt, a szarkazmus a Bizalom/cinizmus tengelyt mozdítja); a megbízhatóság, az őszinteség és az A rész többi eredménye nem változik. Az eredményben megjelenik a femboy-típus, a tengelyek, a mérők és a kép is.
+- **Link (teszt-verzió 5):** a hosszú teszt linkje a `0x08` fejléc-bittel jelzi a C részt, és az A/B rész után 72 bitet visz (8 femboy-tengely × 8 bit, 7 bit következetesség, 1 bit „passz-bajnok”). A v4-es linkek változatlanul olvashatók (`LEGACY[4]`), a gyors és a csak-utált linkben a bit érvénytelen.
 - A típusok `bias` értékét szimulációval hangoltuk, hogy a kitöltők nagyjából egyenletesen oszoljanak meg a típusok között (`test/femtest.test.js` ellenőrzi).
 
 ## SEO

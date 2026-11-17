@@ -424,8 +424,9 @@ test('verziók: a jelenlegi verzió a változásnaplóban, minden régi verzió 
     for (const x of D.VERSIONS) { assert.match(x.date, /^\d{4}-\d{2}-\d{2}$/); assert.ok(x.note.length > 20); }
     for (let v = 1; v < D.VERSION; v++) {
         const defs = D.defsFor(v);
-        const [nA, nT] = v === 3 ? [10, 20] : [5, 15];
-        assert.ok(defs && defs.AXES.length === nA && defs.ARCHETYPES.length === nT && defs.HATED.length === 10, 'v' + v);
+        const [nA, nT] = v >= 3 ? [10, 20] : [5, 15];
+        const nH = v >= 4 ? 18 : 10;
+        assert.ok(defs && defs.AXES.length === nA && defs.ARCHETYPES.length === nT && defs.HATED.length === nH, 'v' + v);
         for (const h of defs.HATED) assert.ok(h.id && h.name && h.blurb && h.roast, h.id);
     }
     assert.equal(D.defsFor(D.VERSION).AXES.length, 10);
@@ -513,7 +514,7 @@ test('v4: 18 skála, a B rész hosszabb (78 / 104), a hlong link 18 utált ért�
     const r = C.summarizeHated(ansOf(D.B_LISTS.hlong, (s, i) => cyc[(i * 2) % 5]));
     assert.equal(Object.keys(r.hs).length, 18);
     const d = C.decode(C.encode(r));
-    assert.equal(d.ver, 4);
+    assert.equal(d.ver, D.VERSION);
     assert.deepEqual(d.hs, r.hs);
     for (const id of ['keses', 'sorban', 'okos', 'igeret', 'kutya', 'rendetlen', 'spoiler', 'henceg']) {
         assert.ok(id in d.hs, id);
@@ -669,7 +670,7 @@ test('téma: a poénok nem ismétlődnek, és a szövegek, súgók épek maradna
     });
 });
 test('téma: a témaréteg nem érinti a pontozást (súlyok, szintek, ikerpárok változatlan szerkezetűek)', () => {
-    assert.equal(D.VERSION, 4);
+    assert.equal(D.VERSION, 5);
     assert.equal(D.VALUE.length, 150);
     D.VALUE.forEach(s => { assert.ok(s.w && Object.keys(s.w).length >= 1, s.id); assert.ok([1, 2, 3].includes(s.tier), s.id); });
     assert.equal(D.TWINS.length, 12);

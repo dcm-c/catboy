@@ -2,8 +2,8 @@
 // ÉRTÉKTEST - felület
 // Módok:
 //   short  Gyors: 50 értékállítás (10 tengely) + 1 rangsorolás + 2 ellenőrző kérdés. Opcionálisan: 10 „melyik zavar jobban?” pár + 8 tükörpár.
-//   long   Részletes: 100 értékállítás + 3 rangsorolás + 5 ellenőrző kérdés. Opcionálisan: 78 állítás az utált értékekről és az előítéletekről.
-//   xlong  Extra hosszú: 150 értékállítás + 5 rangsorolás + 7 ellenőrző kérdés. Opcionálisan: 104 állítás az utált értékekről és az előítéletekről.
+//   long   Részletes: 100 értékállítás + 3 rangsorolás + 5 ellenőrző kérdés. Opcionálisan: 78 állítás az utált értékekről és az előítéletekről, és a 32 állításos femboy-rész (C).
+//   xlong  Extra hosszú: 150 értékállítás + 5 rangsorolás + 7 ellenőrző kérdés. Opcionálisan: 104 állítás az utált értékekről és az előítéletekről, és a 32 állításos femboy-rész (C).
 //   hlong  Csak az utált értékek és az előítélet-barométer (78 állítás).
 // Fontosnak jelölhető kérdések (csillag): gyors 1, részletes 2, extra hosszú 3; a jelölt állítás kétszeres súllyal számít.
 // Az eredmény a link #r= részében utazik (tömör bináris kód), így megosztható, és nem mentünk semmit.
@@ -26,15 +26,15 @@
     ];
     // a: az értékrész tételei (A rész), b: az opcionális kiegészítő rész (utált értékek és előítéletek), rounds: a gyors teszt „párok” kiegészítése
     var MODES = {
-        short: { a: D.A_LISTS.short, b: [], rounds: true },
-        long: { a: D.A_LISTS.long, b: D.B_LISTS.long, rounds: false },
-        xlong: { a: D.A_LISTS.xlong, b: D.B_LISTS.xlong, rounds: false },
-        hlong: { a: [], b: D.B_LISTS.hlong, rounds: false }
+        short: { a: D.A_LISTS.short, b: [], c: D.C_LISTS.short, rounds: true },
+        long: { a: D.A_LISTS.long, b: D.B_LISTS.long, c: D.C_LISTS.long, rounds: false },
+        xlong: { a: D.A_LISTS.xlong, b: D.B_LISTS.xlong, c: D.C_LISTS.xlong, rounds: false },
+        hlong: { a: [], b: D.B_LISTS.hlong, c: D.C_LISTS.hlong, rounds: false }
     };
     // A fordulók: előbb a "melyik utált érték zavar jobban" párok, utána a tükörpárok
     var ROUNDS = PAIRS.map(function (p) { return { t: 'hate', ids: p }; }).concat(MIRROR.map(function (m) { return { t: 'mirror', m: m }; }));
 
-    var st = { phase: 'intro', mode: 'short', part: 'a', list: [], i: 0, ans: {}, stars: {}, rk: {}, j: 0, picks: [], result: null, shared: false, dev: false, bDone: false };
+    var st = { phase: 'intro', mode: 'short', part: 'a', list: [], i: 0, ans: {}, stars: {}, rk: {}, j: 0, picks: [], result: null, shared: false, dev: false, bDone: false, cDone: false };
 
     // A fejlesztői mód szándékosan rejtett: a bevezető iránytűjére kell gyorsan 7-et kattintani.
     // A beállítás ebben a böngészőben megmarad; bekapcsolva a bevezetőn egy kis jelzés mutatja, és arra kattintva kikapcsolható.
@@ -120,7 +120,7 @@
     function startMode(mode) {
         if (mode === 'fem') { if (window.MFSZErtek.femUI) window.MFSZErtek.femUI.start(); return; }
         var M = MODES[mode];
-        st.mode = mode; st.ans = {}; st.stars = {}; st.rk = {}; st.j = 0; st.picks = []; st.result = null; st.bDone = false; st.shared = false;
+        st.mode = mode; st.ans = {}; st.stars = {}; st.rk = {}; st.j = 0; st.picks = []; st.result = null; st.bDone = false; st.cDone = false; st.shared = false;
         st.part = M.a.length ? 'a' : 'b';
         st.list = M.a.length ? M.a : M.b;
         st.i = 0;
@@ -170,6 +170,7 @@
             D.twinsIn(A.long.a).length + ' ellentmondás-pár, ' + checksOf(A.long.a) + ' ellenőrző kérdés, ' + ranksOf(A.long.a) + ' rangsorolás',
             'Fontosnak jelölhetsz ' + D.STARS.long + ' kérdést (kétszeres súly)',
             'Opcionálisan: ' + A.long.b.length + ' állítás az utált értékekről és előítéletekről',
+            'Opcionálisan: ' + D.C_LISTS.long.length + ' femboy-állítás (humoros típus, kis súllyal a tengelyeidbe is beleszámít)',
             'Kb. ' + minutes(A.long.a.length) + ' perc'
         ], 'Részletes teszt', 'long'));
         modes.appendChild(modeCard('xdeep', '🧬', 'Extra hosszú', [
@@ -177,6 +178,7 @@
             D.twinsIn(A.xlong.a).length + ' ellentmondás-pár, ' + checksOf(A.xlong.a) + ' ellenőrző kérdés, ' + ranksOf(A.xlong.a) + ' rangsorolás',
             'Fontosnak jelölhetsz ' + D.STARS.xlong + ' kérdést (kétszeres súly)',
             'Opcionálisan: ' + A.xlong.b.length + ' állítás az utált értékekről és előítéletekről',
+            'Opcionálisan: ' + D.C_LISTS.xlong.length + ' femboy-állítás (humoros típus, kis súllyal a tengelyeidbe is beleszámít)',
             'Kb. ' + minutes(A.xlong.a.length) + ' perc'
         ], 'Extra hosszú teszt', 'xlong'));
         body.appendChild(modes);
@@ -193,7 +195,7 @@
             modes2.appendChild(modeCard('fem', '🎀', 'Femboy-típus teszt', [
                 FD.ITEMS.length + ' humoros állítás, ' + FD.AXES.length + ' tengelyen: stílus, outfit, energia, humor, szakszervezeti szellem és társaik',
                 FD.TYPES.length + ' típus a Pasztell Plüssmackótól a Magányos Rocksztárig, ' + FD.METERS.length + ' vicces mérővel (pl. térdzokni-függőség)',
-                'Megosztható link és kép; önálló teszt, nem kell hozzá az értékrész',
+                'Megosztható link és kép; önálló teszt, nem kell hozzá az értékrész (a részletes és az extra hosszú tesztben opcionális C részként is kitölthető)',
                 'Kb. 4 perc'
             ], 'Femboy-típus teszt', 'fem'));
         }
@@ -279,6 +281,7 @@
     function partInfo() {
         var s = st.list[st.i], M = MODES[st.mode];
         if (st.part === 'a') return { label: (M.b.length || M.rounds ? '1. rész · ' : '') + 'Értékrend', now: st.i + 1, total: st.list.length, tone: 'blue' };
+        if (st.part === 'c') return { label: '3. rész · Femboy-típus', now: st.i + 1, total: st.list.length, tone: 'pink' };
         return { label: (M.a.length ? '2. rész · ' : '') + (s.kind === 'p' ? 'Előítélet-barométer' : 'Utált értékek'), now: st.i + 1, total: st.list.length, tone: 'red' };
     }
 
@@ -295,6 +298,9 @@
         }
         if (st.part === 'b' && st.i === 0) {
             body.appendChild(el('p', 'et-partnote', 'Az „egyetértek” itt azt jelenti: ez engem zavar, vagy ez az én véleményem. Vannak fordított, összehasonlító és helyzetfüggő állítások is. Nem minősítünk senkit, csak a hozzáállásodat mérjük.'));
+        }
+        if (st.part === 'c' && st.i === 0) {
+            body.appendChild(el('p', 'et-partnote', 'A femboy-rész humoros: stílusról, energiáról és személyiségről szól. A válaszaid kis súllyal a fenti tíz értéktengelyedbe is beleszámítanak (pl. Kötelék, Bizalom, Társadalom), és kapsz egy femboy-típust, mérőket és egy képet. Az „egyetértek” itt azt jelenti: ez rám igaz.'));
         }
         if (s.kind === 'p' && !L.slice(0, st.i).some(function (x) { return x.kind === 'p'; })) {
             body.appendChild(el('p', 'et-partnote', 'Ebben a szakaszban az előítélet-barométer állításai jönnek. Fordított állítások is vannak: ott az egyetértés a nyitottabb, elfogadóbb hozzáállást jelzi. Mindegyik a hozzáállásodat méri, senkit nem minősítünk.'));
@@ -323,7 +329,7 @@
         body.appendChild(grid);
         var row = el('div', 'et-nav');
         var back = btn('btn btn-sm btn-outline-secondary', '← Vissza', goBack);
-        back.disabled = st.i === 0 && !(st.part === 'b' && MODES[st.mode].a.length);
+        back.disabled = st.i === 0 && !(st.part !== 'a' && MODES[st.mode].a.length);
         row.appendChild(back);
         row.appendChild(btn('btn btn-sm btn-outline-secondary', 'Passz, kihagyom', function () { answer(null); }));
         body.appendChild(row);
@@ -412,7 +418,7 @@
         body.appendChild(el('p', 'et-hint', full ? '✔ Kész a sorrend. Átrendezéshez koppints egy elemre a levételhez, aztán újra sorba.' : 'Még ' + (s.opts.length - o.length) + ' lehetőség hátra. Koppints elsőnek arra, ami a legfontosabb.'));
         var row = el('div', 'et-nav');
         var back = btn('btn btn-sm btn-outline-secondary', '← Vissza', goBack);
-        back.disabled = st.i === 0 && !(st.part === 'b' && MODES[st.mode].a.length);
+        back.disabled = st.i === 0 && !(st.part !== 'a' && MODES[st.mode].a.length);
         row.appendChild(back);
         var mid = el('div', 'd-flex gap-2 flex-wrap');
         mid.appendChild(btn('btn btn-sm btn-outline-secondary', 'Újrakezdés', function () { clearRank(s); render(); }));
@@ -427,11 +433,18 @@
         if (st.dev) body.appendChild(devQuestion(s));
     }
 
-    // A rész vége: ha van opcionális kiegészítő rész, megkérdezzük, kéri-e
+    // Az opcionális részek, amelyeket a felhasználó még nem csinált meg: B (utált értékek) és C (femboy-típus, csak a hosszú módokban)
+    function remainingParts() {
+        var M = MODES[st.mode], out = [];
+        if ((M.b.length || M.rounds) && !st.bDone) out.push('b');
+        if (M.c.length && !st.cDone) out.push('c');
+        return out;
+    }
+    // A rész vége: ha maradt opcionális kiegészítő rész, megkérdezzük, kéri-e
     function endPart() {
-        var M = MODES[st.mode];
-        if (st.part === 'a' && (M.b.length || M.rounds)) { setPhase('between'); return; }
         if (st.part === 'b') st.bDone = true;
+        if (st.part === 'c') st.cDone = true;
+        if (remainingParts().length) { setPhase('between'); return; }
         finish();
     }
 
@@ -442,35 +455,61 @@
         st.part = 'b'; st.list = M.b; st.i = 0;
         setPhase('quiz');
     }
+    function startC() {
+        var M = MODES[st.mode];
+        st.cDone = false;
+        st.part = 'c'; st.list = M.c; st.i = 0;
+        setPhase('quiz');
+    }
 
     function goBack() {
         if (st.phase === 'quiz') {
             if (st.i > 0) { st.i--; render(); return; }
-            if (st.part === 'b' && MODES[st.mode].a.length) { st.part = 'a'; st.list = MODES[st.mode].a; st.i = st.list.length - 1; render(); }
+            if (st.part !== 'a' && MODES[st.mode].a.length) { st.part = 'a'; st.list = MODES[st.mode].a; st.i = st.list.length - 1; render(); }
         } else if (st.phase === 'hated') {
             if (st.j > 0) { st.j--; st.picks.pop(); render(); }
             else setPhase('between');
         }
     }
 
+    function offerCard(parent, id, ico, title, text, label, fn) {
+        var o = el('div', 'et-offer');
+        o.appendChild(el('div', 'et-offer-ico', ico));
+        var tx = el('div', 'et-offer-tx');
+        tx.appendChild(el('b', '', title));
+        tx.appendChild(el('p', 'mb-2', text));
+        var go = btn('btn btn-primary-custom px-4', label, fn);
+        go.id = id;
+        tx.appendChild(go);
+        o.appendChild(tx);
+        parent.appendChild(o);
+    }
+
     function renderBetween() {
-        var M = MODES[st.mode];
+        var M = MODES[st.mode], left = remainingParts(), first = !st.bDone && !st.cDone;
         var card = el('div', 'card shadow-sm border-0 et-card');
         card.setAttribute('data-tone', 'pink');
         var body = el('div', 'card-body p-4 p-md-5 text-center');
         body.appendChild(el('div', 'et-emoji', '🎉'));
-        body.appendChild(el('h2', 'h3 fw-bold mb-3', 'Kész az értékrend-térképed!'));
-        var n = M.rounds ? ROUNDS.length : M.b.length;
-        body.appendChild(el('p', 'lead mb-2', M.rounds
-            ? 'Szeretnél még ' + PAIRS.length + ' „melyik zavar jobban?” kört és ' + MIRROR.length + ' tükörpárt is? (kb. ' + minutes(n * 0.8) + ' perc)'
-            : 'Szeretnéd folytatni az utált értékekkel és az előítélet-barométerrel? (' + n + ' állítás, kb. ' + minutes(n) + ' perc)'));
-        body.appendChild(el('p', 'text-muted mb-4', 'Ez a rész teljesen opcionális: az értékrend-térképed már kész, ezen nem változtat. Ha kihagyod, később az eredményoldalról is megcsinálhatod.'));
-        var row = el('div', 'd-flex flex-wrap gap-2 justify-content-center');
-        var yes = btn('btn btn-primary-custom px-4', 'Igen, folytatom', startB);
-        yes.id = 'et-b-yes';
-        var no = btn('btn btn-secondary-custom px-4', 'Nem, mutasd az eredményt', function () { st.bDone = false; finish(); });
+        body.appendChild(el('h2', 'h3 fw-bold mb-3', first ? 'Kész az értékrend-térképed!' : 'Kész, szuper! Van még egy opcionális rész.'));
+        body.appendChild(el('p', 'text-muted mb-4', 'A következő részek teljesen opcionálisak' + (first ? ': az értékrend-térképed már kész.' : '.') + ' Ha kihagyod őket, később az eredményoldalról is megcsinálhatod.'));
+        var offers = el('div', 'et-offers');
+        if (left.indexOf('b') >= 0) {
+            var n = M.rounds ? ROUNDS.length : M.b.length;
+            offerCard(offers, 'et-b-yes', '🧪', M.rounds ? 'Utált értékek gyorsan' : 'Utált értékek és előítélet-barométer',
+                M.rounds ? PAIRS.length + ' „melyik zavar jobban?” kör és ' + MIRROR.length + ' tükörpár (kb. ' + minutes(n * 0.8) + ' perc). Az értékrend-térképeden nem változtat.'
+                    : n + ' állítás, kb. ' + minutes(n) + ' perc. Az értékrend-térképeden nem változtat.',
+                'Igen, folytatom', startB);
+        }
+        if (left.indexOf('c') >= 0) {
+            offerCard(offers, 'et-c-yes', '🎀', 'Femboy-típus rész (humoros)', M.c.length + ' állítás, kb. ' + minutes(M.c.length) + ' perc. Kapsz egy femboy-típust, vicces mérőket és képet; a válaszaid kis súllyal a tíz értéktengelyedbe is beleszámítanak.',
+                'Igen, ezt is', startC);
+        }
+        body.appendChild(offers);
+        var row = el('div', 'd-flex flex-wrap gap-2 justify-content-center mt-3');
+        var no = btn('btn btn-secondary-custom px-4', 'Nem, mutasd az eredményt', function () { finish(); });
         no.id = 'et-b-no';
-        row.appendChild(yes); row.appendChild(no);
+        row.appendChild(no);
         body.appendChild(row);
         var nav = el('div', 'et-nav mt-3 justify-content-center');
         nav.appendChild(btn('btn btn-sm btn-outline-secondary', '← Vissza az utolsó kérdéshez', function () { st.i = st.list.length - 1; setPhase('quiz'); }));
@@ -525,7 +564,7 @@
     function finish() {
         var np = PAIRS.length;
         if (st.mode === 'hlong') st.result = C.summarizeHated(st.ans);
-        else st.result = C.summarizeValues(st.mode, st.ans, { b: st.bDone, picks: st.picks.slice(0, np), mirror: st.picks.slice(np), stars: st.stars });
+        else st.result = C.summarizeValues(st.mode, st.ans, { b: st.bDone, c: st.cDone, picks: st.picks.slice(0, np), mirror: st.picks.slice(np), stars: st.stars });
         st.shared = false;
         setPhase('result');
     }
@@ -846,7 +885,7 @@
         bd.appendChild(el('h3', 'h5 fw-bold mb-1', '🛠 Fejlesztői mód: mi járult hozzá?'));
         bd.appendChild(el('p', 'et-joke mb-3', 'Minden sor: a kérdés, a válaszod, a kérdés súlya és az eredményhez adott pont (az eredmény sávján ennyit mozdított). Nyisd ki az egyes tengelyeket.'));
         var M = MODES[st.mode];
-        var L = M.a.concat(st.bDone ? M.b : []);
+        var L = M.a.concat(st.bDone ? M.b : [], st.cDone ? M.c : []);
         var bk = C.breakdown(st.ans, L, st.stars);
         if (r.s) {
             var sc = C.axisScores(st.ans, M.a, undefined, st.stars);
@@ -945,14 +984,27 @@
     // ---------- Eredmény ----------
     function renderContinue(r) {
         var M = MODES[st.mode];
-        var bd = card('red', true);
-        bd.appendChild(el('h3', 'h5 fw-bold mb-1', 'Kiegészítő rész: ' + (M.rounds ? 'utált értékek gyorsan' : 'utált értékek és előítélet-barométer')));
-        bd.appendChild(el('p', 'text-muted mb-3', M.rounds
-            ? 'Ha kíváncsi vagy, melyik érték zavar legjobban, és melyik oldal lenézése bosszant jobban: ' + PAIRS.length + ' pár és ' + MIRROR.length + ' tükörpár (kb. ' + minutes(ROUNDS.length * 0.8) + ' perc). Az értékrend-térképed nem változik.'
-            : 'Még nem csináltad meg az opcionális részt: ' + M.b.length + ' állítás (kb. ' + minutes(M.b.length) + ' perc). Az értékrend-térképed nem változik, de kiegészül az utált értékek skálájával és az előítélet-barométerrel.'));
-        var b = btn('btn btn-primary-custom', 'Folytatom a kiegészítő résszel', startB);
-        b.id = 'et-b-continue';
-        bd.appendChild(b);
+        if (!M) return;
+        var needB = !r.hs && !r.m && !(r.h && r.h.length && r.kind === 'short' && st.bDone) && (M.b.length || M.rounds) && !st.bDone;
+        var needC = !r.f && M.c.length && !st.cDone;
+        if (needB) {
+            var bd = card('red', true);
+            bd.appendChild(el('h3', 'h5 fw-bold mb-1', 'Kiegészítő rész: ' + (M.rounds ? 'utált értékek gyorsan' : 'utált értékek és előítélet-barométer')));
+            bd.appendChild(el('p', 'text-muted mb-3', M.rounds
+                ? 'Ha kíváncsi vagy, melyik érték zavar legjobban, és melyik oldal lenézése bosszant jobban: ' + PAIRS.length + ' pár és ' + MIRROR.length + ' tükörpár (kb. ' + minutes(ROUNDS.length * 0.8) + ' perc). Az értékrend-térképed nem változik.'
+                : 'Még nem csináltad meg az opcionális részt: ' + M.b.length + ' állítás (kb. ' + minutes(M.b.length) + ' perc). Az értékrend-térképed nem változik, de kiegészül az utált értékek skálájával és az előítélet-barométerrel.'));
+            var b = btn('btn btn-primary-custom', 'Folytatom a kiegészítő résszel', startB);
+            b.id = 'et-b-continue';
+            bd.appendChild(b);
+        }
+        if (needC) {
+            var cd = card('pink', true);
+            cd.appendChild(el('h3', 'h5 fw-bold mb-1', 'Kiegészítő rész: femboy-típus (humoros)'));
+            cd.appendChild(el('p', 'text-muted mb-3', M.c.length + ' állítás (kb. ' + minutes(M.c.length) + ' perc) stílusról, energiáról és személyiségről. Kapsz egy femboy-típust, vicces mérőket és képet; a válaszaid kis súllyal a tíz értéktengelyedbe is beleszámítanak, ezért az értékrend-eredményed picit elmozdulhat.'));
+            var c = btn('btn btn-primary-custom', 'Folytatom a femboy-résszel', startC);
+            c.id = 'et-c-continue';
+            cd.appendChild(c);
+        }
     }
 
     function renderResult() {
@@ -1025,7 +1077,11 @@
         else if (r.counts) { renderHatedTop(r, r.counts); if (r.m) renderMirror(r.m); }
         else if (r.s && r.h) { if (r.m || r.h.length || r.kind === 'short' || !r.kind) { renderHatedTop(r); if (r.m) renderMirror(r.m); } }
 
-        if (!st.shared && r.s && !r.hs && !r.m && !(r.h && r.h.length && r.kind === 'short' && st.bDone) && MODES[st.mode] && (MODES[st.mode].b.length || MODES[st.mode].rounds) && !st.bDone) renderContinue(r);
+        if (r.f && window.MFSZErtek.femUI && window.MFSZErtek.femUI.summary) {
+            window.MFSZErtek.femUI.summary(r.f, { title: '🎀 Femboy-típus (C rész)', note: 'A femboy-rész válaszai kis súllyal beleszámítanak a fenti tíz tengelybe is (pl. Kötelék, Bizalom, Társadalom).', link: shareUrl(r) });
+        }
+
+        if (!st.shared && r.s) renderContinue(r);
 
         if (st.dev && !st.shared && st.result) renderDevResult();
         else if (st.dev && st.shared) {
@@ -1103,23 +1159,6 @@
 
     // ---------- Megosztott link megnyitása ----------
     var lastBadHash = null;
-    function openFromHash() {
-        var m = /^#r=(.+)$/.exec(location.hash || '');
-        if (!m) return false;
-        var r = C.decode(m[1]);
-        if (!r) {
-            if (location.hash !== lastBadHash) { lastBadHash = location.hash; setTimeout(function () { toast('Ez a megosztott link nem olvasható (hibás, csonka vagy újabb tesztverzióból való).'); }, 150); }
-            return false;
-        }
-        st.result = r; st.shared = true; st.bDone = !!(r.hs || r.m || r.counts);
-        setPhase('result');
-        return true;
-    }
-    window.addEventListener('hashchange', function () {
-        if (!openFromHash() && /^#r=/.test(location.hash || '') && st.shared) { st.shared = false; st.result = null; setPhase('intro'); }
-    });
-    if (!openFromHash()) render();
-
     // Eszköztár a külön modulok (femtest.js) számára
     window.MFSZErtek.kit = {
         stage: stage, el: el, clear: clear, btn: btn, card: card, axisRow: axisRow, progress: progress, toast: toast, copyText: copyText, download: download,
@@ -1133,13 +1172,31 @@
     };
     if (window.MFSZErtek.femUI && window.MFSZErtek.femUI.mount) window.MFSZErtek.femUI.mount();
 
+    function openFromHash() {
+        var m = /^#r=(.+)$/.exec(location.hash || '');
+        if (!m) return false;
+        var r = C.decode(m[1]);
+        if (!r) {
+            if (location.hash !== lastBadHash) { lastBadHash = location.hash; setTimeout(function () { toast('Ez a megosztott link nem olvasható (hibás, csonka vagy újabb tesztverzióból való).'); }, 150); }
+            return false;
+        }
+        st.result = r; st.shared = true; st.bDone = !!(r.hs || r.m || r.counts); st.cDone = !!r.f;
+        setPhase('result');
+        return true;
+    }
+    window.addEventListener('hashchange', function () {
+        if (!openFromHash() && /^#r=/.test(location.hash || '') && st.shared) { st.shared = false; st.result = null; setPhase('intro'); }
+    });
+    if (!openFromHash()) render();
+
     // Hibakereséshez és teszteléshez
     window.MFSZErtek.ui = {
         state: function () { return st; },
         answerAll: function (v) { st.list.forEach(function (s) { st.ans[s.id] = typeof v === 'function' ? v(s) : v; }); },
-        finish: function () { if (st.phase === 'quiz') { var M = MODES[st.mode]; if (st.part === 'a' && (M.b.length || M.rounds)) { setPhase('between'); } else { st.bDone = st.part === 'b'; finish(); } } },
+        finish: function () { if (st.phase === 'quiz') { if (st.part === 'a' && remainingParts().length) { setPhase('between'); } else { if (st.part === 'b') st.bDone = true; if (st.part === 'c') st.cDone = true; finish(); } } },
         skipB: function () { st.bDone = false; finish(); },
         startB: startB,
+        startC: startC,
         modes: MODES
     };
 })();

@@ -132,6 +132,26 @@
         { min: 0, name: 'Ellentmondás-bajnok', text: 'A válaszaid szinte minden tengelyen szembementek önmagukkal. Vagy rendkívül összetett vagy, vagy véletlenszerűen kattintgattál.' }
     ];
 
+    // Hatás az értékrend-teszt 10 tengelyére (ertektest-data.js), ha a femboy-rész a hosszú teszt opcionális C része.
+    // A kulcs a femboy-tengely, az érték: értéktengely -> súly arra, ha a válasz a „pos” pólus felé visz. A kis súlyok (0,3-0,6) miatt
+    // a femboy-rész csak finoman mozdítja az értékrend-eredményt (a fő állítások súlya 1).
+    var FX = {
+        stilus: { c: 0.3 },            // sötét, alt hangulat: kicsit cinikusabb
+        latvany: { l: -0.3, t: -0.3 }, // látványos kiállás: szabadságpárti, haladó
+        energia: { k: 0.4 },           // társasági: közösségi kötelék
+        hobbi: { g: 0.4 },             // kintlakó: természetóvó
+        bizalom: { c: -0.3 },          // színpadias, magabiztos: bizakodóbb
+        humor: { c: 0.5 },             // szarkasztikus: cinikusabb
+        rend: { l: -0.4 },             // káosz: szabadság a rend helyett
+        szolid: { k: 0.6, e: 0.4 }     // szolidáris: kötelék és elosztó állam
+    };
+    // Egy állítás súlyai az értéktengelyeken (az állítás iránya beleszámít: a fordított állításnál a súlyok előjele is fordul)
+    function weightsOf(it) {
+        var o = {}, fx = FX[it.ax] || {};
+        Object.keys(fx).forEach(function (a) { o[a] = Math.round(fx[a] * it.dir * 100) / 100; });
+        return o;
+    }
+
     function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
     function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 
@@ -186,6 +206,14 @@
         var neutral = answers.filter(function (v) { return v === 0; }).length;
         var tier = TIERS.filter(function (t) { return index >= t.min; })[0];
         return { index: index, tier: tier, skipped: skipped, neutral: neutral, passzBajnok: (neutral + skipped) >= 20 };
+    }
+
+    // Visszaállítás a linkben utazó adatból (tengelyértékek, következetességi index, „passz-bajnok” jelző): válaszok nélkül
+    function restore(scores, consIndex, passz) {
+        var cl = classify(scores);
+        var tier = TIERS.filter(function (t) { return consIndex >= t.min; })[0];
+        return { v: VERSION, scores: scores, type: cl.id, fit: cl.fit, second: cl.second, margin: cl.margin, meters: meters(scores),
+            cons: { index: consIndex, tier: tier, skipped: 0, neutral: 0, passzBajnok: !!passz } };
     }
 
     function evaluate(answers) {
@@ -249,7 +277,7 @@
         return evaluate(answers);
     }
 
-    var api = { VERSION: VERSION, DATE: DATE, AXES: AXES, ITEMS: ITEMS, TYPES: TYPES, METERS: METERS, TIERS: TIERS, find: find, axisScores: axisScores, classify: classify, meters: meters, consistency: consistency, evaluate: evaluate, encode: encode, decode: decode };
+    var api = { VERSION: VERSION, DATE: DATE, AXES: AXES, ITEMS: ITEMS, TYPES: TYPES, METERS: METERS, TIERS: TIERS, find: find, axisScores: axisScores, classify: classify, meters: meters, consistency: consistency, evaluate: evaluate, restore: restore, FX: FX, weightsOf: weightsOf, encode: encode, decode: decode };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
     root.MFSZErtek.fem = root.MFSZErtek.fem || {};

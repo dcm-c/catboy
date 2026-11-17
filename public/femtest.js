@@ -105,21 +105,13 @@
         return 'Femboy-típus teszt: ' + t.emoji + ' ' + t.title + ' (' + r.fit + '% illeszkedés). Te mit kapnál?';
     }
 
-    function renderResult() {
-        var k = K(), el = k.el, stage = k.stage, r = fs.result;
-        if (!r) { k.home(); return; }
+    // A teszt eredményszakaszai (típus, tengelyek, mérők, következetesség): az önálló teszt és a hosszú teszt C része is ezt használja
+    function sections(r, opts) {
+        var k = K(), el = k.el, stage = k.stage;
         var t = typeOf(r.type);
-
-        if (fs.shared) {
-            var note = el('div', 'et-sharednote');
-            note.appendChild(el('span', '', '🔗 Valaki megosztotta veled a femboy-típusát (csak szórakozásból).'));
-            note.appendChild(k.btn('btn btn-sm btn-primary-custom', 'Kitöltöm én is', function () {
-                if (window.history && history.replaceState) history.replaceState(null, '', k.pageBase());
-                start();
-            }));
-            stage.appendChild(note);
-        }
-
+        opts = opts || {};
+        if (opts.title) stage.appendChild(el('h3', 'et-sect mt-4', opts.title));
+        if (opts.note) stage.appendChild(el('p', 'et-joke', opts.note));
         var hero = el('div', 'card shadow-sm border-0 et-card et-hero');
         hero.setAttribute('data-tone', 'pink');
         var hb = el('div', 'card-body p-4 p-md-5 text-center');
@@ -163,9 +155,15 @@
         cn.appendChild(el('p', 'mb-1', r.cons.tier.text));
         if (r.cons.passzBajnok) cn.appendChild(el('p', 'et-joke mb-0', 'Sok „passz” vagy középső válasz született, ezért az eredmény kevésbé biztos: a típus inkább tipp.'));
 
+    }
+
+    // Kép és megosztás. full: link-mező és menügombok is (önálló teszt); különben csak kép + gombok (a hosszú teszt saját linkje a főkártyán van)
+    function shareCard(r, link, full) {
+        var k = K(), el = k.el, stage = k.stage;
+        var t = typeOf(r.type);
         var sc = k.card('pink', true);
-        sc.appendChild(el('h3', 'h5 fw-bold mb-1', '🖼 Kép és link a megosztáshoz'));
-        sc.appendChild(el('p', 'text-muted mb-3', 'A kép és a link csak az eredményt tartalmazza, személyes adatot nem.'));
+        sc.appendChild(el('h3', 'h5 fw-bold mb-1', full ? '🖼 Kép és link a megosztáshoz' : '🖼 A femboy-eredményed képe'));
+        sc.appendChild(el('p', 'text-muted mb-3', full ? 'A kép és a link csak az eredményt tartalmazza, személyes adatot nem.' : 'A kép csak a femboy-rész eredményét tartalmazza, személyes adatot nem.'));
         var cv = null;
         try { cv = drawImage(r); } catch (e) { cv = null; }
         if (cv) {
@@ -179,14 +177,15 @@
         var btns = el('div', 'd-flex flex-wrap gap-2 mb-3');
         if (cv) {
             btns.appendChild(k.btn('btn btn-outline-primary', 'Kép letöltése', function () { k.download(cv, 'femboy-tipus-teszt.png'); }));
-            btns.appendChild(k.btn('btn btn-primary-custom', 'Kép megosztása', function () { shareImage(cv, r); }));
+            btns.appendChild(k.btn('btn btn-primary-custom', 'Kép megosztása', function () { shareImage(cv, r, link); }));
         }
+        if (!full) { sc.appendChild(btns); return; }
         var box = el('div', 'et-sharebox');
         var lab = el('label', 'et-hint d-block mb-1', 'A link a tiéd:');
         lab.setAttribute('for', 'fem-url');
         var wrap = el('div', 'd-flex gap-2');
         var inp = el('input', 'form-control');
-        inp.id = 'fem-url'; inp.type = 'text'; inp.readOnly = true; inp.value = shareUrl(r);
+        inp.id = 'fem-url'; inp.type = 'text'; inp.readOnly = true; inp.value = link;
         wrap.appendChild(inp);
         wrap.appendChild(k.btn('btn btn-outline-primary', 'Másolás', function () {
             k.copyText(inp.value, inp).then(function () { k.toast('Link másolva.'); }, function () { k.toast('Jelöld ki és másold ki a linket.'); });
@@ -198,13 +197,29 @@
         more.appendChild(k.btn('btn btn-secondary-custom', 'Újra', start));
         more.appendChild(k.btn('btn btn-outline-secondary', 'Vissza a tesztekhez', function () { k.home(); }));
         sc.appendChild(more);
+    }
 
+    function renderResult() {
+        var k = K(), el = k.el, stage = k.stage, r = fs.result;
+        if (!r) { k.home(); return; }
+        if (fs.shared) {
+            var note = el('div', 'et-sharednote');
+            note.appendChild(el('span', '', '🔗 Valaki megosztotta veled a femboy-típusát (csak szórakozásból).'));
+            note.appendChild(k.btn('btn btn-sm btn-primary-custom', 'Kitöltöm én is', function () {
+                if (window.history && history.replaceState) history.replaceState(null, '', k.pageBase());
+                start();
+            }));
+            stage.appendChild(note);
+        }
+
+        sections(r);
+        shareCard(r, shareUrl(r), true);
         stage.appendChild(el('p', 'et-hint text-center mt-4', 'Szórakoztató teszt, nem tudományos mérés: ha nem értesz egyet az eredménnyel, az a teszt hibája. 🎀'));
         stage.appendChild(el('p', 'et-ver text-center', 'Femboy-típus teszt · v' + F.VERSION + ' · ' + F.DATE));
     }
 
-    function shareImage(cv, r) {
-        var k = K(), link = shareUrl(r);
+    function shareImage(cv, r, link) {
+        var k = K();
         cv.toBlob(function (blob) {
             if (!blob) { k.toast('A kép mentése nem sikerült.'); return; }
             var file = null;
@@ -351,6 +366,8 @@
             openFromHash();
         },
         state: function () { return fs; },
+        // A hosszú teszt eredményoldala hívja: a C rész eredménye (a linkben utazó összesítőből) + kép
+        summary: function (r, opts) { sections(r, opts); shareCard(r, (opts && opts.link) || '', false); },
         answerAll: function (v) { fs.ans = F.ITEMS.map(function (it, i) { return typeof v === 'function' ? v(it, i) : v; }); },
         finish: function () { fs.result = F.evaluate(fs.ans.map(function (x) { return x === undefined ? null : x; })); fs.shared = false; K().setPhase('femres'); }
     };

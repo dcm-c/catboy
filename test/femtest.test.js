@@ -128,3 +128,92 @@ test('femtest: bekötés: az oldal a megfelelő sorrendben tölti a fájlokat, a
     assert.match(ui, /#f=/);
     assert.match(ui, /register\('femres'/);
 });
+
+// ---------- A femboy-rész mint a hosszú teszt opcionális C része ----------
+const D = require('../public/ertektest-data.js');
+const C = require('../public/ertektest-core.js');
+
+function fullAnswers(mode, v, fem) {
+    const ans = {};
+    D.A_LISTS[mode].forEach(it => { if (it.kind === 'r') return; ans[it.id] = it.kind === 'l' ? (it.expect === 'yes' ? 2 : -2) : v; });
+    if (fem) D.C_LISTS[mode].forEach((it, i) => { ans[it.id] = fem(it, i); });
+    return ans;
+}
+
+test('C rész: csak a hosszú módokban van, a tételek súlyai létező értéktengelyekre mutatnak, nincs azonosító-ütközés', () => {
+    assert.equal(D.C_LISTS.long.length, 32);
+    assert.equal(D.C_LISTS.xlong.length, 32);
+    assert.equal(D.C_LISTS.short.length, 0);
+    assert.equal(D.C_LISTS.hlong.length, 0);
+    const ids = new Set(D.ALL.map(x => x.id));
+    const axIds = D.AXES.map(a => a.id);
+    D.FEM_LIST.forEach(it => {
+        assert.ok(!ids.has(it.id), it.id + ' ütközik');
+        assert.equal(it.kind, 'f');
+        Object.keys(it.w).forEach(a => assert.ok(axIds.includes(a), it.id + ' -> ' + a));
+        assert.ok(Math.abs(Object.values(it.w).reduce((x, y) => x + Math.abs(y), 0)) <= 1.2, it.id + ' túl nagy súly');
+    });
+});
+
+test('C rész: a femboy-válaszok hatnak a tíz értéktengelyre (de csak finoman), a B rész és a megbízhatóság nem változik', () => {
+    const base = C.summarizeValues('long', fullAnswers('long', 1), { b: false, c: false });
+    const mk = v => C.summarizeValues('long', fullAnswers('long', 1, it => (it.fx === 'szolid' ? v * it.dir : undefined)), { b: false, c: true });
+    const up = mk(2), down = mk(-2);
+    assert.ok(up.s.k > down.s.k && up.s.e > down.s.e, 'a szolidáris válaszok a Kötelék és a Gazdaság tengelyt emelik');
+    assert.ok(up.s.k - base.s.k >= 1 && up.s.k - base.s.k <= 40, 'a hatás mérsékelt: ' + (up.s.k - base.s.k));
+    assert.deepEqual(base.f, undefined);
+    assert.ok(up.f && up.f.type && up.f.scores.szolid === 100 && !up.f.answers);
+    // az érintetlen tengelyek nem mozdulnak (a megválaszolatlan femboy-állítások nem számítanak; g, m, n, d, s a szolid hatásán kívül esik)
+    ['g', 'm', 'n', 'd', 's'].forEach(a => assert.equal(up.s[a], base.s[a], a));
+    assert.equal(up.rel.index, base.rel.index);
+    assert.equal(up.honesty.index, base.honesty.index);
+});
+
+test('C rész: link: a femboy-összesítő oda-vissza utazik; mód nélküli (rövid, csak-utált) linkben nem szerepelhet', () => {
+    const fem = (it, i) => [2, 1, -1, 0, 2, -2, 1][i % 7];
+    ['long', 'xlong'].forEach(mode => {
+        [false, true].forEach(withB => {
+            const ans = fullAnswers(mode, 1, fem);
+            if (withB) { D.B_LISTS[mode].forEach(it => { ans[it.id] = 1; }); }
+            const r = C.summarizeValues(mode, ans, { b: withB, c: true });
+            const d = C.decode(C.encode(r));
+            assert.ok(d && d.f, mode + ' dekódolás');
+            assert.equal(d.ver, D.VERSION);
+            assert.deepEqual(d.s, r.s);
+            assert.deepEqual(d.f.scores, r.f.scores);
+            assert.equal(d.f.type, r.f.type);
+            assert.equal(d.f.cons.index, r.f.cons.index);
+            assert.equal(d.f.cons.passzBajnok, r.f.cons.passzBajnok);
+            assert.equal(!!d.hs, withB);
+            assert.equal(d.f.meters.length, 6);
+        });
+    });
+    // C rész nélkül nincs f
+    const noC = C.decode(C.encode(C.summarizeValues('long', fullAnswers('long', 1), { b: false, c: false })));
+    assert.equal(noC.f, undefined);
+    // a gyors mód és a csak-utált nem hordozhat femboy-bitet
+    const r = C.summarizeValues('long', fullAnswers('long', 1, fem), { b: false, c: true });
+    const shortLink = C.decode(C.encode(Object.assign({}, r, { kind: 'short' })));
+    assert.equal(shortLink && shortLink.f, undefined);
+});
+
+test('C rész: a v4-es (a femboy-rész előtti) linkek változatlanul olvashatók, a v5 bitjét a v4 nem ismeri', () => {
+    const r = C.summarizeValues('long', fullAnswers('long', 1), { b: false, c: false });
+    const code = C.encode(r);
+    const bytes = Buffer.from(code.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+    bytes[0] = (4 << 4) | (bytes[0] & 0x0F);
+    const v4 = C.decode(bytes.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+    assert.ok(v4 && v4.ver === 4 && v4.f === undefined);
+    assert.deepEqual(v4.s, r.s);
+    // v4 fejléc a femboy-bittel: érvénytelen
+    bytes[0] |= 0x08;
+    assert.equal(C.decode(bytes.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')), null);
+    assert.equal(D.defsFor(4).HATED.length, 18);
+});
+
+test('C rész: bekötés a felületben: két opcionális rész a közbeeső képernyőn, külön indítás az eredményoldalról', () => {
+    const ui = fs.readFileSync(path.join(pub, 'ertektest.js'), 'utf8');
+    ['remainingParts', 'startC', 'et-c-yes', 'et-c-continue', 'D.C_LISTS.long'].forEach(k => assert.ok(ui.includes(k), k));
+    const html = fs.readFileSync(path.join(pub, 'ertektest.html'), 'utf8');
+    assert.ok(html.indexOf('femtest-data.js') < html.indexOf('ertektest-data.js'), 'a femboy-adat az értékadat előtt töltődik');
+});

@@ -5,6 +5,7 @@
     'use strict';
 
     var data = (typeof module !== 'undefined' && module.exports) ? require('./ertektest-data.js') : root.MFSZErtek.data;
+    var FEM = (typeof module !== 'undefined' && module.exports) ? require('./femtest-data.js') : root.MFSZErtek.femdata;
     var AX = data.AXES.map(function (a) { return a.id; });
 
     function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
@@ -314,11 +315,14 @@
         opts = opts || {};
         var A = data.A_LISTS[mode], B = data.B_LISTS[mode];
         var stars = cleanStars(opts.stars, mode, A);
-        var s = axisScores(answers, A, undefined, stars);
+        // Az opcionális C rész (femboy-típus) válaszai kis súllyal beleszámítanak a tíz tengelybe
+        var Cl = (opts.c && data.C_LISTS[mode]) || [];
+        var s = axisScores(answers, Cl.length ? A.concat(Cl) : A, undefined, stars);
         var cls = classify(s);
         var hon = honesty(answers, A);
         var r = { kind: mode, ver: data.VERSION, s: s, a: cls.id, a2: cls.second, fit: cls.fit, honesty: hon };
         if (Object.keys(stars).length) r.starred = Object.keys(stars);
+        if (Cl.length) r.f = femResult(answers, Cl);
         var list = A.slice(), rounds = null, hasScales = false;
         if (opts.b) {
             if (mode === 'short') {
@@ -339,6 +343,17 @@
         }
         r.rel = reliability({ answers: answers, list: list, values: A, stars: stars, mode: mode, s: s, cls: cls, hon: hon, scales: hasScales, rounds: rounds });
         return r;
+    }
+
+    // A femboy-rész (C) összesítése: a válaszok a saját 8 tengelyen, típus, mérők, következetesség
+    function femResult(answers, Cl) {
+        var ans = FEM.ITEMS.map(function (it) {
+            var v = answers ? answers[it.id] : null;
+            return isNum(v) ? clamp(Math.round(v), -2, 2) : null;
+        });
+        var ev = FEM.evaluate(ans);
+        delete ev.answers;
+        return ev;
     }
 
     // A fontosnak jelölt kérdések: csak az A lista értékállításai, módonként legfeljebb data.STARS[mode] darab
@@ -448,7 +463,8 @@
         if (!(kind in MODE_BITS)) throw new Error('ismeretlen mód: ' + kind);
         var w = new BitWriter(), hasB = kind === 'hlong' ? false : !!(sum.hs || sum.m || (sum.h && sum.h.length) || sum.pj);
         function putScales(sc, defs) { defs.forEach(function (d) { w.put(clamp(Math.round(sc[d.id]), 0, 100), 7); }); }
-        var head = (data.VERSION << 4) | MODE_BITS[kind] | (hasB ? 0x04 : 0);
+        var hasF = !!sum.f && (kind === 'long' || kind === 'xlong');
+        var head = (data.VERSION << 4) | MODE_BITS[kind] | (hasB ? 0x04 : 0) | (hasF ? 0x08 : 0);
         if (kind === 'hlong') {
             putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
             putRel(w, sum.rel);
@@ -468,6 +484,11 @@
                     putScales(sum.hs, data.HATED); putScales(sum.pj, data.PREJ);
                 }
             }
+            if (hasF) {
+                FEM.AXES.forEach(function (a) { w.put(ax8(sum.f.scores[a.id]), 8); });
+                w.put(clamp(Math.round(sum.f.cons.index), 0, 100), 7);
+                w.put(sum.f.cons.passzBajnok ? 1 : 0, 1);
+            }
         }
         return b64uEncBytes([head].concat(w.bytes()));
     }
@@ -477,8 +498,10 @@
         var head = bytes[0];
         var defs = defsFor(ver);
         if (!defs) return null;
-        if (head & 0x08) return null;
         var kind = MODE_OF[head & 0x03], hasB = (head & 0x04) !== 0;
+        // A 0x08 bit a v5-től jelzi a femboy-részt (csak a részletes és az extra hosszú módban); korábban mindig 0 volt
+        var hasF = (head & 0x08) !== 0;
+        if (hasF && (ver < 5 || kind === 'short' || kind === 'hlong')) return null;
         if (kind === 'hlong' && hasB) return null;
         var hIds = defs.HATED.map(function (h) { return h.id; }), pIds = data.PREJ.map(function (p) { return p.id; });
         var hBits = hIds.length * 7, bits;
@@ -486,6 +509,7 @@
         else {
             bits = AX.length * 8 + 7 + FLAG_N + AX.length * 2 + 14;
             if (hasB) bits += kind === 'short' ? 8 + 32 : hBits + 56;
+            if (hasF) bits += FEM.AXES.length * 8 + 8;
         }
         if (bytes.length !== 1 + Math.ceil(bits / 8)) return null;
         var rd = new BitReader(bytes, 1);
@@ -511,6 +535,12 @@
                 } else {
                     out.hs = scales(hIds); out.pj = scales(pIds); out.h = hatedTop(out.hs, 2, defs.HATED);
                 }
+            }
+            if (hasF) {
+                var fs = {};
+                FEM.AXES.forEach(function (a) { fs[a.id] = clamp(rd.get(8) - 100, -100, 100); });
+                var ci = clamp(rd.get(7), 0, 100), pz = rd.get(1);
+                out.f = FEM.restore(fs, ci, pz);
             }
         }
         out.ver = ver;
@@ -642,7 +672,7 @@
             if (!bytes.length) return null;
             if (bytes[0] === 0x7B) return decodeLegacy(new TextDecoder().decode(new Uint8Array(bytes)));
             var ver = bytes[0] >> 4;
-            if (ver === data.VERSION || ver === 3) return decodeV3(bytes, ver);
+            if (ver === data.VERSION || ver === 3 || ver === 4) return decodeV3(bytes, ver);
             if (ver === 1 || ver === 2) return decodeBinaryOld(bytes, ver);
             return null;
         } catch (e) { return null; }
@@ -654,7 +684,7 @@
         defsFor: defsFor, hatedDefsFor: hatedDefsFor, axisScores: axisScores, flat: flat, classify: classify, distance: distance,
         hatedResult: hatedResult, mirrorResult: mirrorResult, hatedScales: hatedScales, prejScales: prejScales, hatedRanking: hatedRanking, hatedTop: hatedTop,
         honesty: honesty, honestyTier: honestyTier, reliability: reliability, relTier: relTier, axisStats: axisStats, axisLevel: axisLevel, scaleConflicts: scaleConflicts,
-        summarizeValues: summarizeValues, summarizeHated: summarizeHated, breakdown: breakdown, encode: encode, decode: decode, find: find
+        summarizeValues: summarizeValues, femResult: femResult, summarizeHated: summarizeHated, breakdown: breakdown, encode: encode, decode: decode, find: find
     };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     root.MFSZErtek = root.MFSZErtek || {};
