@@ -105,21 +105,13 @@
         return 'Femboy-típus teszt: ' + t.emoji + ' ' + t.title + ' (' + r.fit + '% illeszkedés). Te mit kapnál?';
     }
 
-    function renderResult() {
-        var k = K(), el = k.el, stage = k.stage, r = fs.result;
-        if (!r) { k.home(); return; }
+    // A teszt eredményszakaszai (típus, tengelyek, mérők, következetesség): az önálló teszt és a hosszú teszt C része is ezt használja
+    function sections(r, opts) {
+        var k = K(), el = k.el, stage = k.stage;
         var t = typeOf(r.type);
-
-        if (fs.shared) {
-            var note = el('div', 'et-sharednote');
-            note.appendChild(el('span', '', '🔗 Valaki megosztotta veled a femboy-típusát (csak szórakozásból).'));
-            note.appendChild(k.btn('btn btn-sm btn-primary-custom', 'Kitöltöm én is', function () {
-                if (window.history && history.replaceState) history.replaceState(null, '', k.pageBase());
-                start();
-            }));
-            stage.appendChild(note);
-        }
-
+        opts = opts || {};
+        if (opts.title) stage.appendChild(el('h3', 'et-sect mt-4', opts.title));
+        if (opts.note) stage.appendChild(el('p', 'et-joke', opts.note));
         var hero = el('div', 'card shadow-sm border-0 et-card et-hero');
         hero.setAttribute('data-tone', 'pink');
         var hb = el('div', 'card-body p-4 p-md-5 text-center');
@@ -163,9 +155,15 @@
         cn.appendChild(el('p', 'mb-1', r.cons.tier.text));
         if (r.cons.passzBajnok) cn.appendChild(el('p', 'et-joke mb-0', 'Sok „passz” vagy középső válasz született, ezért az eredmény kevésbé biztos: a típus inkább tipp.'));
 
+    }
+
+    // Kép és megosztás. full: link-mező és menügombok is (önálló teszt); különben csak kép + gombok (a hosszú teszt saját linkje a főkártyán van)
+    function shareCard(r, link, full) {
+        var k = K(), el = k.el, stage = k.stage;
+        var t = typeOf(r.type);
         var sc = k.card('pink', true);
-        sc.appendChild(el('h3', 'h5 fw-bold mb-1', '🖼 Kép és link a megosztáshoz'));
-        sc.appendChild(el('p', 'text-muted mb-3', 'A kép és a link csak az eredményt tartalmazza, személyes adatot nem.'));
+        sc.appendChild(el('h3', 'h5 fw-bold mb-1', full ? '🖼 Kép és link a megosztáshoz' : '🖼 A femboy-eredményed képe'));
+        sc.appendChild(el('p', 'text-muted mb-3', full ? 'A kép és a link csak az eredményt tartalmazza, személyes adatot nem.' : 'A kép csak a femboy-rész eredményét tartalmazza, személyes adatot nem.'));
         var cv = null;
         try { cv = drawImage(r); } catch (e) { cv = null; }
         if (cv) {
@@ -179,14 +177,15 @@
         var btns = el('div', 'd-flex flex-wrap gap-2 mb-3');
         if (cv) {
             btns.appendChild(k.btn('btn btn-outline-primary', 'Kép letöltése', function () { k.download(cv, 'femboy-tipus-teszt.png'); }));
-            btns.appendChild(k.btn('btn btn-primary-custom', 'Kép megosztása', function () { shareImage(cv, r); }));
+            btns.appendChild(k.btn('btn btn-primary-custom', 'Kép megosztása', function () { shareImage(cv, r, link); }));
         }
+        if (!full) { sc.appendChild(btns); return; }
         var box = el('div', 'et-sharebox');
         var lab = el('label', 'et-hint d-block mb-1', 'A link a tiéd:');
         lab.setAttribute('for', 'fem-url');
         var wrap = el('div', 'd-flex gap-2');
         var inp = el('input', 'form-control');
-        inp.id = 'fem-url'; inp.type = 'text'; inp.readOnly = true; inp.value = shareUrl(r);
+        inp.id = 'fem-url'; inp.type = 'text'; inp.readOnly = true; inp.value = link;
         wrap.appendChild(inp);
         wrap.appendChild(k.btn('btn btn-outline-primary', 'Másolás', function () {
             k.copyText(inp.value, inp).then(function () { k.toast('Link másolva.'); }, function () { k.toast('Jelöld ki és másold ki a linket.'); });
@@ -198,13 +197,29 @@
         more.appendChild(k.btn('btn btn-secondary-custom', 'Újra', start));
         more.appendChild(k.btn('btn btn-outline-secondary', 'Vissza a tesztekhez', function () { k.home(); }));
         sc.appendChild(more);
+    }
 
+    function renderResult() {
+        var k = K(), el = k.el, stage = k.stage, r = fs.result;
+        if (!r) { k.home(); return; }
+        if (fs.shared) {
+            var note = el('div', 'et-sharednote');
+            note.appendChild(el('span', '', '🔗 Valaki megosztotta veled a femboy-típusát (csak szórakozásból).'));
+            note.appendChild(k.btn('btn btn-sm btn-primary-custom', 'Kitöltöm én is', function () {
+                if (window.history && history.replaceState) history.replaceState(null, '', k.pageBase());
+                start();
+            }));
+            stage.appendChild(note);
+        }
+
+        sections(r);
+        shareCard(r, shareUrl(r), true);
         stage.appendChild(el('p', 'et-hint text-center mt-4', 'Szórakoztató teszt, nem tudományos mérés: ha nem értesz egyet az eredménnyel, az a teszt hibája. 🎀'));
         stage.appendChild(el('p', 'et-ver text-center', 'Femboy-típus teszt · v' + F.VERSION + ' · ' + F.DATE));
     }
 
-    function shareImage(cv, r) {
-        var k = K(), link = shareUrl(r);
+    function shareImage(cv, r, link) {
+        var k = K();
         cv.toBlob(function (blob) {
             if (!blob) { k.toast('A kép mentése nem sikerült.'); return; }
             var file = null;
@@ -255,6 +270,14 @@
         return w;
     }
 
+    // Szöveg keskenyítése, hogy elférjen a megadott szélességben (nem lóg ki, nem ütközik a szomszéddal)
+    function fit(ctx, s, maxW, px, weight) {
+        ctx.font = (weight || 600) + ' ' + px + 'px ' + FONT;
+        if (ctx.measureText(s).width <= maxW) return s;
+        while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+        return s.replace(/\s+$/, '') + '…';
+    }
+
     function drawImage(r) {
         var cv = document.createElement('canvas');
         cv.width = W; cv.height = H;
@@ -268,46 +291,51 @@
         txt(ctx, 'FEMBOY-TÍPUS TESZT · MFSZ', PAD, 92, 24, 700, SOFT);
         txt(ctx, 'v' + F.VERSION, W - PAD, 92, 24, 700, SOFT, 'right');
 
-        fillRR(ctx, PAD, 120, W - 2 * PAD, 300, 36, 'rgba(255,255,255,.88)');
-        emo(ctx, t.emoji, W / 2, 220, 100);
-        var n = para(ctx, t.title, W / 2, 285, W - 2 * PAD - 60, 50, 800, INK, 58, 2, 'center');
-        var pw = (function () { ctx.font = '700 28px ' + FONT; return ctx.measureText(r.fit + '% illeszkedés').width + 40; })();
-        pill(ctx, (W - pw) / 2, 285 + (n - 1) * 58 + 24, r.fit + '% illeszkedés', 28, PINK, '#fff');
+        // Típus
+        fillRR(ctx, PAD, 116, W - 2 * PAD, 300, 36, 'rgba(255,255,255,.9)');
+        emo(ctx, t.emoji, W / 2, 214, 96);
+        var n = para(ctx, t.title, W / 2, 282, W - 2 * PAD - 60, 50, 800, INK, 58, 2, 'center');
+        var label = r.fit + '% illeszkedés';
+        ctx.font = '700 28px ' + FONT;
+        var pw = ctx.measureText(label).width + 40;
+        pill(ctx, (W - pw) / 2, 282 + (n - 1) * 58 + 22, label, 28, PINK, '#fff');
+        para(ctx, t.motto, W / 2, 462, W - 2 * PAD - 60, 27, 600, SOFT, 36, 2, 'center');
 
-        var y = 470;
-        para(ctx, t.motto, W / 2, y, W - 2 * PAD - 80, 28, 600, SOFT, 38, 2, 'center');
-        y = 545;
+        // Tengelyek: két sor mindegyik (felirat és érték, alatta a teljes szélességű sáv), így semmi sem ütközik
+        var y = 560;
         txt(ctx, 'TENGELYEK', PAD, y, 22, 800, BLUE);
-        y += 18;
-        var barX = 360, barW = 560, rowH = 54;
+        y += 14;
+        var rowH = 56, barX = PAD, barW = W - 2 * PAD;
         F.AXES.forEach(function (a) {
             var sc = r.scores[a.id];
-            emo(ctx, a.icon, PAD + 20, y + 40, 30);
-            txt(ctx, a.name, PAD + 56, y + 38, 26, 700, INK);
-            fillRR(ctx, barX, y + 20, barW, 18, 9, TRACK);
-            var w = Math.abs(sc) / 100 * (barW / 2);
-            fillRR(ctx, sc >= 0 ? barX + barW / 2 : barX + barW / 2 - w, y + 20, Math.max(w, 6), 18, 9, sc > 0 ? '#c0408f' : sc < 0 ? BLUE : '#9aa0b4');
-            ctx.fillStyle = 'rgba(42,37,64,.4)'; ctx.fillRect(barX + barW / 2 - 1, y + 14, 2, 30);
+            emo(ctx, a.icon, PAD + 16, y + 28, 26);
+            txt(ctx, a.name, PAD + 44, y + 27, 24, 700, INK);
             var lead = sc === 0 ? 'középen' : Math.abs(sc) + '% ' + (sc > 0 ? a.pos : a.neg).toLowerCase();
-            txt(ctx, lead, W - PAD, y + 38, 22, 700, SOFT, 'right');
+            txt(ctx, fit(ctx, lead, 430, 22, 700), W - PAD, y + 27, 22, 700, sc > 0 ? '#c0408f' : sc < 0 ? '#1f8fc4' : SOFT, 'right');
+            var by = y + 36;
+            fillRR(ctx, barX, by, barW, 12, 6, TRACK);
+            var half = barW / 2, w = Math.abs(sc) / 100 * half;
+            if (w > 0) fillRR(ctx, sc >= 0 ? barX + half : barX + half - w, by, Math.max(w, 8), 12, 6, sc > 0 ? '#c0408f' : BLUE);
+            ctx.fillStyle = 'rgba(42,37,64,.35)'; ctx.fillRect(barX + half - 1, by - 3, 2, 18);
             y += rowH;
         });
 
-        y += 20;
+        // Mérők: három oszlop, két sor
+        y += 22;
         txt(ctx, 'VICCES MÉRŐK', PAD, y, 22, 800, BLUE);
-        y += 18;
-        var colW = (W - 2 * PAD - 24) / 2;
+        y += 16;
+        var gap = 14, tw = (W - 2 * PAD - 2 * gap) / 3, th = 92;
         r.meters.forEach(function (m, i) {
-            var cx = PAD + (i % 2) * (colW + 24), cy = y + Math.floor(i / 2) * 84;
-            fillRR(ctx, cx, cy, colW, 74, 20, 'rgba(255,255,255,.88)');
-            emo(ctx, m.icon, cx + 34, cy + 48, 32);
-            txt(ctx, m.name, cx + 66, cy + 32, 22, 700, INK);
-            fillRR(ctx, cx + 66, cy + 44, colW - 150, 14, 7, TRACK);
-            fillRR(ctx, cx + 66, cy + 44, Math.max(10, (colW - 150) * m.value / 100), 14, 7, m.value >= 67 ? '#e0484f' : m.value <= 33 ? BLUE : '#f0a229');
-            txt(ctx, String(m.value), cx + colW - 22, cy + 56, 24, 800, INK, 'right');
+            var cx = PAD + (i % 3) * (tw + gap), cy = y + Math.floor(i / 3) * (th + gap);
+            fillRR(ctx, cx, cy, tw, th, 20, 'rgba(255,255,255,.9)');
+            emo(ctx, m.icon, cx + 30, cy + 40, 28);
+            txt(ctx, fit(ctx, m.name, tw - 56 - 56, 19, 700), cx + 54, cy + 36, 19, 700, INK);
+            txt(ctx, String(m.value), cx + tw - 16, cy + 36, 24, 800, INK, 'right');
+            fillRR(ctx, cx + 18, cy + 58, tw - 36, 14, 7, TRACK);
+            fillRR(ctx, cx + 18, cy + 58, Math.max(10, (tw - 36) * m.value / 100), 14, 7, m.value >= 67 ? '#e0484f' : m.value <= 33 ? BLUE : '#f0a229');
         });
 
-        txt(ctx, 'femboy.hu/ertektest  ·  szórakoztató teszt, nem tudományos mérés', W / 2, H - 32, 21, 600, SOFT, 'center');
+        txt(ctx, 'femboy.hu/ertektest  ·  szórakoztató teszt, nem tudományos mérés', W / 2, H - 28, 21, 600, SOFT, 'center');
         return cv;
     }
 
@@ -338,6 +366,8 @@
             openFromHash();
         },
         state: function () { return fs; },
+        // A hosszú teszt eredményoldala hívja: a C rész eredménye (a linkben utazó összesítőből) + kép
+        summary: function (r, opts) { sections(r, opts); shareCard(r, (opts && opts.link) || '', false); },
         answerAll: function (v) { fs.ans = F.ITEMS.map(function (it, i) { return typeof v === 'function' ? v(it, i) : v; }); },
         finish: function () { fs.result = F.evaluate(fs.ans.map(function (x) { return x === undefined ? null : x; })); fs.shared = false; K().setPhase('femres'); }
     };
